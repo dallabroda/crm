@@ -193,12 +193,16 @@ router.beforeEach(async (to, from, next) => {
 
     let defaultView = getDefaultView()
     if (!defaultView) {
-      next({ name: 'Leads' })
+      next({ name: 'Deals' })
       return
     }
 
     let { route_name, type, name, is_standard } = defaultView
-    route_name = route_name || 'Leads'
+    // Leads are no longer used (#70): an old default view on Leads opens the funnels
+    if (!route_name || route_name === 'Leads') {
+      next({ name: 'Deals' })
+      return
+    }
 
     if (name && !is_standard) {
       next({

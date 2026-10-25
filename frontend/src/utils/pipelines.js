@@ -1,0 +1,120 @@
+// Pure helpers for funnels (pipelines), shared by the Kanban, the card page and tests.
+
+// Fields that are never hidden or locked by stage rules: without them a card
+// could not be found, moved or owned (cred-hub-funis.md, "Catálogo de campos").
+export const LOCKED_FIELDS = ['pipeline', 'status', 'deal_owner']
+
+export function isMissingFieldsError(error) {
+  return error?.exc_type === 'MissingRequiredFieldsError'
+}
+
+// crm.api.pipeline.move_card / CRM Deal save answer a stage with empty
+// required fields with MissingRequiredFieldsError carrying
+// { missing_fields: [{ fieldname, label, fieldtype, options }] } in a message.
+export function missingFieldsFromError(error) {
+  if (error?.exc_type !== 'MissingRequiredFieldsError') return null
+  let candidates = [
+    ...(error.messages || []),
+    error.message,
+    error._server_messages,
+  ]
+  for (let message of candidates) {
+    let parsed = parseMaybeJSON(message)
+    // _server_messages is a JSON list of JSON strings
+    if (Array.isArray(parsed)) {
+      for (let item of parsed) {
+        let inner = parseMaybeJSON(item)
+        inner = parseMaybeJSON(inner?.message) || inner
+        if (inner?.missing_fields?.length) return inner.missing_fields
+      }
+      continue
+    }
+    if (parsed?.missing_fields?.length) return parsed.missing_fields
+  }
+  return null
+}
+
+function parseMaybeJSON(value) {
+  if (typeof value !== 'string') return value
+  try {
+    return JSON.parse(value)
+  } catch {
+    return null
+  }
+}
+
+const NUMBER_TYPES = ['Int', 'Float', 'Currency', 'Percent']
+
+// Required fields still empty in `values`. Same rule as the server
+// (crm.fcrm.doctype.crm_pipeline.fields.is_empty): a required Yes/No has to be
+// ticked and a required number cannot be 0.
+export function emptyRequiredFields(fields, values) {
+  return (fields || []).filter((f) => {
+    let value = values?.[f.fieldname]
+    if (f.fieldtype === 'Check') return !value
+    if (NUMBER_TYPES.includes(f.fieldtype)) {
+      return (
+        value === undefined || value === null || value === '' || !Number(value)
+      )
+    }
+    return (
+      value === undefined ||
+      value === null ||
+      (typeof value === 'string' && !value.trim())
+    )
+  })
+}
+
+// Applies { fieldname: { visible, required, read_only } } (get_stage_rules) to
+// side panel sections: hidden fields are dropped, required ones marked reqd and
+// read-only ones locked. With `used` (the funnel's fields) and `catalog` (all
+// catalog fieldnames), catalog fields the funnel does not use are dropped too;
+// fields outside the catalog (e.g. contact details) are left alone. Returns new
+// sections; the input is not modified.
+export function applyStageRules(
+  sections,
+  rules,
+  { used = null, catalog = null } = {},
+) {
+  let hasRules = rules && Object.keys(rules).length
+  let filterUnused = used?.length && catalog?.length
+  if (!hasRules && !filterUnused) return sections
+  let usedSet = new Set(used || [])
+  let catalogSet = new Set(catalog || [])
+  return (sections || []).map((section) => {
+    if (!section.columns) return section
+    return {
+      ...section,
+      columns: section.columns.map((column) => ({
+        ...column,
+        fields: (column.fields || [])
+          .map((field) => {
+            let name = typeof field === 'string' ? field : field?.fieldname
+            if (
+              filterUnused &&
+              catalogSet.has(name) &&
+              !usedSet.has(name) &&
+              !LOCKED_FIELDS.includes(name)
+            ) {
+              return null
+            }
+            return applyRule(field, rules || {})
+          })
+          .filter(Boolean),
+      })),
+    }
+  })
+}
+
+function applyRule(field, rules) {
+  let name = typeof field === 'string' ? field : field?.fieldname
+  let rule = rules[name]
+  if (!rule || LOCKED_FIELDS.includes(name)) return field
+  if (!rule.visible) return null
+  if (typeof field === 'string') return field
+  return {
+    ...field,
+    reqd: rule.required ? 1 : field.reqd,
+    read_only: rule.read_only ? 1 : field.read_only,
+  }
+}

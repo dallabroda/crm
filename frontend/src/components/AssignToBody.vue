@@ -9,7 +9,7 @@
       doctype="User"
       :placeholder="__('John Doe')"
       :filters="{
-        name: ['in', users.data.crmUsers?.map((user) => user.name)],
+        name: ['in', assignableUsers],
         ignore_user_type: 1,
       }"
       :hideMe="true"
@@ -78,13 +78,15 @@ import { usersStore } from '@/stores/users'
 import { availabilityStore } from '@/stores/availability'
 import { Tooltip, Switch, createResource, toast } from 'frappe-ui'
 import { useTelemetry } from '@framework/ui/telemetry'
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 
 const props = defineProps({
   doctype: { type: String, default: '' },
   docname: { type: String, default: '' },
   open: { type: Boolean, default: false },
   onUpdate: { type: Function, default: null },
+  // Card in a funnel (#72): only its members and admins can be assigned
+  allowedUsers: { type: Array, default: null },
 })
 
 const { capture } = useTelemetry()
@@ -96,6 +98,12 @@ const assignToMe = ref(false)
 const error = ref('')
 
 const { users, getUser } = usersStore()
+
+const assignableUsers = computed(() => {
+  let crmUsers = users.data.crmUsers?.map((user) => user.name) || []
+  if (!props.allowedUsers) return crmUsers
+  return crmUsers.filter((user) => props.allowedUsers.includes(user))
+})
 const availability = availabilityStore()
 
 const removeValue = (value) => {

@@ -333,6 +333,15 @@
     @save="confirmKanbanLostReason"
     @cancel="cancelKanbanLostReason"
   />
+  <MissingFieldsModal
+    v-if="pendingMissingFields"
+    v-model="showMissingFieldsModal"
+    :deal="pendingMissingFields.data.item"
+    :stageLabel="stageLabel(pendingMissingFields.data.to, props.pipeline)"
+    :fields="pendingMissingFields.fields"
+    @save="confirmMissingFields"
+    @cancel="cancelMissingFields"
+  />
 </template>
 <script setup>
 import Icon from '@/components/Icon.vue'
@@ -355,6 +364,9 @@ import FadedScrollableDiv from '@/components/FadedScrollableDiv.vue'
 import ColumnSettings from '@/components/ColumnSettings.vue'
 import KanbanSettings from '@/components/Kanban/KanbanSettings.vue'
 import LostReasonModal from '@/components/Modals/LostReasonModal.vue'
+import MissingFieldsModal from '@/components/Modals/MissingFieldsModal.vue'
+import { pipelinesStore } from '@/stores/pipelines'
+import { isMissingFieldsError, missingFieldsFromError } from '@/utils/pipelines'
 import { getSettings } from '@/stores/settings'
 import { globalStore } from '@/stores/global'
 import { viewsStore } from '@/stores/views'
@@ -399,6 +411,11 @@ import ImportIcon from '~icons/lucide/import'
 const props = defineProps({
   doctype: { type: String, required: true },
   filters: { type: Object, default: () => ({}) },
+  // Funnel being shown (CRM Deal only, #72): cards move through
+  // crm.api.pipeline.move_card and the Kanban columns are its stages.
+  pipeline: { type: String, default: '' },
+  // [{ name, label, color }] in stage order; replaces the saved view's columns
+  kanbanColumns: { type: Array, default: null },
   // names the page's own `filters` in a chip that emits clearFilters
   filtersLabel: { type: String, default: '' },
   options: {
@@ -424,6 +441,13 @@ const { getLeadStatus, getDealStatus } = statusesStore()
 
 const showKanbanLostReasonModal = ref(false)
 const pendingKanbanMove = ref(null)
+const showMissingFieldsModal = ref(false)
+const pendingMissingFields = ref(null)
+const {
+  apiCall: pipelineCall,
+  stageLabel,
+  getStage: getPipelineStage,
+} = pipelinesStore()
 
 const list = defineModel({ type: Object, default: () => ({}) })
 const loadMore = defineModel('loadMore', { type: Boolean })
@@ -557,7 +581,10 @@ function getParams() {
   const rows = _view?.rows || ''
   const column_field = _view?.column_field || 'status'
   const title_field = _view?.title_field || ''
-  const kanban_columns = _view?.kanban_columns || ''
+  // In a funnel the columns are always its stages, in the funnel's order
+  const kanban_columns = props.kanbanColumns?.length
+    ? props.kanbanColumns
+    : _view?.kanban_columns || ''
   const kanban_fields = _view?.kanban_fields || ''
 
   view.value = {
@@ -614,6 +641,8 @@ listResource = createResource({
     props.doctype,
     route.query.view,
     route.params.viewType,
+    // each funnel has its own columns and cards
+    ...(props.pipeline ? [props.pipeline] : []),
     ...pageFiltersKey,
   ],
   auto: true,
@@ -1277,7 +1306,10 @@ function persistCustomView() {
 
 function getKanbanStatusType(status) {
   if (props.doctype === 'CRM Lead') return getLeadStatus(status)?.type
-  if (props.doctype === 'CRM Deal') return getDealStatus(status)?.type
+  if (props.doctype === 'CRM Deal') {
+    if (props.pipeline) return getPipelineStage(status, props.pipeline)?.type
+    return getDealStatus(status)?.type
+  }
   return null
 }
 
@@ -1298,7 +1330,8 @@ function revertKanbanCardMove(data) {
 }
 
 function persistKanbanColumnOrder(kanbanColumns) {
-  if (!kanbanColumns) return
+  // A funnel's columns come from its stages (Settings > Funnels), not from the view
+  if (!kanbanColumns || props.pipeline) return
   viewUpdated.value = true
   if (!defaultParams.value) {
     defaultParams.value = getParams()
@@ -1311,7 +1344,56 @@ function persistKanbanColumnOrder(kanbanColumns) {
   }
 }
 
+function moveCardInPipeline(data, fields) {
+  let { [view.value.column_field]: stage, ...values } = fields
+  pipelineCall('move_card', {
+    deal: data.item,
+    stage,
+    values: Object.keys(values).length ? values : null,
+  })
+    .then(() => persistKanbanColumnOrder(data.kanban_columns))
+    .catch(async (error) => {
+      let missing = missingFieldsFromError(error)
+      if (!missing && isMissingFieldsError(error)) {
+        missing = await pipelineCall('get_missing_fields', {
+          deal: data.item,
+          stage,
+        }).catch(() => null)
+      }
+      if (missing?.length) {
+        pendingMissingFields.value = { data, values: fields, fields: missing }
+        showMissingFieldsModal.value = true
+        return
+      }
+      toast.error(
+        error?.messages?.[0] || __('Could not move the card. Reverting.'),
+      )
+      revertKanbanCardMove(data)
+    })
+}
+
+function confirmMissingFields(values) {
+  let pending = pendingMissingFields.value
+  pendingMissingFields.value = null
+  if (!pending) return
+  moveCardInPipeline(pending.data, { ...pending.values, ...values })
+}
+
+function cancelMissingFields() {
+  let pending = pendingMissingFields.value
+  pendingMissingFields.value = null
+  if (!pending) return
+  toast.info(
+    __('Move cancelled: required fields of the stage were not filled in.'),
+  )
+  revertKanbanCardMove(pending.data)
+}
+
 function moveKanbanCard(data, fields) {
+  if (props.pipeline && props.doctype === 'CRM Deal') {
+    moveCardInPipeline(data, fields)
+    return
+  }
   call('frappe.client.set_value', {
     doctype: props.doctype,
     name: data.item,

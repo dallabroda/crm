@@ -1,0 +1,611 @@
+<template>
+  <div class="flex h-full flex-col gap-6 p-6 text-ink-gray-8">
+    <div class="flex items-center justify-between px-2 pt-2">
+      <div class="flex items-center gap-2">
+        <Button
+          variant="ghost"
+          icon="lucide-chevron-left"
+          @click="emit('back')"
+        />
+        <h2 class="text-2xl-semibold leading-none">
+          {{
+            isNew ? __('New funnel') : __(form.pipeline_name) || __('Funnel')
+          }}
+        </h2>
+        <Badge
+          v-if="!canManage && !loading"
+          :label="__('Read only')"
+          variant="subtle"
+        />
+      </div>
+      <Button
+        v-if="canManage"
+        variant="solid"
+        :label="__('Save')"
+        :loading="saving"
+        @click="save"
+      />
+    </div>
+
+    <div v-if="loading" class="mt-12 flex items-center justify-center">
+      <LoadingIndicator class="w-4" />
+    </div>
+    <div v-else class="flex flex-col gap-8 overflow-y-auto px-2 pb-6">
+      <ErrorMessage v-if="error" :message="error" />
+
+      <!-- Funnel -->
+      <section class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <FormControl
+          v-model="form.pipeline_name"
+          :label="__('Name')"
+          :disabled="!canManage"
+          :placeholder="__('e.g. Sales, Credit, B2B')"
+        />
+        <FormControl
+          type="select"
+          :label="__('Color')"
+          :options="colorOptions"
+          :disabled="!canManage"
+          :model-value="form.color"
+          @update:model-value="(v) => (form.color = v)"
+        />
+        <div class="flex items-end gap-2 pb-1.5">
+          <Switch v-model="isActive" :disabled="!canManage" />
+          <span class="text-base text-ink-gray-7">{{ __('Active') }}</span>
+        </div>
+      </section>
+
+      <!-- Stages -->
+      <section class="flex flex-col gap-2">
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg-semibold text-ink-gray-8">{{ __('Stages') }}</h3>
+          <Button
+            v-if="canManage"
+            :label="__('Add stage')"
+            icon-left="lucide-plus"
+            @click="addStage"
+          />
+        </div>
+        <p class="text-p-sm text-ink-gray-5">
+          {{ __('Drag to reorder. Won and Lost stages close the card.') }}
+        </p>
+        <Draggable
+          :list="form.stages"
+          item-key="_key"
+          handle=".stage-handle"
+          :disabled="!canManage"
+          class="flex flex-col gap-2"
+        >
+          <template #item="{ element: stage, index }">
+            <div
+              class="flex items-center gap-2"
+              :data-stage="stage.deal_status"
+            >
+              <span
+                class="stage-handle lucide-grip-vertical size-4 cursor-grab text-ink-gray-4"
+                :class="!canManage && 'invisible'"
+              />
+              <IndicatorIcon :class="parseColor(stage.color)" />
+              <FormControl
+                class="flex-1"
+                :model-value="stage.deal_status"
+                :disabled="!canManage"
+                :placeholder="__('Stage name')"
+                @update:model-value="(v) => (stage.deal_status = v)"
+              />
+              <FormControl
+                class="w-36"
+                type="select"
+                :options="typeOptions"
+                :disabled="!canManage"
+                :model-value="stage.type"
+                @update:model-value="(v) => (stage.type = v)"
+              />
+              <FormControl
+                class="w-28"
+                type="select"
+                :options="colorOptions"
+                :disabled="!canManage"
+                :model-value="stage.color"
+                @update:model-value="(v) => (stage.color = v)"
+              />
+              <FormControl
+                class="w-20"
+                type="number"
+                :model-value="stage.probability"
+                :disabled="!canManage"
+                :placeholder="'%'"
+                @update:model-value="
+                  (v) => (stage.probability = Number(v) || 0)
+                "
+              />
+              <Button
+                v-if="canManage"
+                variant="ghost"
+                icon="lucide-trash-2"
+                :tooltip="__('Remove stage')"
+                :aria-label="__('Remove stage')"
+                @click="form.stages.splice(index, 1)"
+              />
+            </div>
+          </template>
+        </Draggable>
+      </section>
+
+      <!-- Members -->
+      <section class="flex flex-col gap-2">
+        <h3 class="text-lg-semibold text-ink-gray-8">{{ __('Members') }}</h3>
+        <p class="text-p-sm text-ink-gray-5">
+          {{
+            __(
+              'Owners see every card of the funnel and can change it. Salespeople see only their own cards.',
+            )
+          }}
+        </p>
+        <div
+          v-for="(member, index) in form.members"
+          :key="member.user"
+          class="flex items-center gap-3"
+          :data-member="member.user"
+        >
+          <UserAvatar :user="member.user" size="sm" />
+          <span class="flex-1 truncate text-base text-ink-gray-8">
+            {{ userName(member.user) }}
+          </span>
+          <FormControl
+            class="w-36"
+            type="select"
+            :options="roleOptions(member.user)"
+            :disabled="!canManage"
+            :model-value="member.role"
+            @update:model-value="(v) => (member.role = v)"
+          />
+          <Tooltip
+            v-if="users.is_admin"
+            :text="__('Can create funnels and be an owner')"
+          >
+            <div class="flex items-center gap-1.5 text-sm text-ink-gray-6">
+              <Switch
+                size="sm"
+                :model-value="Boolean(userInfo(member.user)?.pipeline_owner)"
+                :disabled="Boolean(userInfo(member.user)?.is_admin)"
+                @update:model-value="(v) => toggleOwnerRole(member.user, v)"
+              />
+              {{ __('Funnel owner role') }}
+            </div>
+          </Tooltip>
+          <Button
+            v-if="canManage"
+            variant="ghost"
+            icon="lucide-x"
+            :tooltip="__('Remove member')"
+            :aria-label="__('Remove member')"
+            @click="form.members.splice(index, 1)"
+          />
+        </div>
+        <div v-if="canManage && memberOptions.length" class="w-72">
+          <FormControl
+            type="select"
+            :placeholder="__('Add member')"
+            :options="memberOptions"
+            :model-value="null"
+            @update:model-value="addMember"
+          />
+        </div>
+      </section>
+
+      <!-- Fields and per-stage rules -->
+      <section class="flex flex-col gap-2">
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg-semibold text-ink-gray-8">
+            {{ __('Fields and rules by stage') }}
+          </h3>
+          <div v-if="canManage && fieldOptions.length" class="w-64">
+            <FormControl
+              type="select"
+              :placeholder="__('Add field')"
+              :options="fieldOptions"
+              :model-value="null"
+              @update:model-value="addField"
+            />
+          </div>
+        </div>
+        <p class="text-p-sm text-ink-gray-5">
+          {{
+            __(
+              'For each stage: Visible, Required to enter the stage, Read only. Funnel, stage and owner are always visible.',
+            )
+          }}
+        </p>
+        <div v-if="form.fields.length" class="overflow-x-auto rounded-4 border">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="bg-surface-gray-2 text-ink-gray-6">
+                <th class="sticky left-0 bg-surface-gray-2 p-2 text-left">
+                  {{ __('Field') }}
+                </th>
+                <th
+                  v-for="stage in form.stages"
+                  :key="stage._key"
+                  class="min-w-28 p-2 text-center font-normal"
+                >
+                  {{ __(stage.deal_status) || __('New stage') }}
+                </th>
+                <th v-if="canManage" />
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="(field, index) in form.fields"
+                :key="field.fieldname"
+                class="border-t"
+                :data-field="field.fieldname"
+              >
+                <td
+                  class="sticky left-0 bg-surface-elevation-2 p-2 text-ink-gray-8"
+                >
+                  {{
+                    __(catalogField(field.fieldname)?.label || field.fieldname)
+                  }}
+                </td>
+                <td
+                  v-for="stage in form.stages"
+                  :key="stage._key"
+                  class="p-2 text-center"
+                >
+                  <div class="inline-flex gap-1">
+                    <RuleToggle
+                      v-for="flag in ruleFlags"
+                      :key="flag.key"
+                      :label="flag.short"
+                      :tooltip="flag.label"
+                      :active="Boolean(rule(field.fieldname, stage)[flag.key])"
+                      :disabled="
+                        !canManage ||
+                        (flag.key !== 'visible' &&
+                          !rule(field.fieldname, stage).visible)
+                      "
+                      @toggle="toggleRule(field.fieldname, stage, flag.key)"
+                    />
+                  </div>
+                </td>
+                <td v-if="canManage" class="p-2 text-right">
+                  <Button
+                    variant="ghost"
+                    icon="lucide-x"
+                    :tooltip="__('Remove field from funnel')"
+                    :aria-label="__('Remove field from funnel')"
+                    @click="removeField(index)"
+                  />
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div v-else class="text-p-base text-ink-gray-5">
+          {{
+            __(
+              'No fields chosen: every field of the card is shown in every stage.',
+            )
+          }}
+        </div>
+      </section>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import IndicatorIcon from '@/components/Icons/IndicatorIcon.vue'
+import UserAvatar from '@/components/UserAvatar.vue'
+import RuleToggle from './RuleToggle.vue'
+import { pipelinesStore } from '@/stores/pipelines'
+import { colors, parseColor } from '@/utils'
+import { LOCKED_FIELDS } from '@/utils/pipelines'
+import Draggable from 'vuedraggable'
+import {
+  Badge,
+  ErrorMessage,
+  FormControl,
+  LoadingIndicator,
+  Switch,
+  Tooltip,
+  toast,
+} from 'frappe-ui'
+import { computed, onMounted, reactive, ref } from 'vue'
+
+const props = defineProps({
+  // '' = new funnel
+  pipeline: { type: String, default: '' },
+  // get_pipeline_users(): { can_create, is_admin, users: [...] }
+  users: { type: Object, required: true },
+})
+
+const emit = defineEmits(['back', 'saved'])
+
+const pipelineStore = pipelinesStore()
+
+const isNew = computed(() => !props.pipeline)
+const loading = ref(false)
+const saving = ref(false)
+const error = ref('')
+const myRole = ref(null)
+const catalog = ref([])
+
+let keySeq = 0
+const nextKey = () => `new-${++keySeq}`
+
+const form = reactive({
+  name: null,
+  pipeline_name: '',
+  color: 'blue',
+  is_active: 1,
+  stages: [],
+  members: [],
+  fields: [],
+})
+// { [fieldname]: { [stageKey]: { visible, required, read_only } } }
+const rules = reactive({})
+
+const canManage = computed(() =>
+  isNew.value
+    ? props.users.can_create
+    : ['Admin', 'Owner'].includes(myRole.value),
+)
+
+const isActive = computed({
+  get: () => Boolean(form.is_active),
+  set: (v) => (form.is_active = v ? 1 : 0),
+})
+
+const colorOptions = colors.map((c) => ({ label: __(c), value: c }))
+const typeOptions = [
+  { label: __('Open'), value: 'Open' },
+  { label: __('Ongoing'), value: 'Ongoing' },
+  { label: __('On Hold'), value: 'On Hold' },
+  { label: __('Won'), value: 'Won' },
+  { label: __('Lost'), value: 'Lost' },
+]
+const ruleFlags = [
+  { key: 'visible', short: 'V', label: __('Visible') },
+  { key: 'required', short: 'O', label: __('Required to enter the stage') },
+  { key: 'read_only', short: 'S', label: __('Read only') },
+]
+
+function userInfo(user) {
+  return props.users.users?.find((u) => u.name === user)
+}
+
+function userName(user) {
+  return userInfo(user)?.full_name || user
+}
+
+function canOwn(user) {
+  let info = userInfo(user)
+  return Boolean(info?.pipeline_owner || info?.is_admin)
+}
+
+function roleOptions(user) {
+  return [
+    { label: __('Salesperson'), value: 'Member' },
+    ...(canOwn(user) ? [{ label: __('Owner'), value: 'Owner' }] : []),
+  ]
+}
+
+const memberOptions = computed(() =>
+  (props.users.users || [])
+    .filter((u) => !form.members.some((m) => m.user === u.name))
+    .map((u) => ({ label: u.full_name || u.name, value: u.name })),
+)
+
+function addMember(user) {
+  if (!user || form.members.some((m) => m.user === user)) return
+  form.members.push({ user, role: 'Member' })
+}
+
+async function toggleOwnerRole(user, enabled) {
+  try {
+    let result = await pipelineStore.apiCall('set_pipeline_owner_role', {
+      user,
+      enabled: enabled ? 1 : 0,
+    })
+    let info = userInfo(user)
+    if (info) info.pipeline_owner = result?.pipeline_owner ? 1 : 0
+    if (!enabled) {
+      let member = form.members.find((m) => m.user === user)
+      if (member?.role === 'Owner') member.role = 'Member'
+    }
+  } catch (e) {
+    toast.error(e?.messages?.[0] || __('Could not change the role'))
+  }
+}
+
+function addStage() {
+  form.stages.push({
+    _key: nextKey(),
+    name: null,
+    deal_status: '',
+    type: form.stages.length ? 'Ongoing' : 'Open',
+    color: colors[form.stages.length % colors.length],
+    probability: 0,
+  })
+}
+
+function catalogField(fieldname) {
+  return catalog.value.find((f) => f.fieldname === fieldname)
+}
+
+const fieldOptions = computed(() =>
+  catalog.value
+    .filter(
+      (f) =>
+        !f.disabled &&
+        !LOCKED_FIELDS.includes(f.fieldname) &&
+        !f.locked &&
+        !form.fields.some((x) => x.fieldname === f.fieldname),
+    )
+    .map((f) => ({ label: __(f.label), value: f.fieldname })),
+)
+
+function addField(fieldname) {
+  if (!fieldname || form.fields.some((f) => f.fieldname === fieldname)) return
+  form.fields.push({ fieldname })
+}
+
+function removeField(index) {
+  let [field] = form.fields.splice(index, 1)
+  delete rules[field.fieldname]
+}
+
+function stageKey(stage) {
+  return stage.name || stage._key
+}
+
+const DEFAULT_RULE = { visible: 1, required: 0, read_only: 0 }
+
+function rule(fieldname, stage) {
+  return rules[fieldname]?.[stageKey(stage)] || DEFAULT_RULE
+}
+
+function toggleRule(fieldname, stage, flag) {
+  rules[fieldname] ||= {}
+  let current = { ...rule(fieldname, stage) }
+  current[flag] = current[flag] ? 0 : 1
+  // a hidden field cannot be required or read-only in that stage
+  if (flag === 'visible' && !current.visible) {
+    current.required = 0
+    current.read_only = 0
+  }
+  rules[fieldname][stageKey(stage)] = current
+}
+
+function validate() {
+  if (!form.pipeline_name?.trim()) return __('Give the funnel a name.')
+  if (!form.stages.length) return __('A funnel needs at least one stage.')
+  let names = form.stages.map((s) => (s.deal_status || '').trim())
+  if (names.some((n) => !n)) return __('Every stage needs a name.')
+  let repeated = names.find((n, i) => names.indexOf(n) !== i)
+  if (repeated) return __('Stage {0} appears more than once.', [repeated])
+  return ''
+}
+
+function payload() {
+  let doc = {
+    pipeline_name: form.pipeline_name.trim(),
+    color: form.color,
+    is_active: form.is_active,
+    stages: form.stages.map((s) => ({
+      ...(s.name ? { name: s.name } : {}),
+      deal_status: s.deal_status.trim(),
+      type: s.type,
+      color: s.color,
+      probability: s.probability || 0,
+    })),
+    members: form.members.map((m) => ({ user: m.user, role: m.role })),
+    // in order; position = order (crm.api.pipeline.save_pipeline)
+    fields: form.fields.map((f) => f.fieldname),
+  }
+  if (form.name) doc.name = form.name
+  // Rules can only be sent for stages that already have a key on the server
+  doc.field_rules = []
+  form.stages.forEach((stage) => {
+    let key = stage.name
+    if (!key) return
+    for (let f of form.fields) {
+      let r = rule(f.fieldname, stage)
+      doc.field_rules.push({ stage: key, fieldname: f.fieldname, ...r })
+    }
+  })
+  return doc
+}
+
+async function save() {
+  error.value = validate()
+  if (error.value) return
+  saving.value = true
+  try {
+    let hasNewStages = form.stages.some((s) => !s.name)
+    let saved = await pipelineStore.apiCall('save_pipeline', { doc: payload() })
+    // From here on the funnel and its new stages exist: a retry must update
+    // them, never create them again
+    adoptSavedKeys(saved)
+    if (hasNewStages && form.fields.length) {
+      // second step: rules of the stages created just now, now that they have keys
+      saved = await pipelineStore.apiCall('save_pipeline', { doc: payload() })
+    }
+    toast.success(__('Funnel saved'))
+    emit('saved', saved)
+  } catch (e) {
+    error.value =
+      e?.messages?.join('\n') || e?.message || __('Could not save the funnel')
+  } finally {
+    saving.value = false
+  }
+}
+
+// The server saves stages in the order sent, so the n-th saved stage is the
+// n-th stage of the form; new ones take their key and keep their rules.
+function adoptSavedKeys(saved) {
+  form.name = saved.name
+  form.stages.forEach((stage, i) => {
+    let key = saved.stages?.[i]?.name
+    if (stage.name || !key) return
+    for (let fieldname of Object.keys(rules)) {
+      if (rules[fieldname][stage._key]) {
+        rules[fieldname][key] = rules[fieldname][stage._key]
+        delete rules[fieldname][stage._key]
+      }
+    }
+    stage.name = key
+  })
+}
+
+function fill(config) {
+  form.name = config.name
+  form.pipeline_name = config.pipeline_name
+  form.color = config.color || 'blue'
+  form.is_active = config.is_active ?? 1
+  form.stages = (config.stages || []).map((s) => ({ ...s, _key: s.name }))
+  form.members = (config.members || []).map((m) => ({
+    user: m.user,
+    role: m.role,
+  }))
+  // fieldnames in order, or { fieldname, position } rows
+  form.fields = [...(config.fields || [])]
+    .map((f, i) =>
+      typeof f === 'string'
+        ? { fieldname: f, position: i + 1 }
+        : { fieldname: f.fieldname, position: f.position ?? i + 1 },
+    )
+    .sort((a, b) => a.position - b.position)
+  for (let r of config.field_rules || []) {
+    rules[r.fieldname] ||= {}
+    rules[r.fieldname][r.stage] = {
+      visible: r.visible,
+      required: r.required,
+      read_only: r.read_only,
+    }
+  }
+  myRole.value = config.my_role
+}
+
+onMounted(async () => {
+  loading.value = true
+  try {
+    let catalogData = await pipelineStore.apiCall('get_field_catalog')
+    catalog.value = catalogData?.fields || []
+    if (isNew.value) {
+      addStage()
+      return
+    }
+    fill(
+      await pipelineStore.apiCall('get_pipeline_config', {
+        pipeline: props.pipeline,
+      }),
+    )
+  } catch (e) {
+    error.value = e?.messages?.[0] || __('Could not load the funnel')
+  } finally {
+    loading.value = false
+  }
+})
+</script>

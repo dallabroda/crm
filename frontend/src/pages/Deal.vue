@@ -22,7 +22,18 @@
         :website="doc.website"
         @done="onEnriched"
       />
-      <AssignTo v-model="assignees.data" doctype="CRM Deal" :docname="dealId" />
+      <AssignTo
+        v-model="assignees.data"
+        doctype="CRM Deal"
+        :docname="dealId"
+        :allowedUsers="assignableUsers"
+      />
+      <Button
+        v-if="doc.pipeline && pipelines.length > 1"
+        :label="__('Move to another funnel')"
+        iconLeft="lucide-arrow-right-left"
+        @click="showChangePipelineModal = true"
+      />
       <Dropdown v-if="doc && document.statuses" :options="statuses" align="end">
         <template #default="{ open }">
           <Button
@@ -135,12 +146,13 @@
         v-model="doc"
         @updateField="updateField"
       />
+      <OrganizationRegistry :organization="organization" />
       <div
         v-if="sections.data"
         class="flex flex-1 flex-col justify-between overflow-hidden"
       >
         <SidePanelLayout
-          :sections="sections.data"
+          :sections="visibleSections"
           :addContact="addContact"
           doctype="CRM Deal"
           :docname="dealId"
@@ -337,6 +349,22 @@
     doctype="CRM Deal"
     :document="document"
   />
+  <MissingFieldsModal
+    v-if="missingFields"
+    v-model="showMissingFieldsModal"
+    :deal="dealId"
+    :stageLabel="statusLabel(doc.status)"
+    :fields="missingFields"
+    @save="saveMissingFields"
+    @cancel="cancelMissingFields"
+  />
+  <ChangePipelineModal
+    v-if="showChangePipelineModal"
+    v-model="showChangePipelineModal"
+    :deal="dealId"
+    :currentPipeline="doc.pipeline"
+    @moved="onPipelineChanged"
+  />
 </template>
 <script setup>
 import DeleteLinkedDocModal from '@/components/DeleteLinkedDocModal.vue'
@@ -363,6 +391,13 @@ import LayoutHeader from '@/components/LayoutHeader.vue'
 import Activities from '@/components/Activities/Activities.vue'
 import OrganizationModal from '@/components/Modals/OrganizationModal.vue'
 import LostReasonModal from '@/components/Modals/LostReasonModal.vue'
+import MissingFieldsModal from '@/components/Modals/MissingFieldsModal.vue'
+import ChangePipelineModal from '@/components/Modals/ChangePipelineModal.vue'
+import OrganizationRegistry from '@/components/Pipelines/OrganizationRegistry.vue'
+import { pipelinesStore } from '@/stores/pipelines'
+import { applyStageRules } from '@/utils/pipelines'
+import { parseLinkFilters } from '@/utils/fieldTransforms'
+import { storeToRefs } from 'pinia'
 import AssignTo from '@/components/AssignTo.vue'
 import FilesUploader from '@/components/FilesUploader/FilesUploader.vue'
 import ContactModal from '@/components/Modals/ContactModal.vue'
@@ -383,7 +418,7 @@ import { getSettings } from '@/stores/settings'
 import { globalStore } from '@/stores/global'
 import { statusesStore } from '@/stores/statuses'
 import { getMeta } from '@/stores/meta'
-import { useDocument } from '@/data/document'
+import { useDocument, onMissingRequiredFields } from '@/data/document'
 import { whatsappEnabled } from '@/composables/whatsapp'
 import { canViewQuotations } from '@/composables/erpnext'
 import { callEnabled } from '@/composables/telephony'
@@ -421,6 +456,11 @@ const { brand } = getSettings()
 const { $dialog, $socket, makeCall } = globalStore()
 const { statusOptions, getDealStatus } = statusesStore()
 const { doctypeMeta } = getMeta('CRM Deal')
+
+// Funnels (#72): the card's stages, names and per-stage field rules
+const pipelineStore = pipelinesStore()
+const { pipelines } = storeToRefs(pipelineStore)
+pipelineStore.ensureLoaded()
 
 const route = useRoute()
 const router = useRouter()
@@ -558,7 +598,21 @@ const statuses = computed(() => {
   let customStatuses = document.statuses?.length
     ? document.statuses
     : document._statuses || []
-  return statusOptions('deal', customStatuses, triggerStatusChange)
+  let stages = pipelineStore.getPipeline(doc.value.pipeline)?.stages
+  if (!stages?.length) {
+    return statusOptions('deal', customStatuses, triggerStatusChange)
+  }
+  // Only the stages of the card's funnel, by name; a form script can still
+  // narrow them down with its own list of statuses.
+  if (customStatuses.length) {
+    stages = stages.filter((s) => customStatuses.includes(s.name))
+  }
+  return stages.map((s) => ({
+    label: __(s.deal_status),
+    value: s.name,
+    icon: () => h(IndicatorIcon, { class: s.colorClass }),
+    onClick: () => triggerStatusChange(s.name),
+  }))
 })
 
 useCommandPaletteContext(() => dealCommands())
@@ -988,8 +1042,146 @@ function openEmailBox() {
 }
 
 function statusLabel(status) {
+  if (pipelineStore.getStage(status, doc.value.pipeline)) {
+    return pipelineStore.stageLabel(status, doc.value.pipeline)
+  }
   if (isTranslatable('CRM Deal Status')) return __(status)
   return status
+}
+
+// Per-stage field rules (hidden / required / read-only) of the card's funnel
+const stageRules = ref({})
+let stageRulesRequest = 0
+watch(
+  () => [doc.value.pipeline, doc.value.status],
+  async ([pipeline, stage]) => {
+    let request = ++stageRulesRequest
+    if (!pipeline || !stage) {
+      stageRules.value = {}
+      return
+    }
+    try {
+      let rules = await pipelineStore.apiCall('get_stage_rules', {
+        pipeline,
+        stage,
+      })
+      // a slower answer for a previous stage must not win
+      if (request === stageRulesRequest) stageRules.value = rules || {}
+    } catch (e) {
+      if (request === stageRulesRequest) stageRules.value = {}
+      console.error('[pipelines] get_stage_rules failed', e)
+    }
+  },
+  { immediate: true },
+)
+
+// Owner and assignees must take part in the card's funnel (#68): members + admins.
+// Fields: only the catalog fields the funnel uses (#69).
+const assignableUsers = ref(null)
+const fieldSetup = ref(null)
+watch(
+  () => doc.value.pipeline,
+  async (pipeline) => {
+    let [users, setup] = await Promise.allSettled([
+      pipelineStore.assignableUsers(pipeline),
+      pipelineStore.fieldSetup(pipeline),
+    ])
+    // the server still refuses outsiders; without the list the panel shows all
+    assignableUsers.value = users.status === 'fulfilled' ? users.value : null
+    fieldSetup.value = setup.status === 'fulfilled' ? setup.value : null
+    for (let r of [users, setup]) {
+      if (r.status === 'rejected') console.error('[pipelines]', r.reason)
+    }
+  },
+  { immediate: true },
+)
+
+// Narrow the owner field to the funnel's people, keeping the filters the side
+// panel already put there (CRM users, ignore_user_type)
+function restrictOwner(sections, allowed) {
+  if (!allowed || !sections) return sections
+  return sections.map((section) =>
+    section.columns
+      ? {
+          ...section,
+          columns: section.columns.map((column) => ({
+            ...column,
+            fields: (column.fields || []).map((field) =>
+              field?.fieldname === 'deal_owner'
+                ? {
+                    ...field,
+                    link_filters: JSON.stringify({
+                      ...(parseLinkFilters(field.link_filters) || {}),
+                      ignore_user_type: 1,
+                      name: ['in', allowed],
+                    }),
+                  }
+                : field,
+            ),
+          })),
+        }
+      : section,
+  )
+}
+
+const visibleSections = computed(() =>
+  restrictOwner(
+    applyStageRules(sections.data, stageRules.value, fieldSetup.value || {}),
+    assignableUsers.value,
+  ),
+)
+
+// A stage change the server rejects for empty required fields asks for them
+const missingFields = ref(null)
+const showMissingFieldsModal = ref(false)
+const stopMissingFields = onMissingRequiredFields(
+  'CRM Deal',
+  props.dealId,
+  async (fields) => {
+    if (!fields?.length) {
+      try {
+        fields = await pipelineStore.apiCall('get_missing_fields', {
+          deal: props.dealId,
+          stage: document.doc.status,
+        })
+      } catch (e) {
+        console.error('[pipelines] get_missing_fields failed', e)
+      }
+    }
+    if (!fields?.length) {
+      toast.error(
+        __('Fill in the required fields of this stage before moving the card.'),
+      )
+      document.reload()
+      return
+    }
+    missingFields.value = fields
+    showMissingFieldsModal.value = true
+  },
+)
+onBeforeUnmount(stopMissingFields)
+
+function saveMissingFields(values) {
+  missingFields.value = null
+  Object.assign(document.doc, values)
+  document.save.submit(null, {
+    onSuccess: () => reloadResources({ status: document.doc.status }),
+  })
+}
+
+function cancelMissingFields() {
+  missingFields.value = null
+  toast.info(__('Stage not changed: its required fields were not filled in.'))
+  // back to what the server has (the previous stage)
+  document.reload()
+}
+
+const showChangePipelineModal = ref(false)
+
+function onPipelineChanged() {
+  document.reload()
+  sections.reload()
+  toast.success(__('Card moved to the other funnel'))
 }
 
 const showLostReasonModal = ref(false)

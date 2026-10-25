@@ -5,14 +5,14 @@
     <div class="space-y-2">
       <div>{{ __('Invalid page or not permitted to access') }}</div>
       <Button
-        :route="{ name: 'Leads' }"
-        :label="__('Leads')"
-        :iconLeft="LeadsIcon"
+        :route="{ name: 'Deals' }"
+        :label="__('Deals')"
+        :iconLeft="DealsIcon"
       />
     </div>
   </div>
 </template>
 
 <script setup>
-import LeadsIcon from '@/components/Icons/LeadsIcon.vue'
+import DealsIcon from '@/components/Icons/DealsIcon.vue'
 </script>

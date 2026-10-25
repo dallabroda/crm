@@ -284,7 +284,6 @@ function navigationCommands(tracked) {
 
 function createCommands(tracked, emit, showModal) {
   const custom = [
-    createRouteCommand('lead', 'Lead', 'Leads', 'trigger_lead_create', emit),
     createRouteCommand('deal', 'Deal', 'Deals', 'trigger_deal_create', emit),
   ]
   const generic = [

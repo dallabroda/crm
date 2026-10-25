@@ -12,6 +12,10 @@ describe('navigationItems', () => {
     )
     expect(mobileRoutes).not.toContain('Dashboard')
     expect(mobileRoutes).not.toContain('Calendar')
-    expect(mobileRoutes).toContain('Leads')
+    expect(mobileRoutes).toContain('Deals')
+  })
+
+  it('has no Leads entry: cards live in the funnels (Cred Hub #72)', () => {
+    expect(navigationItems.map((item) => item.route)).not.toContain('Leads')
   })
 })

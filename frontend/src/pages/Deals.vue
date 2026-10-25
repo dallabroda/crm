@@ -17,22 +17,29 @@
     </template>
   </LayoutHeader>
   <ViewControls
+    v-if="pipelinesReady"
+    :key="pipelineName"
     ref="viewControls"
     v-model="deals"
     v-model:loadMore="loadMore"
     v-model:resizeColumn="triggerResize"
     v-model:updatedPageCount="updatedPageCount"
     doctype="CRM Deal"
+    :pipeline="pipelineName"
+    :filters="pipelineFilters"
+    :kanbanColumns="pipelineColumns"
     :options="{
       allowedViews: ['list', 'group_by', 'kanban'],
     }"
   />
   <KanbanView
-    v-if="route.params.viewType == 'kanban'"
+    v-if="pipelinesReady && route.params.viewType == 'kanban'"
+    :key="pipelineName"
     v-model="deals"
     :options="{
       getRoute: (row) => getRoute(row.name),
       onNewClick: (column) => onNewClick(column),
+      fixedColumns: Boolean(pipelineName),
     }"
     @update="(data) => viewControls.updateKanbanSettings(data)"
     @loadMore="(columnName) => viewControls.loadMoreKanban(columnName)"
@@ -256,6 +263,8 @@ import { globalStore } from '@/stores/global'
 import { usersStore } from '@/stores/users'
 import { organizationsStore } from '@/stores/organizations'
 import { statusesStore } from '@/stores/statuses'
+import { pipelinesStore } from '@/stores/pipelines'
+import { storeToRefs } from 'pinia'
 import { callEnabled } from '@/composables/telephony'
 import { formatDate, timeAgo, website, formatTime } from '@/utils'
 import { timestampCell } from '@/composables/useTimelinePreferences'
@@ -263,8 +272,8 @@ import { useTelemetry } from '@framework/ui/telemetry'
 import { useBroadcast } from '@/composables/useBroadcast'
 import { useCrmOnboarding } from '@/composables/onboarding'
 import { Tooltip, Avatar, Dropdown } from 'frappe-ui'
-import { useRoute } from 'vue-router'
-import { ref, reactive, computed, h } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { ref, reactive, computed, h, watch } from 'vue'
 
 const { getFormattedPercent, getFormattedFloat, getFormattedCurrency } =
   getMeta('CRM Deal')
@@ -278,6 +287,47 @@ const { showModal } = useDoctypeModal()
 const { on } = useBroadcast()
 
 const route = useRoute()
+const router = useRouter()
+
+// Funnel (#72): ?pipeline=<name>, defaulting to the first one the user can see
+const pipelineStore = pipelinesStore()
+const { pipelines, loaded: pipelinesLoaded } = storeToRefs(pipelineStore)
+const { getPipeline, stageLabel } = pipelineStore
+pipelineStore.ensureLoaded()
+
+const pipeline = computed(
+  () => getPipeline(route.query.pipeline) || pipelines.value[0] || null,
+)
+const pipelineName = computed(() => pipeline.value?.name || '')
+const pipelinesReady = computed(() => pipelinesLoaded.value)
+
+const pipelineFilters = computed(() =>
+  pipelineName.value ? { pipeline: pipelineName.value } : {},
+)
+
+const pipelineColumns = computed(() =>
+  (pipeline.value?.stages || []).map((stage) => ({
+    name: stage.name,
+    label: __(stage.deal_status),
+    color: stage.color,
+  })),
+)
+
+// Keep the funnel in the URL so links, reloads and the sidebar highlight agree
+watch(
+  [pipelineName, () => route.query.pipeline],
+  ([name, inUrl]) => {
+    if (route.name === 'Deals' && name && inUrl !== name) {
+      router.replace({
+        name: route.name,
+        params: route.params,
+        query: { ...route.query, pipeline: name },
+        hash: route.hash,
+      })
+    }
+  },
+  { immediate: true },
+)
 
 function getRoute(name) {
   return {
@@ -361,7 +411,10 @@ function getGroupedByRows(listRows, groupByField, columns) {
 
     let groupDetail = {
       label: groupByField.label,
-      group: option || __(' '),
+      group:
+        (groupByField.fieldname == 'status' && option
+          ? stageLabel(option, pipelineName.value)
+          : option) || __(' '),
       collapsed: false,
       rows: parseRows(filteredRows, columns),
     }
@@ -430,7 +483,7 @@ function parseRows(rows, columns = []) {
         _rows[row] = website(deal.website)
       } else if (row == 'status') {
         _rows[row] = {
-          label: deal.status,
+          label: stageLabel(deal.status, pipelineName.value),
           color: getDealStatus(deal.status)?.color,
         }
       } else if (row == 'sla_status') {
@@ -497,6 +550,9 @@ function onNewClick(column) {
 
   if (column_field) {
     defaults[column_field] = column.column.name
+  }
+  if (pipelineName.value) {
+    defaults.pipeline = pipelineName.value
   }
 
   showDealModal.value = true

@@ -178,7 +178,6 @@
 import BrushCleaningIcon from '~icons/lucide/brush-cleaning'
 import CRMLogo from '@/components/Icons/CRMLogo.vue'
 import InviteIcon from '@/components/Icons/InviteIcon.vue'
-import ConvertIcon from '@/components/Icons/ConvertIcon.vue'
 import EmailIcon from '@/components/Icons/EmailIcon.vue'
 import CollapsibleSection from '@/components/CollapsibleSection.vue'
 import Icon from '@/components/Icon.vue'
@@ -198,6 +197,8 @@ import HelpIcon from '@/components/Icons/HelpIcon.vue'
 import Notifications from '@/components/Notifications.vue'
 import Settings from '@/components/Settings/Settings.vue'
 import { viewsStore } from '@/stores/views'
+import { pipelinesStore } from '@/stores/pipelines'
+import { storeToRefs } from 'pinia'
 import {
   unreadNotificationsCount,
   notificationsStore,
@@ -252,20 +253,53 @@ const isDemoSite = ref(window.is_demo_site)
 
 const links = getNavigationItems({ mobile: props.mobile })
 
+const pipelineStore = pipelinesStore()
+const { pipelines } = storeToRefs(pipelineStore)
+pipelineStore.ensureLoaded()
+
+function navLink(link) {
+  return {
+    label: link.label,
+    icon: link.icon,
+    key: link.route,
+    to: { name: link.route },
+  }
+}
+
+// "Negócios" lists the funnels the user can see; each one opens its Kanban (#72).
+// The plain "Deals" entry stays in the command palette, not in the sidebar.
+const pipelineViews = computed(() =>
+  pipelines.value.map((pipeline) => ({
+    label: pipeline.pipeline_name,
+    icon: DealsIcon,
+    key: pipelineKey(pipeline.name),
+    to: {
+      name: 'Deals',
+      params: { viewType: 'kanban' },
+      query: { pipeline: pipeline.name },
+    },
+  })),
+)
+
 const allViews = computed(() => {
+  let top = links.filter((link) => link.route === 'Dashboard')
+  let rest = links.filter(
+    (link) => !['Dashboard', 'Deals'].includes(link.route),
+  )
   let _views = [
+    { name: 'Top', hideLabel: true, opened: true, views: top.map(navLink) },
+    {
+      name: 'Deals',
+      opened: true,
+      views: pipelineViews.value,
+    },
     {
       name: 'All Views',
       hideLabel: true,
       opened: true,
-      views: links.map((link) => ({
-        label: link.label,
-        icon: link.icon,
-        key: link.route,
-        to: { name: link.route },
-      })),
+      views: rest.map(navLink),
     },
-  ]
+  ].filter((section) => section.views.length)
   if (getPublicViews().length) {
     _views.push({
       name: 'Public Views',
@@ -320,9 +354,18 @@ function getIcon(routeName, icon) {
   }
 }
 
-// A saved view's key is its name; a plain nav item's key is its route name.
+function pipelineKey(name) {
+  return 'pipeline:' + name
+}
+
+// A saved view's key is its name; a funnel's key is pipeline:<name>; a plain
+// nav item's key is its route name.
 function currentRouteKey() {
-  return route.query.view || route.name
+  if (route.query.view) return route.query.view
+  if (route.name === 'Deals' && route.query.pipeline) {
+    return pipelineKey(route.query.pipeline)
+  }
+  return route.name
 }
 
 // Set the highlight on click rather than waiting for the route, since route
@@ -350,7 +393,7 @@ function selectItem(event, key) {
 }
 
 watch(
-  () => [route.name, route.query.view],
+  () => [route.name, route.query.view, route.query.pipeline],
   () => (activeItem.value = currentRouteKey()),
 )
 
@@ -445,10 +488,6 @@ async function reconcileOnboarding(currentSteps) {
   window.location.reload()
 }
 
-async function getFirstLead() {
-  return await getFirstRecord('firstLead', 'crm.api.onboarding.get_first_lead')
-}
-
 async function getFirstDeal() {
   return await getFirstRecord('firstDeal', 'crm.api.onboarding.get_first_deal')
 }
@@ -471,16 +510,17 @@ const showIntermediateModal = ref(false)
 const currentStep = ref({})
 
 const steps = reactive([
+  // Leads are gone (#72): the first step creates a card in a funnel
   {
-    name: 'create_first_lead',
-    title: __('Add your first lead'),
-    icon: markRaw(LeadsIcon),
+    name: 'create_first_deal',
+    title: __('Create your first card'),
+    icon: markRaw(DealsIcon),
     completed: false,
     onClick: () => {
       minimize.value = true
-      router.push({ name: 'Leads' })
-      send('trigger_lead_create', true)
-      capture('onboarding_step_clicked_create_first_lead')
+      router.push({ name: 'Deals', params: { viewType: 'kanban' } })
+      send('trigger_deal_create', true)
+      capture('onboarding_step_clicked_create_first_deal')
     },
   },
   {
@@ -508,34 +548,6 @@ const steps = reactive([
       capture('onboarding_step_clicked_invite_your_team')
     },
     condition: () => isManager(),
-  },
-  {
-    name: 'convert_lead_to_deal',
-    title: __('Convert lead to deal'),
-    icon: markRaw(ConvertIcon),
-    completed: false,
-    dependsOn: 'create_first_lead',
-    onClick: async () => {
-      minimize.value = true
-      capture('onboarding_step_clicked_convert_lead_to_deal')
-      currentStep.value = {
-        title: __('Convert lead to deal'),
-        buttonLabel: __('Convert'),
-        videoURL: '/assets/crm/videos/convertToDeal.mov',
-        onClick: async () => {
-          showIntermediateModal.value = false
-          currentStep.value = {}
-
-          let lead = await getFirstLead()
-          if (lead) {
-            router.push({ name: 'Lead', params: { leadId: lead } })
-          } else {
-            router.push({ name: 'Leads' })
-          }
-        },
-      }
-      showIntermediateModal.value = true
-    },
   },
   {
     name: 'create_first_task',

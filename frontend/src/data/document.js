@@ -5,6 +5,7 @@ import { useAttachments } from '@/composables/useAttachments'
 import { showSettings, activeSettingsPage } from '@/composables/settings'
 import { runSequentially, parseAssignees, sanitizeText } from '@/utils'
 import { findMissingMandatory } from '@/utils/fieldTransforms'
+import { isMissingFieldsError, missingFieldsFromError } from '@/utils/pipelines'
 import {
   getFetchSource,
   getFieldsToFetch,
@@ -25,6 +26,20 @@ const permissionsCache = {}
 // away. Docs marked here have that one expected error swallowed instead of
 // surfaced as an error page.
 const intentionallyDeletedDocs = new Set()
+
+// Pages that can ask for a funnel stage's required fields (#72) register a
+// handler here; a save rejected with MissingRequiredFieldsError then opens
+// their dialog instead of a raw error toast. Key: "<doctype>:<docname>".
+const missingFieldsHandlers = {}
+
+export function onMissingRequiredFields(doctype, docname, handler) {
+  let key = `${doctype}:${docname}`
+  missingFieldsHandlers[key] = handler
+  return () => {
+    if (missingFieldsHandlers[key] === handler)
+      delete missingFieldsHandlers[key]
+  }
+}
 
 export function markDocumentAsDeleted(doctype, docname) {
   intentionallyDeletedDocs.add(`${doctype}:${docname}`)
@@ -98,6 +113,14 @@ export function useDocument(doctype, docname, resourceOverrides = {}) {
             onError: (err) => {
               triggerOnError(err)
 
+              // frappe-ui keeps only `message`/_server_messages on the error, so
+              // the list may be missing: the page then asks get_missing_fields
+              let handler = missingFieldsHandlers[`${doctype}:${docname}`]
+              if (isMissingFieldsError(err) && handler) {
+                handler(missingFieldsFromError(err))
+                return
+              }
+
               if (err.exc_type == 'MandatoryError') {
                 const fieldName = err.messages
                   .map((msg) => {
@@ -144,7 +167,17 @@ export function useDocument(doctype, docname, resourceOverrides = {}) {
         }
         const mandatory = checkMandatory(documentsCache[doctype][docname].doc)
         if (mandatory) return
-        return _originalSubmit.apply(_save, args)
+        return _originalSubmit.apply(_save, args).catch((err) => {
+          // already answered by the page's missing-fields dialog (onError above):
+          // do not let it surface again as an unhandled rejection
+          if (
+            isMissingFieldsError(err) &&
+            missingFieldsHandlers[`${doctype}:${docname}`]
+          ) {
+            return
+          }
+          throw err
+        })
       }
     } else {
       documentsCache[doctype][''] = reactive({
