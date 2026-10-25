@@ -181,6 +181,9 @@ class TestPipelinePermissions(FrappeTestCase):
 		self.assertEqual(users[ADMIN]["is_admin"], 1)
 		frappe.set_user(REP1)
 		self.assertFalse(get_pipeline_users()["can_create"])
+		frappe.set_user("Guest")
+		with self.assertRaises(frappe.PermissionError):
+			get_pipeline_users()
 
 	def test_patch_keeps_access_of_existing_users(self):
 		save_pipeline({"name": self.pipeline, "members": []})

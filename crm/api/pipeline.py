@@ -13,6 +13,7 @@ from frappe import _
 from crm.fcrm.doctype.crm_pipeline.crm_pipeline import get_first_stage
 from crm.permissions.pipeline import PIPELINE_OWNER_ROLE, get_role_in_pipeline, is_admin
 
+CRM_ROLES = ("Sales User", "Sales Manager", "System Manager")
 STAGE_FIELDS = ("name", "deal_status", "color", "type", "position", "probability")
 STAGE_TYPES = ("Open", "Ongoing", "On Hold", "Won", "Lost")
 
@@ -193,6 +194,7 @@ def _save_stages(pipeline: str, stages: list[dict]):
 @frappe.whitelist()
 def get_pipeline_users() -> dict:
 	"""Active CRM users for the pipeline members screen, with who may own pipelines."""
+	frappe.only_for(CRM_ROLES)
 	users = frappe.get_all(
 		"User",
 		{
@@ -203,11 +205,10 @@ def get_pipeline_users() -> dict:
 		["name", "full_name", "user_image"],
 		order_by="full_name asc",
 	)
-	crm_roles = ("Sales User", "Sales Manager", "System Manager")
 	result = []
 	for user in users:
 		roles = set(frappe.get_roles(user.name))
-		if not roles & set(crm_roles):
+		if not roles & set(CRM_ROLES):
 			continue
 		admin = is_admin(user.name)
 		result.append(
