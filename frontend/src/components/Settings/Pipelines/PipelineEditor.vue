@@ -124,6 +124,7 @@
                 variant="ghost"
                 icon="lucide-trash-2"
                 :tooltip="__('Remove stage')"
+                :aria-label="__('Remove stage')"
                 @click="form.stages.splice(index, 1)"
               />
             </div>
@@ -178,6 +179,7 @@
             variant="ghost"
             icon="lucide-x"
             :tooltip="__('Remove member')"
+            :aria-label="__('Remove member')"
             @click="form.members.splice(index, 1)"
           />
         </div>
@@ -272,6 +274,7 @@
                     variant="ghost"
                     icon="lucide-x"
                     :tooltip="__('Remove field from funnel')"
+                    :aria-label="__('Remove field from funnel')"
                     @click="removeField(index)"
                   />
                 </td>
