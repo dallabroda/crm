@@ -416,8 +416,9 @@ class CRMDeal(Document):
 		return {
 			"column_field": "status",
 			"title_field": "organization",
-			# The card's own value and owner (annual_revenue is the organization's, usually empty)
-			"kanban_fields": '["deal_value", "deal_owner", "_assign", "modified"]',
+			# The card's own value and owner (annual_revenue is the organization's, usually empty);
+			# no _assign: it is almost always the owner again
+			"kanban_fields": '["deal_value", "deal_owner", "modified"]',
 		}
 
 
