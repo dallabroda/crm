@@ -17,7 +17,6 @@ STANDARD_FIELDS = (
 	"deal_value",
 	"expected_deal_value",
 	"expected_closure_date",
-	"probability",
 	"next_step",
 	"source",
 	"website",

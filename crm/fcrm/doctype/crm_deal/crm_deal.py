@@ -303,13 +303,6 @@ class CRMDeal(Document):
 		if self.status == "Won" and not self.closed_date:
 			self.closed_date = frappe.utils.nowdate()
 
-	def update_default_probability(self):
-		"""
-		Update the default probability based on the status.
-		"""
-		if not self.probability or self.probability == 0:
-			self.probability = frappe.db.get_value("CRM Deal Status", self.status, "probability") or 0
-
 	def update_expected_deal_value(self):
 		"""
 		Update the expected deal value based on the net total or total.
@@ -323,7 +316,6 @@ class CRMDeal(Document):
 
 	def validate_forecasting_fields(self):
 		self.update_closed_date()
-		self.update_default_probability()
 		self.update_expected_deal_value()
 		if frappe.db.get_single_value("FCRM Settings", "enable_forecasting"):
 			if not self.expected_deal_value or self.expected_deal_value == 0:
