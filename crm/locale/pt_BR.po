@@ -9180,3 +9180,27 @@ msgstr "Preencha os campos obrigatórios desta etapa antes de mover o card."
 
 msgid "Edit in the organization"
 msgstr "Editar na organização"
+
+msgid "Create cards from incoming emails"
+msgstr "Criar cards a partir de e-mails recebidos"
+
+msgid "If enabled, an email from an unknown contact becomes a card in the funnel chosen below."
+msgstr "Se ligado, um e-mail de contato desconhecido vira um card no funil escolhido abaixo."
+
+msgid "Cards created from emails of this account go to this funnel."
+msgstr "Os cards criados a partir dos e-mails desta conta vão para este funil."
+
+msgid "Choose the funnel where cards from emails go."
+msgstr "Escolha o funil que recebe os cards criados a partir de e-mails."
+
+msgid "Leads from this source become cards in this funnel."
+msgstr "Os leads desta origem viram cards neste funil."
+
+msgid "Create card"
+msgstr "Criar card"
+
+msgid "Error creating card: {0}"
+msgstr "Erro ao criar o card: {0}"
+
+msgid "Pipeline"
+msgstr "Funil"

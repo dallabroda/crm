@@ -29,7 +29,9 @@
         </div>
         <Button
           :label="mode === 'edit' ? __('Preview') : __('Edit')"
-          @click="(mode = mode === 'edit' ? 'preview' : 'edit'), resetPreview()"
+          @click="
+            ((mode = mode === 'edit' ? 'preview' : 'edit'), resetPreview())
+          "
         >
           <template #prefix>
             <LucideEye v-if="mode === 'edit'" class="h-4 w-4" />
@@ -251,7 +253,7 @@
                       <span
                         class="flex-1 truncate text-base text-ink-gray-8"
                         :title="h.label"
-                        >{{ h.label }}</span
+                        >{{ __(h.label) }}</span
                       >
                       <div class="w-52 shrink-0">
                         <FormControl
@@ -319,7 +321,7 @@
                         <input
                           v-model="form.route"
                           class="min-w-0 flex-1 border-0 bg-transparent p-0 text-base text-ink-gray-8 placeholder:text-ink-gray-4 focus:outline-none focus:ring-0"
-                          @input="(routeEdited = true), markDirty()"
+                          @input="((routeEdited = true), markDirty())"
                         />
                       </div>
                     </div>
@@ -396,8 +398,8 @@
                         class="flex text-ink-gray-5 transition-colors hover:text-ink-gray-8"
                         :title="__('Copy link')"
                         @click="
-                          copyToClipboard(publicUrl),
-                            capture('form_embed_copied', { embed_type: 'link' })
+                          (copyToClipboard(publicUrl),
+                          capture('form_embed_copied', { embed_type: 'link' }))
                         "
                       >
                         <LucideCopy class="h-4 w-4" />
@@ -451,10 +453,10 @@
                         class="absolute right-2 top-2 flex text-ink-gray-5 transition-colors hover:text-ink-gray-8"
                         :title="__('Copy')"
                         @click="
-                          copyToClipboard(iframeSnippet),
-                            capture('form_embed_copied', {
-                              embed_type: 'iframe',
-                            })
+                          (copyToClipboard(iframeSnippet),
+                          capture('form_embed_copied', {
+                            embed_type: 'iframe',
+                          }))
                         "
                       >
                         <LucideCopy class="h-4 w-4" />
@@ -659,6 +661,8 @@
 </template>
 
 <script setup>
+import { pipelinesStore } from '@/stores/pipelines'
+import { storeToRefs } from 'pinia'
 import {
   Badge,
   Button,
@@ -803,6 +807,13 @@ function hiddenIsSelect(h) {
   return h.fieldtype === 'Select' || h.fieldtype === 'Link'
 }
 function hiddenSelectOptions(h) {
+  // The funnel a submission lands in (#70): its key is random, so list names
+  if (h.fieldtype === 'Link' && h.options === 'CRM Pipeline') {
+    return pipelines.value.map((p) => ({
+      label: __(p.pipeline_name),
+      value: p.name,
+    }))
+  }
   let opts = []
   if (h.fieldtype === 'Select') {
     opts = (h.options || '').split('\n').filter(Boolean)
@@ -813,6 +824,10 @@ function hiddenSelectOptions(h) {
   if (h.default && !opts.includes(h.default)) opts.unshift(h.default)
   return opts.map((o) => ({ label: o, value: o }))
 }
+
+const pipelineStore = pipelinesStore()
+const { pipelines } = storeToRefs(pipelineStore)
+pipelineStore.ensureLoaded()
 
 // cache of Link option lists (e.g. CRM Lead Status names) for hidden Link fields
 const linkOptions = reactive({})

@@ -163,12 +163,15 @@
       </div>
       <div
         v-if="!callLog?.data?._lead && !callLog?.data?._deal"
-        class="px-4 pb-7 pt-4 sm:px-6"
+        class="flex flex-col gap-3 px-4 pb-7 pt-4 sm:px-6"
       >
+        <!-- the call becomes a card in a funnel (#70) -->
+        <PipelineSelect v-model="callPipeline" />
         <Button
           class="w-full"
           variant="solid"
-          :label="__('Create Lead')"
+          :label="__('Create card')"
+          :disabled="!callPipeline"
           @click="createLead"
         />
       </div>
@@ -177,6 +180,7 @@
 </template>
 
 <script setup>
+import PipelineSelect from '@/components/Pipelines/PipelineSelect.vue'
 import EditIcon from '@/components/Icons/EditIcon.vue'
 import ArrowUpRightIcon from '@/components/Icons/ArrowUpRightIcon.vue'
 import DurationIcon from '@/components/Icons/DurationIcon.vue'
@@ -369,6 +373,7 @@ const detailFields = computed(() => {
 
 const d = ref({})
 const leadDetails = ref({})
+const callPipeline = ref('')
 
 async function createLead() {
   await d.value.triggerOnCreateLead?.(
@@ -377,18 +382,21 @@ async function createLead() {
     () => (show.value = false),
   )
 
+  // with a funnel the server returns the card created from the call (#70)
   call('crm.fcrm.doctype.crm_call_log.crm_call_log.create_lead_from_call_log', {
     call_log: callLog.value?.data,
     lead_details: leadDetails.value,
+    pipeline: callPipeline.value,
   })
     .then((d) => {
       if (d) {
-        router.push({ name: 'Lead', params: { leadId: d } })
+        show.value = false
+        router.push({ name: 'Deal', params: { dealId: d } })
       }
     })
     .catch((err) => {
       toast.error(
-        __('Error creating lead: {0}', [err.messages?.[0] || err.message]),
+        __('Error creating card: {0}', [err.messages?.[0] || err.message]),
       )
     })
 }
