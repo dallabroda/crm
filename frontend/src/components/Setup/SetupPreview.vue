@@ -17,7 +17,6 @@ const FX = ['shimmer', 'sheen', 'ripple', 'toast']
 
 const SCENES = {
   connect_email: 'email',
-  bring_leads: 'leads',
   invite_team: 'team',
 }
 

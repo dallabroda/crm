@@ -28,23 +28,20 @@
         />
         <div class="mt-8 flex min-h-[520px] flex-col">
           <Transition name="step" mode="out-in">
-            <KeepAlive include="SetupLeads">
-              <component
-                :is="activeStep.component"
-                ref="activeStepView"
-                :key="activeStep.name"
-                class="flex-1"
-                @done="completeStep"
-                @skip="skipStep"
-              />
-            </KeepAlive>
+            <component
+              :is="activeStep.component"
+              ref="activeStepView"
+              :key="activeStep.name"
+              class="flex-1"
+              @done="completeStep"
+              @skip="skipStep"
+            />
           </Transition>
         </div>
       </main>
-      <SetupTelemetryConsent class="mb-3" />
       <footer class="flex items-center gap-2 text-sm text-ink-gray-5">
         <CRMLogo class="size-4" />
-        Frappe CRM
+        Cred Hub
       </footer>
     </section>
     <SetupPreview
@@ -59,10 +56,7 @@
 import CRMLogo from '@/components/Icons/CRMLogo.vue'
 import SetupPreview from '@/components/Setup/SetupPreview.vue'
 import SetupEmail from '@/components/Setup/SetupEmail.vue'
-import SetupLeads from '@/components/Setup/SetupLeads.vue'
 import SetupInvite from '@/components/Setup/SetupInvite.vue'
-import SetupTelemetryConsent from '@/components/Setup/SetupTelemetryConsent.vue'
-import { setupFeedback } from '@/composables/modals'
 import { SETUP_DONE_KEY } from '@/router'
 import { globalStore } from '@/stores/global'
 import { Button, Progress, call, usePageMeta } from 'frappe-ui'
@@ -74,9 +68,10 @@ const router = useRouter()
 const { capture } = useTelemetry()
 const { $dialog } = globalStore()
 
+// Cred Hub: no "bring leads" step (cards live in funnels set up first) and
+// no telemetry consent (telemetry is always off in this fork)
 const steps = [
   { name: 'connect_email', component: markRaw(SetupEmail) },
-  { name: 'bring_leads', component: markRaw(SetupLeads) },
   { name: 'invite_team', component: markRaw(SetupInvite) },
 ]
 
@@ -153,7 +148,7 @@ function confirmSkipSetup() {
   $dialog({
     title: __('Skip setup?'),
     message: __(
-      "You won't see this guided setup again. You can still connect email, import leads and invite your team from Settings.",
+      "You won't see this guided setup again. You can still connect email and invite your team from Settings.",
     ),
     actions: [
       { label: __('Cancel'), onClick: ({ close }) => close() },
@@ -171,15 +166,10 @@ function confirmSkipSetup() {
 }
 
 async function finishSetup(skipped) {
-  setupFeedback.value = {
-    skipped_setup: skipped,
-    completed_steps: stepsWithStatus('completed'),
-    skipped_steps: stepsWithStatus('skipped'),
-  }
   capture('setup_finished', {
     skipped,
     duration_s: secondsSince(setupStartedAt),
-    steps_completed: setupFeedback.value.completed_steps.length,
+    steps_completed: stepsWithStatus('completed').length,
   })
   await markSetupDone()
   router.replace({ name: 'Home' })
@@ -199,7 +189,7 @@ async function markSetupDone() {
   }
 }
 
-usePageMeta(() => ({ title: __('Set up Frappe CRM') }))
+usePageMeta(() => ({ title: __('Set up Cred Hub') }))
 </script>
 
 <style scoped>

@@ -17,7 +17,7 @@
           <div
             class="url mx-auto flex h-6 w-60 items-center justify-center gap-1.5 rounded-full text-xs text-ink-gray-5"
           >
-            <LockIcon class="size-3" />acme.frappe.cloud
+            <LockIcon class="size-3" />acme.credtechdigital.com.br
           </div>
           <Sk w="14px" /><Sk w="14px" />
           <span class="loadbar absolute -bottom-px left-0 h-0.5" />
@@ -375,8 +375,8 @@ function onMove(event) {
   --st-pick: var(--surface-gray-3);
   --st-sheen: rgb(255 255 255 / 0.6);
   --st-glow: transparent;
-  --st-frag-shadow: 0 1px 2px rgb(0 0 0 / 0.04),
-    0 10px 24px -14px rgb(0 0 0 / 0.18);
+  --st-frag-shadow:
+    0 1px 2px rgb(0 0 0 / 0.04), 0 10px 24px -14px rgb(0 0 0 / 0.18);
   --st-win-shadow: 0 40px 80px -40px rgb(0 0 0 / 0.35);
   --sx: 50%;
   --sy: 40%;
@@ -386,7 +386,8 @@ function onMove(event) {
 /* Dark: translucent white hairlines and highlights so layers separate */
 :root[data-theme='dark'] .scene {
   --st-bg: color-mix(in oklch, var(--surface-base) 55%, black);
-  --st-win: linear-gradient(
+  --st-win:
+    linear-gradient(
       to bottom,
       rgb(255 255 255 / 0.045),
       rgb(255 255 255 / 0.015) 180px
@@ -403,8 +404,8 @@ function onMove(event) {
   --st-pick: rgb(255 255 255 / 0.08);
   --st-sheen: rgb(255 255 255 / 0.07);
   --st-glow: rgb(255 255 255 / 0.05);
-  --st-frag-shadow: 0 18px 36px -14px rgb(0 0 0 / 0.7),
-    0 2px 6px rgb(0 0 0 / 0.3);
+  --st-frag-shadow:
+    0 18px 36px -14px rgb(0 0 0 / 0.7), 0 2px 6px rgb(0 0 0 / 0.3);
   --st-win-shadow: 0 50px 100px -30px rgb(0 0 0 / 0.8);
 }
 

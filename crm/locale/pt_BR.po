@@ -3585,7 +3585,7 @@ msgstr ""
 #. Name of a Workspace
 #: crm/fcrm/workspace/frappe_crm/frappe_crm.json
 msgid "Frappe CRM"
-msgstr ""
+msgstr "Cred Hub"
 
 #: frontend/src/components/Layouts/AppSidebar.vue:638
 msgid "Frappe CRM mobile"
@@ -3827,7 +3827,7 @@ msgstr ""
 
 #: frontend/src/pages/PersonaForm.vue:108
 msgid "How many people will use Frappe CRM?"
-msgstr ""
+msgstr "Quantas pessoas vão usar o Cred Hub?"
 
 #. Description of the 'Timeline Timestamp Format' (Select) field in DocType
 #. 'FCRM Settings'
@@ -8109,7 +8109,7 @@ msgstr ""
 
 #: frontend/src/components/SalesHierarchyBanner.vue:20
 msgid "We are changing how permissions work in Frappe CRM"
-msgstr ""
+msgstr "Estamos mudando como as permissões funcionam no Cred Hub"
 
 #: frontend/src/components/Layouts/AppSidebar.vue:593
 msgid "Web Form"
@@ -8167,7 +8167,7 @@ msgstr ""
 
 #: frontend/src/pages/PersonaForm.vue:132
 msgid "Welcome to Frappe CRM"
-msgstr ""
+msgstr "Boas-vindas ao Cred Hub"
 
 #: frontend/src/pages/Welcome.vue:4
 msgid "Welcome {0}, lets add your first lead"
@@ -8319,7 +8319,7 @@ msgstr ""
 
 #: crm/www/crm.py:18
 msgid "You do not have permission to access Frappe CRM"
-msgstr ""
+msgstr "Você não tem permissão para acessar o Cred Hub"
 
 #: frontend/src/data/document.js:45
 msgid "You do not have permission to access this document"
@@ -9204,3 +9204,24 @@ msgstr "Erro ao criar o card: {0}"
 
 msgid "Pipeline"
 msgstr "Funil"
+
+msgid "Free software under the AGPL-3.0 license, built on open source projects (credits in the source code)."
+msgstr "Software livre sob a licença AGPL-3.0, construído sobre projetos de código aberto (créditos no código-fonte)."
+
+msgid "Source code (AGPL-3.0)"
+msgstr "Código-fonte (AGPL-3.0)"
+
+msgid "Connect ERPNext to Cred Hub"
+msgstr "Conectar o ERPNext ao Cred Hub"
+
+msgid "Set up Cred Hub"
+msgstr "Configurar o Cred Hub"
+
+msgid "Pull replies into card timelines"
+msgstr "Trazer as respostas para a linha do tempo dos cards"
+
+msgid "You won't see this guided setup again. You can still connect email and invite your team from Settings."
+msgstr "Você não verá esta configuração guiada de novo. Ainda dá para conectar o e-mail e convidar a equipe em Configurações."
+
+msgid "You do not have enough permissions to access Cred Hub. Please contact your administrator if you believe this is an error."
+msgstr "Você não tem permissão para acessar o Cred Hub. Fale com o administrador se achar que isto é um erro."

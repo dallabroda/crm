@@ -1,18 +1,32 @@
 <template>
+  <!-- Cred Hub: marca "C" da CredTech (mesma geometria de crm/public/images/logo.svg) -->
   <svg
     width="300"
     height="300"
-    viewBox="0 0 300 300"
+    viewBox="0 0 512 512"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
+    role="img"
+    aria-label="Cred Hub"
   >
-    <path
-      d="M214.286 0H85.7143C38.3756 0 0 38.3756 0 85.7143V214.286C0 261.624 38.3756 300 85.7143 300H214.286C261.624 300 300 261.624 300 214.286V85.7143C300 38.3756 261.624 0 214.286 0Z"
-      fill="#EF0BF5"
-    />
-    <path
-      d="M64.2141 90.301V111.862H214.339V140.214L160.187 193.146V208.993L139.705 208.885V193.146L85.6605 140.214H64.2141V149.269L118.259 202.202V230.23L181.634 230.769V202.202L235.786 149.269V90.301H64.2141Z"
-      fill="white"
-    />
+    <defs>
+      <mask :id="maskId">
+        <rect width="512" height="512" fill="black" />
+        <g transform="translate(12.8 12.8) scale(0.95)">
+          <path
+            fill="white"
+            fill-rule="evenodd"
+            d="M66 256a147 147 0 1 0 294 0a147 147 0 1 0 -294 0Z M149 256a147 147 0 1 0 294 0a147 147 0 1 0 -294 0Z"
+          />
+          <rect x="345" y="208" width="167" height="90" fill="black" />
+        </g>
+      </mask>
+    </defs>
+    <rect width="512" height="512" rx="112" fill="#111111" />
+    <rect width="512" height="512" fill="#ffffff" :mask="`url(#${maskId})`" />
   </svg>
 </template>
+<script setup>
+// one mask id per instance: the logo can appear several times on a page
+const maskId = `credhub-c-${Math.random().toString(36).slice(2, 8)}`
+</script>
