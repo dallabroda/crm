@@ -109,16 +109,6 @@
                 :model-value="stage.color"
                 @update:model-value="(v) => (stage.color = v)"
               />
-              <FormControl
-                class="w-20"
-                type="number"
-                :model-value="stage.probability"
-                :disabled="!canManage"
-                :placeholder="'%'"
-                @update:model-value="
-                  (v) => (stage.probability = Number(v) || 0)
-                "
-              />
               <Button
                 v-if="canManage"
                 variant="ghost"
@@ -426,7 +416,6 @@ function addStage() {
     deal_status: '',
     type: form.stages.length ? 'Ongoing' : 'Open',
     color: colors[form.stages.length % colors.length],
-    probability: 0,
   })
 }
 
@@ -498,7 +487,6 @@ function payload() {
       deal_status: s.deal_status.trim(),
       type: s.type,
       color: s.color,
-      probability: s.probability || 0,
     })),
     members: form.members.map((m) => ({ user: m.user, role: m.role })),
     // in order; position = order (crm.api.pipeline.save_pipeline)
