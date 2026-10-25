@@ -1213,7 +1213,7 @@ def label_stages(rows: list[dict], key: str = "stage") -> list[dict]:
 	pipeline_names = dict(frappe.get_all("CRM Pipeline", ["name", "pipeline_name"], as_list=True))
 	prefix = len(pipeline_names) > 1
 	labels = {
-		stage.name: f"{pipeline_names.get(stage.pipeline, '')} · {_(stage.deal_status)}"
+		stage.name: f"{_(pipeline_names.get(stage.pipeline, ''))} · {_(stage.deal_status)}"
 		if prefix
 		else _(stage.deal_status)
 		for stage in stages
