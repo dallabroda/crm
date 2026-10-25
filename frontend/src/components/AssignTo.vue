@@ -18,6 +18,7 @@
         :doctype="doctype"
         :open="open"
         :onUpdate="ownerField && saveAssignees"
+        :allowedUsers="allowedUsers"
       />
     </template>
   </Popover>
@@ -32,6 +33,7 @@ import { computed } from 'vue'
 const props = defineProps({
   doctype: { type: String, default: '' },
   docname: { type: String, default: '' },
+  allowedUsers: { type: Array, default: null },
 })
 
 const { document } = useDocument(props.doctype, props.docname)

@@ -22,7 +22,12 @@
         :website="doc.website"
         @done="onEnriched"
       />
-      <AssignTo v-model="assignees.data" doctype="CRM Deal" :docname="dealId" />
+      <AssignTo
+        v-model="assignees.data"
+        doctype="CRM Deal"
+        :docname="dealId"
+        :allowedUsers="assignableUsers"
+      />
       <Button
         v-if="doc.pipeline && pipelines.length > 1"
         :label="__('Move to another funnel')"
@@ -389,6 +394,7 @@ import MissingFieldsModal from '@/components/Modals/MissingFieldsModal.vue'
 import ChangePipelineModal from '@/components/Modals/ChangePipelineModal.vue'
 import { pipelinesStore } from '@/stores/pipelines'
 import { applyStageRules } from '@/utils/pipelines'
+import { parseLinkFilters } from '@/utils/fieldTransforms'
 import { storeToRefs } from 'pinia'
 import AssignTo from '@/components/AssignTo.vue'
 import FilesUploader from '@/components/FilesUploader/FilesUploader.vue'
@@ -1067,8 +1073,55 @@ watch(
   { immediate: true },
 )
 
+// Owner and assignees must take part in the card's funnel (#68): members + admins
+const assignableUsers = ref(null)
+watch(
+  () => doc.value.pipeline,
+  async (pipeline) => {
+    try {
+      assignableUsers.value = await pipelineStore.assignableUsers(pipeline)
+    } catch (e) {
+      // the server still refuses outsiders; the full list is only a weaker hint
+      assignableUsers.value = null
+      console.error('[pipelines] could not load the funnel members', e)
+    }
+  },
+  { immediate: true },
+)
+
+// Narrow the owner field to the funnel's people, keeping the filters the side
+// panel already put there (CRM users, ignore_user_type)
+function restrictOwner(sections, allowed) {
+  if (!allowed || !sections) return sections
+  return sections.map((section) =>
+    section.columns
+      ? {
+          ...section,
+          columns: section.columns.map((column) => ({
+            ...column,
+            fields: (column.fields || []).map((field) =>
+              field?.fieldname === 'deal_owner'
+                ? {
+                    ...field,
+                    link_filters: JSON.stringify({
+                      ...(parseLinkFilters(field.link_filters) || {}),
+                      ignore_user_type: 1,
+                      name: ['in', allowed],
+                    }),
+                  }
+                : field,
+            ),
+          })),
+        }
+      : section,
+  )
+}
+
 const visibleSections = computed(() =>
-  applyStageRules(sections.data, stageRules.value),
+  restrictOwner(
+    applyStageRules(sections.data, stageRules.value),
+    assignableUsers.value,
+  ),
 )
 
 // A stage change the server rejects for empty required fields asks for them

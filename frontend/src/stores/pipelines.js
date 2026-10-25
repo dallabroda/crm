@@ -93,6 +93,8 @@ export const pipelinesStore = defineStore('crm-pipelines', () => {
 
   function reload() {
     loading = null
+    assignableCache = {}
+    pipelineUsers = null
     return fetch()
   }
 
@@ -121,6 +123,28 @@ export const pipelinesStore = defineStore('crm-pipelines', () => {
     return label ? __(label) : stageKey
   }
 
+  // Who can own or be assigned a card of a funnel: its members and the admins
+  // (crm.permissions.pipeline). Cached per funnel; reload() clears it.
+  let assignableCache = {}
+  let pipelineUsers = null
+  async function assignableUsers(pipeline) {
+    if (!pipeline) return null
+    assignableCache[pipeline] ||= (async () => {
+      pipelineUsers ||= apiCall('get_pipeline_users')
+      let [config, users] = await Promise.all([
+        apiCall('get_pipeline_config', { pipeline }),
+        pipelineUsers,
+      ])
+      let names = new Set((config?.members || []).map((m) => m.user))
+      for (let u of users?.users || []) if (u.is_admin) names.add(u.name)
+      return [...names]
+    })().catch((e) => {
+      delete assignableCache[pipeline]
+      throw e
+    })
+    return assignableCache[pipeline]
+  }
+
   function setCurrentPipeline(name) {
     if (usingMocks.value) mockModule?.setMockPipeline(name)
   }
@@ -136,6 +160,7 @@ export const pipelinesStore = defineStore('crm-pipelines', () => {
     getStage,
     stageLabel,
     setCurrentPipeline,
+    assignableUsers,
     apiCall,
   }
 })
