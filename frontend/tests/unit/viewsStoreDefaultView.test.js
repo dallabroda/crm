@@ -43,11 +43,20 @@ describe('viewsStore.getDefaultView', () => {
   it('picks the home default by fixed route priority, not response order', async () => {
     const store = await storeWithViews([
       defaultView('Tasks', 'My Tasks'),
+      defaultView('Contacts', 'My Contacts'),
       defaultView('Deals', 'My Deals'),
-      defaultView('Leads', 'My Leads'),
     ])
 
-    expect(store.getDefaultView().name).toBe('My Leads')
+    expect(store.getDefaultView().name).toBe('My Deals')
+  })
+
+  it('does not prefer a Leads default over the funnels (Cred Hub #72)', async () => {
+    const store = await storeWithViews([
+      defaultView('Leads', 'My Leads'),
+      defaultView('Deals', 'My Deals'),
+    ])
+
+    expect(store.getDefaultView().name).toBe('My Deals')
   })
 
   it('falls back to sorted custom routes when no known route has a default', async () => {
