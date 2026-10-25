@@ -7,6 +7,7 @@ from frappe.query_builder.functions import Avg, Coalesce, Count, Date, DateForma
 from pypika.functions import Function
 
 from crm.fcrm.doctype.crm_dashboard.crm_dashboard import create_default_manager_dashboard
+from crm.permissions.pipeline import is_admin
 from crm.utils import sales_user_only
 
 
@@ -33,11 +34,9 @@ def get_dashboard(from_date: str | None = None, to_date: str | None = None, user
 		from_date = frappe.utils.get_first_day(from_date or frappe.utils.nowdate())
 		to_date = frappe.utils.get_last_day(to_date or frappe.utils.nowdate())
 
-	roles = frappe.get_roles(frappe.session.user)
-	is_sales_manager = "Sales Manager" in roles or "System Manager" in roles
-	is_sales_user = "Sales User" in roles and not is_sales_manager
-
-	if is_sales_user:
+	# These queries bypass list permissions: anyone who is not an admin (see crm.permissions.pipeline)
+	# only gets their own numbers, whatever `user` they ask for
+	if not is_admin():
 		user = frappe.session.user
 
 	dashboard = frappe.db.exists("CRM Dashboard", "Manager Dashboard")
@@ -73,11 +72,9 @@ def get_chart(
 		from_date = frappe.utils.get_first_day(from_date or frappe.utils.nowdate())
 		to_date = frappe.utils.get_last_day(to_date or frappe.utils.nowdate())
 
-	roles = frappe.get_roles(frappe.session.user)
-	is_sales_manager = "Sales Manager" in roles or "System Manager" in roles
-	is_sales_user = "Sales User" in roles and not is_sales_manager
-
-	if is_sales_user:
+	# These queries bypass list permissions: anyone who is not an admin (see crm.permissions.pipeline)
+	# only gets their own numbers, whatever `user` they ask for
+	if not is_admin():
 		user = frappe.session.user
 
 	method_name = f"get_{name}"

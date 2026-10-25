@@ -5,12 +5,13 @@ import frappe
 from frappe.utils.nestedset import rebuild_tree
 
 from crm.api.activities import get_activities
+from crm.fcrm.doctype.crm_pipeline.crm_pipeline import add_members, get_default_pipeline
 from crm.permissions.org_hierarchy import (
 	get_lead_permission_query_conditions,
-	has_deal_permission,
 	has_lead_permission,
 	hierarchy_enabled,
 )
+from crm.permissions.pipeline import has_deal_permission
 from crm.tests import CRMTestCase as FrappeTestCase
 
 TEST_USERS = ("manager@hier.test", "rep1@hier.test", "rep2@hier.test", "outsider@hier.test")
@@ -40,6 +41,9 @@ class TestOrgHierarchy(FrappeTestCase):
 		make_hierarchy_node("rep2@hier.test", reports_to=mgr.name)
 		rebuild_tree("CRM Sales Hierarchy")
 
+		# Cards are only visible inside pipelines the user belongs to
+		add_members(get_default_pipeline(), list(TEST_USERS))
+
 		settings = frappe.get_single("FCRM Settings")
 		settings.enable_sales_hierarchy = 1
 		settings.save(ignore_permissions=True)
@@ -54,6 +58,7 @@ class TestOrgHierarchy(FrappeTestCase):
 		delete_test_documents()
 		for email in TEST_USERS:
 			frappe.db.delete("CRM Sales Hierarchy", {"user": email})
+			frappe.db.delete("CRM Pipeline Member", {"user": email})
 			frappe.delete_doc("User", email, force=True, ignore_permissions=True)
 		frappe.db.commit()  # nosemgrep: persist teardown cleanup of committed fixtures
 		super().tearDownClass()

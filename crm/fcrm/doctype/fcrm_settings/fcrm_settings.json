@@ -29,8 +29,7 @@
   "favicon",
   "dropdown_items_tab",
   "dropdown_items",
-  "setup_completed",
-  "entry_pipeline"
+  "setup_completed"
  ],
  "fields": [
   {
@@ -185,19 +184,12 @@
    "fieldtype": "Check",
    "hidden": 1,
    "label": "Setup Completed"
-  },
-  {
-   "description": "Pipeline that receives cards created automatically (WhatsApp, ads, web forms).",
-   "fieldname": "entry_pipeline",
-   "fieldtype": "Link",
-   "label": "Entry Pipeline",
-   "options": "CRM Pipeline"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-10-24 20:00:00.000000",
+ "modified": "2026-10-24 23:00:00.000000",
  "modified_by": "Administrator",
  "module": "FCRM",
  "name": "FCRM Settings",

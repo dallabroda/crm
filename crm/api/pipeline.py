@@ -11,25 +11,11 @@ import frappe
 from frappe import _
 
 from crm.fcrm.doctype.crm_pipeline.crm_pipeline import get_first_stage
+from crm.permissions.pipeline import PIPELINE_OWNER_ROLE, get_role_in_pipeline, is_admin
 
-ADMIN_ROLES = ("System Manager", "Sales Manager")
+CRM_ROLES = ("Sales User", "Sales Manager", "System Manager")
 STAGE_FIELDS = ("name", "deal_status", "color", "type", "position", "probability")
 STAGE_TYPES = ("Open", "Ongoing", "On Hold", "Won", "Lost")
-
-
-def is_admin(user: str | None = None) -> bool:
-	user = user or frappe.session.user
-	return user == "Administrator" or bool(set(frappe.get_roles(user)) & set(ADMIN_ROLES))
-
-
-def get_role_in_pipeline(pipeline: str, user: str | None = None) -> str | None:
-	"""Admin, Owner or Member; None when the user does not take part in the pipeline."""
-	user = user or frappe.session.user
-	if is_admin(user):
-		return "Admin"
-	return frappe.db.get_value(
-		"CRM Pipeline Member", {"parenttype": "CRM Pipeline", "parent": pipeline, "user": user}, "role"
-	)
 
 
 def _stages(pipeline: str) -> list[dict]:
@@ -117,8 +103,8 @@ def save_pipeline(doc: str | dict) -> dict:
 		_assert_can_manage(data.name)
 		pipeline = frappe.get_doc("CRM Pipeline", data.name)
 	else:
-		if not frappe.has_permission("CRM Pipeline", "create"):
-			frappe.throw(_("You are not allowed to create pipelines."), frappe.PermissionError)
+		if not is_admin() and PIPELINE_OWNER_ROLE not in frappe.get_roles():
+			frappe.throw(_("Only pipeline owners can create pipelines."), frappe.PermissionError)
 		pipeline = frappe.new_doc("CRM Pipeline")
 
 	for key in ("pipeline_name", "color", "icon", "position", "is_active"):
@@ -203,6 +189,64 @@ def _save_stages(pipeline: str, stages: list[dict]):
 				)
 			)
 		frappe.delete_doc("CRM Deal Status", name, ignore_permissions=True)
+
+
+@frappe.whitelist()
+def get_pipeline_users() -> dict:
+	"""Active CRM users for the pipeline members screen, with who may own pipelines."""
+	frappe.only_for(CRM_ROLES)
+	users = frappe.get_all(
+		"User",
+		{
+			"enabled": 1,
+			"name": ("not in", ("Administrator", "Guest")),
+			"user_type": "System User",
+		},
+		["name", "full_name", "user_image"],
+		order_by="full_name asc",
+	)
+	result = []
+	for user in users:
+		roles = set(frappe.get_roles(user.name))
+		if not roles & set(CRM_ROLES):
+			continue
+		admin = is_admin(user.name)
+		result.append(
+			{
+				**user,
+				"pipeline_owner": int(admin or PIPELINE_OWNER_ROLE in roles),
+				"is_admin": int(admin),
+			}
+		)
+	return {
+		"can_create": int(is_admin() or PIPELINE_OWNER_ROLE in frappe.get_roles()),
+		"is_admin": int(is_admin()),
+		"users": result,
+	}
+
+
+@frappe.whitelist()
+def set_pipeline_owner_role(user: str, enabled: bool) -> dict:
+	"""Give or take the global Pipeline Owner role (create pipelines, be an owner). Admins only."""
+	if not is_admin():
+		frappe.throw(_("Only admins can change who owns pipelines."), frappe.PermissionError)
+	doc = frappe.get_doc("User", user)
+	# Sales Managers manage this role without having write access to User itself
+	doc.flags.ignore_permissions = True
+	if frappe.utils.sbool(enabled):
+		doc.add_roles(PIPELINE_OWNER_ROLE)
+	else:
+		owned = frappe.get_all(
+			"CRM Pipeline Member",
+			{"parenttype": "CRM Pipeline", "user": user, "role": "Owner"},
+			pluck="parent",
+		)
+		if owned:
+			frappe.throw(
+				_("{0} still owns pipelines. Change them to member first.").format(frappe.bold(user))
+			)
+		doc.remove_roles(PIPELINE_OWNER_ROLE)
+	return {"user": user, "pipeline_owner": PIPELINE_OWNER_ROLE in frappe.get_roles(user)}
 
 
 @frappe.whitelist()

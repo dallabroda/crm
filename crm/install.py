@@ -19,6 +19,7 @@ def after_install(force=False):
 	add_default_lead_statuses()
 	add_default_deal_statuses()
 	add_pipeline_indexes()
+	add_pipeline_owner_role()
 	add_default_communication_statuses()
 	add_default_fields_layout(force)
 	add_property_setter()
@@ -156,6 +157,14 @@ def add_default_deal_statuses():
 def add_pipeline_indexes():
 	# Kanban and lists filter cards by pipeline and group them by stage
 	frappe.db.add_index("CRM Deal", ["pipeline", "status"])
+
+
+def add_pipeline_owner_role():
+	"""Global role that lets a user create pipelines and be an owner of them."""
+	if not frappe.db.exists("Role", "Pipeline Owner"):
+		frappe.get_doc({"doctype": "Role", "role_name": "Pipeline Owner", "desk_access": 0}).insert(
+			ignore_permissions=True
+		)
 
 
 def add_default_pipeline() -> str:

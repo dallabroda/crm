@@ -24,6 +24,7 @@ def before_tests():
 		ensure_erpnext_fixtures()
 
 	load_crm_user_test_records()
+	add_test_users_to_default_pipeline()
 
 
 def ensure_erpnext_fixtures():
@@ -39,6 +40,18 @@ def ensure_erpnext_fixtures():
 	# by install_fixtures above), so set the default directly.
 	if not frappe.db.get_default("stock_uom"):
 		frappe.db.set_default("stock_uom", "Nos")
+
+
+def add_test_users_to_default_pipeline():
+	"""Cards only accept owners and assignees who take part in the pipeline."""
+	from crm.fcrm.doctype.crm_pipeline.crm_pipeline import add_members
+
+	pipeline = frappe.get_all("CRM Pipeline", pluck="name", order_by="position asc, creation asc", limit=1)
+	test_records_path = os.path.join(os.path.dirname(__file__), "test_records.json")
+	if pipeline and os.path.exists(test_records_path):
+		with open(test_records_path) as f:
+			emails = [r["email"] for r in json.load(f) if r.get("doctype") == "User"]
+		add_members(pipeline[0], [e for e in emails if frappe.db.exists("User", e)])
 
 
 def load_crm_user_test_records():

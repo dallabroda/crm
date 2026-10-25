@@ -102,6 +102,13 @@
    "read": 1,
    "report": 1,
    "role": "Sales User"
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Pipeline Owner",
+   "write": 1
   }
  ],
  "row_format": "Dynamic",

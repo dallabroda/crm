@@ -84,6 +84,10 @@ def delete_demo_users(demo_user_emails):
 	# collect contact names before deleting users — User.on_trash NULLs contact.user
 	contact_names = frappe.get_all("Contact", filters={"user": ["in", demo_user_emails]}, pluck="name")
 
+	# pipeline memberships reference the users; deleting with force would leave them dangling
+	Member = DocType("CRM Pipeline Member")
+	frappe.qb.from_(Member).delete().where(Member.user.isin(demo_user_emails)).run()
+
 	for email in demo_user_emails:
 		if frappe.db.exists("User", email):
 			frappe.delete_doc("User", email, ignore_permissions=True, force=True)
