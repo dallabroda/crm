@@ -10842,3 +10842,7 @@ msgstr "Realizado"
 #: frontend/src/components/Settings/DashboardSettings.vue
 msgid "Makes \"Expected Closure Date\" and \"Deal Value\" mandatory for deal value forecasting"
 msgstr "Torna obrigatórios a \"Data prevista de fechamento\" e o \"Valor do card\" para a previsão do valor dos cards"
+
+#: crm/fcrm/doctype/crm_deal/crm_deal.json
+msgid "Filled with the products total when the card has products."
+msgstr "Preenchido com o total dos produtos quando o card tem produtos."
