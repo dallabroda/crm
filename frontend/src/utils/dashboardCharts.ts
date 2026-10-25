@@ -19,6 +19,8 @@ interface ValueAxisConfig {
 
 interface SeriesConfig {
   name: string
+  // Display name, already translated by the server; `name` stays the data key
+  label?: string
   type: 'bar' | 'line' | 'area'
   color?: string
   axis?: 'y' | 'y2'
@@ -58,6 +60,7 @@ export interface DonutChartConfig {
   valueColumn: string
   maxSliceCount?: number
   showInlineLabels?: boolean
+  centerLabel?: string
   echartOptions?: Row
 }
 
@@ -75,14 +78,36 @@ export function toNumberCardProps(config: NumberChartConfig): NumberCardProps {
   return props
 }
 
+// Same as frappe-ui's default; the chart's own "Others" slice is not translatable, so the tail
+// is grouped here first, under a translated name, and the chart never needs to group it again.
+const DONUT_MAX_SLICES = 9
+
+function groupDonutTail(config: DonutChartConfig): Row[] {
+  const { categoryColumn: category, valueColumn: value } = config
+  const max = Math.max(2, config.maxSliceCount ?? DONUT_MAX_SLICES)
+  const rows = (config.data || [])
+    .filter((row) => Number(row[value]) >= 0)
+    .sort((a, b) => Number(b[value]) - Number(a[value]))
+  if (rows.length <= max) return rows
+  const others = rows
+    .slice(max - 1)
+    .reduce((sum, row) => sum + Number(row[value]), 0)
+  return [
+    ...rows.slice(0, max - 1),
+    { [category]: __('Others'), [value]: others },
+  ]
+}
+
 export function toDonutChartProps(config: DonutChartConfig): DonutChartProps {
   return {
     title: config.title,
     subtitle: config.subtitle,
-    data: config.data || [],
+    data: groupDonutTail(config),
     category: config.categoryColumn,
     value: config.valueColumn,
     maxSlices: config.maxSliceCount,
+    // Without it the ring's middle reads the value column's key ("Count")
+    centerLabel: config.centerLabel ?? __('Total'),
     showDataLabels: config.showInlineLabels,
     palette: config.colors,
     echartOptions: config.echartOptions,
@@ -114,6 +139,7 @@ export function toAxisChartProps(config: AxisChartConfig): BarChartProps {
   const seriesConfig: Record<string, SeriesStyle> = {}
   series.forEach((s, i) => {
     seriesConfig[s.name] = {
+      label: s.label,
       type: s.type,
       color: s.color || config.colors?.[i],
       showDataLabels: s.showDataLabels,
