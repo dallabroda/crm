@@ -3129,7 +3129,7 @@ msgstr "Editor"
 #. Label of the email (Data) field in DocType 'CRM Lead'
 #: crm/domain_enrichment/mapper.py:39 crm/fcrm/doctype/crm_contacts/crm_contacts.json:39 crm/fcrm/doctype/crm_invitation/crm_invitation.json:22 crm/fcrm/doctype/crm_lead/crm_lead.json:133 frontend/src/components/Activities/ActivityHeader.vue:113 frontend/src/components/Settings/Profile/UserEmailSettings.vue:67 frontend/src/components/Settings/Settings.vue:198 frontend/src/pages/Contact.vue:431 frontend/src/pages/MobileContact.vue:386 frontend/src/pages/MobileOrganization.vue:471 frontend/src/pages/MobileOrganization.vue:499 frontend/src/pages/Organization.vue:567 frontend/src/pages/Organization.vue:595
 msgid "Email"
-msgstr "E-Mail\n"
+msgstr "E-mail"
 
 #: frontend/src/components/Settings/Profile/UserEmailSettings.vue:66
 msgid "Email Account"
