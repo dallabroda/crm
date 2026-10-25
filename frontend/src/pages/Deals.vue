@@ -291,12 +291,8 @@ const router = useRouter()
 
 // Funnel (#72): ?pipeline=<name>, defaulting to the first one the user can see
 const pipelineStore = pipelinesStore()
-const {
-  pipelines,
-  loaded: pipelinesLoaded,
-  usingMocks: pipelinesMocked,
-} = storeToRefs(pipelineStore)
-const { getPipeline, stageLabel, setCurrentPipeline } = pipelineStore
+const { pipelines, loaded: pipelinesLoaded } = storeToRefs(pipelineStore)
+const { getPipeline, stageLabel } = pipelineStore
 pipelineStore.ensureLoaded()
 
 const pipeline = computed(
@@ -305,11 +301,8 @@ const pipeline = computed(
 const pipelineName = computed(() => pipeline.value?.name || '')
 const pipelinesReady = computed(() => pipelinesLoaded.value)
 
-// The mock backend (development only) has no CRM Deal.pipeline column to filter on
 const pipelineFilters = computed(() =>
-  pipelineName.value && !pipelinesMocked.value
-    ? { pipeline: pipelineName.value }
-    : {},
+  pipelineName.value ? { pipeline: pipelineName.value } : {},
 )
 
 const pipelineColumns = computed(() =>
@@ -324,7 +317,6 @@ const pipelineColumns = computed(() =>
 watch(
   [pipelineName, () => route.query.pipeline],
   ([name, inUrl]) => {
-    setCurrentPipeline(name)
     if (route.name === 'Deals' && name && inUrl !== name) {
       router.replace({
         name: route.name,

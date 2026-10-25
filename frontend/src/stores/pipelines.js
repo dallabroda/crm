@@ -5,21 +5,9 @@ import { ref, computed } from 'vue'
 
 const API = 'crm.api.pipeline.'
 
-// While the server side of the funnels (#67–#69) is not merged, development
-// builds fall back to src/data/pipelineMocks.js. Production builds always talk
-// to the server: import.meta.env.DEV is false there, so the mock module is
-// dropped from the bundle.
-let mockModule = null
-async function loadMocks() {
-  if (!import.meta.env.DEV) return null
-  mockModule ||= await import('@/data/pipelineMocks.js')
-  return mockModule
-}
-
 export const pipelinesStore = defineStore('crm-pipelines', () => {
   const pipelines = ref([])
   const loaded = ref(false)
-  const usingMocks = ref(false)
   let loading = null
 
   // stage key (CRM Deal Status name) -> { ...stage, pipeline }
@@ -33,26 +21,8 @@ export const pipelinesStore = defineStore('crm-pipelines', () => {
     return map
   })
 
-  async function apiCall(method, args = {}) {
-    if (usingMocks.value) {
-      let mocks = await loadMocks()
-      return mocks.mockCall(method, args)
-    }
-    try {
-      return await call(API + method, args)
-    } catch (error) {
-      // Development only: functions that the server side has not merged yet
-      // (e.g. get_stage_rules before #69) fall back to the mock one by one.
-      let mocks = isMissingMethod(error) ? await loadMocks() : null
-      if (!mocks) throw error
-      console.warn(`[pipelines] ${method} not on the server yet, using mock`)
-      return mocks.mockCall(method, args)
-    }
-  }
-
-  function isMissingMethod(error) {
-    let text = [error?.message, ...(error?.messages || [])].join(' ')
-    return /Failed to get method|has no attribute|No module named/.test(text)
+  function apiCall(method, args = {}) {
+    return call(API + method, args)
   }
 
   function normalize(list) {
@@ -69,16 +39,11 @@ export const pipelinesStore = defineStore('crm-pipelines', () => {
   function fetch() {
     loading = (async () => {
       try {
-        pipelines.value = normalize(await call(API + 'get_pipelines'))
+        pipelines.value = normalize(await apiCall('get_pipelines'))
       } catch (error) {
-        let mocks = await loadMocks()
-        if (!mocks) throw error
-        console.warn(
-          '[pipelines] server API unavailable, using mock data',
-          error,
-        )
-        usingMocks.value = true
-        pipelines.value = normalize(await mocks.mockCall('get_pipelines'))
+        // without funnels the menu and Kanban stay empty; nothing else to do here
+        console.error('[pipelines] could not load the funnels', error)
+        pipelines.value = []
       } finally {
         loaded.value = true
       }
@@ -106,8 +71,7 @@ export const pipelinesStore = defineStore('crm-pipelines', () => {
 
   const defaultPipeline = computed(() => pipelines.value[0] || null)
 
-  // Real stage keys are unique across funnels; passing the funnel still matters
-  // for the mocks, which reuse the default status names in every funnel.
+  // Stage keys are unique across funnels; with the funnel the lookup is direct
   function getStage(stageKey, pipeline = null) {
     if (pipeline) {
       let s = getPipeline(pipeline)?.stages.find((s) => s.name === stageKey)
@@ -179,21 +143,15 @@ export const pipelinesStore = defineStore('crm-pipelines', () => {
     return assignableCache[pipeline]
   }
 
-  function setCurrentPipeline(name) {
-    if (usingMocks.value) mockModule?.setMockPipeline(name)
-  }
-
   return {
     pipelines,
     loaded,
-    usingMocks,
     defaultPipeline,
     ensureLoaded,
     reload,
     getPipeline,
     getStage,
     stageLabel,
-    setCurrentPipeline,
     assignableUsers,
     fieldSetup,
     apiCall,
