@@ -160,10 +160,19 @@ def _save_stages(pipeline: str, stages: list[dict]):
 	# Renames are applied one by one, so swapping two names would collide midway: park renamed stages
 	# under their (unique) key first
 	for stage in stages:
-		if stage.get("name") and stage.get("deal_status"):
-			current = frappe.db.get_value("CRM Deal Status", stage["name"], "deal_status")
-			if current is not None and current != stage["deal_status"].strip():
-				frappe.db.set_value("CRM Deal Status", stage["name"], "deal_status", stage["name"])
+		if not stage.get("name"):
+			continue
+		current = frappe.db.get_value(
+			"CRM Deal Status", stage["name"], ["pipeline", "deal_status"], as_dict=True
+		)
+		if not current:
+			frappe.throw(
+				_("Stage {0} not found.").format(frappe.bold(stage["name"])), frappe.DoesNotExistError
+			)
+		if current.pipeline != pipeline:
+			frappe.throw(_("Stage {0} belongs to another pipeline.").format(frappe.bold(current.deal_status)))
+		if stage.get("deal_status") and current.deal_status != stage["deal_status"].strip():
+			frappe.db.set_value("CRM Deal Status", stage["name"], "deal_status", stage["name"])
 	keep = set()
 	for position, stage in enumerate(stages, start=1):
 		stage = frappe._dict(stage)
