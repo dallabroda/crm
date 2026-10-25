@@ -53,6 +53,25 @@
             v-if="hasOrganizationSections || hasContactSections"
             class="h-px w-full border-t my-5"
           />
+          <div
+            v-if="usePipelines"
+            class="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-3"
+          >
+            <FormControl
+              type="select"
+              :label="__('Funnel')"
+              :options="pipelineOptions"
+              :model-value="deal.doc.pipeline"
+              @update:model-value="selectPipeline"
+            />
+            <FormControl
+              type="select"
+              :label="__('Stage')"
+              :options="stageOptions"
+              :model-value="deal.doc.status"
+              @update:model-value="(v) => (deal.doc.status = v)"
+            />
+          </div>
           <FieldLayout
             v-if="tabs.data?.length"
             :tabs="tabs.data"
@@ -81,11 +100,13 @@ import EditIcon from '@/components/Icons/EditIcon.vue'
 import FieldLayout from '@/components/FieldLayout/FieldLayout.vue'
 import { usersStore } from '@/stores/users'
 import { statusesStore } from '@/stores/statuses'
+import { pipelinesStore } from '@/stores/pipelines'
+import { storeToRefs } from 'pinia'
 import { isMobileView } from '@/composables/settings'
 import { showQuickEntryModal, quickEntryProps } from '@/composables/modals'
 import { useDocument } from '@/data/document'
 import { useTelemetry } from '@framework/ui/telemetry'
-import { Dialog, Switch, createResource } from 'frappe-ui'
+import { Dialog, FormControl, Switch, createResource } from 'frappe-ui'
 import { computed, ref, onMounted, nextTick, watch } from 'vue'
 import { useRouter } from 'vue-router'
 
@@ -172,6 +193,76 @@ watch(
 
 const dealStatuses = computed(() => statusOptions('deal'))
 
+// Funnels (#72): the card is created in a funnel and one of its stages; the
+// layout's own status field is replaced by the selects above
+const pipelineStore = pipelinesStore()
+const { pipelines } = storeToRefs(pipelineStore)
+const usePipelines = computed(() => pipelines.value.length > 0)
+
+const pipelineOptions = computed(() =>
+  pipelines.value.map((p) => ({ label: __(p.pipeline_name), value: p.name })),
+)
+
+const stageOptions = computed(() =>
+  (pipelineStore.getPipeline(deal.doc.pipeline)?.stages || []).map((s) => ({
+    label: __(s.deal_status),
+    value: s.name,
+  })),
+)
+
+// Same rule as the server: first open stage, else the first one
+function firstStage(pipeline) {
+  let stages = pipelineStore.getPipeline(pipeline)?.stages || []
+  return (stages.find((s) => !['Won', 'Lost'].includes(s.type)) || stages[0])
+    ?.name
+}
+
+function selectPipeline(pipeline) {
+  deal.doc.pipeline = pipeline
+  deal.doc.status = firstStage(pipeline)
+}
+
+function eachField(callback) {
+  tabs.data?.forEach((tab) =>
+    tab.sections.forEach((section) =>
+      section.columns.forEach((column) => column.fields.forEach(callback)),
+    ),
+  )
+}
+
+watch([usePipelines, () => tabs.data], ([inUse]) => {
+  eachField((field) => {
+    if (field.fieldname === 'status') field.hidden = inUse ? 1 : 0
+  })
+})
+
+// Existing contact: only the chosen organization's contacts (#72)
+watch(
+  [() => deal.doc.organization, () => tabs.data],
+  ([organization]) => {
+    eachField((field) => {
+      if (field.fieldname === 'contact') {
+        field.link_filters = organization
+          ? JSON.stringify({ company_name: organization })
+          : null
+      }
+    })
+  },
+  { immediate: true },
+)
+
+// A contact picked for another organization would not match the filter.
+// Started after the defaults are applied, so a contact passed in with its
+// organization (e.g. creating a card from a contact) is kept.
+function clearContactWhenOrganizationChanges() {
+  watch(
+    () => deal.doc.organization,
+    (organization, previous) => {
+      if (organization !== previous) deal.doc.contact = null
+    },
+  )
+}
+
 async function createDeal() {
   if (deal.doc.website && !deal.doc.website.startsWith('http')) {
     deal.doc.website = 'https://' + deal.doc.website
@@ -239,7 +330,7 @@ function openQuickEntryModal() {
   nextTick(() => (show.value = false))
 }
 
-onMounted(() => {
+onMounted(async () => {
   deal.doc.no_of_employees = '1-10'
   Object.assign(deal.doc, props.defaults)
   chooseExistingOrganization.value = Boolean(props.defaults.organization)
@@ -248,7 +339,23 @@ onMounted(() => {
   if (!deal.doc.deal_owner) {
     deal.doc.deal_owner = getUser().name
   }
-  if (!deal.doc.status && dealStatuses.value[0].value) {
+  await nextTick()
+  clearContactWhenOrganizationChanges()
+
+  await pipelineStore.ensureLoaded()
+  if (usePipelines.value) {
+    // Opened from a funnel's Kanban column: that funnel and stage
+    let pipeline = pipelineStore.getPipeline(deal.doc.pipeline)
+      ? deal.doc.pipeline
+      : pipelines.value[0].name
+    let stageInPipeline = pipelineStore
+      .getPipeline(pipeline)
+      .stages.some((s) => s.name === deal.doc.status)
+    deal.doc.pipeline = pipeline
+    if (!stageInPipeline) deal.doc.status = firstStage(pipeline)
+    return
+  }
+  if (!deal.doc.status && dealStatuses.value[0]?.value) {
     deal.doc.status = dealStatuses.value[0].value
   }
 })
