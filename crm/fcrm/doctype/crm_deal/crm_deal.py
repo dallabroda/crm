@@ -128,7 +128,7 @@ class CRMDeal(Document):
 		if not self.pipeline:
 			self.pipeline = get_default_pipeline()
 		if not self.pipeline:
-			frappe.throw(_("Create a pipeline before adding cards."))
+			frappe.throw(_("Choose a pipeline for the card. You must be a member of it."))
 
 		pipeline = frappe.db.get_value(
 			"CRM Pipeline", self.pipeline, ["pipeline_name", "is_active"], as_dict=True

@@ -191,6 +191,40 @@ def _save_stages(pipeline: str, stages: list[dict]):
 
 
 @frappe.whitelist()
+def get_pipeline_users() -> dict:
+	"""Active CRM users for the pipeline members screen, with who may own pipelines."""
+	users = frappe.get_all(
+		"User",
+		{
+			"enabled": 1,
+			"name": ("not in", ("Administrator", "Guest")),
+			"user_type": "System User",
+		},
+		["name", "full_name", "user_image"],
+		order_by="full_name asc",
+	)
+	crm_roles = ("Sales User", "Sales Manager", "System Manager")
+	result = []
+	for user in users:
+		roles = set(frappe.get_roles(user.name))
+		if not roles & set(crm_roles):
+			continue
+		admin = is_admin(user.name)
+		result.append(
+			{
+				**user,
+				"pipeline_owner": int(admin or PIPELINE_OWNER_ROLE in roles),
+				"is_admin": int(admin),
+			}
+		)
+	return {
+		"can_create": int(is_admin() or PIPELINE_OWNER_ROLE in frappe.get_roles()),
+		"is_admin": int(is_admin()),
+		"users": result,
+	}
+
+
+@frappe.whitelist()
 def set_pipeline_owner_role(user: str, enabled: bool) -> dict:
 	"""Give or take the global Pipeline Owner role (create pipelines, be an owner). Admins only."""
 	if not is_admin():

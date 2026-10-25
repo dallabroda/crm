@@ -14,6 +14,7 @@ from crm.fcrm.doctype.crm_deal.crm_deal import (
 	remove_contact,
 	set_primary_contact,
 )
+from crm.fcrm.doctype.crm_pipeline.crm_pipeline import add_members, get_default_pipeline
 from crm.tests import CRMTestCase as FrappeTestCase
 
 
@@ -565,7 +566,9 @@ class TestGetDealContacts(FrappeTestCase):
 		org = create_test_deal(organization="Reused Org").organization
 		organization_name = frappe.db.get_value("CRM Organization", org, "organization_name")
 
-		frappe.set_user(create_test_user_with_role("deal-creator@example.com", "CRM Deal", create=1))
+		creator = create_test_user_with_role("deal-creator@example.com", "CRM Deal", create=1)
+		add_members(get_default_pipeline(), [creator])  # cards need a pipeline the user belongs to
+		frappe.set_user(creator)
 		deal_name = create_deal({"organization_name": organization_name})
 		self.assertEqual(frappe.db.get_value("CRM Deal", deal_name, "organization"), org)
 

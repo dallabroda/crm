@@ -4,7 +4,8 @@
 import frappe
 from frappe.desk.form.assign_to import add as assign_add
 
-from crm.api.pipeline import save_pipeline, set_pipeline_owner_role
+from crm.api.dashboard import get_chart
+from crm.api.pipeline import get_pipeline_users, save_pipeline, set_pipeline_owner_role
 from crm.patches.credhub.add_pipeline_permissions import execute as add_pipeline_permissions
 from crm.permissions.pipeline import has_deal_permission, is_admin
 from crm.tests import CRMTestCase as FrappeTestCase
@@ -159,6 +160,27 @@ class TestPipelinePermissions(FrappeTestCase):
 		self.assertFalse(set_pipeline_owner_role(REP1, False)["pipeline_owner"])
 		with self.assertRaises(frappe.ValidationError):
 			set_pipeline_owner_role(OWNER, False)  # still owns "Credit"
+
+	def test_dashboard_gives_non_admins_only_their_numbers(self):
+		def total(user, as_user):
+			frappe.set_user(user)
+			data = get_chart("deals_by_stage_donut", "donut", user=as_user)["data"]
+			frappe.set_user("Administrator")
+			return sum(row["count"] for row in data if row["stage"].startswith("Credit"))
+
+		self.assertEqual(total(REP1, REP2), 1)  # asking for someone else's numbers returns their own
+		self.assertEqual(total(ADMIN, None), 2)
+
+	def test_pipeline_users_lists_who_can_own(self):
+		frappe.set_user(ADMIN)
+		data = get_pipeline_users()
+		users = {u["name"]: u for u in data["users"]}
+		self.assertTrue(data["can_create"])
+		self.assertEqual(users[OWNER]["pipeline_owner"], 1)
+		self.assertEqual(users[REP1]["pipeline_owner"], 0)
+		self.assertEqual(users[ADMIN]["is_admin"], 1)
+		frappe.set_user(REP1)
+		self.assertFalse(get_pipeline_users()["can_create"])
 
 	def test_patch_keeps_access_of_existing_users(self):
 		save_pipeline({"name": self.pipeline, "members": []})

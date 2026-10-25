@@ -71,8 +71,6 @@ class CRMPipeline(Document):
 				),
 				frappe.LinkExistsError,
 			)
-		if frappe.db.get_single_value("FCRM Settings", "entry_pipeline") == self.name:
-			frappe.throw(_("This is the entry pipeline. Choose another entry pipeline before deleting it."))
 		for view in frappe.get_all("CRM View Settings", {"pipeline": self.name}, pluck="name"):
 			frappe.delete_doc("CRM View Settings", view, ignore_permissions=True)
 		for stage in frappe.get_all("CRM Deal Status", {"pipeline": self.name}, pluck="name"):
@@ -105,13 +103,26 @@ def next_position(doctype: str, **filters) -> int:
 	return (query.run()[0][0] or 0) + 1
 
 
-def get_default_pipeline() -> str | None:
-	"""Pipeline used when a card is created without one: the entry pipeline, else the first active one."""
-	entry = frappe.db.get_single_value("FCRM Settings", "entry_pipeline")
-	if entry and frappe.db.get_value("CRM Pipeline", entry, "is_active"):
-		return entry
+def get_default_pipeline(user: str | None = None) -> str | None:
+	"""Pipeline for a card created without one: the first active pipeline the user takes part in
+	(any active pipeline for admins and system processes)."""
+	from crm.permissions.pipeline import is_admin
+
+	user = user or frappe.session.user
+	filters = {"is_active": 1}
+	if not is_admin(user):
+		Member = frappe.qb.DocType("CRM Pipeline Member")
+		member_of = (
+			frappe.qb.from_(Member)
+			.select(Member.parent)
+			.where((Member.parenttype == "CRM Pipeline") & (Member.user == user))
+			.run(pluck=True)
+		)
+		if not member_of:
+			return None
+		filters["name"] = ("in", member_of)
 	pipelines = frappe.get_all(
-		"CRM Pipeline", {"is_active": 1}, pluck="name", order_by="position asc, creation asc", limit=1
+		"CRM Pipeline", filters, pluck="name", order_by="position asc, creation asc", limit=1
 	)
 	return pipelines[0] if pipelines else None
 
