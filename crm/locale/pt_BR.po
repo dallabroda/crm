@@ -536,7 +536,7 @@ msgstr "Endereço"
 #: frontend/src/components/Settings/Users.vue:221
 #: frontend/src/components/Settings/Users.vue:224
 msgid "Admin"
-msgstr ""
+msgstr "Administrador"
 
 #: crm/integrations/twilio/twilio_handler.py:144
 msgid "Agent is unavailable to take the call, please call after some time."
@@ -1435,7 +1435,7 @@ msgstr "Alterar Status"
 #: frontend/src/components/Layouts/AppSidebar.vue:510
 #: frontend/src/components/Layouts/AppSidebar.vue:519
 msgid "Change deal status"
-msgstr ""
+msgstr "Mudar a etapa do card"
 
 #: frontend/src/components/Settings/PreferencesSettings.vue:60
 msgid "Change language of the application."
@@ -1899,7 +1899,7 @@ msgstr "Criar"
 
 #: frontend/src/components/Modals/DealModal.vue:8
 msgid "Create Deal"
-msgstr ""
+msgstr "Criar card"
 
 #: frontend/src/components/Calendar/CalendarEventPanel.vue:514
 #: frontend/src/pages/Calendar.vue:7
@@ -2115,7 +2115,7 @@ msgstr "Dia"
 #: frontend/src/components/Telephony/ExotelCallUI.vue:200
 #: frontend/src/pages/Tasks.vue:132
 msgid "Deal"
-msgstr ""
+msgstr "Card"
 
 #. Label of the deal_owner (Link) field in DocType 'CRM Deal'
 #: crm/fcrm/doctype/crm_deal/crm_deal.json frontend/src/pages/Contact.vue:541
@@ -2123,23 +2123,23 @@ msgstr ""
 #: frontend/src/pages/MobileOrganization.vue:483
 #: frontend/src/pages/Organization.vue:513
 msgid "Deal Owner"
-msgstr ""
+msgstr "Responsável"
 
 #. Label of the deal_status (Link) field in DocType 'ERPNext CRM Settings'
 #: crm/fcrm/doctype/erpnext_crm_settings/erpnext_crm_settings.json
 #: frontend/src/components/Settings/ERPNextSettings.vue:241
 msgid "Deal Status"
-msgstr ""
+msgstr "Etapa"
 
 #. Label of a shortcut in the Frappe CRM Workspace
 #: crm/fcrm/workspace/frappe_crm/frappe_crm.json
 msgid "Deal Statuses"
-msgstr ""
+msgstr "Etapas"
 
 #. Label of the deal_value (Currency) field in DocType 'CRM Deal'
 #: crm/fcrm/doctype/crm_deal/crm_deal.json
 msgid "Deal Value"
-msgstr ""
+msgstr "Valor do card"
 
 #: crm/api/dashboard.py:1023
 msgid "Deal generation channel analysis"
@@ -2147,11 +2147,11 @@ msgstr ""
 
 #: frontend/src/components/Settings/ERPNextSettings.vue:522
 msgid "Deal status is required"
-msgstr ""
+msgstr "A etapa é obrigatória"
 
 #: crm/api/dashboard.py:1078 crm/api/dashboard.py:1141
 msgid "Deal value"
-msgstr ""
+msgstr "Valor do card"
 
 #. Label of a shortcut in the Frappe CRM Workspace
 #: crm/fcrm/workspace/frappe_crm/frappe_crm.json
@@ -2159,7 +2159,7 @@ msgstr ""
 #: frontend/src/pages/MobileDeal.vue:391
 #: frontend/src/pages/MobileOrganization.vue:343
 msgid "Deals"
-msgstr ""
+msgstr "Negócios"
 
 #: frontend/src/components/Dashboard/AddChartModal.vue:93
 msgid "Deals by Ongoing & Won Stage"
@@ -2167,15 +2167,15 @@ msgstr ""
 
 #: frontend/src/components/Dashboard/AddChartModal.vue:96
 msgid "Deals by Salesperson"
-msgstr ""
+msgstr "Cards por vendedor"
 
 #: frontend/src/components/Dashboard/AddChartModal.vue:103
 msgid "Deals by Source"
-msgstr ""
+msgstr "Cards por origem"
 
 #: frontend/src/components/Dashboard/AddChartModal.vue:101
 msgid "Deals by Stage"
-msgstr ""
+msgstr "Cards por etapa"
 
 #: frontend/src/components/Dashboard/AddChartModal.vue:95
 msgid "Deals by Territory"
@@ -2187,15 +2187,15 @@ msgstr ""
 
 #: crm/api/dashboard.py:1130
 msgid "Deals by salesperson"
-msgstr ""
+msgstr "Cards por vendedor"
 
 #: crm/api/dashboard.py:1022
 msgid "Deals by source"
-msgstr ""
+msgstr "Cards por origem"
 
 #: crm/api/dashboard.py:895
 msgid "Deals by stage"
-msgstr ""
+msgstr "Cards por etapa"
 
 #: crm/api/dashboard.py:1067
 msgid "Deals by territory"
@@ -2454,7 +2454,7 @@ msgstr ""
 #: frontend/src/components/Settings/Telephony/ExotelSettings.vue:29
 #: frontend/src/components/Settings/Telephony/TwilioSettings.vue:29
 msgid "Disable"
-msgstr ""
+msgstr "Desativar"
 
 #: frontend/src/components/Settings/ERPNextSettings.vue:434
 msgid "Disable ERPNext Integration"
@@ -3225,7 +3225,7 @@ msgstr ""
 #. Label of the expected_deal_value (Currency) field in DocType 'CRM Deal'
 #: crm/fcrm/doctype/crm_deal/crm_deal.json
 msgid "Expected Deal Value"
-msgstr ""
+msgstr "Valor esperado do card"
 
 #: crm/fcrm/doctype/crm_deal/crm_deal.py:253
 msgid "Expected closure date is required."
@@ -4529,7 +4529,7 @@ msgstr "Semelhante"
 
 #: frontend/src/components/FilesUploader/FilesUploaderArea.vue:51
 msgid "Link"
-msgstr ""
+msgstr "Ligação"
 
 #: crm/fcrm/doctype/crm_product/reconcile_job.py:100
 msgid "Linked Item {0} no longer exists"
@@ -4619,7 +4619,7 @@ msgstr "Perdido"
 
 #: frontend/src/components/Dashboard/AddChartModal.vue:94
 msgid "Lost Deal Reasons"
-msgstr ""
+msgstr "Motivos de perda"
 
 #. Label of the lost_details_tab (Tab Break) field in DocType 'CRM Deal'
 #. Label of the lost_details_tab (Tab Break) field in DocType 'CRM Lead'
@@ -4657,7 +4657,7 @@ msgstr ""
 
 #: crm/api/dashboard.py:937
 msgid "Lost deal reasons"
-msgstr ""
+msgstr "Motivos de perda"
 
 #. Option for the 'Priority' (Select) field in DocType 'CRM Task'
 #: crm/fcrm/doctype/crm_task/crm_task.json
@@ -4929,7 +4929,7 @@ msgstr ""
 
 #: frontend/src/components/Modals/ViewModal.vue:30
 msgid "My Open Deals"
-msgstr ""
+msgstr "Meus cards abertos"
 
 #. Label of the title (Data) field in DocType 'CRM Dashboard'
 #. Label of the name1 (Data) field in DocType 'CRM Dropdown Item'
@@ -5427,7 +5427,7 @@ msgstr "Formato de número"
 
 #: crm/api/dashboard.py:1075 crm/api/dashboard.py:1138
 msgid "Number of deals"
-msgstr ""
+msgstr "Número de cards"
 
 #: crm/api/dashboard.py:1131
 msgid "Number of deals and total value per salesperson"
@@ -5470,22 +5470,22 @@ msgstr ""
 #: crm/fcrm/doctype/crm_deal_status/crm_deal_status.json
 #: crm/fcrm/doctype/crm_lead_status/crm_lead_status.json
 msgid "On Hold"
-msgstr "Em Espera"
+msgstr "Em espera"
 
 #. Option for the 'Type' (Select) field in DocType 'CRM Deal Status'
 #. Option for the 'Type' (Select) field in DocType 'CRM Lead Status'
 #: crm/fcrm/doctype/crm_deal_status/crm_deal_status.json
 #: crm/fcrm/doctype/crm_lead_status/crm_lead_status.json
 msgid "Ongoing"
-msgstr ""
+msgstr "Em andamento"
 
 #: frontend/src/components/Dashboard/AddChartModal.vue:73
 msgid "Ongoing Deals"
-msgstr ""
+msgstr "Cards em andamento"
 
 #: crm/api/dashboard.py:189
 msgid "Ongoing deals"
-msgstr ""
+msgstr "Cards em andamento"
 
 #: crm/api/user.py:62 crm/api/user.py:95
 msgid "Only System Managers can assign the Sales Manager role"
@@ -5517,7 +5517,7 @@ msgstr ""
 #: crm/fcrm/doctype/crm_deal_status/crm_deal_status.json
 #: crm/fcrm/doctype/crm_lead_status/crm_lead_status.json
 msgid "Open"
-msgstr "Aberto"
+msgstr "Aberta"
 
 #: frontend/src/components/ConditionsFilter/CFCondition.vue:88
 msgid "Open Nested Conditions"
@@ -5654,7 +5654,7 @@ msgstr "Saída"
 #. Label of the log_owner (Link) field in DocType 'CRM Status Change Log'
 #: crm/fcrm/doctype/crm_status_change_log/crm_status_change_log.json
 msgid "Owner"
-msgstr "Proprietário"
+msgstr "Dono"
 
 #: frontend/src/components/Calendar/CalendarEventPanel.vue:146
 msgid "Owner: {0}"
@@ -6636,7 +6636,7 @@ msgstr ""
 
 #: crm/api/dashboard.py:1133
 msgid "Salesperson"
-msgstr ""
+msgstr "Vendedor"
 
 #. Label of the salutation (Link) field in DocType 'CRM Deal'
 #. Label of the salutation (Link) field in DocType 'CRM Lead'
@@ -7170,7 +7170,7 @@ msgstr ""
 
 #: crm/api/dashboard.py:790 crm/api/dashboard.py:848
 msgid "Stage"
-msgstr ""
+msgstr "Etapa"
 
 #: crm/fcrm/doctype/crm_form_script/crm_form_script.js:15
 msgid "Standard Form Scripts can not be modified, duplicate the Form Script instead."
@@ -8218,15 +8218,15 @@ msgstr ""
 #: crm/fcrm/doctype/crm_lead_status/crm_lead_status.json
 #: frontend/src/components/Settings/ERPNextSettings.vue:254
 msgid "Won"
-msgstr ""
+msgstr "Ganho"
 
 #: frontend/src/components/Dashboard/AddChartModal.vue:75
 msgid "Won Deals"
-msgstr ""
+msgstr "Cards ganhos"
 
 #: crm/api/dashboard.py:306
 msgid "Won deals"
-msgstr ""
+msgstr "Cards ganhos"
 
 #: frontend/src/components/Settings/Sla/SlaHolidays.vue:5
 msgid "Work Schedule & Holidays"
@@ -8424,7 +8424,7 @@ msgstr ""
 
 #: crm/api/activities.py:50
 msgid "created this deal"
-msgstr ""
+msgstr "criou este card"
 
 #: crm/api/activities.py:202
 msgid "created this lead"
@@ -8462,7 +8462,7 @@ msgstr ""
 #: frontend/src/components/Settings/AssignmentRules/AssigneeRules.vue:135
 #: frontend/src/components/Settings/AssignmentRules/AssignmentRuleView.vue:380
 msgid "deals"
-msgstr "negociações"
+msgstr "cards"
 
 #: frontend/src/components/Settings/AssignmentRules/AssignmentRuleView.vue:190
 #: frontend/src/components/Settings/AssignmentRules/AssignmentRuleView.vue:274
@@ -8926,3 +8926,242 @@ msgstr ""
 msgid "⚠️ No row found for idx: {0} in parent field: {1}"
 msgstr ""
 
+msgid "No deals yet"
+msgstr "Nenhum card ainda"
+
+msgid "A deal is a sale you are working on. Create one, or convert a lead into a deal once it looks promising."
+msgstr "Um card é uma oportunidade no funil. Crie um para começar."
+
+msgid "Sales"
+msgstr "Vendas"
+
+msgid "Qualification"
+msgstr "Qualificação"
+
+msgid "Demo/Making"
+msgstr "Demonstração"
+
+msgid "Proposal/Quotation"
+msgstr "Proposta/Orçamento"
+
+msgid "Negotiation"
+msgstr "Negociação"
+
+msgid "Ready to Close"
+msgstr "Pronto para fechar"
+
+msgid "Funnel"
+msgstr "Funil"
+
+msgid "Funnels"
+msgstr "Funis"
+
+msgid "New funnel"
+msgstr "Novo funil"
+
+msgid "Stages"
+msgstr "Etapas"
+
+msgid "New stage"
+msgstr "Nova etapa"
+
+msgid "Stage name"
+msgstr "Nome da etapa"
+
+msgid "Add stage"
+msgstr "Adicionar etapa"
+
+msgid "Remove stage"
+msgstr "Remover etapa"
+
+msgid "Members"
+msgstr "Membros"
+
+msgid "Add member"
+msgstr "Adicionar membro"
+
+msgid "Remove member"
+msgstr "Remover membro"
+
+msgid "My role"
+msgstr "Meu papel"
+
+msgid "Read only"
+msgstr "Só leitura"
+
+msgid "Visible"
+msgstr "Visível"
+
+msgid "Required to enter the stage"
+msgstr "Obrigatório para entrar na etapa"
+
+msgid "Fields and rules by stage"
+msgstr "Campos e regras por etapa"
+
+msgid "Add field"
+msgstr "Adicionar campo"
+
+msgid "Remove field from funnel"
+msgstr "Tirar o campo do funil"
+
+msgid "Funnel owner role"
+msgstr "Papel de dono de funil"
+
+msgid "Can create funnels and be an owner"
+msgstr "Pode criar funis e ser dono"
+
+msgid "Choose a funnel"
+msgstr "Escolha um funil"
+
+msgid "Move to another funnel"
+msgstr "Mover para outro funil"
+
+msgid "Move"
+msgstr "Mover"
+
+msgid "Card moved to the other funnel"
+msgstr "Card movido para o outro funil"
+
+msgid "Could not move the card to the other funnel."
+msgstr "Não foi possível mover o card para o outro funil."
+
+msgid "Could not move the card. Reverting."
+msgstr "Não foi possível mover o card. Desfazendo."
+
+msgid "Field values are kept, even those the new funnel does not show."
+msgstr "Os valores dos campos ficam guardados, mesmo os que o novo funil não mostra."
+
+msgid "Fill in to move the card"
+msgstr "Preencha para mover o card"
+
+msgid "The stage {0} requires these fields."
+msgstr "A etapa {0} exige estes campos."
+
+msgid "Fill in: {0}"
+msgstr "Preencha: {0}"
+
+msgid "Move cancelled: required fields of the stage were not filled in."
+msgstr "Movimento cancelado: os campos obrigatórios da etapa não foram preenchidos."
+
+msgid "Stage not changed: its required fields were not filled in."
+msgstr "Etapa não alterada: os campos obrigatórios dela não foram preenchidos."
+
+msgid "Funnel saved"
+msgstr "Funil salvo"
+
+msgid "Could not save the funnel"
+msgstr "Não foi possível salvar o funil"
+
+msgid "Could not load the funnel"
+msgstr "Não foi possível carregar o funil"
+
+msgid "Could not load the funnels"
+msgstr "Não foi possível carregar os funis"
+
+msgid "Could not change the role"
+msgstr "Não foi possível mudar o papel"
+
+msgid "Give the funnel a name."
+msgstr "Dê um nome ao funil."
+
+msgid "A funnel needs at least one stage."
+msgstr "O funil precisa de pelo menos uma etapa."
+
+msgid "Every stage needs a name."
+msgstr "Toda etapa precisa de um nome."
+
+msgid "Stage {0} appears more than once."
+msgstr "A etapa {0} aparece mais de uma vez."
+
+msgid "e.g. Sales, Credit, B2B"
+msgstr "ex.: Vendas, Crédito, B2B"
+
+msgid "Drag to reorder. Won and Lost stages close the card."
+msgstr "Arraste para reordenar. Etapas de Ganho e Perdido encerram o card."
+
+msgid "Each funnel has its own stages, members and fields. Salespeople only see the funnels they are part of."
+msgstr "Cada funil tem as próprias etapas, membros e campos. O vendedor só vê os funis de que participa."
+
+msgid "Owners see every card of the funnel and can change it. Salespeople see only their own cards."
+msgstr "O dono vê todos os cards do funil e pode alterá-lo. O vendedor vê só os próprios cards."
+
+msgid "For each stage: Visible, Required to enter the stage, Read only. Funnel, stage and owner are always visible."
+msgstr "Para cada etapa: Visível, Obrigatório para entrar na etapa, Só leitura. Funil, etapa e responsável aparecem sempre."
+
+msgid "No fields chosen: every field of the card is shown in every stage."
+msgstr "Nenhum campo escolhido: todos os campos do card aparecem em todas as etapas."
+
+msgid "Fields"
+msgstr "Campos"
+
+msgid "New field"
+msgstr "Novo campo"
+
+msgid "Edit field"
+msgstr "Editar campo"
+
+msgid "Field saved"
+msgstr "Campo salvo"
+
+msgid "Could not save the field"
+msgstr "Não foi possível salvar o campo"
+
+msgid "Could not load the fields"
+msgstr "Não foi possível carregar os campos"
+
+msgid "Could not disable the field"
+msgstr "Não foi possível desativar o campo"
+
+msgid "Field disabled. Its values stay saved."
+msgstr "Campo desativado. Os valores continuam guardados."
+
+msgid "Standard"
+msgstr "Padrão"
+
+msgid "Created"
+msgstr "Criado"
+
+msgid "Origin"
+msgstr "Origem"
+
+msgid "{0} of {1} custom fields"
+msgstr "{0} de {1} campos criados"
+
+msgid "Fields of the company, shared by every funnel. Each funnel chooses which ones it uses and in which stages."
+msgstr "Campos da empresa, compartilhados por todos os funis. Cada funil escolhe quais usa e em quais etapas."
+
+msgid "Give the field a name."
+msgstr "Dê um nome ao campo."
+
+msgid "Write at least one option."
+msgstr "Escreva pelo menos uma opção."
+
+msgid "Choose what the field links to."
+msgstr "Escolha a que o campo se liga."
+
+msgid "Options (one per line)"
+msgstr "Opções (uma por linha)"
+
+msgid "Links to"
+msgstr "Liga-se a"
+
+msgid "Text"
+msgstr "Texto"
+
+msgid "Decimal number"
+msgstr "Número decimal"
+
+msgid "Amount (R$)"
+msgstr "Valor (R$)"
+
+msgid "List of options"
+msgstr "Lista de opções"
+
+msgid "Yes/No"
+msgstr "Sim/Não"
+
+msgid "File"
+msgstr "Arquivo"
+
+msgid "Link to contact or organization"
+msgstr "Ligação com contato ou organização"
