@@ -1,4 +1,5 @@
 import frappe
+from frappe import _
 
 
 @frappe.whitelist()
@@ -7,6 +8,14 @@ def create_email_account(data: dict):
 	service_config = email_service_config.get(service)
 	if not service_config:
 		return "Service not supported"
+
+	# Cards from incoming e-mails go to the pipeline chosen here (no default pipeline)
+	create_cards = frappe.utils.cint(data.get("create_lead_from_incoming_email"))
+	pipeline = data.get("crm_pipeline") or None
+	if create_cards and not pipeline:
+		frappe.throw(_("Choose the pipeline that receives cards created from incoming e-mails."))
+	if pipeline and not frappe.db.get_value("CRM Pipeline", pipeline, "is_active"):
+		frappe.throw(_("Pipeline {0} not found or inactive.").format(frappe.bold(pipeline)))
 
 	try:
 		email_doc = frappe.get_doc(
@@ -26,6 +35,8 @@ def create_email_account(data: dict):
 				"use_tls": 1,
 				"use_imap": 1,
 				"smtp_port": 587,
+				"create_lead_from_incoming_email": create_cards,
+				"crm_pipeline": pipeline,
 				**service_config,
 			}
 		)
@@ -33,9 +44,10 @@ def create_email_account(data: dict):
 			email_doc.api_key = data.get("api_key")
 			email_doc.api_secret = data.get("api_secret")
 			email_doc.frappe_mail_site = data.get("frappe_mail_site")
-			email_doc.append_to = "CRM Lead"
 		else:
-			email_doc.append("imap_folder", {"append_to": "CRM Lead", "folder_name": "INBOX"})
+			# No append_to: it would turn every unknown e-mail into a lead outside any pipeline.
+			# New records come only from "create from incoming e-mails" + its pipeline.
+			email_doc.append("imap_folder", {"folder_name": "INBOX"})
 			email_doc.password = data.get("password")
 			# validate whether the credentials are correct
 			email_doc.get_incoming_server()

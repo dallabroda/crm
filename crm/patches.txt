@@ -41,3 +41,4 @@ crm.patches.credhub.add_pipelines
 crm.patches.credhub.add_pipeline_permissions
 crm.patches.credhub.add_pipeline_fields
 crm.patches.credhub.add_email_account_pipeline_field
+crm.patches.credhub.stop_email_append_to_lead
