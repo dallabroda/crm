@@ -8,6 +8,7 @@ from frappe.desk.form.assign_to import remove as assign_remove
 
 from crm.fcrm.doctype.crm_lead.crm_lead import convert_to_deal
 from crm.tests import CRMTestCase as FrappeTestCase
+from crm.tests import default_test_pipeline
 
 
 class TestCRMLead(FrappeTestCase):
@@ -311,7 +312,7 @@ class TestCRMLead(FrappeTestCase):
 		)
 
 		# Convert lead to deal
-		deal_name = lead.convert_to_deal()
+		deal_name = lead.convert_to_deal(deal={"pipeline": default_test_pipeline()})
 		self.assertTrue(deal_name)
 
 		# Verify lead is marked as converted
@@ -368,7 +369,7 @@ class TestCRMLead(FrappeTestCase):
 		)
 
 		# Convert lead using existing contact and org
-		deal_name = lead.convert_to_deal()
+		deal_name = lead.convert_to_deal(deal={"pipeline": default_test_pipeline()})
 
 		# Verify deal was created with existing records
 		deal = frappe.get_doc("CRM Deal", deal_name)
@@ -393,7 +394,7 @@ class TestCRMLead(FrappeTestCase):
 		)
 
 		# Convert lead to deal using API
-		deal_name = convert_to_deal(lead=lead.name)
+		deal_name = convert_to_deal(lead=lead.name, deal={"pipeline": default_test_pipeline()})
 		self.assertTrue(deal_name)
 
 		# Verify lead is marked as converted
@@ -430,7 +431,7 @@ class TestCRMLead(FrappeTestCase):
 				with self.assertRaisesRegex(
 					frappe.ValidationError, f"Cannot convert a lead with status {status}"
 				):
-					convert_to_deal(lead=lead.name)
+					convert_to_deal(lead=lead.name, deal={"pipeline": default_test_pipeline()})
 				lead.reload()
 				self.assertFalse(lead.converted)
 
@@ -466,6 +467,7 @@ class TestCRMLead(FrappeTestCase):
 		# Convert lead using API with existing records
 		deal_name = convert_to_deal(
 			lead=lead.name,
+			deal={"pipeline": default_test_pipeline()},
 			existing_contact=existing_contact.name,
 			existing_organization=existing_org.name,
 		)
@@ -494,7 +496,7 @@ class TestCRMLead(FrappeTestCase):
 			job_title="CEO",
 		)
 
-		deal_name = lead.convert_to_deal()
+		deal_name = lead.convert_to_deal(deal={"pipeline": default_test_pipeline()})
 		deal = frappe.get_doc("CRM Deal", deal_name)
 
 		# Verify fields are copied
@@ -514,7 +516,7 @@ class TestCRMLead(FrappeTestCase):
 			no_of_employees="201-500",
 		)
 
-		deal_name = lead.convert_to_deal()
+		deal_name = lead.convert_to_deal(deal={"pipeline": default_test_pipeline()})
 		deal = frappe.get_doc("CRM Deal", deal_name)
 
 		org = frappe.get_doc("CRM Organization", deal.organization)
@@ -529,7 +531,7 @@ class TestCRMLead(FrappeTestCase):
 			custom_lead_conversion_region="North",
 		)
 
-		deal_name = lead.convert_to_deal()
+		deal_name = lead.convert_to_deal(deal={"pipeline": default_test_pipeline()})
 		deal = frappe.get_doc("CRM Deal", deal_name)
 
 		self.assertEqual(deal.custom_deal_conversion_region, "North")
@@ -548,7 +550,7 @@ class TestCRMLead(FrappeTestCase):
 		self.assertIn("Administrator", lead_assignees)
 		self.assertIn("crm.user1@example.com", lead_assignees)
 
-		deal_name = lead.convert_to_deal()
+		deal_name = lead.convert_to_deal(deal={"pipeline": default_test_pipeline()})
 		deal = frappe.get_doc("CRM Deal", deal_name)
 
 		deal_assignees = deal.get_assigned_users()

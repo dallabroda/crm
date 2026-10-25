@@ -16,6 +16,7 @@ from crm.fcrm.doctype.crm_deal.crm_deal import (
 )
 from crm.fcrm.doctype.crm_pipeline.crm_pipeline import add_members, get_default_pipeline
 from crm.tests import CRMTestCase as FrappeTestCase
+from crm.tests import default_test_pipeline
 
 
 class TestCRMDeal(FrappeTestCase):
@@ -325,6 +326,7 @@ class TestCRMDeal(FrappeTestCase):
 		"""Test create_deal API function"""
 		deal_name = create_deal(
 			{
+				"pipeline": default_test_pipeline(),
 				"organization_name": "API Deal Org",
 				"annual_revenue": 500000,
 				"first_name": "Deal",
@@ -365,6 +367,7 @@ class TestCRMDeal(FrappeTestCase):
 		# Create deal with same organization name
 		deal_name = create_deal(
 			{
+				"pipeline": default_test_pipeline(),
 				"organization_name": "Existing Org",
 				"first_name": "Existing",
 				"email": "existing@example.com",
@@ -378,6 +381,7 @@ class TestCRMDeal(FrappeTestCase):
 		"""Test that no_of_employees is copied onto the organization create_deal creates"""
 		deal_name = create_deal(
 			{
+				"pipeline": default_test_pipeline(),
 				"organization_name": "Employees Test Org",
 				"no_of_employees": "51-200",
 				"first_name": "Employees",
@@ -399,6 +403,7 @@ class TestCRMDeal(FrappeTestCase):
 		# Create deal with same email
 		deal_name = create_deal(
 			{
+				"pipeline": default_test_pipeline(),
 				"organization_name": "Contact Existing Org",
 				"first_name": "Existing",
 				"email": "existingc@example.com",
@@ -569,11 +574,11 @@ class TestGetDealContacts(FrappeTestCase):
 		creator = create_test_user_with_role("deal-creator@example.com", "CRM Deal", create=1)
 		add_members(get_default_pipeline(), [creator])  # cards need a pipeline the user belongs to
 		frappe.set_user(creator)
-		deal_name = create_deal({"organization_name": organization_name})
+		deal_name = create_deal({"pipeline": default_test_pipeline(), "organization_name": organization_name})
 		self.assertEqual(frappe.db.get_value("CRM Deal", deal_name, "organization"), org)
 
 		with self.assertRaises(frappe.PermissionError):
-			create_deal({"organization_name": "Brand New Org"})
+			create_deal({"pipeline": default_test_pipeline(), "organization_name": "Brand New Org"})
 
 	def test_remove_assignments_requires_read_permission(self):
 		deal = create_test_deal(organization="Remove Assignment Org")
@@ -636,7 +641,7 @@ def create_test_deal(**kwargs):
 				"CRM Organization", {"organization_name": org_name}, "name"
 			)
 
-	data = {"doctype": "CRM Deal"}
+	data = {"doctype": "CRM Deal", "pipeline": default_test_pipeline()}
 	data.update(kwargs)
 	return frappe.get_doc(data).insert()
 

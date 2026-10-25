@@ -5,7 +5,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
-from crm.fcrm.doctype.crm_pipeline.crm_pipeline import get_default_pipeline, next_position
+from crm.fcrm.doctype.crm_pipeline.crm_pipeline import next_position
 
 
 class CRMDealStatus(Document):
@@ -41,8 +41,6 @@ class CRMDealStatus(Document):
 
 	def validate(self):
 		self.deal_status = (self.deal_status or "").strip()
-		if not self.pipeline:
-			self.pipeline = get_default_pipeline()
 		self.validate_unique_in_pipeline()
 		self.validate_pipeline_change()
 		if not self.position:

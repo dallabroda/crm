@@ -21,6 +21,7 @@ from crm.integrations.exotel.handler import (
 	normalize_call_status,
 )
 from crm.tests import CRMTestCase as FrappeTestCase
+from crm.tests import default_test_pipeline
 
 
 class TestIntegrations(FrappeTestCase):
@@ -319,6 +320,7 @@ class TestIntegrations(FrappeTestCase):
 		deal = frappe.get_doc(
 			{
 				"doctype": "CRM Deal",
+				"pipeline": default_test_pipeline(),
 				"organization": org.name,
 				"deal_owner": "Administrator",
 			}
@@ -461,6 +463,7 @@ class TestIntegrations(FrappeTestCase):
 		deal = frappe.get_doc(
 			{
 				"doctype": "CRM Deal",
+				"pipeline": default_test_pipeline(),
 				"organization": org.name,
 				"deal_owner": "Administrator",
 			}

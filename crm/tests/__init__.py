@@ -42,6 +42,11 @@ def ensure_erpnext_fixtures():
 		frappe.db.set_default("stock_uom", "Nos")
 
 
+def default_test_pipeline() -> str:
+	"""Pipeline generic tests put their cards in (the one created on install)."""
+	return frappe.get_all("CRM Pipeline", pluck="name", order_by="position asc, creation asc", limit=1)[0]
+
+
 def add_test_users_to_default_pipeline():
 	"""Cards only accept owners and assignees who take part in the pipeline."""
 	from crm.fcrm.doctype.crm_pipeline.crm_pipeline import add_members
