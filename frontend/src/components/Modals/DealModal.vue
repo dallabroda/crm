@@ -106,6 +106,7 @@ import { isMobileView } from '@/composables/settings'
 import { showQuickEntryModal, quickEntryProps } from '@/composables/modals'
 import { useDocument } from '@/data/document'
 import { useTelemetry } from '@framework/ui/telemetry'
+import { useCrmOnboarding } from '@/composables/onboarding'
 import { Dialog, FormControl, Switch, createResource } from 'frappe-ui'
 import { computed, ref, onMounted, nextTick, watch } from 'vue'
 import { useRouter } from 'vue-router'
@@ -130,6 +131,7 @@ const isDealCreating = ref(false)
 const chooseExistingContact = ref(false)
 const chooseExistingOrganization = ref(false)
 const { capture } = useTelemetry()
+const { completeStep } = useCrmOnboarding()
 
 const tabs = createResource({
   url: 'crm.fcrm.doctype.crm_fields_layout.crm_fields_layout.get_fields_layout',
@@ -309,6 +311,7 @@ async function createDeal() {
     },
     onSuccess(name) {
       capture('deal_created')
+      completeStep('create_first_deal')
       isDealCreating.value = false
       show.value = false
       router.push({ name: 'Deal', params: { dealId: name } })

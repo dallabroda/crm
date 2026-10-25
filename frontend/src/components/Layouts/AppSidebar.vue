@@ -178,7 +178,6 @@
 import BrushCleaningIcon from '~icons/lucide/brush-cleaning'
 import CRMLogo from '@/components/Icons/CRMLogo.vue'
 import InviteIcon from '@/components/Icons/InviteIcon.vue'
-import ConvertIcon from '@/components/Icons/ConvertIcon.vue'
 import EmailIcon from '@/components/Icons/EmailIcon.vue'
 import CollapsibleSection from '@/components/CollapsibleSection.vue'
 import Icon from '@/components/Icon.vue'
@@ -489,10 +488,6 @@ async function reconcileOnboarding(currentSteps) {
   window.location.reload()
 }
 
-async function getFirstLead() {
-  return await getFirstRecord('firstLead', 'crm.api.onboarding.get_first_lead')
-}
-
 async function getFirstDeal() {
   return await getFirstRecord('firstDeal', 'crm.api.onboarding.get_first_deal')
 }
@@ -515,16 +510,17 @@ const showIntermediateModal = ref(false)
 const currentStep = ref({})
 
 const steps = reactive([
+  // Leads are gone (#72): the first step creates a card in a funnel
   {
-    name: 'create_first_lead',
-    title: __('Add your first lead'),
-    icon: markRaw(LeadsIcon),
+    name: 'create_first_deal',
+    title: __('Create your first card'),
+    icon: markRaw(DealsIcon),
     completed: false,
     onClick: () => {
       minimize.value = true
-      router.push({ name: 'Leads' })
-      send('trigger_lead_create', true)
-      capture('onboarding_step_clicked_create_first_lead')
+      router.push({ name: 'Deals', params: { viewType: 'kanban' } })
+      send('trigger_deal_create', true)
+      capture('onboarding_step_clicked_create_first_deal')
     },
   },
   {
@@ -552,34 +548,6 @@ const steps = reactive([
       capture('onboarding_step_clicked_invite_your_team')
     },
     condition: () => isManager(),
-  },
-  {
-    name: 'convert_lead_to_deal',
-    title: __('Convert lead to deal'),
-    icon: markRaw(ConvertIcon),
-    completed: false,
-    dependsOn: 'create_first_lead',
-    onClick: async () => {
-      minimize.value = true
-      capture('onboarding_step_clicked_convert_lead_to_deal')
-      currentStep.value = {
-        title: __('Convert lead to deal'),
-        buttonLabel: __('Convert'),
-        videoURL: '/assets/crm/videos/convertToDeal.mov',
-        onClick: async () => {
-          showIntermediateModal.value = false
-          currentStep.value = {}
-
-          let lead = await getFirstLead()
-          if (lead) {
-            router.push({ name: 'Lead', params: { leadId: lead } })
-          } else {
-            router.push({ name: 'Leads' })
-          }
-        },
-      }
-      showIntermediateModal.value = true
-    },
   },
   {
     name: 'create_first_task',

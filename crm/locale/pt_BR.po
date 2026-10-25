@@ -9165,3 +9165,6 @@ msgstr "Arquivo"
 
 msgid "Link to contact or organization"
 msgstr "Ligação com contato ou organização"
+
+msgid "Create your first card"
+msgstr "Crie seu primeiro card"
