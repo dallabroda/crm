@@ -99,6 +99,21 @@ class TestCRMPipeline(FrappeTestCase):
 		with self.assertRaises(frappe.ValidationError):
 			move_card(card.name, credit["stages"][1]["name"], {"pipeline": get_default_pipeline()})
 
+	def test_move_card_rejects_read_only_fields(self):
+		credit = make_pipeline()
+		card = make_card(pipeline=credit["name"])
+		with self.assertRaises(frappe.ValidationError):
+			move_card(card.name, credit["stages"][1]["name"], {"sla_status": "Fulfilled"})
+
+	def test_swapping_stage_names(self):
+		credit = make_pipeline(stages=("One", "Two"))
+		one, two = credit["stages"]
+		saved = save_pipeline(
+			{"name": credit["name"], "stages": [{**one, "deal_status": "Two"}, {**two, "deal_status": "One"}]}
+		)
+		self.assertEqual([s["deal_status"] for s in saved["stages"]], ["Two", "One"])
+		self.assertEqual([s["name"] for s in saved["stages"]], [one["name"], two["name"]])
+
 	def test_stage_with_cards_cannot_be_removed(self):
 		credit = make_pipeline()
 		make_card(pipeline=credit["name"])

@@ -150,6 +150,20 @@ def save_pipeline(doc: str | dict) -> dict:
 def _save_stages(pipeline: str, stages: list[dict]):
 	if not stages:
 		frappe.throw(_("A pipeline needs at least one stage."))
+	labels = [(s.get("deal_status") or "").strip() for s in stages if s.get("deal_status")]
+	duplicates = {label for label in labels if labels.count(label) > 1}
+	if duplicates:
+		frappe.throw(
+			_("Stage {0} appears more than once.").format(frappe.bold(", ".join(sorted(duplicates)))),
+			frappe.DuplicateEntryError,
+		)
+	# Renames are applied one by one, so swapping two names would collide midway: park renamed stages
+	# under their (unique) key first
+	for stage in stages:
+		if stage.get("name") and stage.get("deal_status"):
+			current = frappe.db.get_value("CRM Deal Status", stage["name"], "deal_status")
+			if current is not None and current != stage["deal_status"].strip():
+				frappe.db.set_value("CRM Deal Status", stage["name"], "deal_status", stage["name"])
 	keep = set()
 	for position, stage in enumerate(stages, start=1):
 		stage = frappe._dict(stage)
@@ -211,6 +225,13 @@ def _set_values(doc, values):
 	values = json.loads(values) if isinstance(values, str) else values
 	protected = {"name", "pipeline", "status", "owner", "creation", "modified", "doctype"}
 	for fieldname, value in values.items():
-		if fieldname in protected or not doc.meta.has_field(fieldname):
+		df = doc.meta.get_field(fieldname)
+		if (
+			fieldname in protected
+			or not df
+			or df.read_only
+			or df.fieldtype in frappe.model.table_fields
+			or not doc.has_permlevel_access_to(fieldname, df, "write")
+		):
 			frappe.throw(_("Field {0} cannot be set here.").format(frappe.bold(fieldname)))
 		doc.set(fieldname, value)

@@ -4,7 +4,6 @@ import json
 
 import click
 import frappe
-from frappe import _
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 
 from crm.domain_enrichment.install import seed_default_rules_and_mappings
@@ -164,9 +163,9 @@ def add_default_pipeline() -> str:
 	existing = frappe.get_all("CRM Pipeline", pluck="name", order_by="position asc, creation asc", limit=1)
 	if existing:
 		return existing[0]
-	lang = frappe.db.get_single_value("System Settings", "language") or "en"
 	doc = frappe.new_doc("CRM Pipeline")
-	doc.pipeline_name = _("Sales", lang=lang)
+	# Stored in English like the default stages; the UI translates it
+	doc.pipeline_name = "Sales"
 	doc.position = 1
 	doc.color = "blue"
 	doc.insert(ignore_permissions=True)
