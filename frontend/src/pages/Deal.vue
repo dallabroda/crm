@@ -146,6 +146,7 @@
         v-model="doc"
         @updateField="updateField"
       />
+      <OrganizationRegistry :organization="organization" />
       <div
         v-if="sections.data"
         class="flex flex-1 flex-col justify-between overflow-hidden"
@@ -392,6 +393,7 @@ import OrganizationModal from '@/components/Modals/OrganizationModal.vue'
 import LostReasonModal from '@/components/Modals/LostReasonModal.vue'
 import MissingFieldsModal from '@/components/Modals/MissingFieldsModal.vue'
 import ChangePipelineModal from '@/components/Modals/ChangePipelineModal.vue'
+import OrganizationRegistry from '@/components/Pipelines/OrganizationRegistry.vue'
 import { pipelinesStore } from '@/stores/pipelines'
 import { applyStageRules } from '@/utils/pipelines'
 import { parseLinkFilters } from '@/utils/fieldTransforms'
