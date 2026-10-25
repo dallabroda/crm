@@ -167,7 +167,17 @@ export function useDocument(doctype, docname, resourceOverrides = {}) {
         }
         const mandatory = checkMandatory(documentsCache[doctype][docname].doc)
         if (mandatory) return
-        return _originalSubmit.apply(_save, args)
+        return _originalSubmit.apply(_save, args).catch((err) => {
+          // already answered by the page's missing-fields dialog (onError above):
+          // do not let it surface again as an unhandled rejection
+          if (
+            isMissingFieldsError(err) &&
+            missingFieldsHandlers[`${doctype}:${docname}`]
+          ) {
+            return
+          }
+          throw err
+        })
       }
     } else {
       documentsCache[doctype][''] = reactive({

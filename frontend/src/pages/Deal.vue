@@ -1073,17 +1073,22 @@ watch(
   { immediate: true },
 )
 
-// Owner and assignees must take part in the card's funnel (#68): members + admins
+// Owner and assignees must take part in the card's funnel (#68): members + admins.
+// Fields: only the catalog fields the funnel uses (#69).
 const assignableUsers = ref(null)
+const fieldSetup = ref(null)
 watch(
   () => doc.value.pipeline,
   async (pipeline) => {
-    try {
-      assignableUsers.value = await pipelineStore.assignableUsers(pipeline)
-    } catch (e) {
-      // the server still refuses outsiders; the full list is only a weaker hint
-      assignableUsers.value = null
-      console.error('[pipelines] could not load the funnel members', e)
+    let [users, setup] = await Promise.allSettled([
+      pipelineStore.assignableUsers(pipeline),
+      pipelineStore.fieldSetup(pipeline),
+    ])
+    // the server still refuses outsiders; without the list the panel shows all
+    assignableUsers.value = users.status === 'fulfilled' ? users.value : null
+    fieldSetup.value = setup.status === 'fulfilled' ? setup.value : null
+    for (let r of [users, setup]) {
+      if (r.status === 'rejected') console.error('[pipelines]', r.reason)
     }
   },
   { immediate: true },
@@ -1119,7 +1124,7 @@ function restrictOwner(sections, allowed) {
 
 const visibleSections = computed(() =>
   restrictOwner(
-    applyStageRules(sections.data, stageRules.value),
+    applyStageRules(sections.data, stageRules.value, fieldSetup.value || {}),
     assignableUsers.value,
   ),
 )

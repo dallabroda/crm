@@ -119,6 +119,29 @@ describe('applyStageRules', () => {
     ).toEqual({ fieldname: 'deal_owner', reqd: 0, read_only: 0 })
   })
 
+  it('drops catalog fields the funnel does not use, keeps the rest', () => {
+    let out = applyStageRules(
+      sections,
+      {},
+      {
+        used: ['cpf'],
+        catalog: ['address', 'cpf', 'deal_value', 'deal_owner'],
+      },
+    )
+    // next_step is not in the catalog (left alone); deal_owner is locked
+    expect(out[0].columns[0].fields.map((f) => f.fieldname || f)).toEqual([
+      'cpf',
+      'deal_owner',
+      'next_step',
+    ])
+  })
+
+  it('shows every field when the funnel chose none', () => {
+    expect(applyStageRules(sections, {}, { used: [], catalog: ['cpf'] })).toBe(
+      sections,
+    )
+  })
+
   it('does not modify the input and keeps sections without columns', () => {
     let copy = JSON.parse(JSON.stringify(sections))
     let out = applyStageRules(sections, {

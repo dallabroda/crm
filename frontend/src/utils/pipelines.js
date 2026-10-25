@@ -45,9 +45,20 @@ function parseMaybeJSON(value) {
 
 // Applies { fieldname: { visible, required, read_only } } (get_stage_rules) to
 // side panel sections: hidden fields are dropped, required ones marked reqd and
-// read-only ones locked. Returns new sections; the input is not modified.
-export function applyStageRules(sections, rules) {
-  if (!rules || !Object.keys(rules).length) return sections
+// read-only ones locked. With `used` (the funnel's fields) and `catalog` (all
+// catalog fieldnames), catalog fields the funnel does not use are dropped too;
+// fields outside the catalog (e.g. contact details) are left alone. Returns new
+// sections; the input is not modified.
+export function applyStageRules(
+  sections,
+  rules,
+  { used = null, catalog = null } = {},
+) {
+  let hasRules = rules && Object.keys(rules).length
+  let filterUnused = used?.length && catalog?.length
+  if (!hasRules && !filterUnused) return sections
+  let usedSet = new Set(used || [])
+  let catalogSet = new Set(catalog || [])
   return (sections || []).map((section) => {
     if (!section.columns) return section
     return {
@@ -55,7 +66,18 @@ export function applyStageRules(sections, rules) {
       columns: section.columns.map((column) => ({
         ...column,
         fields: (column.fields || [])
-          .map((field) => applyRule(field, rules))
+          .map((field) => {
+            let name = typeof field === 'string' ? field : field?.fieldname
+            if (
+              filterUnused &&
+              catalogSet.has(name) &&
+              !usedSet.has(name) &&
+              !LOCKED_FIELDS.includes(name)
+            ) {
+              return null
+            }
+            return applyRule(field, rules || {})
+          })
           .filter(Boolean),
       })),
     }

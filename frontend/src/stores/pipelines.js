@@ -95,6 +95,8 @@ export const pipelinesStore = defineStore('crm-pipelines', () => {
     loading = null
     assignableCache = {}
     pipelineUsers = null
+    configCache = {}
+    catalogPromise = null
     return fetch()
   }
 
@@ -123,6 +125,38 @@ export const pipelinesStore = defineStore('crm-pipelines', () => {
     return label ? __(label) : stageKey
   }
 
+  // Funnel config and field catalog, cached; reload() clears them
+  let configCache = {}
+  let catalogPromise = null
+  function getConfig(pipeline) {
+    configCache[pipeline] ||= apiCall('get_pipeline_config', {
+      pipeline,
+    }).catch((e) => {
+      delete configCache[pipeline]
+      throw e
+    })
+    return configCache[pipeline]
+  }
+
+  // Fields a funnel's cards show: { used: [fieldnames], catalog: [fieldnames] }
+  async function fieldSetup(pipeline) {
+    if (!pipeline) return null
+    catalogPromise ||= apiCall('get_field_catalog').catch((e) => {
+      catalogPromise = null
+      throw e
+    })
+    let [config, catalog] = await Promise.all([
+      getConfig(pipeline),
+      catalogPromise,
+    ])
+    return {
+      used: (config?.fields || []).map((f) =>
+        typeof f === 'string' ? f : f.fieldname,
+      ),
+      catalog: (catalog?.fields || []).map((f) => f.fieldname),
+    }
+  }
+
   // Who can own or be assigned a card of a funnel: its members and the admins
   // (crm.permissions.pipeline). Cached per funnel; reload() clears it.
   let assignableCache = {}
@@ -132,7 +166,7 @@ export const pipelinesStore = defineStore('crm-pipelines', () => {
     assignableCache[pipeline] ||= (async () => {
       pipelineUsers ||= apiCall('get_pipeline_users')
       let [config, users] = await Promise.all([
-        apiCall('get_pipeline_config', { pipeline }),
+        getConfig(pipeline),
         pipelineUsers,
       ])
       let names = new Set((config?.members || []).map((m) => m.user))
@@ -161,6 +195,7 @@ export const pipelinesStore = defineStore('crm-pipelines', () => {
     stageLabel,
     setCurrentPipeline,
     assignableUsers,
+    fieldSetup,
     apiCall,
   }
 })

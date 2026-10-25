@@ -46,7 +46,7 @@
           <FormControl
             v-else-if="field.fieldtype === 'Check'"
             type="checkbox"
-            :label="__('Yes')"
+            :label="__('Tick to confirm')"
             :model-value="Boolean(values[field.fieldname])"
             @update:model-value="(v) => (values[field.fieldname] = v ? 1 : 0)"
           />
@@ -119,10 +119,16 @@ function cancel() {
 }
 
 function save() {
-  // A Check is never "empty": unticked is a valid 0, so only blank inputs block.
-  let missing = props.fields.filter(
-    (f) => f.fieldtype !== 'Check' && isEmpty(values[f.fieldname]),
-  )
+  // Same rule as the server (crm.fcrm.doctype.crm_pipeline.fields.is_empty):
+  // a required Yes/No has to be ticked, a required number cannot be 0
+  let missing = props.fields.filter((f) => {
+    let value = values[f.fieldname]
+    if (f.fieldtype === 'Check') return !value
+    if (['Int', 'Float', 'Currency', 'Percent'].includes(f.fieldtype)) {
+      return isEmpty(value) || !Number(value)
+    }
+    return isEmpty(value) || (typeof value === 'string' && !value.trim())
+  })
   if (missing.length) {
     error.value = __('Fill in: {0}', [
       missing.map((f) => __(f.label)).join(', '),
