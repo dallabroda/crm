@@ -839,7 +839,7 @@ def get_deals_by_stage_axis(
 	if user:
 		query = query.where(CRMDeal.deal_owner == user)
 
-	result = query.run(as_dict=True)
+	result = label_stages(query.run(as_dict=True))
 
 	return {
 		"data": result or [],
@@ -888,7 +888,7 @@ def get_deals_by_stage_donut(
 	if user:
 		query = query.where(CRMDeal.deal_owner == user)
 
-	result = query.run(as_dict=True)
+	result = label_stages(query.run(as_dict=True))
 
 	return {
 		"data": result or [],
@@ -1200,5 +1200,28 @@ def get_deal_status_change_counts(
 	if filters and filters.get("user"):
 		query = query.where(CRMDeal.deal_owner == filters["user"])
 
-	result = query.run(as_dict=True)
+	result = label_stages(query.run(as_dict=True))
 	return result or []
+
+
+def label_stages(rows: list[dict], key: str = "stage") -> list[dict]:
+	"""Replace stage keys with their names. With more than one pipeline, prefix the pipeline name,
+	since different pipelines may have stages with the same name."""
+	keys = {row.get(key) for row in rows if row.get(key)}
+	if not keys:
+		return rows
+	stages = frappe.get_all(
+		"CRM Deal Status", {"name": ("in", list(keys))}, ["name", "deal_status", "pipeline"]
+	)
+	pipeline_names = dict(frappe.get_all("CRM Pipeline", ["name", "pipeline_name"], as_list=True))
+	prefix = len(pipeline_names) > 1
+	labels = {
+		stage.name: f"{pipeline_names.get(stage.pipeline, '')} · {_(stage.deal_status)}"
+		if prefix
+		else _(stage.deal_status)
+		for stage in stages
+	}
+	for row in rows:
+		if row.get(key) in labels:
+			row[key] = labels[row[key]]
+	return rows

@@ -7,6 +7,7 @@ from frappe.desk.form.assign_to import _add as assign
 from frappe.model.document import Document
 
 from crm.api.exchange_rate import get_exchange_rate
+from crm.fcrm.doctype.crm_pipeline.crm_pipeline import get_default_pipeline, get_first_stage
 from crm.fcrm.doctype.crm_service_level_agreement.utils import get_sla
 from crm.fcrm.doctype.crm_status_change_log.crm_status_change_log import add_status_change_log
 from crm.fcrm.doctype.utils import add_or_remove_lost_reason_section_in_sidepanel
@@ -61,6 +62,7 @@ class CRMDeal(Document):
 		organization: DF.Link | None
 		organization_name: DF.Data | None
 		phone: DF.Data | None
+		pipeline: DF.Link
 		probability: DF.Percent
 		products: DF.Table[CRMProducts]
 		response_by: DF.Datetime | None
@@ -118,11 +120,36 @@ class CRMDeal(Document):
 		self.apply_sla()
 
 	def validate_status(self):
-		if self.is_new() and not self.status:
-			if frappe.db.exists("CRM Deal Status", "Qualification"):
-				self.status = "Qualification"
-			else:
-				self.status = frappe.get_all("CRM Deal Status", {"type": "Open"}, pluck="name")[0]
+		"""Every card belongs to a pipeline and sits in one of that pipeline's stages."""
+		if not self.pipeline and self.status:
+			self.pipeline = frappe.db.get_value("CRM Deal Status", self.status, "pipeline")
+		if not self.pipeline:
+			self.pipeline = get_default_pipeline()
+		if not self.pipeline:
+			frappe.throw(_("Create a pipeline before adding cards."))
+
+		pipeline = frappe.db.get_value(
+			"CRM Pipeline", self.pipeline, ["pipeline_name", "is_active"], as_dict=True
+		)
+		if not pipeline:
+			frappe.throw(
+				_("Pipeline {0} not found.").format(frappe.bold(self.pipeline)), frappe.LinkValidationError
+			)
+		if (self.is_new() or self.has_value_changed("pipeline")) and not pipeline.is_active:
+			frappe.throw(_("Pipeline {0} is inactive.").format(frappe.bold(pipeline.pipeline_name)))
+
+		if not self.status:
+			self.status = get_first_stage(self.pipeline)
+			if not self.status:
+				frappe.throw(_("Pipeline {0} has no stages.").format(frappe.bold(pipeline.pipeline_name)))
+
+		stage = frappe.db.get_value("CRM Deal Status", self.status, ["pipeline", "deal_status"], as_dict=True)
+		if stage and stage.pipeline != self.pipeline:
+			frappe.throw(
+				_("Stage {0} does not belong to pipeline {1}.").format(
+					frappe.bold(stage.deal_status), frappe.bold(pipeline.pipeline_name)
+				)
+			)
 
 	def set_primary_contact(self, contact=None):
 		if not self.contacts:

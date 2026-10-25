@@ -15,7 +15,8 @@
   "last_status_change_log",
   "from_type",
   "to_type",
-  "log_owner"
+  "log_owner",
+  "pipeline"
  ],
  "fields": [
   {
@@ -75,12 +76,18 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "To Type"
+  },
+  {
+   "fieldname": "pipeline",
+   "fieldtype": "Link",
+   "label": "Pipeline",
+   "options": "CRM Pipeline"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-02-23 12:15:29.602937",
+ "modified": "2026-10-24 20:00:00.000000",
  "modified_by": "Administrator",
  "module": "FCRM",
  "name": "CRM Status Change Log",

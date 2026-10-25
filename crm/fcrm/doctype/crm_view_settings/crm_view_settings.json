@@ -13,6 +13,7 @@
   "column_break_zacm",
   "type",
   "dt",
+  "pipeline",
   "route_name",
   "pinned",
   "public",
@@ -184,11 +185,18 @@
    "fieldname": "is_default",
    "fieldtype": "Check",
    "label": "Is Default"
+  },
+  {
+   "fieldname": "pipeline",
+   "fieldtype": "Link",
+   "label": "Pipeline",
+   "options": "CRM Pipeline",
+   "search_index": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-23 12:29:29.007129",
+ "modified": "2026-10-24 20:00:00.000000",
  "modified_by": "Administrator",
  "module": "FCRM",
  "name": "CRM View Settings",
