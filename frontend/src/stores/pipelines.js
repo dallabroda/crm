@@ -102,16 +102,21 @@ export const pipelinesStore = defineStore('crm-pipelines', () => {
     return configCache[pipeline]
   }
 
-  // Fields a funnel's cards show: { used: [fieldnames], catalog: [fieldnames] }
-  async function fieldSetup(pipeline) {
-    if (!pipeline) return null
+  // { limit, used, fields: [{ fieldname, label, fieldtype, options, ... }] }
+  function getCatalog() {
     catalogPromise ||= apiCall('get_field_catalog').catch((e) => {
       catalogPromise = null
       throw e
     })
+    return catalogPromise
+  }
+
+  // Fields a funnel's cards show: { used: [fieldnames], catalog: [fieldnames] }
+  async function fieldSetup(pipeline) {
+    if (!pipeline) return null
     let [config, catalog] = await Promise.all([
       getConfig(pipeline),
-      catalogPromise,
+      getCatalog(),
     ])
     return {
       used: (config?.fields || []).map((f) =>
@@ -154,6 +159,7 @@ export const pipelinesStore = defineStore('crm-pipelines', () => {
     stageLabel,
     assignableUsers,
     fieldSetup,
+    getCatalog,
     apiCall,
   }
 })

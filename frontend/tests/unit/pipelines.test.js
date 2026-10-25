@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import {
   applyStageRules,
+  emptyRequiredFields,
   isMissingFieldsError,
   missingFieldsFromError,
   LOCKED_FIELDS,
@@ -149,5 +150,31 @@ describe('applyStageRules', () => {
     })
     expect(sections).toEqual(copy)
     expect(out[1]).toBe(sections[1])
+  })
+})
+
+describe('emptyRequiredFields', () => {
+  const fields = [
+    { fieldname: 'cpf', fieldtype: 'Data' },
+    { fieldname: 'aceite', fieldtype: 'Check' },
+    { fieldname: 'valor', fieldtype: 'Currency' },
+    { fieldname: 'vencimento', fieldtype: 'Date' },
+  ]
+  const names = (values) =>
+    emptyRequiredFields(fields, values).map((f) => f.fieldname)
+
+  it('treats blank text, unticked Yes/No and number 0 as empty', () => {
+    expect(names({ cpf: '  ', aceite: 0, valor: 0 })).toEqual([
+      'cpf',
+      'aceite',
+      'valor',
+      'vencimento',
+    ])
+  })
+
+  it('accepts filled values', () => {
+    expect(
+      names({ cpf: '123', aceite: 1, valor: '10.5', vencimento: '2026-11-01' }),
+    ).toEqual([])
   })
 })

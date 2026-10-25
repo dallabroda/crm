@@ -72,6 +72,20 @@
               @update:model-value="(v) => (deal.doc.status = v)"
             />
           </div>
+          <div
+            v-if="stageFields.length"
+            class="mb-4 rounded-6 border border-outline-gray-2 p-3"
+            data-testid="stage-required-fields"
+          >
+            <div class="mb-3 text-sm text-ink-gray-6">
+              {{ __('Required in this stage') }}
+            </div>
+            <StageFields
+              :fields="stageFields"
+              :values="deal.doc"
+              @change="(f, v) => (deal.doc[f] = v)"
+            />
+          </div>
           <FieldLayout
             v-if="tabs.data?.length"
             :tabs="tabs.data"
@@ -101,6 +115,8 @@ import FieldLayout from '@/components/FieldLayout/FieldLayout.vue'
 import { usersStore } from '@/stores/users'
 import { statusesStore } from '@/stores/statuses'
 import { pipelinesStore } from '@/stores/pipelines'
+import StageFields from '@/components/Pipelines/StageFields.vue'
+import { emptyRequiredFields } from '@/utils/pipelines'
 import { storeToRefs } from 'pinia'
 import { isMobileView } from '@/composables/settings'
 import { showQuickEntryModal, quickEntryProps } from '@/composables/modals'
@@ -238,6 +254,50 @@ watch([usePipelines, () => tabs.data], ([inUse]) => {
   })
 })
 
+// Required fields of the chosen stage (#69): the server refuses the card
+// without them, so they are asked here unless the quick entry already has them
+const stageRequired = ref([])
+let stageRequest = 0
+watch(
+  () => [deal.doc.pipeline, deal.doc.status],
+  async ([pipeline, stage]) => {
+    let request = ++stageRequest
+    if (!usePipelines.value || !pipeline || !stage) {
+      stageRequired.value = []
+      return
+    }
+    try {
+      let [rules, catalog] = await Promise.all([
+        pipelineStore.apiCall('get_stage_rules', { pipeline, stage }),
+        pipelineStore.getCatalog(),
+      ])
+      if (request !== stageRequest) return
+      stageRequired.value = Object.entries(rules || {})
+        .filter(([, rule]) => rule.required)
+        .map(([fieldname]) =>
+          (catalog?.fields || []).find((f) => f.fieldname === fieldname),
+        )
+        .filter(Boolean)
+    } catch (e) {
+      if (request === stageRequest) stageRequired.value = []
+      console.error('[pipelines] could not load the stage rules', e)
+    }
+  },
+)
+
+const quickEntryFieldnames = computed(() => {
+  let names = new Set()
+  eachField((field) => !field.hidden && names.add(field.fieldname))
+  return names
+})
+
+// asked in the box above; those already in the quick entry are filled there
+const stageFields = computed(() =>
+  stageRequired.value.filter(
+    (f) => !quickEntryFieldnames.value.has(f.fieldname),
+  ),
+)
+
 // Existing contact: only the chosen organization's contacts (#72)
 watch(
   [() => deal.doc.organization, () => tabs.data],
@@ -305,6 +365,13 @@ async function createDeal() {
       }
       if (!deal.doc.status) {
         error.value = __('Status is required')
+        return error.value
+      }
+      let missing = emptyRequiredFields(stageRequired.value, deal.doc)
+      if (missing.length) {
+        error.value = __('Fill in: {0}', [
+          missing.map((f) => __(f.label)).join(', '),
+        ])
         return error.value
       }
       isDealCreating.value = true

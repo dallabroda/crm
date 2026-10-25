@@ -9168,3 +9168,12 @@ msgstr "Ligação com contato ou organização"
 
 msgid "Create your first card"
 msgstr "Crie seu primeiro card"
+
+msgid "Required in this stage"
+msgstr "Obrigatório nesta etapa"
+
+msgid "Tick to confirm"
+msgstr "Marque para confirmar"
+
+msgid "Fill in the required fields of this stage before moving the card."
+msgstr "Preencha os campos obrigatórios desta etapa antes de mover o card."

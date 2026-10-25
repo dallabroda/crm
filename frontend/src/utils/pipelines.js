@@ -43,6 +43,28 @@ function parseMaybeJSON(value) {
   }
 }
 
+const NUMBER_TYPES = ['Int', 'Float', 'Currency', 'Percent']
+
+// Required fields still empty in `values`. Same rule as the server
+// (crm.fcrm.doctype.crm_pipeline.fields.is_empty): a required Yes/No has to be
+// ticked and a required number cannot be 0.
+export function emptyRequiredFields(fields, values) {
+  return (fields || []).filter((f) => {
+    let value = values?.[f.fieldname]
+    if (f.fieldtype === 'Check') return !value
+    if (NUMBER_TYPES.includes(f.fieldtype)) {
+      return (
+        value === undefined || value === null || value === '' || !Number(value)
+      )
+    }
+    return (
+      value === undefined ||
+      value === null ||
+      (typeof value === 'string' && !value.trim())
+    )
+  })
+}
+
 // Applies { fieldname: { visible, required, read_only } } (get_stage_rules) to
 // side panel sections: hidden fields are dropped, required ones marked reqd and
 // read-only ones locked. With `used` (the funnel's fields) and `catalog` (all

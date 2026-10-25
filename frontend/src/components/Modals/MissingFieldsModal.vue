@@ -8,60 +8,12 @@
       <div class="-mt-3 mb-4 text-p-base text-ink-gray-7">
         {{ __('The stage {0} requires these fields.', [stageLabel]) }}
       </div>
-      <div class="flex flex-col gap-3">
-        <div v-for="field in fields" :key="field.fieldname">
-          <div class="mb-2 text-sm text-ink-gray-5">
-            {{ __(field.label) }}
-            <span class="text-ink-red-4">*</span>
-          </div>
-          <Link
-            v-if="field.fieldtype === 'Link'"
-            class="form-control flex-1 truncate"
-            :value="values[field.fieldname]"
-            :doctype="field.options"
-            @change="(v) => (values[field.fieldname] = v)"
-          />
-          <DatePicker
-            v-else-if="field.fieldtype === 'Date'"
-            :model-value="values[field.fieldname]"
-            variant="outline"
-            :format="getFormat('', '', true, false, false)"
-            @change="(v) => (values[field.fieldname] = v)"
-          />
-          <AttachControl
-            v-else-if="field.fieldtype === 'Attach'"
-            :value="values[field.fieldname]"
-            doctype="CRM Deal"
-            :docname="deal"
-            :fieldname="field.fieldname"
-            @change="(v) => (values[field.fieldname] = v)"
-          />
-          <FormControl
-            v-else-if="field.fieldtype === 'Select'"
-            type="select"
-            :options="selectOptions(field)"
-            :model-value="values[field.fieldname]"
-            @update:model-value="(v) => (values[field.fieldname] = v)"
-          />
-          <FormControl
-            v-else-if="field.fieldtype === 'Check'"
-            type="checkbox"
-            :label="__('Tick to confirm')"
-            :model-value="Boolean(values[field.fieldname])"
-            @update:model-value="(v) => (values[field.fieldname] = v ? 1 : 0)"
-          />
-          <FormControl
-            v-else
-            :type="
-              ['Int', 'Float', 'Currency'].includes(field.fieldtype)
-                ? 'number'
-                : 'text'
-            "
-            :model-value="values[field.fieldname]"
-            @update:model-value="(v) => (values[field.fieldname] = v)"
-          />
-        </div>
-      </div>
+      <StageFields
+        :fields="fields"
+        :values="values"
+        :docname="deal"
+        @change="(f, v) => (values[f] = v)"
+      />
     </template>
     <template #actions>
       <div class="flex items-center justify-between gap-2">
@@ -75,10 +27,9 @@
   </Dialog>
 </template>
 <script setup>
-import Link from '@/components/Controls/Link.vue'
-import AttachControl from '@/components/Controls/AttachControl.vue'
-import { getFormat } from '@/utils'
-import { Dialog, DatePicker, ErrorMessage, FormControl } from 'frappe-ui'
+import StageFields from '@/components/Pipelines/StageFields.vue'
+import { emptyRequiredFields } from '@/utils/pipelines'
+import { Dialog, ErrorMessage } from 'frappe-ui'
 import { reactive, ref } from 'vue'
 
 const props = defineProps({
@@ -98,19 +49,6 @@ const error = ref('')
 // without this flag it would cancel the move that save just retried.
 let saved = false
 
-function selectOptions(field) {
-  return ['', ...(field.options || '').split('\n').filter(Boolean)].map(
-    (o) => ({
-      label: o ? __(o) : '',
-      value: o,
-    }),
-  )
-}
-
-function isEmpty(value) {
-  return value === undefined || value === null || value === ''
-}
-
 function cancel() {
   if (saved) return
   show.value = false
@@ -119,16 +57,7 @@ function cancel() {
 }
 
 function save() {
-  // Same rule as the server (crm.fcrm.doctype.crm_pipeline.fields.is_empty):
-  // a required Yes/No has to be ticked, a required number cannot be 0
-  let missing = props.fields.filter((f) => {
-    let value = values[f.fieldname]
-    if (f.fieldtype === 'Check') return !value
-    if (['Int', 'Float', 'Currency', 'Percent'].includes(f.fieldtype)) {
-      return isEmpty(value) || !Number(value)
-    }
-    return isEmpty(value) || (typeof value === 'string' && !value.trim())
-  })
+  let missing = emptyRequiredFields(props.fields, values)
   if (missing.length) {
     error.value = __('Fill in: {0}', [
       missing.map((f) => __(f.label)).join(', '),
