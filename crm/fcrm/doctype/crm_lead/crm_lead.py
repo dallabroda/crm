@@ -1,7 +1,6 @@
 # Copyright (c) 2023, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-import json
 
 import frappe
 from frappe import _
@@ -125,12 +124,18 @@ class CRMLead(Document):
 			else None
 		)
 		self.flags.ignore_permissions = True
-		return convert_to_deal(
-			lead=self.name,
-			doc=self,
-			deal={"pipeline": self.pipeline, "deal_owner": owner},
-			if_converted="Return Existing",
-		)
+		# An entry from outside cannot answer the entry stage's required fields; refusing it would
+		# lose the entry, so the card is created and the fields are asked when someone works it
+		frappe.flags.crm_automatic_entry = True
+		try:
+			return convert_to_deal(
+				lead=self.name,
+				doc=self,
+				deal={"pipeline": self.pipeline, "deal_owner": owner},
+				if_converted="Return Existing",
+			)
+		finally:
+			frappe.flags.crm_automatic_entry = False
 
 	def before_save(self):
 		self.apply_sla()

@@ -9,6 +9,7 @@ from crm.api.pipeline import save_pipeline
 from crm.fcrm.doctype.crm_call_log.crm_call_log import create_lead_from_call_log
 from crm.fcrm.doctype.crm_call_log.test_crm_call_log import create_test_call_log
 from crm.fcrm.doctype.crm_pipeline.crm_pipeline import get_default_pipeline
+from crm.fcrm.doctype.crm_pipeline.fields import MissingRequiredFieldsError
 from crm.lead_syncing.doctype.lead_sync_source.facebook import FacebookSyncSource
 from crm.tests import CRMTestCase as FrappeTestCase
 
@@ -66,6 +67,23 @@ class TestPipelineIntake(FrappeTestCase):
 		self.assertEqual(card.deal_owner, MEMBER)
 		self.assertEqual(frappe.db.get_value("CRM Lead", lead.name, "converted"), 1)
 
+	def test_entry_stage_required_fields_do_not_lose_the_entry(self):
+		first = self.pipeline["stages"][0]["name"]
+		save_pipeline(
+			{
+				"name": self.pipeline["name"],
+				"fields": ["next_step"],
+				"field_rules": [{"stage": first, "fieldname": "next_step", "required": 1}],
+			}
+		)
+		lead = self.make_lead(email="required@example.com")
+		self.assertEqual(self.card_of(lead.name).status, first)
+		self.assertFalse(frappe.flags.get("crm_automatic_entry"))
+		with self.assertRaises(MissingRequiredFieldsError):  # people creating cards still fill them
+			frappe.get_doc(
+				{"doctype": "CRM Deal", "pipeline": self.pipeline["name"], "deal_owner": "Administrator"}
+			).insert()
+
 	def test_owner_outside_pipeline_is_not_kept(self):
 		lead = self.make_lead(lead_owner=OUTSIDER)
 		self.assertFalse(self.card_of(lead.name).deal_owner)
@@ -104,7 +122,9 @@ class TestPipelineIntake(FrappeTestCase):
 
 	def test_call_creates_card_in_pipeline(self):
 		call = create_test_call_log(from_number="+5511999990000")
-		card = create_lead_from_call_log({"name": call.name}, {"first_name": "Dani"}, pipeline=self.pipeline["name"])
+		card = create_lead_from_call_log(
+			{"name": call.name}, {"first_name": "Dani"}, pipeline=self.pipeline["name"]
+		)
 		self.assertEqual(frappe.db.get_value("CRM Deal", card, "pipeline"), self.pipeline["name"])
 		call.reload()
 		self.assertTrue(call.has_link("CRM Deal", card))
@@ -113,7 +133,9 @@ class TestPipelineIntake(FrappeTestCase):
 		call = create_test_call_log(from_number="+5511999990001")
 		frappe.set_user(OUTSIDER)
 		with self.assertRaises(frappe.PermissionError):
-			create_lead_from_call_log({"name": call.name}, {"first_name": "Eva"}, pipeline=self.pipeline["name"])
+			create_lead_from_call_log(
+				{"name": call.name}, {"first_name": "Eva"}, pipeline=self.pipeline["name"]
+			)
 
 	def test_web_forms_seed_hidden_pipeline(self):
 		for document_type in ("CRM Lead", "CRM Deal"):
