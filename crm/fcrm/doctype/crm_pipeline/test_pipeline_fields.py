@@ -221,6 +221,20 @@ class TestPipelineFields(FrappeTestCase):
 		card.set(self.cpf, "3")
 		card.save()  # editable again in the next stage
 
+	def test_empty_read_only_field_can_be_filled_when_moving_on(self):
+		self.set_rule(self.lead, self.cpf, read_only=1)
+		self.set_rule(self.documents, self.cpf, required=1)
+		card = self.make_card()
+		move_card(card.name, self.documents, {self.cpf: "123"})
+		self.assertEqual(frappe.db.get_value("CRM Deal", card.name, self.cpf), "123")
+
+	def test_missing_fields_also_in_message(self):
+		self.set_rule(self.documents, self.cpf, required=1)
+		card = self.make_card()
+		with self.assertRaises(MissingRequiredFieldsError):
+			move_card(card.name, self.documents)
+		self.assertEqual(frappe.local.response["message"]["missing_fields"][0]["fieldname"], self.cpf)
+
 	def test_read_only_ignores_same_value_in_another_format(self):
 		date_field = create_field("Date test", "Date")["fieldname"]
 		try:

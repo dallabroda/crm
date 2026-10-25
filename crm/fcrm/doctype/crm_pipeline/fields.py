@@ -24,10 +24,6 @@ STANDARD_FIELDS = (
 	"annual_revenue",
 	"no_of_employees",
 	"industry",
-	"territory",
-	"currency",
-	"lost_reason",
-	"lost_notes",
 )
 FIELD_TYPES = ("Data", "Int", "Float", "Currency", "Date", "Select", "Check", "Attach", "Link")
 LINK_TARGETS = ("Contact", "CRM Organization")
@@ -304,7 +300,9 @@ def validate_deal(doc):
 	if doc.is_new() or doc.has_value_changed("status"):
 		missing = get_missing_fields(doc, doc.status)
 		if missing:
+			# frappe-ui only keeps `message` and the server messages on errors
 			frappe.local.response["missing_fields"] = missing
+			frappe.local.response["message"] = {"missing_fields": missing}
 			frappe.throw(
 				_("Fill in the required fields of this stage: {0}").format(
 					", ".join(frappe.bold(m["label"]) for m in missing)
@@ -315,9 +313,15 @@ def validate_deal(doc):
 	before = doc.get_doc_before_save()
 	if not before or before.pipeline != doc.pipeline:
 		return
+	moving = before.status != doc.status
 	for fieldname, rule in get_stage_rules(doc.pipeline, before.status).items():
 		df = doc.meta.get_field(fieldname)
-		if rule["read_only"] and df and _changed(df, before.get(fieldname), doc.get(fieldname)):
+		if not rule["read_only"] or not df:
+			continue
+		# Filling an empty field while moving on is allowed: the next stage may require it
+		if moving and is_empty(df, before.get(fieldname)):
+			continue
+		if _changed(df, before.get(fieldname), doc.get(fieldname)):
 			frappe.throw(
 				_("{0} cannot be changed in this stage.").format(
 					frappe.bold(_(df.label) if df else fieldname)
