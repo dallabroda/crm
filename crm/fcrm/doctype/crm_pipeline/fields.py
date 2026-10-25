@@ -15,7 +15,6 @@ LOCKED_FIELDS = ("pipeline", "status", "deal_owner")
 STANDARD_FIELDS = (
 	"organization",
 	"deal_value",
-	"expected_deal_value",
 	"expected_closure_date",
 	"next_step",
 	"source",

@@ -7,7 +7,7 @@ import frappe
 
 from crm.tests import CRMTestCase as FrappeTestCase
 
-FORECASTING_FIELDS = ["expected_closure_date", "expected_deal_value"]
+FORECASTING_FIELDS = ["expected_closure_date", "deal_value"]
 
 
 class TestFCRMSettings(FrappeTestCase):
@@ -59,7 +59,7 @@ class TestFCRMSettings(FrappeTestCase):
 		layout = json.loads(doc.layout)
 		custom_section = {
 			"name": "custom_section",
-			"columns": [{"name": "custom_column", "fields": ["expected_deal_value"]}],
+			"columns": [{"name": "custom_column", "fields": ["deal_value"]}],
 		}
 		if any("sections" in item for item in layout):
 			layout[-1]["sections"].append(custom_section)
@@ -71,7 +71,7 @@ class TestFCRMSettings(FrappeTestCase):
 		self.set_forecasting(1)
 
 		fields = self.get_quick_entry_fields()
-		self.assertEqual(fields.count("expected_deal_value"), 1)
+		self.assertEqual(fields.count("deal_value"), 1)
 		self.assertIn("expected_closure_date", fields)
 		self.assertNotIn("probability", fields)  # removed from the Cred Hub (credtech#81)
 

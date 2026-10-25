@@ -671,13 +671,8 @@ def get_forecasted_revenue(from_date: str | None = None, to_date: str | None = N
 
 	forecasted_value = (
 		Case()
-		.when(CRMDealStatus.type == "Lost", CRMDeal.expected_deal_value * IfNull(CRMDeal.exchange_rate, 1))
-		.else_(
-			CRMDeal.expected_deal_value
-			* IfNull(CRMDeal.probability, 0)
-			/ 100
-			* IfNull(CRMDeal.exchange_rate, 1)
-		)
+		.when(CRMDealStatus.type == "Lost", CRMDeal.deal_value * IfNull(CRMDeal.exchange_rate, 1))
+		.else_(CRMDeal.deal_value * IfNull(CRMDeal.probability, 0) / 100 * IfNull(CRMDeal.exchange_rate, 1))
 	)
 
 	actual_value = (
