@@ -1,2 +1,2 @@
 __version__ = "1.89.1"
-__title__ = "Frappe CRM"
+__title__ = "Cred Hub"
