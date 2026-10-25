@@ -8,6 +8,7 @@ from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 
 from crm.domain_enrichment.install import seed_default_rules_and_mappings
 from crm.fcrm.doctype.crm_dashboard.crm_dashboard import create_default_manager_dashboard
+from crm.fcrm.doctype.crm_pipeline.fields import setup_default_fields
 from crm.fcrm.doctype.crm_products.crm_products import create_product_details_script
 
 
@@ -152,6 +153,7 @@ def add_default_deal_statuses():
 		doc.position = statuses[status]["position"]
 		# Default stages keep their label as key, so existing references ("Qualification") keep working
 		doc.insert(set_name=status)
+	setup_default_fields(pipeline)
 
 
 def add_pipeline_indexes():

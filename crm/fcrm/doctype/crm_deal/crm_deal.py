@@ -8,6 +8,7 @@ from frappe.model.document import Document
 
 from crm.api.exchange_rate import get_exchange_rate
 from crm.fcrm.doctype.crm_pipeline.crm_pipeline import get_default_pipeline, get_first_stage
+from crm.fcrm.doctype.crm_pipeline.fields import validate_deal as validate_stage_fields
 from crm.fcrm.doctype.crm_service_level_agreement.utils import get_sla
 from crm.fcrm.doctype.crm_status_change_log.crm_status_change_log import add_status_change_log
 from crm.fcrm.doctype.utils import add_or_remove_lost_reason_section_in_sidepanel
@@ -92,6 +93,7 @@ class CRMDeal(Document):
 	def validate(self):
 		self.validate_status()
 		self.validate_pipeline_access()
+		validate_stage_fields(self)
 		self.set_primary_contact()
 		self.set_primary_email_mobile_no()
 		if not self.is_new() and self.has_value_changed("deal_owner") and self.deal_owner:

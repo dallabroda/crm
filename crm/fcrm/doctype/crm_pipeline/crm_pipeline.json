@@ -13,7 +13,10 @@
   "color",
   "icon",
   "members_section",
-  "members"
+  "members",
+  "fields_section",
+  "fields",
+  "field_rules"
  ],
  "fields": [
   {
@@ -62,12 +65,29 @@
    "fieldtype": "Table",
    "label": "Members",
    "options": "CRM Pipeline Member"
+  },
+  {
+   "fieldname": "fields_section",
+   "fieldtype": "Section Break",
+   "label": "Fields"
+  },
+  {
+   "fieldname": "fields",
+   "fieldtype": "Table",
+   "label": "Fields",
+   "options": "CRM Pipeline Field"
+  },
+  {
+   "fieldname": "field_rules",
+   "fieldtype": "Table",
+   "label": "Field Rules",
+   "options": "CRM Pipeline Field Rule"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-10-24 20:00:00.000000",
+ "modified": "2026-10-24 22:00:00.000000",
  "modified_by": "Administrator",
  "module": "FCRM",
  "name": "CRM Pipeline",
