@@ -4,6 +4,7 @@
       v-if="columns"
       :list="columns"
       item-key="column"
+      :disabled="options.fixedColumns"
       :delay="isTouchScreenDevice() ? 200 : 0"
       class="flex sm:mx-2.5 mx-2 pb-3.5"
       @end="updateColumn"
@@ -15,7 +16,10 @@
         >
           <div class="flex gap-2 items-center group justify-between">
             <div class="flex items-center text-base">
-              <Popover bare>
+              <div v-if="options.fixedColumns" class="px-1.5">
+                <IndicatorIcon :class="parseColor(column.column.color)" />
+              </div>
+              <Popover v-else bare>
                 <template #trigger>
                   <Button
                     variant="ghost"
@@ -49,10 +53,12 @@
                   </div>
                 </template>
               </Popover>
-              <div class="text-ink-gray-9">{{ column.column.name }}</div>
+              <div class="text-ink-gray-9">
+                {{ column.column.label || column.column.name }}
+              </div>
             </div>
             <div class="flex">
-              <Dropdown :options="actions(column)">
+              <Dropdown v-if="!options.fixedColumns" :options="actions(column)">
                 <template #default>
                   <Button
                     class="opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity"
@@ -160,7 +166,7 @@
         </div>
       </template>
     </Draggable>
-    <div class="shrink-0 min-w-64">
+    <div v-if="!options.fixedColumns" class="shrink-0 min-w-64">
       <Combobox
         :model-value="null"
         :options="deletedColumns"
@@ -201,6 +207,8 @@ defineProps({
       getRoute: null,
       onClick: null,
       onNewClick: null,
+      // funnel stages: no reordering, recolouring, hiding or adding columns here
+      fixedColumns: false,
     }),
   },
 })
