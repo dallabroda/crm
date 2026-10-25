@@ -63,3 +63,11 @@ class TestSingleCardValue(FrappeTestCase):
 			[{"key": "deal_value"}],
 		)
 		self.assertFalse(frappe.db.get_single_value("FCRM Settings", "auto_update_expected_deal_value"))
+
+	def test_screen_follows_the_products_total(self):
+		from crm.fcrm.doctype.crm_products.crm_products import get_product_details_script
+
+		self.assertIn("this.doc.deal_value = this.doc.net_total", get_product_details_script("CRM Deal"))
+		self.assertNotIn("deal_value", get_product_details_script("CRM Lead"))
+		field = frappe.get_meta("CRM Deal").get_field("deal_value")
+		self.assertIn("doc.products", field.read_only_depends_on)

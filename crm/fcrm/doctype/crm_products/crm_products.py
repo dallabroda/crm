@@ -136,7 +136,17 @@ def get_product_details_script(doctype):
     if (!net_total && discount_applied) {
       this.doc.net_total = net_total
     }
-  }
+"""
+		+ (
+			# The card has a single value: with products, their total (credtech#80; the server does the same)
+			"""    if (this.doc.products.length) {
+      this.doc.deal_value = this.doc.net_total
+    }
+"""
+			if doctype == "CRM Deal"
+			else ""
+		)
+		+ """  }
 }
 
 class CRMProducts {
