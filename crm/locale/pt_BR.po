@@ -10818,3 +10818,23 @@ msgstr "Selecione {0}..."
 
 msgid "The system is busy creating other records. Try again in a moment."
 msgstr "O sistema está criando outros registros. Tente de novo em instantes."
+
+#: crm/api/dashboard.py
+msgid "days"
+msgstr "dias"
+
+#: crm/api/dashboard.py
+msgid "Cards"
+msgstr "Cards"
+
+#: crm/api/dashboard.py
+msgid "Won cards"
+msgstr "Cards ganhos"
+
+#: crm/api/dashboard.py
+msgid "Forecasted"
+msgstr "Previsto"
+
+#: crm/api/dashboard.py
+msgid "Actual"
+msgstr "Realizado"

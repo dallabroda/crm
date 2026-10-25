@@ -479,9 +479,9 @@ def get_average_time_to_close_a_lead(
 		"title": _("Avg. time to close a lead"),
 		"tooltip": _("Average time taken from lead creation to deal closure"),
 		"value": current_avg_lead,
-		"suffix": " days",
+		"suffix": " " + _("days"),
 		"delta": delta_lead,
-		"deltaSuffix": " days",
+		"deltaSuffix": " " + _("days"),
 		"negativeIsBetter": True,
 	}
 
@@ -542,9 +542,9 @@ def get_average_time_to_close_a_deal(
 		"title": _("Avg. time to close a deal"),
 		"tooltip": _("Average time taken from deal creation to deal closure"),
 		"value": current_avg_deal,
-		"suffix": " days",
+		"suffix": " " + _("days"),
 		"delta": delta_deal,
-		"deltaSuffix": " days",
+		"deltaSuffix": " " + _("days"),
 		"negativeIsBetter": True,
 	}
 
@@ -644,9 +644,9 @@ def get_sales_trend(from_date: str | None = None, to_date: str | None = None, us
 			"title": _("Count"),
 		},
 		"series": [
-			{"name": "leads", "type": "line", "showDataPoints": True},
-			{"name": "deals", "type": "line", "showDataPoints": True},
-			{"name": "won_deals", "type": "line", "showDataPoints": True},
+			{"name": "leads", "label": _("Leads"), "type": "line", "showDataPoints": True},
+			{"name": "deals", "label": _("Cards"), "type": "line", "showDataPoints": True},
+			{"name": "won_deals", "label": _("Won cards"), "type": "line", "showDataPoints": True},
 		],
 	}
 
@@ -724,8 +724,8 @@ def get_forecasted_revenue(from_date: str | None = None, to_date: str | None = N
 			"title": _("Revenue") + f" ({get_base_currency_symbol()})",
 		},
 		"series": [
-			{"name": "forecasted", "type": "line", "showDataPoints": True},
-			{"name": "actual", "type": "line", "showDataPoints": True},
+			{"name": "forecasted", "label": _("Forecasted"), "type": "line", "showDataPoints": True},
+			{"name": "actual", "label": _("Actual"), "type": "line", "showDataPoints": True},
 		],
 	}
 
@@ -848,7 +848,7 @@ def get_deals_by_stage_axis(
 		},
 		"yAxis": {"title": _("Count")},
 		"series": [
-			{"name": "count", "type": "bar"},
+			{"name": "count", "label": _("Count"), "type": "bar"},
 		],
 	}
 
@@ -942,7 +942,7 @@ def get_lost_deal_reasons(from_date: str | None = None, to_date: str | None = No
 			"title": _("Count"),
 		},
 		"series": [
-			{"name": "count", "type": "bar"},
+			{"name": "count", "label": _("Count"), "type": "bar"},
 		],
 	}
 
@@ -1075,8 +1075,8 @@ def get_deals_by_territory(from_date: str | None = None, to_date: str | None = N
 			"title": _("Deal value") + f" ({get_base_currency_symbol()})",
 		},
 		"series": [
-			{"name": "deals", "type": "bar"},
-			{"name": "value", "type": "line", "showDataPoints": True, "axis": "y2"},
+			{"name": "deals", "label": _("Cards"), "type": "bar"},
+			{"name": "value", "label": _("Value"), "type": "line", "showDataPoints": True, "axis": "y2"},
 		],
 	}
 
@@ -1138,8 +1138,8 @@ def get_deals_by_salesperson(
 			"title": _("Deal value") + f" ({get_base_currency_symbol()})",
 		},
 		"series": [
-			{"name": "deals", "type": "bar"},
-			{"name": "value", "type": "line", "showDataPoints": True, "axis": "y2"},
+			{"name": "deals", "label": _("Cards"), "type": "bar"},
+			{"name": "value", "label": _("Value"), "type": "line", "showDataPoints": True, "axis": "y2"},
 		],
 	}
 
