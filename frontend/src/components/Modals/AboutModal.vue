@@ -30,13 +30,13 @@
           </a>
         </div>
         <hr class="border-t my-3 mx-2" />
-        <!-- AGPL-3.0: users of the service get a link to the source of the
-             running version; original copyright notices stay in the code -->
+        <!-- AGPL-3.0 section 5(d): keep the Appropriate Legal Notices that the
+             original About showed (copyright, no warranty, license, source) -->
         <p class="text-sm text-ink-gray-6 px-2 mt-2">
           © CredTech Digital.
           {{
             __(
-              'Free software under the AGPL-3.0 license, built on open source projects (credits in the source code).',
+              'Based on Frappe CRM, © Frappe Technologies Pvt. Ltd. and contributors. Free software under the GNU AGPL-3.0, provided without any warranty.',
             )
           }}
         </p>
@@ -48,6 +48,7 @@
 import CRMLogo from '@/components/Icons/CRMLogo.vue'
 import GitHubIcon from '@/components/Icons/GitHubIcon.vue'
 import LucideGlobe from '~icons/lucide/globe'
+import LucideScale from '~icons/lucide/scale'
 import { Dialog } from 'frappe-ui'
 
 let show = defineModel({ type: Boolean })
@@ -62,6 +63,11 @@ let links = [
     label: __('Source code (AGPL-3.0)'),
     url: 'https://github.com/dallabroda/crm',
     icon: GitHubIcon,
+  },
+  {
+    label: __('License (GNU AGPL-3.0)'),
+    url: 'https://www.gnu.org/licenses/agpl-3.0.html',
+    icon: LucideScale,
   },
 ]
 </script>

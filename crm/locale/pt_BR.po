@@ -9225,3 +9225,9 @@ msgstr "Você não verá esta configuração guiada de novo. Ainda dá para cone
 
 msgid "You do not have enough permissions to access Cred Hub. Please contact your administrator if you believe this is an error."
 msgstr "Você não tem permissão para acessar o Cred Hub. Fale com o administrador se achar que isto é um erro."
+
+msgid "Based on Frappe CRM, © Frappe Technologies Pvt. Ltd. and contributors. Free software under the GNU AGPL-3.0, provided without any warranty."
+msgstr "Baseado no Frappe CRM, © Frappe Technologies Pvt. Ltd. e colaboradores. Software livre sob a licença GNU AGPL-3.0, fornecido sem nenhuma garantia."
+
+msgid "License (GNU AGPL-3.0)"
+msgstr "Licença (GNU AGPL-3.0)"
