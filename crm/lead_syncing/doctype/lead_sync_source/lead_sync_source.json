@@ -11,6 +11,7 @@
   "column_break_lwcw",
   "last_synced_at",
   "enabled",
+  "pipeline",
   "background_sync_frequency",
   "facebook_section",
   "facebook_page",
@@ -80,6 +81,14 @@
    "label": "Background Sync Frequency",
    "options": "Every 5 Minutes\nEvery 10 Minutes\nEvery 15 Minutes\nHourly\nDaily\nMonthly",
    "reqd": 1
+  },
+  {
+   "description": "Pipeline that receives the synced leads as cards.",
+   "fieldname": "pipeline",
+   "fieldtype": "Link",
+   "label": "Pipeline",
+   "mandatory_depends_on": "eval:doc.enabled",
+   "options": "CRM Pipeline"
   }
  ],
  "grid_page_length": 50,
@@ -90,7 +99,7 @@
    "link_fieldname": "source"
   }
  ],
- "modified": "2026-02-23 12:45:55.637376",
+ "modified": "2026-10-24 23:30:00.000000",
  "modified_by": "Administrator",
  "module": "Lead Syncing",
  "name": "Lead Sync Source",

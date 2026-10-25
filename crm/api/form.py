@@ -64,6 +64,8 @@ DENIED_FIELDNAMES = (
 	# a mandatory Link the system sets — seeded as a hidden field with a default, not
 	# offered in the picker.
 	"status",
+	# the pipeline a submission lands in is chosen by the form author, not the visitor
+	"pipeline",
 	"lead_name",
 	"converted",
 	"sla_status",
@@ -217,6 +219,10 @@ def _seed_hidden_fields(document_type: str) -> list[dict]:
 	visible = _seeded_visible_fieldnames(document_type)
 	hidden = []
 	for df in meta.fields:
+		if df.fieldname == "pipeline":
+			continue  # added below for every target
+		if document_type == "CRM Deal" and df.fieldname == "status":
+			continue  # the card takes the first stage of the form's pipeline
 		if not df.reqd or df.fieldname in visible:
 			continue
 		if df.fieldtype in SUPPORTED_FIELDTYPES and df.fieldname not in DENIED_FIELDNAMES:
@@ -229,6 +235,18 @@ def _seed_hidden_fields(document_type: str) -> list[dict]:
 				"fieldtype": df.fieldtype,
 				"options": df.options or "",
 				"default": default,
+			}
+		)
+	pipeline_df = meta.get_field("pipeline")
+	if pipeline_df:
+		# Submissions become cards in this pipeline (a Lead form converts right away)
+		hidden.append(
+			{
+				"fieldname": "pipeline",
+				"label": pipeline_df.label,
+				"fieldtype": pipeline_df.fieldtype,
+				"options": pipeline_df.options,
+				"default": get_default_pipeline() or "",
 			}
 		)
 	return hidden

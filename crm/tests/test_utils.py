@@ -458,8 +458,10 @@ class TestCreateLeadFromIncomingEmail(FrappeTestCase):
 		frappe.db.set_single_value("FCRM Settings", "auto_mark_replied_on_response", 0)
 		frappe.db.set_single_value("FCRM Settings", "update_timestamp_on_new_communication", 0)
 
-	def _make_email_account(self, create_lead=1):
-		"""Create a minimal incoming Email Account with the CRM custom field set."""
+	def _make_email_account(self, create_lead=1, pipeline="default"):
+		"""Create a minimal incoming Email Account with the CRM custom fields set."""
+		from crm.fcrm.doctype.crm_pipeline.crm_pipeline import get_default_pipeline
+
 		email_account = frappe.get_doc(
 			{
 				"doctype": "Email Account",
@@ -467,6 +469,7 @@ class TestCreateLeadFromIncomingEmail(FrappeTestCase):
 				"email_id": "test-crm-incoming@example.com",
 				"enable_incoming": 1,
 				"create_lead_from_incoming_email": create_lead,
+				"crm_pipeline": get_default_pipeline() if pipeline == "default" else pipeline,
 			}
 		)
 		email_account.flags.ignore_mandatory = True
@@ -498,6 +501,22 @@ class TestCreateLeadFromIncomingEmail(FrappeTestCase):
 		doc.insert(ignore_permissions=True)
 
 		self.assertTrue(frappe.db.exists("CRM Lead", {"email": "newlead@example.com"}))
+
+	def test_incoming_email_becomes_card_in_account_pipeline(self):
+		email_account = self._make_email_account()
+		doc = self._incoming_comm("newcard@example.com", email_account.name, sender_full_name="New Card")
+		doc.insert(ignore_permissions=True)
+		lead = frappe.db.get_value("CRM Lead", {"email": "newcard@example.com"})
+		card = frappe.db.get_value("CRM Deal", {"lead": lead}, ["name", "pipeline"], as_dict=True)
+		self.assertEqual(card.pipeline, email_account.crm_pipeline)
+		doc.reload()
+		self.assertEqual((doc.reference_doctype, doc.reference_name), ("CRM Deal", card.name))
+
+	def test_nothing_created_without_pipeline(self):
+		email_account = self._make_email_account(pipeline=None)
+		doc = self._incoming_comm("nopipeline@example.com", email_account.name)
+		doc.insert(ignore_permissions=True)
+		self.assertFalse(frappe.db.exists("CRM Lead", {"email": "nopipeline@example.com"}))
 
 	def test_lead_not_created_when_setting_disabled(self):
 		"""When create_lead_from_incoming_email is off on the Email Account, no lead is created."""
@@ -616,15 +635,15 @@ class TestCreateLeadFromIncomingEmail(FrappeTestCase):
 		)
 		self.assertEqual(lead, [{"first_name": "Mononym", "last_name": ""}])
 
-	def test_communication_linked_back_to_created_lead(self):
-		"""After lead creation, the communication's reference_doctype and reference_name should point to the new lead."""
+	def test_communication_linked_back_to_created_card(self):
+		"""The communication points to the card created from the e-mail."""
 		email_account = self._make_email_account()
 		doc = self._incoming_comm("linked@example.com", email_account.name, sender_full_name="Link Test")
 		create_lead_from_incoming_email(doc)
 
-		self.assertEqual(doc.reference_doctype, "CRM Lead")
 		lead_name = frappe.db.get_value("CRM Lead", {"email": "linked@example.com"}, "name")
-		self.assertEqual(doc.reference_name, lead_name)
+		self.assertEqual(doc.reference_doctype, "CRM Deal")
+		self.assertEqual(doc.reference_name, frappe.db.get_value("CRM Deal", {"lead": lead_name}, "name"))
 
 	def test_lead_source_set_to_email_when_source_exists(self):
 		"""Lead source should be set to 'Email' when the CRM Lead Source 'Email' exists."""

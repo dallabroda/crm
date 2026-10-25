@@ -15,6 +15,7 @@ from crm.fcrm.doctype.crm_status_change_log.crm_status_change_log import (
 	add_status_change_log,
 )
 from crm.fcrm.doctype.utils import add_or_remove_lost_reason_section_in_sidepanel
+from crm.permissions.pipeline import get_role_in_pipeline
 
 LEAD_DEAL_FIELD_MAP = {"lead_owner": "deal_owner"}
 
@@ -63,6 +64,7 @@ class CRMLead(Document):
 		no_of_employees: DF.Literal["1-10", "11-50", "51-200", "201-500", "501-1000", "1000+"]
 		organization: DF.Data | None
 		phone: DF.Data | None
+		pipeline: DF.Link | None
 		products: DF.Table[CRMProducts]
 		response_by: DF.Datetime | None
 		rolling_responses: DF.Table[CRMRollingResponseTime]
@@ -110,6 +112,25 @@ class CRMLead(Document):
 		from crm.domain_enrichment.tasks import auto_enrich_on_create
 
 		auto_enrich_on_create(self)
+
+		if self.pipeline:
+			self.convert_into_pipeline()
+
+	def convert_into_pipeline(self):
+		"""Automatic entries arrive as a lead carrying the pipeline chosen in the integration: turn it
+		into a card there at once (the lead stays only as the record of the original entry)."""
+		owner = (
+			self.lead_owner
+			if self.lead_owner and get_role_in_pipeline(self.pipeline, self.lead_owner)
+			else None
+		)
+		self.flags.ignore_permissions = True
+		return convert_to_deal(
+			lead=self.name,
+			doc=self,
+			deal={"pipeline": self.pipeline, "deal_owner": owner},
+			if_converted="Return Existing",
+		)
 
 	def before_save(self):
 		self.apply_sla()
@@ -417,7 +438,8 @@ class CRMLead(Document):
 		new_deal.insert(ignore_permissions=True)
 
 		for user in self.get_assigned_users():
-			if user and user != new_deal.deal_owner:
+			# Assignees outside the card's pipeline could not see it
+			if user and user != new_deal.deal_owner and get_role_in_pipeline(new_deal.pipeline, user):
 				new_deal.assign_agent(user)
 
 		return new_deal.name
