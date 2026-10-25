@@ -10838,3 +10838,7 @@ msgstr "Previsto"
 #: crm/api/dashboard.py
 msgid "Actual"
 msgstr "Realizado"
+
+#: frontend/src/components/Settings/DashboardSettings.vue
+msgid "Makes \"Expected Closure Date\" and \"Deal Value\" mandatory for deal value forecasting"
+msgstr "Torna obrigatórios a \"Data prevista de fechamento\" e o \"Valor do card\" para a previsão do valor dos cards"
