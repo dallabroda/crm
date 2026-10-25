@@ -5,7 +5,7 @@ import { useAttachments } from '@/composables/useAttachments'
 import { showSettings, activeSettingsPage } from '@/composables/settings'
 import { runSequentially, parseAssignees, sanitizeText } from '@/utils'
 import { findMissingMandatory } from '@/utils/fieldTransforms'
-import { missingFieldsFromError } from '@/utils/pipelines'
+import { isMissingFieldsError, missingFieldsFromError } from '@/utils/pipelines'
 import {
   getFetchSource,
   getFieldsToFetch,
@@ -113,10 +113,11 @@ export function useDocument(doctype, docname, resourceOverrides = {}) {
             onError: (err) => {
               triggerOnError(err)
 
-              let missing = missingFieldsFromError(err)
+              // frappe-ui keeps only `message`/_server_messages on the error, so
+              // the list may be missing: the page then asks get_missing_fields
               let handler = missingFieldsHandlers[`${doctype}:${docname}`]
-              if (missing && handler) {
-                handler(missing)
+              if (isMissingFieldsError(err) && handler) {
+                handler(missingFieldsFromError(err))
                 return
               }
 

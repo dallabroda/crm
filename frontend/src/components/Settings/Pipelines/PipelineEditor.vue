@@ -498,10 +498,8 @@ function payload() {
       probability: s.probability || 0,
     })),
     members: form.members.map((m) => ({ user: m.user, role: m.role })),
-    fields: form.fields.map((f, i) => ({
-      fieldname: f.fieldname,
-      position: i + 1,
-    })),
+    // in order; position = order (crm.api.pipeline.save_pipeline)
+    fields: form.fields.map((f) => f.fieldname),
   }
   if (form.name) doc.name = form.name
   // Rules can only be sent for stages that already have a key on the server
@@ -568,9 +566,14 @@ function fill(config) {
     user: m.user,
     role: m.role,
   }))
-  form.fields = [...(config.fields || [])].sort(
-    (a, b) => a.position - b.position,
-  )
+  // fieldnames in order, or { fieldname, position } rows
+  form.fields = [...(config.fields || [])]
+    .map((f, i) =>
+      typeof f === 'string'
+        ? { fieldname: f, position: i + 1 }
+        : { fieldname: f.fieldname, position: f.position ?? i + 1 },
+    )
+    .sort((a, b) => a.position - b.position)
   for (let r of config.field_rules || []) {
     rules[r.fieldname] ||= {}
     rules[r.fieldname][r.stage] = {

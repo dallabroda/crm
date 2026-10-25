@@ -366,7 +366,7 @@ import KanbanSettings from '@/components/Kanban/KanbanSettings.vue'
 import LostReasonModal from '@/components/Modals/LostReasonModal.vue'
 import MissingFieldsModal from '@/components/Modals/MissingFieldsModal.vue'
 import { pipelinesStore } from '@/stores/pipelines'
-import { missingFieldsFromError } from '@/utils/pipelines'
+import { isMissingFieldsError, missingFieldsFromError } from '@/utils/pipelines'
 import { getSettings } from '@/stores/settings'
 import { globalStore } from '@/stores/global'
 import { viewsStore } from '@/stores/views'
@@ -1352,9 +1352,15 @@ function moveCardInPipeline(data, fields) {
     values: Object.keys(values).length ? values : null,
   })
     .then(() => persistKanbanColumnOrder(data.kanban_columns))
-    .catch((error) => {
+    .catch(async (error) => {
       let missing = missingFieldsFromError(error)
-      if (missing) {
+      if (!missing && isMissingFieldsError(error)) {
+        missing = await pipelineCall('get_missing_fields', {
+          deal: data.item,
+          stage,
+        }).catch(() => null)
+      }
+      if (missing?.length) {
         pendingMissingFields.value = { data, values: fields, fields: missing }
         showMissingFieldsModal.value = true
         return

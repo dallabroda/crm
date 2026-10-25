@@ -1130,7 +1130,24 @@ const showMissingFieldsModal = ref(false)
 const stopMissingFields = onMissingRequiredFields(
   'CRM Deal',
   props.dealId,
-  (fields) => {
+  async (fields) => {
+    if (!fields?.length) {
+      try {
+        fields = await pipelineStore.apiCall('get_missing_fields', {
+          deal: props.dealId,
+          stage: document.doc.status,
+        })
+      } catch (e) {
+        console.error('[pipelines] get_missing_fields failed', e)
+      }
+    }
+    if (!fields?.length) {
+      toast.error(
+        __('Fill in the required fields of this stage before moving the card.'),
+      )
+      document.reload()
+      return
+    }
     missingFields.value = fields
     showMissingFieldsModal.value = true
   },

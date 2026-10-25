@@ -238,8 +238,13 @@ export async function mockCall(method, args = {}) {
         pipelines.push({ position: pipelines.length + 1, my_role: 'Owner' })
       }
       let target = findPipeline(doc.name)
-      let { field_rules, ...rest } = doc
+      let { field_rules, fields, ...rest } = doc
       Object.assign(target, rest)
+      if (fields) {
+        target.fields = fields.map((f, i) =>
+          typeof f === 'string' ? { fieldname: f, position: i + 1 } : f,
+        )
+      }
       target.stages = (doc.stages || target.stages).map((s, i) => ({
         ...s,
         name:

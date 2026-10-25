@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import {
   applyStageRules,
+  isMissingFieldsError,
   missingFieldsFromError,
   LOCKED_FIELDS,
 } from '../../src/utils/pipelines'
@@ -8,6 +9,20 @@ import {
 const missing = [
   { fieldname: 'cpf', label: 'CPF', fieldtype: 'Data', options: '' },
 ]
+
+describe('isMissingFieldsError', () => {
+  it('recognises the error even when the field list was dropped', () => {
+    // frappe-ui keeps only message/_server_messages on the error object
+    expect(
+      isMissingFieldsError({
+        exc_type: 'MissingRequiredFieldsError',
+        messages: [],
+      }),
+    ).toBe(true)
+    expect(isMissingFieldsError({ exc_type: 'ValidationError' })).toBe(false)
+    expect(isMissingFieldsError(null)).toBe(false)
+  })
+})
 
 describe('missingFieldsFromError', () => {
   it('ignores other errors', () => {

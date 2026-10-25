@@ -4,6 +4,10 @@
 // could not be found, moved or owned (cred-hub-funis.md, "Catálogo de campos").
 export const LOCKED_FIELDS = ['pipeline', 'status', 'deal_owner']
 
+export function isMissingFieldsError(error) {
+  return error?.exc_type === 'MissingRequiredFieldsError'
+}
+
 // crm.api.pipeline.move_card / CRM Deal save answer a stage with empty
 // required fields with MissingRequiredFieldsError carrying
 // { missing_fields: [{ fieldname, label, fieldtype, options }] } in a message.
