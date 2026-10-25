@@ -15,6 +15,12 @@
       </div>
     </template>
     <template #default>
+      <!-- every card belongs to a funnel (no default funnel, owner decision) -->
+      <PipelineSelect
+        v-model="pipeline"
+        class="mb-6"
+        :description="__('The card starts in the first stage of this funnel.')"
+      />
       <div class="mb-4 flex items-center gap-2 text-ink-gray-5">
         <OrganizationsIcon class="h-4 w-4" />
         <label class="block text-base">{{ __('Organization') }}</label>
@@ -86,10 +92,10 @@ import ContactsIcon from '@/components/Icons/ContactsIcon.vue'
 import EditIcon from '@/components/Icons/EditIcon.vue'
 import FieldLayout from '@/components/FieldLayout/FieldLayout.vue'
 import Link from '@/components/Controls/Link.vue'
+import PipelineSelect from '@/components/Pipelines/PipelineSelect.vue'
 import { useDocument } from '@/data/document'
 import { usersStore } from '@/stores/users'
 import { sessionStore } from '@/stores/session'
-import { statusesStore } from '@/stores/statuses'
 import { getMeta } from '@/stores/meta'
 import { showQuickEntryModal, quickEntryProps } from '@/composables/modals'
 import { isMobileView } from '@/composables/settings'
@@ -107,7 +113,6 @@ const show = defineModel({ type: Boolean })
 
 const router = useRouter()
 
-const { statusOptions, getDealStatus } = statusesStore()
 const { isManager } = usersStore()
 const { user } = sessionStore()
 const { completeStep } = useCrmOnboarding()
@@ -119,6 +124,8 @@ const existingOrganizationChecked = ref(false)
 const existingContact = ref('')
 const existingOrganization = ref('')
 const error = ref('')
+// automatic entries already carry their funnel; old leads have none
+const pipeline = ref(props.lead.pipeline || '')
 const { capture } = useTelemetry()
 
 const { triggerConvertToDeal } = useDocument('CRM Lead', props.lead.name)
@@ -126,6 +133,14 @@ const { document: deal } = useDocument('CRM Deal')
 
 async function convertToDeal() {
   error.value = ''
+
+  if (!pipeline.value) {
+    error.value = __('Choose the funnel of the card.')
+    return
+  }
+  // the server puts the card in the funnel's first stage
+  deal.doc.pipeline = pipeline.value
+  delete deal.doc.status
 
   if (existingContactChecked.value && !existingContact.value) {
     error.value = __('Please select an existing contact')
@@ -185,8 +200,6 @@ async function convertToDeal() {
   }
 }
 
-const dealStatuses = computed(() => statusOptions('deal'))
-
 const dealTabs = createResource({
   url: 'crm.fcrm.doctype.crm_fields_layout.crm_fields_layout.get_fields_layout',
   cache: ['RequiredFields', 'CRM Deal'],
@@ -197,14 +210,11 @@ const dealTabs = createResource({
     _tabs?.forEach((tab) => {
       tab.sections?.forEach((section) => {
         section.columns?.forEach((column) => {
-          column.fields?.forEach((field) => {
-            hasFields = true
-            if (field.fieldname == 'status') {
-              field.fieldtype = 'Select'
-              field.options = dealStatuses.value
-              field.prefix = getDealStatus(deal.doc.status).color
-            }
-          })
+          // stages belong to a funnel: the card starts in the first one
+          column.fields = (column.fields || []).filter(
+            (field) => field.fieldname !== 'status',
+          )
+          if (column.fields.length) hasFields = true
         })
       })
     })
@@ -288,9 +298,9 @@ function isMatchingCustomField(leadField, dealField) {
 function isCustomField(field) {
   return Boolean(
     field?.is_custom_field ||
-      field?.custom ||
-      field?.fieldname?.startsWith('custom_') ||
-      field?.name === `${field?.parent}-${field?.fieldname}`,
+    field?.custom ||
+    field?.fieldname?.startsWith('custom_') ||
+    field?.name === `${field?.parent}-${field?.fieldname}`,
   )
 }
 

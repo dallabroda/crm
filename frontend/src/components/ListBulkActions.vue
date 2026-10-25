@@ -28,15 +28,47 @@
     :items="showDeleteDocModal.items"
     :reload="reload"
   />
+  <Dialog v-model:open="bulkConvert.open" :size="'md'">
+    <template #title>
+      <h3 class="text-3xl-semibold leading-6 text-ink-gray-9">
+        {{ __('Convert to Deal') }}
+      </h3>
+    </template>
+    <template #default>
+      <p class="mb-4 text-p-base text-ink-gray-7">
+        {{
+          __('Are you sure you want to convert {0} lead(s) to deal(s)?', [
+            bulkConvert.names.length,
+          ])
+        }}
+      </p>
+      <PipelineSelect
+        v-model="bulkConvert.pipeline"
+        :description="__('The card starts in the first stage of this funnel.')"
+      />
+      <ErrorMessage class="mt-4" :message="bulkConvert.error" />
+    </template>
+    <template #actions>
+      <div class="flex justify-end">
+        <Button
+          :label="__('Convert')"
+          variant="solid"
+          :loading="bulkConvert.loading"
+          @click="submitBulkConvert"
+        />
+      </div>
+    </template>
+  </Dialog>
 </template>
 
 <script setup>
 import EditValueModal from '@/components/Modals/EditValueModal.vue'
 import AssignmentModal from '@/components/Modals/AssignmentModal.vue'
+import PipelineSelect from '@/components/Pipelines/PipelineSelect.vue'
 import { setupListCustomizations } from '@/utils'
 import { globalStore } from '@/stores/global'
 import { useTelemetry } from '@framework/ui/telemetry'
-import { call, toast } from 'frappe-ui'
+import { Button, Dialog, ErrorMessage, call, toast } from 'frappe-ui'
 import { createToast, scriptToast } from '@/utils/scriptToast'
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
@@ -74,34 +106,63 @@ function editValues(selections, unselectAll) {
   unselectAllAction.value = unselectAll
 }
 
+// every card belongs to a funnel (no default funnel): ask for it once for
+// the whole selection
+const bulkConvert = ref({
+  open: false,
+  names: [],
+  pipeline: '',
+  error: '',
+  loading: false,
+  unselectAll: null,
+})
+
 function convertToDeal(selections, unselectAll) {
-  $dialog({
-    title: __('Convert to Deal'),
-    message: __('Are you sure you want to convert {0} lead(s) to deal(s)?', [
-      selections.size,
-    ]),
-    variant: 'solid',
-    theme: 'blue',
-    actions: [
-      {
-        label: __('Convert'),
-        variant: 'solid',
-        onClick: ({ close }) => {
-          capture('bulk_convert_to_deal')
-          Array.from(selections).forEach((name) => {
-            call('crm.fcrm.doctype.crm_lead.crm_lead.convert_to_deal', {
-              lead: name,
-            }).then(() => {
-              toast.success(__('Converted Successfully'))
-              list.value.reload()
-              unselectAll()
-              close()
-            })
-          })
-        },
-      },
-    ],
-  })
+  bulkConvert.value = {
+    open: true,
+    names: Array.from(selections),
+    pipeline: '',
+    error: '',
+    loading: false,
+    unselectAll,
+  }
+}
+
+async function submitBulkConvert() {
+  const state = bulkConvert.value
+  if (!state.pipeline) {
+    state.error = __('Choose the funnel of the cards.')
+    return
+  }
+  state.error = ''
+  state.loading = true
+  capture('bulk_convert_to_deal')
+  // one at a time: each conversion locks its lead and may create contacts
+  let failed = 0
+  for (const name of state.names) {
+    try {
+      await call('crm.fcrm.doctype.crm_lead.crm_lead.convert_to_deal', {
+        lead: name,
+        deal: { pipeline: state.pipeline },
+      })
+    } catch {
+      failed++
+    }
+  }
+  state.loading = false
+  if (failed) {
+    toast.error(
+      __('{0} of {1} leads could not be converted', [
+        failed,
+        state.names.length,
+      ]),
+    )
+  } else {
+    toast.success(__('Converted Successfully'))
+  }
+  list.value.reload()
+  state.unselectAll?.()
+  state.open = false
 }
 
 function deleteValues(selections, unselectAll) {

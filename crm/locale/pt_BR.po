@@ -9231,3 +9231,18 @@ msgstr "Baseado no Frappe CRM, © Frappe Technologies Pvt. Ltd. e colaboradores.
 
 msgid "License (GNU AGPL-3.0)"
 msgstr "Licença (GNU AGPL-3.0)"
+
+msgid "Choose the funnel of the card."
+msgstr "Escolha o funil do card."
+
+msgid "Choose the funnel of the cards."
+msgstr "Escolha o funil dos cards."
+
+msgid "The card starts in the first stage of this funnel."
+msgstr "O card começa na primeira etapa deste funil."
+
+msgid "{0} of {1} leads could not be converted"
+msgstr "{0} de {1} leads não puderam ser convertidos"
+
+msgid "Choose a pipeline for the card."
+msgstr "Escolha um funil para o card."
