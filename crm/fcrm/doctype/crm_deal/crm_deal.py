@@ -11,6 +11,7 @@ from crm.fcrm.doctype.crm_pipeline.crm_pipeline import get_default_pipeline, get
 from crm.fcrm.doctype.crm_service_level_agreement.utils import get_sla
 from crm.fcrm.doctype.crm_status_change_log.crm_status_change_log import add_status_change_log
 from crm.fcrm.doctype.utils import add_or_remove_lost_reason_section_in_sidepanel
+from crm.permissions.pipeline import get_role_in_pipeline
 
 
 class CRMDeal(Document):
@@ -90,6 +91,7 @@ class CRMDeal(Document):
 
 	def validate(self):
 		self.validate_status()
+		self.validate_pipeline_access()
 		self.set_primary_contact()
 		self.set_primary_email_mobile_no()
 		if not self.is_new() and self.has_value_changed("deal_owner") and self.deal_owner:
@@ -148,6 +150,29 @@ class CRMDeal(Document):
 			frappe.throw(
 				_("Stage {0} does not belong to pipeline {1}.").format(
 					frappe.bold(stage.deal_status), frappe.bold(pipeline.pipeline_name)
+				)
+			)
+
+	def validate_pipeline_access(self):
+		"""Only members create or move cards into a pipeline, and the responsible must be a member too."""
+		if frappe.flags.in_install or frappe.flags.in_patch or frappe.flags.in_migrate:
+			return
+		pipeline_changed = self.is_new() or self.has_value_changed("pipeline")
+		user = frappe.session.user
+		if (
+			pipeline_changed
+			and not self.flags.ignore_permissions
+			and not get_role_in_pipeline(self.pipeline, user)
+		):
+			frappe.throw(_("You are not a member of this pipeline."), frappe.PermissionError)
+		if (
+			self.deal_owner
+			and (pipeline_changed or self.has_value_changed("deal_owner"))
+			and not get_role_in_pipeline(self.pipeline, self.deal_owner)
+		):
+			frappe.throw(
+				_("{0} is not a member of this pipeline and cannot be responsible for the card.").format(
+					frappe.bold(frappe.utils.get_fullname(self.deal_owner))
 				)
 			)
 

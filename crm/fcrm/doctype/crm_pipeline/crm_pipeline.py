@@ -56,6 +56,12 @@ class CRMPipeline(Document):
 					)
 				)
 			seen.add(member.user)
+			if member.role == "Owner" and not can_own_pipelines(member.user):
+				frappe.throw(
+					_("Row {0}: give user {1} the Pipeline Owner role before making them an owner.").format(
+						member.idx, frappe.bold(member.user)
+					)
+				)
 
 	def on_trash(self):
 		if frappe.db.exists("CRM Deal", {"pipeline": self.name}):
@@ -71,6 +77,23 @@ class CRMPipeline(Document):
 			frappe.delete_doc("CRM View Settings", view, ignore_permissions=True)
 		for stage in frappe.get_all("CRM Deal Status", {"pipeline": self.name}, pluck="name"):
 			frappe.delete_doc("CRM Deal Status", stage, ignore_permissions=True)
+
+
+def add_members(pipeline: str, users: list[str], role: str = "Member"):
+	"""Add users to a pipeline, keeping existing memberships as they are."""
+	doc = frappe.get_doc("CRM Pipeline", pipeline)
+	current = {m.user for m in doc.members}
+	for user in users:
+		if user and user not in current:
+			doc.append("members", {"user": user, "role": role})
+			current.add(user)
+	doc.save(ignore_permissions=True)
+
+
+def can_own_pipelines(user: str) -> bool:
+	from crm.permissions.pipeline import PIPELINE_OWNER_ROLE, is_admin
+
+	return is_admin(user) or PIPELINE_OWNER_ROLE in frappe.get_roles(user)
 
 
 def next_position(doctype: str, **filters) -> int:

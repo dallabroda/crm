@@ -12,6 +12,7 @@ from crm.demo.utils import (
 	insert_version,
 	resolve_owners,
 )
+from crm.fcrm.doctype.crm_pipeline.crm_pipeline import add_members, get_default_pipeline
 
 
 def create_demo_deals(lead_names, demo_users):
@@ -20,6 +21,11 @@ def create_demo_deals(lead_names, demo_users):
 
 	session_user, owner_1, owner_2, _ = resolve_owners(demo_users)
 	_full_names = build_full_names(session_user)
+
+	# Card owners must take part in the pipeline the demo deals land in
+	pipeline = get_default_pipeline()
+	if pipeline:
+		add_members(pipeline, [session_user, *demo_users])
 
 	# leads[0] Alice, [3] David, [7] Henry, [8] Iris, [9] Jack → 5 active/won deals
 	# leads[10] Karen, [11] Leo → 2 lost deals
