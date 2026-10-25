@@ -7,7 +7,7 @@ import frappe
 
 from crm.tests import CRMTestCase as FrappeTestCase
 
-FORECASTING_FIELDS = ["expected_closure_date", "probability", "expected_deal_value"]
+FORECASTING_FIELDS = ["expected_closure_date", "expected_deal_value"]
 
 
 class TestFCRMSettings(FrappeTestCase):
@@ -73,7 +73,7 @@ class TestFCRMSettings(FrappeTestCase):
 		fields = self.get_quick_entry_fields()
 		self.assertEqual(fields.count("expected_deal_value"), 1)
 		self.assertIn("expected_closure_date", fields)
-		self.assertIn("probability", fields)
+		self.assertNotIn("probability", fields)  # removed from the Cred Hub (credtech#81)
 
 	def test_forecasting_adds_section_to_sidepanel(self):
 		"""Side panel should get a labeled Forecasted Sales section after the contacts section"""

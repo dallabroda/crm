@@ -238,7 +238,7 @@ def add_default_fields_layout(force=False):
 		},
 		"CRM Deal-Side Panel": {
 			"doctype": "CRM Deal",
-			"layout": '[{"label": "Contacts", "name": "contacts_section", "opened": true, "editable": false, "contacts": []}, {"label": "Organization Details", "name": "organization_section", "opened": true, "columns": [{"name": "column_na2Q", "fields": ["organization", "company_description", "industry", "no_of_employees", "website", "territory", "annual_revenue", "closed_date", "probability", "next_step", "deal_owner", "linkedin", "twitter", "facebook"]}]}]',
+			"layout": '[{"label": "Contacts", "name": "contacts_section", "opened": true, "editable": false, "contacts": []}, {"label": "Organization Details", "name": "organization_section", "opened": true, "columns": [{"name": "column_na2Q", "fields": ["organization", "company_description", "industry", "no_of_employees", "website", "territory", "annual_revenue", "closed_date", "next_step", "deal_owner", "linkedin", "twitter", "facebook"]}]}]',
 		},
 		"Contact-Side Panel": {
 			"doctype": "Contact",
@@ -257,7 +257,7 @@ def add_default_fields_layout(force=False):
 		},
 		"CRM Deal-Data Fields": {
 			"doctype": "CRM Deal",
-			"layout": '[{"name":"first_tab","sections":[{"label":"Details","name":"details_section","opened":true,"columns":[{"name":"column_z9XL","fields":["organization","company_description","industry","no_of_employees","annual_revenue"]},{"name":"column_gM4w","fields":["website","linkedin","twitter","facebook","closed_date","next_step"]},{"name":"column_gWmE","fields":["territory","probability","deal_owner"]}]},{"label":"Products","name":"section_jHhQ","opened":true,"columns":[{"name":"column_xiNF","fields":["products"]}],"editingLabel":false,"hideLabel":true},{"label":"New Section","name":"section_WNOQ","opened":true,"columns":[{"name":"column_ziBW","fields":["total"]},{"label":"","name":"column_wuwA","fields":["net_total"]}],"hideBorder":true,"hideLabel":true}]}]',
+			"layout": '[{"name":"first_tab","sections":[{"label":"Details","name":"details_section","opened":true,"columns":[{"name":"column_z9XL","fields":["organization","company_description","industry","no_of_employees","annual_revenue"]},{"name":"column_gM4w","fields":["website","linkedin","twitter","facebook","closed_date","next_step"]},{"name":"column_gWmE","fields":["territory","deal_owner"]}]},{"label":"Products","name":"section_jHhQ","opened":true,"columns":[{"name":"column_xiNF","fields":["products"]}],"editingLabel":false,"hideLabel":true},{"label":"New Section","name":"section_WNOQ","opened":true,"columns":[{"name":"column_ziBW","fields":["total"]},{"label":"","name":"column_wuwA","fields":["net_total"]}],"hideBorder":true,"hideLabel":true}]}]',
 		},
 	}
 
@@ -571,7 +571,7 @@ def add_default_lost_reasons():
 def add_default_quick_filters():
 	quick_filters = {
 		"CRM Lead": ["lead_name", "email", "organization", "status", "source"],
-		"CRM Deal": ["organization", "status", "probability", "email"],
+		"CRM Deal": ["organization", "status", "email"],
 		"Contact": ["status", "email_id", "phone"],
 		"CRM Organization": ["organization_name", "no_of_employees", "territory", "industry"],
 		"CRM Task": ["title", "priority", "assigned_to", "status", "due_date"],
@@ -654,11 +654,8 @@ def add_availability_user_fields():
 
 
 def add_default_scripts():
-	from crm.fcrm.doctype.fcrm_settings.fcrm_settings import create_forecasting_script
-
 	for doctype in ["CRM Lead", "CRM Deal"]:
 		create_product_details_script(doctype)
-	create_forecasting_script()
 
 
 def add_assignment_rule_property_setters():

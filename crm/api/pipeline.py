@@ -16,7 +16,7 @@ from crm.fcrm.doctype.crm_pipeline.fields import default_pipeline_fields, sync_r
 from crm.permissions.pipeline import PIPELINE_OWNER_ROLE, get_role_in_pipeline, is_admin
 
 CRM_ROLES = ("Sales User", "Sales Manager", "System Manager")
-STAGE_FIELDS = ("name", "deal_status", "color", "type", "position", "probability")
+STAGE_FIELDS = ("name", "deal_status", "color", "type", "position")
 STAGE_TYPES = ("Open", "Ongoing", "On Hold", "Won", "Lost")
 
 
@@ -227,7 +227,7 @@ def _save_stages(pipeline: str, stages: list[dict]) -> list[str]:
 		else:
 			doc = frappe.new_doc("CRM Deal Status")
 			doc.pipeline = pipeline
-		for key in ("deal_status", "color", "type", "probability"):
+		for key in ("deal_status", "color", "type"):
 			if key in stage:
 				doc.set(key, stage[key])
 		doc.position = position
