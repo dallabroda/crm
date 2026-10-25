@@ -12,6 +12,7 @@
   "organization",
   "next_step",
   "column_break_ijan",
+  "pipeline",
   "status",
   "deal_owner",
   "section_break_jgpm",
@@ -477,18 +478,18 @@
    "label": "Lost Details"
   },
   {
+   "description": "Company logo discovered by Domain Enrichment.",
    "fieldname": "organization_logo",
    "fieldtype": "Attach Image",
    "label": "Organization Logo",
-   "no_copy": 1,
-   "description": "Company logo discovered by Domain Enrichment."
+   "no_copy": 1
   },
   {
+   "description": "Company description discovered by Domain Enrichment.",
    "fieldname": "company_description",
    "fieldtype": "Small Text",
    "label": "Company Description",
-   "no_copy": 1,
-   "description": "Company description discovered by Domain Enrichment."
+   "no_copy": 1
   },
   {
    "depends_on": "eval:doc.linkedin",
@@ -510,12 +511,21 @@
    "fieldtype": "Data",
    "label": "Facebook",
    "no_copy": 1
+  },
+  {
+   "fieldname": "pipeline",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Pipeline",
+   "options": "CRM Pipeline",
+   "reqd": 1,
+   "search_index": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-04-04 12:34:10.808282",
+ "modified": "2026-10-24 20:00:00.000000",
  "modified_by": "Administrator",
  "module": "FCRM",
  "name": "CRM Deal",

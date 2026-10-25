@@ -23,6 +23,7 @@ class CRMStatusChangeLog(Document):
 		last_status_change_log: DF.Link | None
 		log_owner: DF.Link | None
 		parent: DF.Data
+		pipeline: DF.Link | None
 		parentfield: DF.Data
 		parenttype: DF.Data
 		to: DF.Data | None
@@ -46,7 +47,8 @@ def add_status_change_log(doc):
 	to_status_type = frappe.db.get_value("CRM Deal Status", doc.status, "type") if doc.status else None
 
 	if not doc.is_new():
-		previous_status = doc.get_doc_before_save().status if doc.get_doc_before_save() else None
+		before = doc.get_doc_before_save()
+		previous_status = before.status if before else None
 		previous_status_type = (
 			frappe.db.get_value("CRM Deal Status", previous_status, "type") if previous_status else None
 		)
@@ -57,6 +59,8 @@ def add_status_change_log(doc):
 				{
 					"from": previous_status,
 					"from_type": previous_status_type or "",
+					# Each row is the time spent in its "from" stage, so it carries that stage's pipeline
+					"pipeline": before.get("pipeline") if before else None,
 					"to": "",
 					"to_type": "",
 					"from_date": now_minus_one_minute,
@@ -76,6 +80,7 @@ def add_status_change_log(doc):
 		{
 			"from": doc.status,
 			"from_type": to_status_type or "",
+			"pipeline": doc.get("pipeline"),
 			"to": "",
 			"to_type": "",
 			"from_date": datetime.now(),

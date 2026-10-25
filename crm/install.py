@@ -4,6 +4,7 @@ import json
 
 import click
 import frappe
+from frappe import _
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 
 from crm.domain_enrichment.install import seed_default_rules_and_mappings
@@ -18,6 +19,7 @@ def before_install():
 def after_install(force=False):
 	add_default_lead_statuses()
 	add_default_deal_statuses()
+	add_pipeline_indexes()
 	add_default_communication_statuses()
 	add_default_fields_layout(force)
 	add_property_setter()
@@ -136,17 +138,39 @@ def add_default_deal_statuses():
 		},
 	}
 
+	pipeline = add_default_pipeline()
 	for status in statuses:
 		if frappe.db.exists("CRM Deal Status", status):
 			continue
 
 		doc = frappe.new_doc("CRM Deal Status")
+		doc.pipeline = pipeline
 		doc.deal_status = status
 		doc.color = statuses[status]["color"]
 		doc.type = statuses[status]["type"]
 		doc.probability = statuses[status]["probability"]
 		doc.position = statuses[status]["position"]
-		doc.insert()
+		# Default stages keep their label as key, so existing references ("Qualification") keep working
+		doc.insert(set_name=status)
+
+
+def add_pipeline_indexes():
+	# Kanban and lists filter cards by pipeline and group them by stage
+	frappe.db.add_index("CRM Deal", ["pipeline", "status"])
+
+
+def add_default_pipeline() -> str:
+	"""Create the first pipeline if the site has none; returns the pipeline to hold the default stages."""
+	existing = frappe.get_all("CRM Pipeline", pluck="name", order_by="position asc, creation asc", limit=1)
+	if existing:
+		return existing[0]
+	lang = frappe.db.get_single_value("System Settings", "language") or "en"
+	doc = frappe.new_doc("CRM Pipeline")
+	doc.pipeline_name = _("Sales", lang=lang)
+	doc.position = 1
+	doc.color = "blue"
+	doc.insert(ignore_permissions=True)
+	return doc.name
 
 
 def add_default_communication_statuses():
