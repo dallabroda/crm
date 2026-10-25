@@ -87,38 +87,31 @@
               />
               <IndicatorIcon :class="parseColor(stage.color)" />
               <FormControl
-                class="flex-1"
+                class="min-w-0 flex-1"
                 :model-value="stage.deal_status"
                 :disabled="!canManage"
                 :placeholder="__('Stage name')"
                 @update:model-value="(v) => (stage.deal_status = v)"
               />
-              <FormControl
-                class="w-36"
-                type="select"
-                :options="typeOptions"
-                :disabled="!canManage"
-                :model-value="stage.type"
-                @update:model-value="(v) => (stage.type = v)"
-              />
-              <FormControl
-                class="w-28"
-                type="select"
-                :options="colorOptions"
-                :disabled="!canManage"
-                :model-value="stage.color"
-                @update:model-value="(v) => (stage.color = v)"
-              />
-              <FormControl
-                class="w-20"
-                type="number"
-                :model-value="stage.probability"
-                :disabled="!canManage"
-                :placeholder="'%'"
-                @update:model-value="
-                  (v) => (stage.probability = Number(v) || 0)
-                "
-              />
+              <!-- selects stretch to their container: fixed-width boxes keep the name visible -->
+              <div class="w-36 shrink-0">
+                <FormControl
+                  type="select"
+                  :options="typeOptions"
+                  :disabled="!canManage"
+                  :model-value="stage.type"
+                  @update:model-value="(v) => (stage.type = v)"
+                />
+              </div>
+              <div class="w-28 shrink-0">
+                <FormControl
+                  type="select"
+                  :options="colorOptions"
+                  :disabled="!canManage"
+                  :model-value="stage.color"
+                  @update:model-value="(v) => (stage.color = v)"
+                />
+              </div>
               <Button
                 v-if="canManage"
                 variant="ghost"
@@ -149,19 +142,21 @@
           :data-member="member.user"
         >
           <UserAvatar :user="member.user" size="sm" />
-          <span class="flex-1 truncate text-base text-ink-gray-8">
+          <span class="min-w-0 flex-1 truncate text-base text-ink-gray-8">
             {{ userName(member.user) }}
           </span>
-          <FormControl
-            class="w-36"
-            type="select"
-            :options="roleOptions(member.user)"
-            :disabled="!canManage"
-            :model-value="member.role"
-            @update:model-value="(v) => (member.role = v)"
-          />
+          <div class="w-36 shrink-0">
+            <FormControl
+              type="select"
+              :options="roleOptions(member.user, member.role)"
+              :disabled="!canManage"
+              :model-value="member.role"
+              @update:model-value="(v) => (member.role = v)"
+            />
+          </div>
+          <!-- system users (e.g. Administrator) are not in the users list: no role toggle -->
           <Tooltip
-            v-if="users.is_admin"
+            v-if="users.is_admin && userInfo(member.user)"
             :text="__('Can create funnels and be an owner')"
           >
             <div class="flex items-center gap-1.5 text-sm text-ink-gray-6">
@@ -384,10 +379,14 @@ function canOwn(user) {
   return Boolean(info?.pipeline_owner || info?.is_admin)
 }
 
-function roleOptions(user) {
+// an owner stays selectable even when the user list does not include them
+// (system users such as Administrator)
+function roleOptions(user, current) {
   return [
     { label: __('Salesperson'), value: 'Member' },
-    ...(canOwn(user) ? [{ label: __('Owner'), value: 'Owner' }] : []),
+    ...(canOwn(user) || current === 'Owner'
+      ? [{ label: __('Owner'), value: 'Owner' }]
+      : []),
   ]
 }
 
@@ -426,7 +425,6 @@ function addStage() {
     deal_status: '',
     type: form.stages.length ? 'Ongoing' : 'Open',
     color: colors[form.stages.length % colors.length],
-    probability: 0,
   })
 }
 
@@ -498,7 +496,6 @@ function payload() {
       deal_status: s.deal_status.trim(),
       type: s.type,
       color: s.color,
-      probability: s.probability || 0,
     })),
     members: form.members.map((m) => ({ user: m.user, role: m.role })),
     // in order; position = order (crm.api.pipeline.save_pipeline)
