@@ -9177,3 +9177,6 @@ msgstr "Marque para confirmar"
 
 msgid "Fill in the required fields of this stage before moving the card."
 msgstr "Preencha os campos obrigatórios desta etapa antes de mover o card."
+
+msgid "Edit in the organization"
+msgstr "Editar na organização"
