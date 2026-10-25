@@ -297,7 +297,8 @@ def validate_deal(doc):
 	cannot change. Applies to the UI and the API alike."""
 	if frappe.flags.in_install or frappe.flags.in_patch or frappe.flags.in_migrate or not doc.pipeline:
 		return
-	if doc.is_new() or doc.has_value_changed("status"):
+	automatic_entry = doc.is_new() and frappe.flags.get("crm_automatic_entry")
+	if (doc.is_new() or doc.has_value_changed("status")) and not automatic_entry:
 		missing = get_missing_fields(doc, doc.status)
 		if missing:
 			# frappe-ui only keeps `message` and the server messages on errors

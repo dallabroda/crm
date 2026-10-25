@@ -206,10 +206,16 @@ def create_lead_from_incoming_email(doc: Communication, method: str | None = Non
 	if not doc.email_account:
 		return
 
-	create_lead_enabled = frappe.db.get_value(
-		"Email Account", doc.email_account, "create_lead_from_incoming_email"
+	settings = frappe.db.get_value(
+		"Email Account", doc.email_account, ["create_lead_from_incoming_email", "crm_pipeline"], as_dict=True
 	)
-	if not create_lead_enabled:
+	if not settings or not settings.create_lead_from_incoming_email:
+		return
+	if not settings.crm_pipeline:
+		frappe.log_error(
+			title="Incoming e-mail not turned into a card",
+			message=f"Email Account {doc.email_account} creates cards but has no pipeline set.",
+		)
 		return
 
 	if frappe.db.exists("CRM Lead", {"email": doc.sender}):
@@ -232,10 +238,12 @@ def create_lead_from_incoming_email(doc: Communication, method: str | None = Non
 	if frappe.db.exists("CRM Lead Source", "Email"):
 		lead.source = "Email"
 
+	lead.pipeline = settings.crm_pipeline
 	lead.insert(ignore_permissions=True)
 
-	doc.reference_doctype = "CRM Lead"
-	doc.reference_name = lead.name
+	card = frappe.db.get_value("CRM Deal", {"lead": lead.name}, "name")
+	doc.reference_doctype = "CRM Deal" if card else "CRM Lead"
+	doc.reference_name = card or lead.name
 	doc.save(ignore_permissions=True)
 
 

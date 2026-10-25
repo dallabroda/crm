@@ -26,12 +26,18 @@ class LeadSyncSource(Document):
 		enabled: DF.Check
 		facebook_lead_form: DF.Link | None
 		facebook_page: DF.Link | None
+		pipeline: DF.Link | None
 		last_synced_at: DF.Datetime | None
 		type: DF.Literal["Facebook"]
 	# end: auto-generated types
 
 	def validate(self):
+		self.validate_pipeline()
 		self.validate_same_fb_form_active()
+
+	def validate_pipeline(self):
+		if self.enabled and not self.pipeline:
+			frappe.throw(frappe._("Choose the pipeline that receives these leads."))
 
 	def validate_same_fb_form_active(self):
 		if not self.enabled:
@@ -66,4 +72,6 @@ class LeadSyncSource(Document):
 			if not self.facebook_lead_form:
 				frappe.throw(frappe._("Please select a lead gen form before syncing!"))
 
-			FacebookSyncSource(self.get_password("access_token"), self.facebook_lead_form).sync()
+			FacebookSyncSource(
+				self.get_password("access_token"), self.facebook_lead_form, pipeline=self.pipeline
+			).sync()

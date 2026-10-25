@@ -6,6 +6,7 @@ from frappe import _, generate_hash
 from frappe.model.document import Document
 
 from crm.integrations.api import get_contact_by_phone_number
+from crm.permissions.pipeline import get_role_in_pipeline
 from crm.utils import seconds_to_duration
 
 
@@ -291,7 +292,11 @@ def get_permitted_docs(doctype: str, names: list[str]) -> list[dict]:
 
 
 @frappe.whitelist()
-def create_lead_from_call_log(call_log: str | dict, lead_details: str | dict | None = None):
+def create_lead_from_call_log(
+	call_log: str | dict, lead_details: str | dict | None = None, pipeline: str | None = None
+):
+	"""Create a card in `pipeline` from a call (a plain lead without a pipeline, for old clients).
+	Returns the card name, or the lead name when no pipeline is given."""
 	call_log_data = frappe.parse_json(call_log or {})
 
 	if isinstance(call_log_data, str):
@@ -334,10 +339,16 @@ def create_lead_from_call_log(call_log: str | dict, lead_details: str | dict | N
 		reference_label = sanitized_details.get("mobile_no") or call_doc.name
 		sanitized_details["first_name"] = _("Lead from call {0}").format(reference_label)
 
+	if pipeline:
+		if not get_role_in_pipeline(pipeline):
+			frappe.throw(_("You are not a member of this pipeline."), frappe.PermissionError)
+		sanitized_details["pipeline"] = pipeline
+
 	lead.update(sanitized_details)
 	lead.insert()
 
-	call_doc.link_with_reference_doc("CRM Lead", lead.name)
+	card = frappe.db.get_value("CRM Deal", {"lead": lead.name}, "name") if pipeline else None
+	call_doc.link_with_reference_doc("CRM Deal" if card else "CRM Lead", card or lead.name)
 	call_doc.save()
 
-	return lead.name
+	return card or lead.name

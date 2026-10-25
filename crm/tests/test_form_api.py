@@ -70,7 +70,9 @@ class TestFormAPI(FrappeTestCase):
 		]
 		self.assertIn("organization_name", visible)
 		hidden = {h["fieldname"] for h in cfg["hidden_fields"]}
-		self.assertIn("status", hidden)
+		# the card lands in the form's pipeline and takes its first stage
+		self.assertIn("pipeline", hidden)
+		self.assertNotIn("status", hidden)
 
 	def test_save_form_persists_edits(self):
 		name = make_form("edit-me")

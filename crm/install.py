@@ -361,6 +361,29 @@ def add_email_account_custom_field():
 		)
 
 		frappe.clear_cache(doctype="Email Account")
+	add_email_account_pipeline_field()
+
+
+def add_email_account_pipeline_field():
+	"""Pipeline that receives cards created from incoming e-mails (no default: each integration picks)."""
+	if frappe.get_meta("Email Account").has_field("crm_pipeline"):
+		return
+	create_custom_fields(
+		{
+			"Email Account": [
+				{
+					"fieldname": "crm_pipeline",
+					"fieldtype": "Link",
+					"label": "Pipeline for new cards",
+					"options": "CRM Pipeline",
+					"depends_on": "eval:doc.create_lead_from_incoming_email",
+					"mandatory_depends_on": "eval:doc.create_lead_from_incoming_email",
+					"insert_after": "create_lead_from_incoming_email",
+				}
+			]
+		}
+	)
+	frappe.clear_cache(doctype="Email Account")
 
 
 def add_web_form_custom_fields():

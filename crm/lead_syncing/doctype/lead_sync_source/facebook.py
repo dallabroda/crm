@@ -29,10 +29,12 @@ class FacebookSyncSource:
 		access_token: str,
 		form_id: str,
 		source_name: str | None = None,
+		pipeline: str | None = None,
 	):
 		self.access_token = access_token
 		self.form_id = form_id
 		self.source_name = source_name
+		self.pipeline = pipeline
 		self.form_questions_mapping = None
 
 	def get_api_url(self, endpoint: str) -> str:
@@ -59,6 +61,8 @@ class FacebookSyncSource:
 		crm_lead_data["source"] = "Facebook"
 		crm_lead_data["facebook_lead_id"] = lead["id"]
 		crm_lead_data["facebook_form_id"] = self.form_id
+		if self.pipeline:
+			crm_lead_data["pipeline"] = self.pipeline
 
 		try:
 			self.validate_duplicate_lead(crm_lead_data, question_to_field_map)
