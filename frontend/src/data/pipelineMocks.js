@@ -235,9 +235,26 @@ export async function mockCall(method, args = {}) {
       let doc = typeof args.doc === 'string' ? JSON.parse(args.doc) : args.doc
       if (!doc.name) {
         doc.name = 'mock-' + Math.random().toString(36).slice(2, 8)
-        pipelines.push({ ...doc, my_role: 'Owner' })
-      } else {
-        Object.assign(findPipeline(doc.name) || {}, doc)
+        pipelines.push({ position: pipelines.length + 1, my_role: 'Owner' })
+      }
+      let target = findPipeline(doc.name)
+      let { field_rules, ...rest } = doc
+      Object.assign(target, rest)
+      target.stages = (doc.stages || target.stages).map((s, i) => ({
+        ...s,
+        name:
+          s.name ||
+          `${doc.name}-stage-${i + 1}-${Math.random().toString(36).slice(2, 6)}`,
+        position: i + 1,
+      }))
+      rules[doc.name] = {}
+      for (let r of field_rules || []) {
+        rules[doc.name][r.stage] ||= {}
+        rules[doc.name][r.stage][r.fieldname] = {
+          visible: r.visible,
+          required: r.required,
+          read_only: r.read_only,
+        }
       }
       return mockCall('get_pipeline_config', { pipeline: doc.name })
     }
@@ -269,6 +286,27 @@ export async function mockCall(method, args = {}) {
         field.options = args.options
       return clone(field)
     }
+    case 'get_pipeline_users': {
+      let users = await call('frappe.client.get_list', {
+        doctype: 'User',
+        filters: { enabled: 1, user_type: 'System User' },
+        fields: ['name', 'full_name', 'user_image'],
+        limit_page_length: 0,
+      })
+      return {
+        can_create: true,
+        is_admin: true,
+        users: users
+          .filter((u) => u.name !== 'Guest')
+          .map((u) => ({
+            ...u,
+            is_admin: u.name === 'Administrator' ? 1 : 0,
+            pipeline_owner: u.name === 'Administrator' ? 1 : 0,
+          })),
+      }
+    }
+    case 'set_pipeline_owner_role':
+      return { user: args.user, pipeline_owner: args.enabled ? 1 : 0 }
     default:
       throw new Error(`mockCall: unknown method ${method}`)
   }

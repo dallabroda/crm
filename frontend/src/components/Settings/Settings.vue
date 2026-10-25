@@ -56,6 +56,9 @@ import LucideNetwork from '~icons/lucide/network'
 import LucideWorkflow from '~icons/lucide/workflow'
 import MonitorCogIcon from '~icons/lucide/monitor-cog'
 import LucideTextCursorInput from '~icons/lucide/text-cursor-input'
+import LucideKanban from '~icons/lucide/kanban'
+import PipelinesPage from './Pipelines/PipelinesPage.vue'
+import FieldsPage from './Fields/FieldsPage.vue'
 import SlidersIcon from '@/components/Icons/SlidersIcon.vue'
 import SparkleIcon from '@/components/Icons/SparkleIcon.vue'
 import WhatsAppIcon from '@/components/Icons/WhatsAppIcon.vue'
@@ -150,6 +153,22 @@ const tabs = computed(() => {
         },
       ],
       condition: () => isManager(),
+    },
+    {
+      label: __('Funnels'),
+      items: [
+        {
+          label: __('Funnels'),
+          icon: LucideKanban,
+          component: markRaw(PipelinesPage),
+        },
+        {
+          label: __('Fields'),
+          icon: LucideTextCursorInput,
+          component: markRaw(FieldsPage),
+          condition: () => isManager(),
+        },
+      ],
     },
     {
       label: __('User Management'),
