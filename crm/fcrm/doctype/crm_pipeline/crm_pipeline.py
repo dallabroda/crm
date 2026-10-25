@@ -6,6 +6,8 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.query_builder.functions import Max
 
+from crm.fcrm.doctype.crm_pipeline.fields import validate_pipeline_fields
+
 
 class CRMPipeline(Document):
 	# begin: auto-generated types
@@ -16,6 +18,8 @@ class CRMPipeline(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
+		from crm.fcrm.doctype.crm_pipeline_field.crm_pipeline_field import CRMPipelineField
+		from crm.fcrm.doctype.crm_pipeline_field_rule.crm_pipeline_field_rule import CRMPipelineFieldRule
 		from crm.fcrm.doctype.crm_pipeline_member.crm_pipeline_member import CRMPipelineMember
 
 		color: DF.Literal[
@@ -33,6 +37,8 @@ class CRMPipeline(Document):
 			"violet",
 			"purple",
 		]
+		field_rules: DF.Table[CRMPipelineFieldRule]
+		fields: DF.Table[CRMPipelineField]
 		icon: DF.Data | None
 		is_active: DF.Check
 		members: DF.Table[CRMPipelineMember]
@@ -45,6 +51,7 @@ class CRMPipeline(Document):
 		if not self.position:
 			self.position = next_position("CRM Pipeline")
 		self.validate_members()
+		validate_pipeline_fields(self)
 
 	def validate_members(self):
 		seen = set()
@@ -74,7 +81,8 @@ class CRMPipeline(Document):
 		for view in frappe.get_all("CRM View Settings", {"pipeline": self.name}, pluck="name"):
 			frappe.delete_doc("CRM View Settings", view, ignore_permissions=True)
 		for stage in frappe.get_all("CRM Deal Status", {"pipeline": self.name}, pluck="name"):
-			frappe.delete_doc("CRM Deal Status", stage, ignore_permissions=True)
+			# force: this pipeline's own field rules still point at the stage until it is deleted
+			frappe.delete_doc("CRM Deal Status", stage, ignore_permissions=True, force=True)
 
 
 def add_members(pipeline: str, users: list[str], role: str = "Member"):

@@ -10,7 +10,9 @@ import json
 import frappe
 from frappe import _
 
+from crm.fcrm.doctype.crm_pipeline import fields as field_catalog
 from crm.fcrm.doctype.crm_pipeline.crm_pipeline import get_first_stage
+from crm.fcrm.doctype.crm_pipeline.fields import default_pipeline_fields, sync_rules
 from crm.permissions.pipeline import PIPELINE_OWNER_ROLE, get_role_in_pipeline, is_admin
 
 CRM_ROLES = ("Sales User", "Sales Manager", "System Manager")
@@ -85,18 +87,30 @@ def get_pipeline_config(pipeline: str) -> dict:
 			{"user": m.user, "full_name": full_names.get(m.user) or m.user, "role": m.role}
 			for m in doc.members
 		],
-		# Fields and per-stage rules come with the field catalog (#69)
-		"fields": [],
-		"field_rules": [],
+		"fields": [{"fieldname": f.fieldname, "position": f.position} for f in doc.fields],
+		"field_rules": [
+			{
+				"stage": r.stage,
+				"fieldname": r.fieldname,
+				"visible": r.visible,
+				"required": r.required,
+				"read_only": r.read_only,
+			}
+			for r in doc.field_rules
+		],
 	}
 
 
 @frappe.whitelist()
 def save_pipeline(doc: str | dict) -> dict:
-	"""Create (no "name") or update a pipeline with its stages and members, in one transaction.
+	"""Create (no "name") or update a pipeline with its stages, members, fields and field rules,
+	in one transaction. Keys left out of the payload are not touched.
 
-	Stages are saved in the order received (position = order); existing stages missing from the
-	payload are deleted, which fails if a card is still in them.
+	- stages: saved in the order received (position = order); existing stages missing from the
+	  payload are deleted, which fails if a card is still in them.
+	- fields: fieldnames from the catalog, in order (a new pipeline starts with the standard ones).
+	- field_rules: {stage, fieldname, visible, required, read_only} for existing stages; any
+	  (field, stage) pair not sent keeps its rule, new pairs start visible, optional and editable.
 	"""
 	data = frappe._dict(json.loads(doc) if isinstance(doc, str) else doc)
 	if data.get("name"):
@@ -125,15 +139,57 @@ def save_pipeline(doc: str | dict) -> dict:
 		# Whoever creates a pipeline owns it, so they can keep managing it
 		pipeline.append("members", {"user": frappe.session.user, "role": "Owner"})
 
+	if "fields" in data or creating:
+		fieldnames = (
+			[f if isinstance(f, str) else f.get("fieldname") for f in data.fields or []]
+			if "fields" in data
+			else default_pipeline_fields()
+		)
+		pipeline.set("fields", [{"fieldname": f, "position": i} for i, f in enumerate(fieldnames, start=1)])
+
 	pipeline.save(ignore_permissions=True)
 
+	removed_stages = []
 	if "stages" in data:
-		_save_stages(pipeline.name, data.stages or [])
+		removed_stages = _save_stages(pipeline.name, data.stages or [])
+
+	stages = frappe.get_all(
+		"CRM Deal Status",
+		{"pipeline": pipeline.name, "name": ("not in", removed_stages or [""])},
+		pluck="name",
+		order_by="position asc, creation asc",
+	)
+	if "field_rules" in data:
+		_apply_rules(pipeline, stages, data.field_rules or [])
+	sync_rules(pipeline, stages)
+	pipeline.save(ignore_permissions=True)
+
+	for name in removed_stages:
+		frappe.delete_doc("CRM Deal Status", name, ignore_permissions=True)
 
 	return get_pipeline_config(pipeline.name)
 
 
-def _save_stages(pipeline: str, stages: list[dict]):
+def _apply_rules(pipeline, stages: list[str], rules: list[dict]):
+	existing = {(r.stage, r.fieldname): r for r in pipeline.field_rules}
+	used = {f.fieldname for f in pipeline.fields}
+	for rule in rules:
+		rule = frappe._dict(rule)
+		if rule.stage not in stages:
+			frappe.throw(_("Rule for an unknown stage: {0}").format(frappe.bold(rule.stage)))
+		if rule.fieldname not in used:
+			frappe.throw(_("Field {0} is not used in this pipeline.").format(frappe.bold(rule.fieldname)))
+		row = existing.get((rule.stage, rule.fieldname))
+		if not row:
+			row = pipeline.append("field_rules", {"stage": rule.stage, "fieldname": rule.fieldname})
+			existing[(rule.stage, rule.fieldname)] = row
+		for key in ("visible", "required", "read_only"):
+			if key in rule:
+				row.set(key, frappe.utils.cint(rule[key]))
+
+
+def _save_stages(pipeline: str, stages: list[dict]) -> list[str]:
+	"""Create/update stages in order; returns the stages to delete (checked to have no cards)."""
 	if not stages:
 		frappe.throw(_("A pipeline needs at least one stage."))
 	labels = [(s.get("deal_status") or "").strip() for s in stages if s.get("deal_status")]
@@ -178,6 +234,7 @@ def _save_stages(pipeline: str, stages: list[dict]):
 		doc.save(ignore_permissions=True)
 		keep.add(doc.name)
 
+	removed = []
 	for name in frappe.get_all("CRM Deal Status", {"pipeline": pipeline}, pluck="name"):
 		if name in keep:
 			continue
@@ -188,7 +245,8 @@ def _save_stages(pipeline: str, stages: list[dict]):
 					frappe.bold(label)
 				)
 			)
-		frappe.delete_doc("CRM Deal Status", name, ignore_permissions=True)
+		removed.append(name)
+	return removed
 
 
 @frappe.whitelist()
@@ -288,3 +346,51 @@ def _set_values(doc, values):
 		):
 			frappe.throw(_("Field {0} cannot be set here.").format(frappe.bold(fieldname)))
 		doc.set(fieldname, value)
+
+
+@frappe.whitelist()
+def get_stage_rules(pipeline: str, stage: str) -> dict:
+	"""{fieldname: {visible, required, read_only}} for the fields used in the pipeline, in `stage`."""
+	_assert_can_view(pipeline)
+	return field_catalog.get_stage_rules(pipeline, stage)
+
+
+@frappe.whitelist()
+def get_missing_fields(deal: str, stage: str) -> list[dict]:
+	"""Required fields of `stage` that are empty on the card (what to ask before moving it)."""
+	doc = frappe.get_doc("CRM Deal", deal)
+	doc.check_permission("read")
+	return field_catalog.get_missing_fields(doc, stage)
+
+
+@frappe.whitelist()
+def get_field_catalog() -> dict:
+	frappe.only_for(CRM_ROLES)
+	return {
+		"limit": field_catalog.CREATED_FIELD_LIMIT,
+		"used": field_catalog.created_field_count(),
+		"fields": field_catalog.get_catalog(),
+	}
+
+
+def _assert_admin():
+	if not is_admin():
+		frappe.throw(_("Only admins can change the field catalog."), frappe.PermissionError)
+
+
+@frappe.whitelist()
+def create_field(label: str, fieldtype: str, options: str | None = None) -> dict:
+	_assert_admin()
+	return field_catalog.create_field(label, fieldtype, options)
+
+
+@frappe.whitelist()
+def update_field(fieldname: str, label: str | None = None, options: str | None = None) -> dict:
+	_assert_admin()
+	return field_catalog.update_field(fieldname, label, options)
+
+
+@frappe.whitelist()
+def disable_field(fieldname: str) -> dict:
+	_assert_admin()
+	return field_catalog.disable_field(fieldname)
