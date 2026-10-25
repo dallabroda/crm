@@ -366,6 +366,7 @@ import KanbanSettings from '@/components/Kanban/KanbanSettings.vue'
 import LostReasonModal from '@/components/Modals/LostReasonModal.vue'
 import MissingFieldsModal from '@/components/Modals/MissingFieldsModal.vue'
 import { pipelinesStore } from '@/stores/pipelines'
+import { missingFieldsFromError } from '@/utils/pipelines'
 import { getSettings } from '@/stores/settings'
 import { globalStore } from '@/stores/global'
 import { viewsStore } from '@/stores/views'
@@ -1341,24 +1342,6 @@ function persistKanbanColumnOrder(kanbanColumns) {
   if (!route.query.view) {
     createOrUpdateStandardView()
   }
-}
-
-// crm.api.pipeline.move_card answers a stage with empty required fields with
-// MissingRequiredFieldsError carrying { missing_fields: [...] } in its message.
-function missingFieldsFromError(error) {
-  if (error?.exc_type !== 'MissingRequiredFieldsError') return null
-  for (let message of [...(error.messages || []), error.message]) {
-    let parsed = message
-    if (typeof message === 'string') {
-      try {
-        parsed = JSON.parse(message)
-      } catch {
-        continue
-      }
-    }
-    if (parsed?.missing_fields?.length) return parsed.missing_fields
-  }
-  return null
 }
 
 function moveCardInPipeline(data, fields) {

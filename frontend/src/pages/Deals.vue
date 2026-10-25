@@ -315,7 +315,7 @@ const pipelineFilters = computed(() =>
 const pipelineColumns = computed(() =>
   (pipeline.value?.stages || []).map((stage) => ({
     name: stage.name,
-    label: stage.deal_status,
+    label: __(stage.deal_status),
     color: stage.color,
   })),
 )
