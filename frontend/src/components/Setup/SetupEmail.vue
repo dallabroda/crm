@@ -96,7 +96,7 @@
             v-model="state.enable_incoming"
             class="py-2.5"
             :label="__('Receive email')"
-            :description="__('Pull replies into lead and deal timelines')"
+            :description="__('Pull replies into card timelines')"
           />
           <Switch
             v-model="state.enable_outgoing"

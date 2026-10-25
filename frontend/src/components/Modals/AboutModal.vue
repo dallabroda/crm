@@ -6,7 +6,7 @@
           <div class="flex flex-col items-center">
             <CRMLogo class="mb-3 size-12" />
             <Dialog.Title as-child>
-              <h3 class="text-2xl-semibold text-ink-gray-9">Frappe CRM</h3>
+              <h3 class="text-2xl-semibold text-ink-gray-9">Cred Hub</h3>
             </Dialog.Title>
           </div>
         </div>
@@ -30,8 +30,15 @@
           </a>
         </div>
         <hr class="border-t my-3 mx-2" />
+        <!-- AGPL-3.0 section 5(d): keep the Appropriate Legal Notices that the
+             original About showed (copyright, no warranty, license, source) -->
         <p class="text-sm text-ink-gray-6 px-2 mt-2">
-          © Frappe Technologies Pvt. Ltd. and contributors
+          © CredTech Digital.
+          {{
+            __(
+              'Based on Frappe CRM, © Frappe Technologies Pvt. Ltd. and contributors. Free software under the GNU AGPL-3.0, provided without any warranty.',
+            )
+          }}
         </p>
       </div>
     </template>
@@ -41,9 +48,7 @@
 import CRMLogo from '@/components/Icons/CRMLogo.vue'
 import GitHubIcon from '@/components/Icons/GitHubIcon.vue'
 import LucideGlobe from '~icons/lucide/globe'
-import LucideHeadset from '~icons/lucide/headset'
-import LucideBug from '~icons/lucide/bug'
-import LucideBookOpen from '~icons/lucide/book-open'
+import LucideScale from '~icons/lucide/scale'
 import { Dialog } from 'frappe-ui'
 
 let show = defineModel({ type: Boolean })
@@ -51,28 +56,18 @@ let show = defineModel({ type: Boolean })
 let links = [
   {
     label: __('Website'),
-    url: 'https://frappe.io/crm',
+    url: 'https://credtechdigital.com.br',
     icon: LucideGlobe,
   },
   {
-    label: __('GitHub Repository'),
-    url: 'https://github.com/frappe/crm',
+    label: __('Source code (AGPL-3.0)'),
+    url: 'https://github.com/dallabroda/crm',
     icon: GitHubIcon,
   },
   {
-    label: __('Documentation'),
-    url: 'https://docs.frappe.io/crm',
-    icon: LucideBookOpen,
-  },
-  {
-    label: __('Report an Issue'),
-    url: 'https://github.com/frappe/crm/issues',
-    icon: LucideBug,
-  },
-  {
-    label: __('Contact Support'),
-    url: 'https://support.frappe.io',
-    icon: LucideHeadset,
+    label: __('License (GNU AGPL-3.0)'),
+    url: 'https://www.gnu.org/licenses/agpl-3.0.html',
+    icon: LucideScale,
   },
 ]
 </script>
