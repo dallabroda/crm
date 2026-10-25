@@ -88,6 +88,13 @@
               :label="__('Background Sync Frequency')"
             />
 
+            <PipelineSelect
+              v-model="syncSource.pipeline"
+              :description="
+                __('Leads from this source become cards in this funnel.')
+              "
+            />
+
             <FormControl
               v-model="syncSource.access_token"
               type="password"
@@ -169,6 +176,7 @@
 </template>
 
 <script setup>
+import PipelineSelect from '@/components/Pipelines/PipelineSelect.vue'
 import { useDocument } from '@/data/document'
 import { onMounted, inject, ref, computed, watch } from 'vue'
 import { supportedSourceTypes } from './leadSyncSourceConfig'
@@ -254,6 +262,7 @@ const syncSource = ref({
   facebook_page: '',
   facebook_lead_form: '',
   enabled: true,
+  pipeline: '',
   background_sync_frequency:
     fieldsMap.value.background_sync_frequency?.default || 'Hourly',
 })

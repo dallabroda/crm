@@ -60,6 +60,13 @@
           </div>
         </template>
       </div>
+      <PipelineSelect
+        v-if="state.create_lead_from_incoming_email"
+        v-model="state.crm_pipeline"
+        :description="
+          __('Cards created from emails of this account go to this funnel.')
+        "
+      />
       <ErrorMessage v-if="error" class="ml-1" :message="error" />
     </div>
     <!-- action buttons -->
@@ -85,6 +92,7 @@
 import { computed, reactive, ref } from 'vue'
 import { call, toast } from 'frappe-ui'
 import EmailProviderIcon from './EmailProviderIcon.vue'
+import PipelineSelect from '@/components/Pipelines/PipelineSelect.vue'
 import {
   emailIcon,
   services,
@@ -115,6 +123,7 @@ const state = reactive({
   default_incoming: props.accountData.default_incoming || false,
   create_lead_from_incoming_email:
     props.accountData.create_lead_from_incoming_email || false,
+  crm_pipeline: props.accountData.crm_pipeline || '',
 })
 
 const info = {
@@ -138,6 +147,10 @@ const loading = ref(false)
 async function updateAccount() {
   error.value = validateInputs(state, isCustomService.value)
   if (error.value) return
+  if (state.create_lead_from_incoming_email && !state.crm_pipeline) {
+    error.value = __('Choose the funnel where cards from emails go.')
+    return
+  }
   const old = { ...props.accountData }
   const updatedEmailAccount = { ...state }
 
@@ -168,8 +181,8 @@ async function updateAccount() {
       loading.value = true
       await callSetValue(values)
       succesHandler()
-    } catch {
-      errorHandler()
+    } catch (err) {
+      errorHandler(err)
     }
   }
 }
@@ -186,6 +199,7 @@ const isDirty = computed(() => {
     state.default_incoming !== props.accountData.default_incoming ||
     state.create_lead_from_incoming_email !==
       props.accountData.create_lead_from_incoming_email ||
+    state.crm_pipeline !== (props.accountData.crm_pipeline || '') ||
     state.frappe_mail_site !== props.accountData.frappe_mail_site
   )
 })
@@ -213,8 +227,10 @@ function succesHandler() {
   toast.success(__('Email account updated successfully'))
 }
 
-function errorHandler() {
+function errorHandler(err) {
   loading.value = false
-  error.value = __('Failed to update email account: invalid credentials')
+  error.value =
+    err?.messages?.[0] ||
+    __('Failed to update email account: invalid credentials')
 }
 </script>

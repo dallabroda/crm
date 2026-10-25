@@ -71,6 +71,13 @@
             </div>
           </template>
         </div>
+        <PipelineSelect
+          v-if="state.create_lead_from_incoming_email"
+          v-model="state.crm_pipeline"
+          :description="
+            __('Cards created from emails of this account go to this funnel.')
+          "
+        />
         <ErrorMessage class="ml-1" :message="error" />
       </div>
     </div>
@@ -106,6 +113,7 @@ import {
   incomingOutgoingFields,
 } from './emailConfig'
 import EmailProviderIcon from './EmailProviderIcon.vue'
+import PipelineSelect from '@/components/Pipelines/PipelineSelect.vue'
 
 const emit = defineEmits(['update:step'])
 
@@ -122,6 +130,7 @@ const state = reactive({
   default_incoming: false,
   default_outgoing: false,
   create_lead_from_incoming_email: false,
+  crm_pipeline: '',
 })
 const { capture } = useTelemetry()
 const { completeStep } = useCrmOnboarding()
@@ -148,8 +157,11 @@ const addEmailRes = createResource({
     completeStep('connect_your_email')
     emit('update:step', 'email-list')
   },
-  onError: () => {
-    error.value = __('Failed to create email account: invalid credentials')
+  onError: (err) => {
+    // the server's own reason (e.g. a missing funnel) beats a generic message
+    error.value =
+      err?.messages?.[0] ||
+      __('Failed to create email account: invalid credentials')
   },
 })
 
@@ -157,6 +169,10 @@ const error = ref()
 function createEmailAccount() {
   error.value = validateInputs(state, selectedService.value.custom)
   if (error.value) return
+  if (state.create_lead_from_incoming_email && !state.crm_pipeline) {
+    error.value = __('Choose the funnel where cards from emails go.')
+    return
+  }
 
   addEmailRes.submit({ data: state })
   capture('email_account_created')
