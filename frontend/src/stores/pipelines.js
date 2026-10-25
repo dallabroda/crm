@@ -38,7 +38,21 @@ export const pipelinesStore = defineStore('crm-pipelines', () => {
       let mocks = await loadMocks()
       return mocks.mockCall(method, args)
     }
-    return call(API + method, args)
+    try {
+      return await call(API + method, args)
+    } catch (error) {
+      // Development only: functions that the server side has not merged yet
+      // (e.g. get_stage_rules before #69) fall back to the mock one by one.
+      let mocks = isMissingMethod(error) ? await loadMocks() : null
+      if (!mocks) throw error
+      console.warn(`[pipelines] ${method} not on the server yet, using mock`)
+      return mocks.mockCall(method, args)
+    }
+  }
+
+  function isMissingMethod(error) {
+    let text = [error?.message, ...(error?.messages || [])].join(' ')
+    return /Failed to get method|has no attribute|No module named/.test(text)
   }
 
   function normalize(list) {
@@ -59,7 +73,10 @@ export const pipelinesStore = defineStore('crm-pipelines', () => {
       } catch (error) {
         let mocks = await loadMocks()
         if (!mocks) throw error
-        console.warn('[pipelines] server API unavailable, using mock data', error)
+        console.warn(
+          '[pipelines] server API unavailable, using mock data',
+          error,
+        )
         usingMocks.value = true
         pipelines.value = normalize(await mocks.mockCall('get_pipelines'))
       } finally {

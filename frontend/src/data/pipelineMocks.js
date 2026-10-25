@@ -31,7 +31,9 @@ const pipelines = [
       stage('Won', 'Ganho', 'green', 'Won', 6, 100),
       stage('Lost', 'Perdido', 'red', 'Lost', 7, 0),
     ],
-    members: [{ user: 'Administrator', full_name: 'Administrator', role: 'Owner' }],
+    members: [
+      { user: 'Administrator', full_name: 'Administrator', role: 'Owner' },
+    ],
     fields: [
       { fieldname: 'organization', position: 1 },
       { fieldname: 'deal_value', position: 2 },
@@ -53,7 +55,9 @@ const pipelines = [
       stage('Won', 'Aprovado', 'green', 'Won', 3, 100),
       stage('Lost', 'Recusado', 'red', 'Lost', 4, 0),
     ],
-    members: [{ user: 'Administrator', full_name: 'Administrator', role: 'Member' }],
+    members: [
+      { user: 'Administrator', full_name: 'Administrator', role: 'Member' },
+    ],
     fields: [
       { fieldname: 'organization', position: 1 },
       { fieldname: 'deal_value', position: 2 },
@@ -81,11 +85,51 @@ const catalog = {
   limit: 80,
   used: 0,
   fields: [
-    { fieldname: 'organization', label: 'Organization', fieldtype: 'Link', options: 'CRM Organization', is_standard: 1, locked: 0, disabled: 0 },
-    { fieldname: 'deal_value', label: 'Deal Value', fieldtype: 'Currency', options: '', is_standard: 1, locked: 0, disabled: 0 },
-    { fieldname: 'expected_closure_date', label: 'Expected Closure Date', fieldtype: 'Date', options: '', is_standard: 1, locked: 0, disabled: 0 },
-    { fieldname: 'next_step', label: 'Next Step', fieldtype: 'Data', options: '', is_standard: 1, locked: 0, disabled: 0 },
-    { fieldname: 'deal_owner', label: 'Deal Owner', fieldtype: 'Link', options: 'User', is_standard: 1, locked: 1, disabled: 0 },
+    {
+      fieldname: 'organization',
+      label: 'Organization',
+      fieldtype: 'Link',
+      options: 'CRM Organization',
+      is_standard: 1,
+      locked: 0,
+      disabled: 0,
+    },
+    {
+      fieldname: 'deal_value',
+      label: 'Deal Value',
+      fieldtype: 'Currency',
+      options: '',
+      is_standard: 1,
+      locked: 0,
+      disabled: 0,
+    },
+    {
+      fieldname: 'expected_closure_date',
+      label: 'Expected Closure Date',
+      fieldtype: 'Date',
+      options: '',
+      is_standard: 1,
+      locked: 0,
+      disabled: 0,
+    },
+    {
+      fieldname: 'next_step',
+      label: 'Next Step',
+      fieldtype: 'Data',
+      options: '',
+      is_standard: 1,
+      locked: 0,
+      disabled: 0,
+    },
+    {
+      fieldname: 'deal_owner',
+      label: 'Deal Owner',
+      fieldtype: 'Link',
+      options: 'User',
+      is_standard: 1,
+      locked: 1,
+      disabled: 0,
+    },
   ],
 }
 
@@ -95,8 +139,11 @@ function findPipeline(name) {
   return pipelines.find((p) => p.name === name)
 }
 
+// Against the real server (only some functions mocked) the funnel key is
+// unknown here, so fall back to the Vendas rules: default stage keys match.
 function stageRules(pipeline, stageName) {
-  return clone(rules[pipeline]?.[stageName] || {})
+  let byPipeline = rules[pipeline] || rules['mock-vendas']
+  return clone(byPipeline?.[stageName] || {})
 }
 
 function fieldRules(pipeline) {
@@ -152,7 +199,12 @@ async function missingFields(deal, stageName) {
 export async function mockCall(method, args = {}) {
   switch (method) {
     case 'get_pipelines':
-      return clone(pipelines).map(({ members, fields, ...p }) => p)
+      return clone(pipelines).map((p) => {
+        // get_pipelines does not return members/fields (get_pipeline_config does)
+        delete p.members
+        delete p.fields
+        return p
+      })
     case 'get_pipeline_config': {
       let p = findPipeline(args.pipeline)
       return p ? { ...clone(p), field_rules: fieldRules(p.name) } : null
@@ -190,7 +242,10 @@ export async function mockCall(method, args = {}) {
       return mockCall('get_pipeline_config', { pipeline: doc.name })
     }
     case 'get_field_catalog':
-      return { ...clone(catalog), used: catalog.fields.filter((f) => !f.is_standard).length }
+      return {
+        ...clone(catalog),
+        used: catalog.fields.filter((f) => !f.is_standard).length,
+      }
     case 'create_field': {
       let field = {
         fieldname: 'custom_' + args.label.toLowerCase().replace(/\W+/g, '_'),
@@ -210,7 +265,8 @@ export async function mockCall(method, args = {}) {
       if (!field) throw new Error('Field not found')
       if (method === 'disable_field') field.disabled = 1
       if (args.label) field.label = args.label
-      if (args.options !== undefined && args.options !== null) field.options = args.options
+      if (args.options !== undefined && args.options !== null)
+        field.options = args.options
       return clone(field)
     }
     default:

@@ -99,8 +99,9 @@ describe('applyStageRules', () => {
       LOCKED_FIELDS.map((f) => [f, { visible: 0, required: 0, read_only: 1 }]),
     )
     let out = applyStageRules(sections, rules)
-    expect(out[0].columns[0].fields.find((f) => f.fieldname === 'deal_owner'))
-      .toEqual({ fieldname: 'deal_owner', reqd: 0, read_only: 0 })
+    expect(
+      out[0].columns[0].fields.find((f) => f.fieldname === 'deal_owner'),
+    ).toEqual({ fieldname: 'deal_owner', reqd: 0, read_only: 0 })
   })
 
   it('does not modify the input and keeps sections without columns', () => {

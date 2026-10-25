@@ -1,5 +1,9 @@
 <template>
-  <Dialog v-model:open="show" :title="__('Fill in to move the card')" @close="cancel">
+  <Dialog
+    v-model:open="show"
+    :title="__('Fill in to move the card')"
+    @close="cancel"
+  >
     <template #default>
       <div class="-mt-3 mb-4 text-p-base text-ink-gray-7">
         {{ __('The stage {0} requires these fields.', [stageLabel]) }}
@@ -48,7 +52,11 @@
           />
           <FormControl
             v-else
-            :type="['Int', 'Float', 'Currency'].includes(field.fieldtype) ? 'number' : 'text'"
+            :type="
+              ['Int', 'Float', 'Currency'].includes(field.fieldtype)
+                ? 'number'
+                : 'text'
+            "
             :model-value="values[field.fieldname]"
             @update:model-value="(v) => (values[field.fieldname] = v)"
           />
@@ -91,10 +99,12 @@ const error = ref('')
 let saved = false
 
 function selectOptions(field) {
-  return ['', ...(field.options || '').split('\n').filter(Boolean)].map((o) => ({
-    label: o ? __(o) : '',
-    value: o,
-  }))
+  return ['', ...(field.options || '').split('\n').filter(Boolean)].map(
+    (o) => ({
+      label: o ? __(o) : '',
+      value: o,
+    }),
+  )
 }
 
 function isEmpty(value) {
@@ -114,7 +124,9 @@ function save() {
     (f) => f.fieldtype !== 'Check' && isEmpty(values[f.fieldname]),
   )
   if (missing.length) {
-    error.value = __('Fill in: {0}', [missing.map((f) => __(f.label)).join(', ')])
+    error.value = __('Fill in: {0}', [
+      missing.map((f) => __(f.label)).join(', '),
+    ])
     return
   }
   error.value = ''
@@ -122,7 +134,8 @@ function save() {
   show.value = false
   let payload = {}
   for (let f of props.fields) {
-    payload[f.fieldname] = f.fieldtype === 'Check' ? values[f.fieldname] || 0 : values[f.fieldname]
+    payload[f.fieldname] =
+      f.fieldtype === 'Check' ? values[f.fieldname] || 0 : values[f.fieldname]
   }
   emit('save', payload)
 }

@@ -9,7 +9,11 @@ export const LOCKED_FIELDS = ['pipeline', 'status', 'deal_owner']
 // { missing_fields: [{ fieldname, label, fieldtype, options }] } in a message.
 export function missingFieldsFromError(error) {
   if (error?.exc_type !== 'MissingRequiredFieldsError') return null
-  let candidates = [...(error.messages || []), error.message, error._server_messages]
+  let candidates = [
+    ...(error.messages || []),
+    error.message,
+    error._server_messages,
+  ]
   for (let message of candidates) {
     let parsed = parseMaybeJSON(message)
     // _server_messages is a JSON list of JSON strings

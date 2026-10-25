@@ -5,6 +5,7 @@ import { useAttachments } from '@/composables/useAttachments'
 import { showSettings, activeSettingsPage } from '@/composables/settings'
 import { runSequentially, parseAssignees, sanitizeText } from '@/utils'
 import { findMissingMandatory } from '@/utils/fieldTransforms'
+import { missingFieldsFromError } from '@/utils/pipelines'
 import {
   getFetchSource,
   getFieldsToFetch,
@@ -25,6 +26,20 @@ const permissionsCache = {}
 // away. Docs marked here have that one expected error swallowed instead of
 // surfaced as an error page.
 const intentionallyDeletedDocs = new Set()
+
+// Pages that can ask for a funnel stage's required fields (#72) register a
+// handler here; a save rejected with MissingRequiredFieldsError then opens
+// their dialog instead of a raw error toast. Key: "<doctype>:<docname>".
+const missingFieldsHandlers = {}
+
+export function onMissingRequiredFields(doctype, docname, handler) {
+  let key = `${doctype}:${docname}`
+  missingFieldsHandlers[key] = handler
+  return () => {
+    if (missingFieldsHandlers[key] === handler)
+      delete missingFieldsHandlers[key]
+  }
+}
 
 export function markDocumentAsDeleted(doctype, docname) {
   intentionallyDeletedDocs.add(`${doctype}:${docname}`)
@@ -97,6 +112,13 @@ export function useDocument(doctype, docname, resourceOverrides = {}) {
             },
             onError: (err) => {
               triggerOnError(err)
+
+              let missing = missingFieldsFromError(err)
+              let handler = missingFieldsHandlers[`${doctype}:${docname}`]
+              if (missing && handler) {
+                handler(missing)
+                return
+              }
 
               if (err.exc_type == 'MandatoryError') {
                 const fieldName = err.messages

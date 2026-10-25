@@ -284,7 +284,9 @@ const pipelineViews = computed(() =>
 
 const allViews = computed(() => {
   let top = links.filter((link) => link.route === 'Dashboard')
-  let rest = links.filter((link) => !['Dashboard', 'Deals'].includes(link.route))
+  let rest = links.filter(
+    (link) => !['Dashboard', 'Deals'].includes(link.route),
+  )
   let _views = [
     { name: 'Top', hideLabel: true, opened: true, views: top.map(navLink) },
     {
@@ -292,7 +294,12 @@ const allViews = computed(() => {
       opened: true,
       views: pipelineViews.value,
     },
-    { name: 'All Views', hideLabel: true, opened: true, views: rest.map(navLink) },
+    {
+      name: 'All Views',
+      hideLabel: true,
+      opened: true,
+      views: rest.map(navLink),
+    },
   ].filter((section) => section.views.length)
   if (getPublicViews().length) {
     _views.push({

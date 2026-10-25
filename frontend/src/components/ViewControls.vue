@@ -1359,7 +1359,9 @@ function moveCardInPipeline(data, fields) {
         showMissingFieldsModal.value = true
         return
       }
-      toast.error(error?.messages?.[0] || __('Could not move the card. Reverting.'))
+      toast.error(
+        error?.messages?.[0] || __('Could not move the card. Reverting.'),
+      )
       revertKanbanCardMove(data)
     })
 }
@@ -1375,7 +1377,9 @@ function cancelMissingFields() {
   let pending = pendingMissingFields.value
   pendingMissingFields.value = null
   if (!pending) return
-  toast.info(__('Move cancelled: required fields of the stage were not filled in.'))
+  toast.info(
+    __('Move cancelled: required fields of the stage were not filled in.'),
+  )
   revertKanbanCardMove(pending.data)
 }
 
