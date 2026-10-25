@@ -15,6 +15,7 @@ from crm.fcrm.doctype.crm_status_change_log.crm_status_change_log import (
 )
 from crm.fcrm.doctype.utils import add_or_remove_lost_reason_section_in_sidepanel
 from crm.permissions.pipeline import get_role_in_pipeline
+from crm.utils.locks import acquire_record_creation_lock
 
 LEAD_DEAL_FIELD_MAP = {"lead_owner": "deal_owner"}
 
@@ -572,6 +573,7 @@ def convert_to_deal(
 	an automation retry idempotent - and "Fail" refuses.
 	"""
 	validate_conversion_access(lead, doc)
+	acquire_record_creation_lock()
 	lead = lock_lead(lead)
 	existing = existing_deal(lead.name)
 	if existing and if_converted != "Create":

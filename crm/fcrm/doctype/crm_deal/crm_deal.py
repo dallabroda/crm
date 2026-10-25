@@ -13,6 +13,7 @@ from crm.fcrm.doctype.crm_service_level_agreement.utils import get_sla
 from crm.fcrm.doctype.crm_status_change_log.crm_status_change_log import add_status_change_log
 from crm.fcrm.doctype.utils import add_or_remove_lost_reason_section_in_sidepanel
 from crm.permissions.pipeline import get_role_in_pipeline
+from crm.utils.locks import acquire_record_creation_lock
 
 
 class CRMDeal(Document):
@@ -529,6 +530,7 @@ def create_contact(doc):
 @frappe.whitelist()
 def create_deal(doc: dict):
 	frappe.has_permission("CRM Deal", "create", throw=True)
+	acquire_record_creation_lock()
 	deal = frappe.new_doc("CRM Deal")
 
 	contact = doc.get("contact")
