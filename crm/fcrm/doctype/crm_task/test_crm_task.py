@@ -4,6 +4,7 @@
 import frappe
 
 from crm.tests import CRMTestCase as FrappeTestCase
+from crm.tests import default_test_pipeline
 
 
 class TestCRMTask(FrappeTestCase):
@@ -84,6 +85,7 @@ class TestCRMTask(FrappeTestCase):
 		deal = frappe.get_doc(
 			{
 				"doctype": "CRM Deal",
+				"pipeline": default_test_pipeline(),
 				"organization": org.name,
 			}
 		).insert()

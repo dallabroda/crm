@@ -12,6 +12,7 @@ from crm.fcrm.doctype.crm_call_log.crm_call_log import (
 	parse_call_log,
 )
 from crm.integrations.api import _get_recording_credentials
+from crm.tests import default_test_pipeline
 
 
 class TestCRMCallLog(FrappeTestCase):
@@ -119,6 +120,7 @@ class TestCRMCallLog(FrappeTestCase):
 		deal = frappe.get_doc(
 			{
 				"doctype": "CRM Deal",
+				"pipeline": default_test_pipeline(),
 				"organization": org.name,
 				"deal_owner": "Administrator",
 			}
@@ -345,6 +347,7 @@ class TestCRMCallLog(FrappeTestCase):
 		deal = frappe.get_doc(
 			{
 				"doctype": "CRM Deal",
+				"pipeline": default_test_pipeline(),
 				"organization": org.name,
 				"deal_owner": "Administrator",
 			}
@@ -404,7 +407,12 @@ class TestCRMCallLog(FrappeTestCase):
 	def test_call_log_names_deal_without_contacts_from_the_deal(self):
 		org = frappe.get_doc({"doctype": "CRM Organization", "organization_name": "Referenced Org"}).insert()
 		deal = frappe.get_doc(
-			{"doctype": "CRM Deal", "organization": org.name, "deal_owner": "Administrator"}
+			{
+				"doctype": "CRM Deal",
+				"pipeline": default_test_pipeline(),
+				"organization": org.name,
+				"deal_owner": "Administrator",
+			}
 		).insert()
 		create_test_lead("Other Lead", "+919876500005")
 		call = create_test_call_log(
@@ -418,7 +426,9 @@ class TestCRMCallLog(FrappeTestCase):
 		self.assertEqual(get_call_log(call.name)["_receiver"]["label"], "Referenced Org")
 
 	def test_call_log_names_deal_from_typed_organization_name(self):
-		deal = frappe.get_doc({"doctype": "CRM Deal", "deal_owner": "Administrator"}).insert()
+		deal = frappe.get_doc(
+			{"doctype": "CRM Deal", "pipeline": default_test_pipeline(), "deal_owner": "Administrator"}
+		).insert()
 		deal.db_set("organization_name", "Typed Org")
 		call = create_test_call_log(reference_doctype="CRM Deal", reference_docname=deal.name)
 

@@ -13,6 +13,7 @@ from crm.permissions.org_hierarchy import (
 )
 from crm.permissions.pipeline import has_deal_permission
 from crm.tests import CRMTestCase as FrappeTestCase
+from crm.tests import default_test_pipeline
 
 TEST_USERS = ("manager@hier.test", "rep1@hier.test", "rep2@hier.test", "outsider@hier.test")
 
@@ -260,7 +261,14 @@ def make_lead(owner_email):
 
 
 def make_deal(owner_email):
-	doc = frappe.get_doc({"doctype": "CRM Deal", "deal_owner": owner_email, "organization": "Test Org"})
+	doc = frappe.get_doc(
+		{
+			"doctype": "CRM Deal",
+			"pipeline": default_test_pipeline(),
+			"deal_owner": owner_email,
+			"organization": "Test Org",
+		}
+	)
 	doc.flags.ignore_mandatory = True
 	doc.flags.ignore_links = True
 	return doc.insert(ignore_permissions=True)

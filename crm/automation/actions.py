@@ -129,6 +129,13 @@ class ConvertLeadToDeal(AutomationAction):
 	}
 	params_schema: ClassVar[list] = [
 		{
+			"fieldname": "pipeline",
+			"label": "Pipeline",
+			"fieldtype": "Link",
+			"options": "CRM Pipeline",
+			"reqd": 1,
+		},
+		{
 			"fieldname": "if_converted",
 			"label": "If Already Converted",
 			"fieldtype": "Select",
@@ -156,6 +163,8 @@ class ConvertLeadToDeal(AutomationAction):
 		require_doctype(doctype, ["CRM Lead"], self.label)
 		if params.get("if_converted") not in (None, "", "Return Existing", "Fail"):
 			raise AutomationParamError(_("Unsupported conversion policy"), fieldname="if_converted")
+		if not params.get("pipeline") or not frappe.db.exists("CRM Pipeline", params.get("pipeline")):
+			raise AutomationParamError(_("Choose the pipeline of the new card"), fieldname="pipeline")
 		self._validate_overrides(params.get("deal"))
 
 	def _validate_overrides(self, overrides):
@@ -182,7 +191,9 @@ class ConvertLeadToDeal(AutomationAction):
 
 	def _overrides(self, doc, params, context) -> dict:
 		overrides = parse_overrides(params.get("deal"))
-		return {field: render_value(value, doc, context) for field, value in overrides.items()}
+		values = {field: render_value(value, doc, context) for field, value in overrides.items()}
+		values.setdefault("pipeline", params.get("pipeline"))
+		return values
 
 	def _result(self, lead, deal, reused) -> dict:
 		deal_doc = frappe.get_doc("CRM Deal", deal)

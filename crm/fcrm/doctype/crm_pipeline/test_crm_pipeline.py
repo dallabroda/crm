@@ -36,9 +36,13 @@ class TestCRMPipeline(FrappeTestCase):
 		self.assertTrue(default)
 		self.assertEqual(frappe.db.get_value("CRM Deal Status", "Qualification", "pipeline"), default)
 
-	def test_card_without_pipeline_goes_to_default_first_stage(self):
-		card = make_card()
-		self.assertEqual(card.pipeline, get_default_pipeline())
+	def test_card_without_pipeline_is_refused(self):
+		# Pipeline is mandatory and never guessed (owner decision)
+		with self.assertRaises(frappe.MandatoryError):
+			frappe.get_doc({"doctype": "CRM Deal", "deal_owner": "Administrator"}).insert()
+
+	def test_card_takes_first_stage_of_its_pipeline(self):
+		card = make_card(pipeline=get_default_pipeline())
 		self.assertEqual(card.status, get_first_stage(card.pipeline))
 
 	def test_card_gets_pipeline_from_stage(self):
@@ -76,7 +80,7 @@ class TestCRMPipeline(FrappeTestCase):
 
 	def test_change_pipeline_keeps_values_and_logs_pipeline(self):
 		credit = make_pipeline()
-		card = make_card(next_step="Call back")
+		card = make_card(pipeline=get_default_pipeline(), next_step="Call back")
 		change_pipeline(card.name, credit["name"])
 		card.reload()
 		self.assertEqual(card.pipeline, credit["name"])

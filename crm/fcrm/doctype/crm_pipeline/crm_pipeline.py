@@ -112,8 +112,8 @@ def next_position(doctype: str, **filters) -> int:
 
 
 def get_default_pipeline(user: str | None = None) -> str | None:
-	"""Pipeline for a card created without one: the first active pipeline the user takes part in
-	(any active pipeline for admins and system processes)."""
+	"""First active pipeline the user takes part in (any active one for admins). Only a suggestion
+	for screens and forms: a card without a pipeline is refused, never placed here."""
 	from crm.permissions.pipeline import is_admin
 
 	user = user or frappe.session.user

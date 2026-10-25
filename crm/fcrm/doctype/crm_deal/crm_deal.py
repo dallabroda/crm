@@ -7,7 +7,7 @@ from frappe.desk.form.assign_to import _add as assign
 from frappe.model.document import Document
 
 from crm.api.exchange_rate import get_exchange_rate
-from crm.fcrm.doctype.crm_pipeline.crm_pipeline import get_default_pipeline, get_first_stage
+from crm.fcrm.doctype.crm_pipeline.crm_pipeline import get_first_stage
 from crm.fcrm.doctype.crm_pipeline.fields import validate_deal as validate_stage_fields
 from crm.fcrm.doctype.crm_service_level_agreement.utils import get_sla
 from crm.fcrm.doctype.crm_status_change_log.crm_status_change_log import add_status_change_log
@@ -124,13 +124,12 @@ class CRMDeal(Document):
 		self.apply_sla()
 
 	def validate_status(self):
-		"""Every card belongs to a pipeline and sits in one of that pipeline's stages."""
+		"""Every card belongs to a pipeline and sits in one of that pipeline's stages. There is no
+		default pipeline (owner decision): it is chosen, directly or through the stage."""
 		if not self.pipeline and self.status:
 			self.pipeline = frappe.db.get_value("CRM Deal Status", self.status, "pipeline")
 		if not self.pipeline:
-			self.pipeline = get_default_pipeline()
-		if not self.pipeline:
-			frappe.throw(_("Choose a pipeline for the card. You must be a member of it."))
+			frappe.throw(_("Choose a pipeline for the card."), frappe.MandatoryError)
 
 		pipeline = frappe.db.get_value(
 			"CRM Pipeline", self.pipeline, ["pipeline_name", "is_active"], as_dict=True

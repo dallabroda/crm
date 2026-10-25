@@ -23,7 +23,7 @@ from crm.domain_enrichment.config import get_config
 from crm.domain_enrichment.cross_record import copy_enrichment_from_organization
 from crm.domain_enrichment.mapper import FieldChange, apply_to_document
 from crm.domain_enrichment.result import EnrichmentResult, Field, SocialProfile
-from crm.domain_enrichment.tests import fixtures
+from crm.tests import default_test_pipeline
 
 
 def canned_result(website="https://acme.example") -> EnrichmentResult:
@@ -290,6 +290,7 @@ class CrossRecordCopyTest(FrappeTestCase):
 
 	def test_copies_empty_fields_from_enriched_org(self):
 		deal = frappe.new_doc("CRM Deal")
+		deal.pipeline = default_test_pipeline()
 		deal.organization = self.org.name
 		filled = copy_enrichment_from_organization(deal)
 		self.assertTrue(filled)
@@ -298,6 +299,7 @@ class CrossRecordCopyTest(FrappeTestCase):
 
 	def test_does_not_clobber_user_set_fields(self):
 		deal = frappe.new_doc("CRM Deal")
+		deal.pipeline = default_test_pipeline()
 		deal.organization = self.org.name
 		deal.company_description = "User wrote this."
 		copy_enrichment_from_organization(deal)
@@ -310,6 +312,7 @@ class CrossRecordCopyTest(FrappeTestCase):
 		plain.insert()
 
 		deal = frappe.new_doc("CRM Deal")
+		deal.pipeline = default_test_pipeline()
 		deal.organization = plain.name
 		filled = copy_enrichment_from_organization(deal)
 		self.assertEqual(filled, [])

@@ -6,6 +6,7 @@ from frappe.exceptions import FrappeTypeError
 
 from crm.api.onboarding import get_first_deal, get_first_lead
 from crm.tests import CRMTestCase as FrappeTestCase
+from crm.tests import default_test_pipeline
 
 SALES_USER = "onboarding-rep@example.com"
 
@@ -43,7 +44,9 @@ class TestOnboardingAPI(FrappeTestCase):
 		return lead
 
 	def _make_deal(self):
-		deal = frappe.get_doc({"doctype": "CRM Deal", "organization": None})
+		deal = frappe.get_doc(
+			{"doctype": "CRM Deal", "pipeline": default_test_pipeline(), "organization": None}
+		)
 		deal.insert(ignore_permissions=True)
 		return deal
 
