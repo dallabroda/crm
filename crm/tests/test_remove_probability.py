@@ -5,6 +5,7 @@ import json
 
 import frappe
 
+from crm.api.doc import get_data, get_fields, get_filterable_fields, get_group_by_fields, sort_options
 from crm.fcrm.doctype.crm_dashboard.crm_dashboard import create_default_manager_dashboard
 from crm.fcrm.doctype.crm_pipeline.fields import catalog_fieldnames, default_pipeline_fields
 from crm.patches.credhub.remove_probability import execute as remove_probability
@@ -25,6 +26,29 @@ class TestRemoveProbability(FrappeTestCase):
 			{"doctype": "CRM Deal", "pipeline": default_test_pipeline(), "status": "Negotiation"}
 		).insert(ignore_permissions=True)
 		self.assertFalse(card.probability)
+
+	def test_pickers_do_not_offer_retired_fields(self):
+		retired = {"probability", "expected_deal_value"}
+		offered = {
+			"sort": {f["fieldname"] for f in sort_options("CRM Deal")},
+			"filter": {f["fieldname"] for f in get_filterable_fields("CRM Deal")},
+			"group by": {f["fieldname"] for f in get_group_by_fields("CRM Deal")},
+			"fields": {f.fieldname for f in get_fields("CRM Deal")},
+			"columns": {
+				f["fieldname"]
+				for f in get_data(
+					doctype="CRM Deal",
+					filters={},
+					order_by="modified desc",
+					page_length=1,
+					view={"view_type": "list"},
+				)["fields"]
+			},
+		}
+		for picker, fieldnames in offered.items():
+			with self.subTest(picker=picker):
+				self.assertIn("status", fieldnames)
+				self.assertFalse(retired & fieldnames)
 
 	def test_default_dashboard_has_no_forecast(self):
 		self.assertNotIn("forecasted_revenue", create_default_manager_dashboard(force=True))
