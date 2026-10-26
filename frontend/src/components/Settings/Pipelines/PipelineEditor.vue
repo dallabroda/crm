@@ -303,6 +303,7 @@ import UserAvatar from '@/components/UserAvatar.vue'
 import RuleToggle from './RuleToggle.vue'
 import PipelineDistribution from './PipelineDistribution.vue'
 import { pipelinesStore } from '@/stores/pipelines'
+import { getMeta } from '@/stores/meta'
 import { colors, parseColor } from '@/utils'
 import { LOCKED_FIELDS } from '@/utils/pipelines'
 import Draggable from 'vuedraggable'
@@ -386,11 +387,15 @@ function defaultDistribution() {
 }
 
 // any card field can decide the salesperson (e.g. campaign, city, product)
-const distributionFieldOptions = computed(() =>
-  catalog.value
-    .filter((f) => !f.disabled)
-    .map((f) => ({ label: __(f.label), value: f.fieldname })),
-)
+// Rules test the incoming entry (a lead), so only fields that a lead has can
+// decide; fields that exist only on the card would never match
+const { getFields: getLeadFields } = getMeta('CRM Lead')
+const distributionFieldOptions = computed(() => {
+  let leadFields = new Set((getLeadFields() || []).map((f) => f.fieldname))
+  return catalog.value
+    .filter((f) => !f.disabled && leadFields.has(f.fieldname))
+    .map((f) => ({ label: __(f.label), value: f.fieldname }))
+})
 
 function userInfo(user) {
   return props.users.users?.find((u) => u.name === user)
