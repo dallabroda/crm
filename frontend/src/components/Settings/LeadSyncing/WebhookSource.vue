@@ -246,7 +246,7 @@ const confirmKey = ref(false)
 
 const snippet = computed(
   () =>
-    `<script src="${window.location.origin}/assets/cred_hub/js/lead-form.js" data-key="${newKey.value || __('YOUR-KEY')}" defer><` +
+    `<script src="${window.location.origin}/assets/cred_hub/js/lead-form.js" data-source="${props.source.name}" data-key="${newKey.value || __('YOUR-KEY')}" defer><` +
     '/script>',
 )
 
