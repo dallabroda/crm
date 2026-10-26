@@ -22,7 +22,8 @@ export const metaLeadsApi = {
   disconnect: () => call(API + 'disconnect_facebook'),
   // [{ time, status: Created | Duplicate | Failed, lead, lead_name, form_name
   //    (Meta) or source_label (other sources),
-  //    pipeline, assigned_to, error, card: { doctype, name } }]
+  //    pipeline, assigned_to, error, card: { doctype, name },
+  //    welcome: Queued | Sent | Failed | null, welcome_error, welcome_url }]
   // every source when `source` is left out
   getActivity: (source) =>
     getRequest(API + 'get_lead_source_activity', source ? { source } : {}),

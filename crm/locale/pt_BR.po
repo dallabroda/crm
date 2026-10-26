@@ -11194,3 +11194,127 @@ msgstr "Salvar endereços"
 #: frontend/src/components/Settings/LeadSyncing
 msgid "Test"
 msgstr "Teste"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "WhatsApp welcome message"
+msgstr "Mensagem de boas-vindas no WhatsApp"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Connected to the Cred Chat account {0}"
+msgstr "Conectado à conta {0} do Cred Chat"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Connect your Cred Chat to send a WhatsApp message to each new lead the moment it arrives. Then turn it on in each source above."
+msgstr "Conecte o seu Cred Chat para mandar uma mensagem no WhatsApp para cada lead novo assim que ele chegar. Depois ligue em cada origem acima."
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "The welcome message is turned off on every source and the access key is erased."
+msgstr "A mensagem de boas-vindas é desligada em todas as origens e a chave de acesso é apagada."
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "In Cred Chat, the account number is the number after /accounts/ in the address bar."
+msgstr "No Cred Chat, o número da conta é o número depois de /accounts/ na barra de endereço."
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "The access key is in Cred Chat › Profile settings › Access token. Use the key of an administrator of the account."
+msgstr "A chave de acesso fica em Cred Chat › Configurações do perfil › Token de acesso. Use a chave de um administrador da conta."
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Account number"
+msgstr "Número da conta"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Access key"
+msgstr "Chave de acesso"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Connect"
+msgstr "Conectar"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Could not load the Cred Chat connection"
+msgstr "Não foi possível carregar a conexão com o Cred Chat"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Cred Chat connected"
+msgstr "Cred Chat conectado"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Could not connect the Cred Chat"
+msgstr "Não foi possível conectar o Cred Chat"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Cred Chat disconnected. No welcome message is sent."
+msgstr "Cred Chat desconectado. Nenhuma mensagem de boas-vindas é enviada."
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Could not disconnect the Cred Chat"
+msgstr "Não foi possível desconectar o Cred Chat"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Sent to each new lead of this source, from your WhatsApp number in Cred Chat."
+msgstr "Enviada para cada lead novo desta origem, pelo seu número de WhatsApp no Cred Chat."
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Connect your Cred Chat in \"WhatsApp welcome message\", below the sources, to use it."
+msgstr "Para usar, conecte o seu Cred Chat em \"Mensagem de boas-vindas no WhatsApp\", abaixo das origens."
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "WhatsApp number"
+msgstr "Número de WhatsApp"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Message (approved template)"
+msgstr "Mensagem (template aprovado)"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "This number has no approved text template yet. Create one in Cred Chat › Settings › Templates and wait for Meta to approve it."
+msgstr "Este número ainda não tem template de texto aprovado. Crie um em Cred Chat › Configurações › Templates e espere a Meta aprovar."
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Meta charges each conversation started by the company on your WhatsApp account. Leads without a valid mobile number get no message."
+msgstr "A Meta cobra cada conversa iniciada pela empresa na sua conta de WhatsApp. Lead sem celular válido não recebe mensagem."
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Save welcome message"
+msgstr "Salvar boas-vindas"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Choose a lead field"
+msgstr "Escolha um campo do lead"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Could not load the welcome message"
+msgstr "Não foi possível carregar a mensagem de boas-vindas"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Welcome message on for this source"
+msgstr "Boas-vindas ligadas para esta origem"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Welcome message saved"
+msgstr "Mensagem de boas-vindas salva"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Could not save the welcome message"
+msgstr "Não foi possível salvar a mensagem de boas-vindas"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Open the conversation in Cred Chat"
+msgstr "Abrir a conversa no Cred Chat"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Waiting to be sent"
+msgstr "Aguardando envio"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Welcome sent"
+msgstr "Boas-vindas enviadas"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Welcome not sent"
+msgstr "Boas-vindas não enviadas"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Welcome queued"
+msgstr "Boas-vindas na fila"

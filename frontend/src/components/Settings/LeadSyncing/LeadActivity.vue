@@ -48,6 +48,45 @@
             </template>
           </span>
         </div>
+        <!-- WhatsApp welcome message: Sent means handed to Cred Chat -->
+        <Tooltip
+          v-if="item.welcome"
+          :text="
+            item.welcome === 'Failed'
+              ? item.welcome_error
+              : item.welcome === 'Sent'
+                ? __('Open the conversation in Cred Chat')
+                : __('Waiting to be sent')
+          "
+        >
+          <a
+            v-if="item.welcome === 'Sent' && item.welcome_url"
+            :href="item.welcome_url"
+            target="_blank"
+            rel="noopener"
+            class="flex shrink-0 items-center gap-1 text-p-xs text-ink-green-7 hover:underline"
+            @click.stop
+          >
+            <span class="lucide-message-circle size-3.5" aria-hidden="true" />
+            {{ __('Welcome sent') }}
+          </a>
+          <span
+            v-else
+            class="flex shrink-0 items-center gap-1 text-p-xs"
+            :class="
+              item.welcome === 'Failed' ? 'text-ink-red-6' : 'text-ink-gray-5'
+            "
+          >
+            <span class="lucide-message-circle size-3.5" aria-hidden="true" />
+            {{
+              item.welcome === 'Failed'
+                ? __('Welcome not sent')
+                : item.welcome === 'Sent'
+                  ? __('Welcome sent')
+                  : __('Welcome queued')
+            }}
+          </span>
+        </Tooltip>
         <Tooltip :text="formatDate(item.time)">
           <span class="shrink-0 text-p-xs text-ink-gray-5">
             {{ timeAgo(item.time) }}

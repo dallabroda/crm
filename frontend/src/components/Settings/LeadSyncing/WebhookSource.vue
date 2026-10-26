@@ -33,6 +33,12 @@
         variant="ghost"
         @click="open = !open"
       />
+      <Button
+        :label="__('WhatsApp')"
+        :icon-right="showWelcome ? 'lucide-chevron-up' : 'lucide-chevron-down'"
+        variant="ghost"
+        @click="showWelcome = !showWelcome"
+      />
       <Tooltip :text="__('Receive leads from this source')">
         <Switch
           :model-value="Boolean(source.enabled)"
@@ -233,12 +239,14 @@
         }}
       </p>
     </div>
+    <WelcomeMessage v-if="showWelcome" :source="source.name" />
   </div>
 </template>
 
 <script setup>
 import PipelineSelect from '@/components/Pipelines/PipelineSelect.vue'
 import SiteAddresses, { validOrigins } from './SiteAddresses.vue'
+import WelcomeMessage from './WelcomeMessage.vue'
 import { sourceType, webhookSourcesApi } from './webhookSourcesApi'
 import { copyToClipboard, timeAgo } from '@/utils'
 import { Button, Switch, Tooltip, toast } from 'frappe-ui'
@@ -254,6 +262,7 @@ const emit = defineEmits(['changed'])
 
 const type = computed(() => sourceType(props.source.type))
 const open = ref(Boolean(props.initialKey))
+const showWelcome = ref(false)
 const newKey = ref(props.initialKey)
 const saving = ref(false)
 const origins = ref(props.source.allowed_origins || '')
