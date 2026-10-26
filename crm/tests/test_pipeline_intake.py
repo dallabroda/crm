@@ -85,8 +85,9 @@ class TestPipelineIntake(FrappeTestCase):
 			).insert()
 
 	def test_owner_outside_pipeline_is_not_kept(self):
+		# Someone outside the pipeline cannot own the card: the pipeline's distribution picks a member
 		lead = self.make_lead(lead_owner=OUTSIDER)
-		self.assertFalse(self.card_of(lead.name).deal_owner)
+		self.assertEqual(self.card_of(lead.name).deal_owner, MEMBER)
 
 	def test_lead_without_pipeline_stays_a_lead(self):
 		lead = frappe.get_doc({"doctype": "CRM Lead", "first_name": "Bia"}).insert(ignore_permissions=True)
