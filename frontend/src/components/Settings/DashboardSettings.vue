@@ -31,34 +31,13 @@
           <div class="text-p-sm text-ink-gray-5 truncate">
             {{
               __(
-                'Makes "Expected Closure Date" and "Expected Deal Value" mandatory for deal value forecasting',
+                'Makes "Expected Closure Date" and "Deal Value" mandatory for deal value forecasting',
               )
             }}
           </div>
         </div>
         <div>
           <Switch v-model="settings.doc.enable_forecasting" size="sm" />
-        </div>
-      </div>
-      <div class="h-px border-t mx-2 border-outline-elevation-2" />
-      <div class="flex items-center justify-between py-3 px-2">
-        <div class="flex flex-col">
-          <div class="text-p-base-medium text-ink-gray-7 truncate">
-            {{ __('Auto Update Expected Deal Value') }}
-          </div>
-          <div class="text-p-sm text-ink-gray-5 truncate">
-            {{
-              __(
-                'Automatically update "Expected Deal Value" based on the total value of associated products in a deal',
-              )
-            }}
-          </div>
-        </div>
-        <div>
-          <Switch
-            v-model="settings.doc.auto_update_expected_deal_value"
-            size="sm"
-          />
         </div>
       </div>
       <div class="h-px border-t mx-2 border-outline-elevation-2" />
