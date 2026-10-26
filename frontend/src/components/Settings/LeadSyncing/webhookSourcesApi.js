@@ -10,9 +10,15 @@ export const webhookSourcesApi = {
   // [{ name, type, label, pipeline, enabled, url, key_hint, last_lead_at }]
   list: () => getRequest(API + 'get_webhook_sources'),
   // { name, url, key }: the key is shown this once
-  create: (type, label, pipeline) =>
-    call(API + 'create_webhook_source', { type, label, pipeline }),
-  // any of label / pipeline / enabled
+  // allowed_origins (website only): the site's addresses, one per line
+  create: (type, label, pipeline, allowed_origins) =>
+    call(API + 'create_webhook_source', {
+      type,
+      label,
+      pipeline,
+      allowed_origins,
+    }),
+  // any of label / pipeline / enabled / allowed_origins
   update: (name, values) =>
     call(API + 'update_webhook_source', { name, ...values }),
   // { key }

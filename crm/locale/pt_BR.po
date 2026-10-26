@@ -11178,3 +11178,19 @@ msgstr "Typeform"
 #: frontend/src/components/Settings/LeadSyncing
 msgid "Other tools (Zapier, Make, API)"
 msgstr "Outras ferramentas (Zapier, Make, API)"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Address of your website"
+msgstr "Endereço do seu site"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Leads are accepted only from these addresses, one per line, starting with https://. Include the version with and without www if your site uses both."
+msgstr "Os leads só são aceitos destes endereços, um por linha, começando com https://. Inclua a versão com e sem www se o seu site usa as duas."
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Save addresses"
+msgstr "Salvar endereços"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Test"
+msgstr "Teste"

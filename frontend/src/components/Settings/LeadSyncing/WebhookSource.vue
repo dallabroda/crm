@@ -88,6 +88,21 @@
         }}
       </p>
 
+      <!-- website: only leads sent from these addresses are accepted -->
+      <div v-if="source.type === 'website'" class="flex items-end gap-2">
+        <div class="flex-1">
+          <SiteAddresses v-model="origins" :disabled="saving" />
+        </div>
+        <Button
+          :label="__('Save addresses')"
+          :disabled="
+            origins === (source.allowed_origins || '') || !validOrigins(origins)
+          "
+          :loading="saving"
+          @click="save({ allowed_origins: origins.trim() })"
+        />
+      </div>
+
       <!-- where to paste, per tool -->
       <ol
         class="flex list-decimal flex-col gap-1 pl-5 text-p-sm text-ink-gray-7"
@@ -223,6 +238,7 @@
 
 <script setup>
 import PipelineSelect from '@/components/Pipelines/PipelineSelect.vue'
+import SiteAddresses, { validOrigins } from './SiteAddresses.vue'
 import { sourceType, webhookSourcesApi } from './webhookSourcesApi'
 import { copyToClipboard, timeAgo } from '@/utils'
 import { Button, Switch, Tooltip, toast } from 'frappe-ui'
@@ -240,6 +256,7 @@ const type = computed(() => sourceType(props.source.type))
 const open = ref(Boolean(props.initialKey))
 const newKey = ref(props.initialKey)
 const saving = ref(false)
+const origins = ref(props.source.allowed_origins || '')
 const removing = ref(false)
 const confirmRemove = ref(false)
 const confirmKey = ref(false)

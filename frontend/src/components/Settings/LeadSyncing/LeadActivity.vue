@@ -83,15 +83,20 @@ async function load() {
 
 function statusLabel(status) {
   return (
-    { Created: __('New'), Duplicate: __('Duplicate'), Failed: __('Failed') }[
-      status
-    ] || status
+    {
+      Created: __('New'),
+      Duplicate: __('Duplicate'),
+      Failed: __('Failed'),
+      Test: __('Test'),
+    }[status] || status
   )
 }
 
 function statusTheme(status) {
   return (
-    { Created: 'green', Duplicate: 'orange', Failed: 'red' }[status] || 'gray'
+    { Created: 'green', Duplicate: 'orange', Failed: 'red', Test: 'blue' }[
+      status
+    ] || 'gray'
   )
 }
 

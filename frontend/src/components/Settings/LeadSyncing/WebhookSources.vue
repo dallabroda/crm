@@ -26,26 +26,32 @@
     <!-- name and funnel of the source being added -->
     <div
       v-if="draft"
-      class="flex items-end gap-3 rounded border border-outline-gray-1 p-3"
+      class="flex flex-col gap-3 rounded border border-outline-gray-1 p-3"
     >
-      <div class="flex-1">
-        <FormControl
-          v-model="draft.label"
-          type="text"
-          :label="__('Name')"
-          :placeholder="sourceType(draft.type).label"
+      <div class="flex items-end gap-3">
+        <div class="flex-1">
+          <FormControl
+            v-model="draft.label"
+            type="text"
+            :label="__('Name')"
+            :placeholder="sourceType(draft.type).label"
+          />
+        </div>
+        <div class="w-56">
+          <PipelineSelect v-model="draft.pipeline" />
+        </div>
+        <Button :label="__('Cancel')" @click="draft = null" />
+        <Button
+          variant="solid"
+          :label="__('Create')"
+          :disabled="!draft.pipeline || !originsOk"
+          :loading="creating"
+          @click="create"
         />
       </div>
-      <div class="w-56">
-        <PipelineSelect v-model="draft.pipeline" />
-      </div>
-      <Button :label="__('Cancel')" @click="draft = null" />
-      <Button
-        variant="solid"
-        :label="__('Create')"
-        :disabled="!draft.pipeline"
-        :loading="creating"
-        @click="create"
+      <SiteAddresses
+        v-if="draft.type === 'website'"
+        v-model="draft.allowed_origins"
       />
     </div>
 
@@ -68,6 +74,7 @@
 <script setup>
 import PipelineSelect from '@/components/Pipelines/PipelineSelect.vue'
 import WebhookSource from './WebhookSource.vue'
+import SiteAddresses, { validOrigins } from './SiteAddresses.vue'
 import {
   SOURCE_TYPES,
   sourceType,
@@ -82,6 +89,12 @@ const sources = ref([])
 const loading = ref(false)
 const creating = ref(false)
 const draft = ref(null)
+// the website source only accepts leads sent from the company's own site
+const originsOk = computed(
+  () =>
+    draft.value?.type !== 'website' ||
+    validOrigins(draft.value.allowed_origins),
+)
 // key of a source created in this visit, shown once in its row
 const keys = ref({})
 
@@ -89,7 +102,13 @@ const addOptions = computed(() =>
   SOURCE_TYPES.map((t) => ({
     label: t.label,
     icon: t.icon,
-    onClick: () => (draft.value = { type: t.value, label: '', pipeline: '' }),
+    onClick: () =>
+      (draft.value = {
+        type: t.value,
+        label: '',
+        pipeline: '',
+        allowed_origins: '',
+      }),
   })),
 )
 
@@ -108,11 +127,12 @@ async function load() {
 async function create() {
   creating.value = true
   try {
-    let { type, label, pipeline } = draft.value
+    let { type, label, pipeline, allowed_origins } = draft.value
     let created = await webhookSourcesApi.create(
       type,
       label.trim() || sourceType(type).label,
       pipeline,
+      type === 'website' ? allowed_origins.trim() : null,
     )
     keys.value[created.name] = created.key
     draft.value = null
