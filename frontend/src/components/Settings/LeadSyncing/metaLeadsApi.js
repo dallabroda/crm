@@ -15,8 +15,10 @@ export const metaLeadsApi = {
   saveForm: (formId, values) =>
     call(API + 'save_facebook_form', { form_id: formId, ...values }),
   disconnect: () => call(API + 'disconnect_facebook'),
-  // [{ time, status: Created | Duplicate | Failed, lead, lead_name, form_name,
+  // [{ time, status: Created | Duplicate | Failed, lead, lead_name, form_name
+  //    (Meta) or source_label (other sources),
   //    pipeline, assigned_to, error, card: { doctype, name } }]
-  getActivity: () =>
-    call(API + 'get_lead_source_activity', { source: 'Facebook' }),
+  // every source when `source` is left out
+  getActivity: (source) =>
+    call(API + 'get_lead_source_activity', source ? { source } : {}),
 }

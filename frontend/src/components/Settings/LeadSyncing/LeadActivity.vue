@@ -41,7 +41,7 @@
               item.error
             }}</template>
             <template v-else>
-              {{ item.form_name }}
+              {{ item.form_name || item.source_label }}
               <template v-if="item.assigned_to">
                 · {{ __('assigned to {0}', [item.assigned_to]) }}
               </template>

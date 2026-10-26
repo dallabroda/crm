@@ -14,6 +14,7 @@
     </div>
     <div class="flex flex-1 flex-col gap-8 overflow-y-auto px-2">
       <MetaLeadsSource @changed="activity?.load()" />
+      <WebhookSources @changed="activity?.load()" />
       <LeadActivity ref="activity" />
     </div>
   </div>
@@ -24,6 +25,7 @@
 // where a Meta access token was pasted by hand, gave way to "Connect with
 // Facebook": the token never shows up here.
 import MetaLeadsSource from './MetaLeadsSource.vue'
+import WebhookSources from './WebhookSources.vue'
 import LeadActivity from './LeadActivity.vue'
 import { ref } from 'vue'
 

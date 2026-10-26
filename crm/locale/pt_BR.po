@@ -11038,3 +11038,143 @@ msgstr "Por regras"
 #: frontend/src/components/Settings/Pipelines/PipelineDistribution.vue
 msgid "Funnel owner"
 msgstr "Dono do funil"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "How to connect"
+msgstr "Como conectar"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Receive leads from this source"
+msgstr "Receber os leads desta origem"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Address (URL)"
+msgstr "Endereço (URL)"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Copy the key now: for safety it is shown only this once. If you lose it, create a new one."
+msgstr "Copie a chave agora: por segurança ela aparece só desta vez. Se perder, crie uma nova."
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "In Google Ads, open the campaign, then Assets › Lead forms and edit the form."
+msgstr "No Google Ads, abra a campanha, depois Recursos › Formulários de lead e edite o formulário."
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "In \"Lead delivery options\", choose Webhook integration and paste the Address (URL) and the Key above."
+msgstr "Em \"Opções de entrega de leads\", escolha a integração por webhook e cole o Endereço (URL) e a Chave acima."
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Click \"Send test data\": the test lead shows up in Latest leads below."
+msgstr "Clique em \"Enviar dados de teste\": o lead de teste aparece em Últimos leads, abaixo."
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "In Typeform, open the form, then Connect › Webhooks › Add a webhook and paste the Address (URL)."
+msgstr "No Typeform, abra o formulário, depois Connect › Webhooks › Add a webhook e cole o Endereço (URL)."
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "In the webhook settings, turn on Secret and paste the Key above."
+msgstr "Nas configurações do webhook, ative Secret e cole a Chave acima."
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "To know which campaign brought each lead, add the hidden fields utm_source, utm_medium, utm_campaign, utm_content and utm_term to the form."
+msgstr "Para saber qual campanha trouxe cada lead, adicione ao formulário os campos ocultos (hidden fields) utm_source, utm_medium, utm_campaign, utm_content e utm_term."
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Paste this line at the end of every page of the site, before the closing body tag (it keeps the campaign of whoever arrives from an ad):"
+msgstr "Cole esta linha no fim de todas as páginas do site, antes do fechamento da tag body (ela guarda a campanha de quem chega por um anúncio):"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Add data-credhub to each form that should create leads. Fields named name, email, phone and company are recognized; the others go to the card notes."
+msgstr "Adicione data-credhub a cada formulário que deve criar leads. Campos com nome name, email, phone e company são reconhecidos; os outros vão para as anotações do card."
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Send a POST with a JSON body to the Address (URL), with the Key in the X-CredHub-Key header."
+msgstr "Envie um POST com corpo JSON para o Endereço (URL), com a Chave no cabeçalho X-CredHub-Key."
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Recognized fields: name, email, phone, company, utm_source, utm_medium, utm_campaign, utm_content, utm_term, gclid, fbclid. The others go to the card notes."
+msgstr "Campos reconhecidos: name, email, phone, company, utm_source, utm_medium, utm_campaign, utm_content, utm_term, gclid, fbclid. Os outros vão para as anotações do card."
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "In Zapier or Make, use the \"Webhooks\" action with these same settings."
+msgstr "No Zapier ou no Make, use a ação \"Webhooks\" com essas mesmas configurações."
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Confirm removal"
+msgstr "Confirmar remoção"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Remove this source"
+msgstr "Remover esta origem"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Confirm new key"
+msgstr "Confirmar nova chave"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Create a new key"
+msgstr "Criar nova chave"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "The current key stops working at once: the tool where it was pasted must get the new one."
+msgstr "A chave atual para de funcionar na hora: a ferramenta onde ela foi colada precisa receber a nova."
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "YOUR-KEY"
+msgstr "SUA-CHAVE"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Could not save the source"
+msgstr "Não foi possível salvar a origem"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Could not create a new key"
+msgstr "Não foi possível criar uma nova chave"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Source removed. Its leads stop arriving."
+msgstr "Origem removida. Os leads dela deixam de chegar."
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Could not remove the source"
+msgstr "Não foi possível remover a origem"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Google Ads, website and other tools"
+msgstr "Google Ads, site e outras ferramentas"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Each source gets its own address and key. Leads arrive the moment the form is sent, with the campaign that brought them."
+msgstr "Cada origem tem um endereço e uma chave próprios. Os leads chegam no momento em que o formulário é enviado, com a campanha que os trouxe."
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Add source"
+msgstr "Adicionar origem"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "No source added yet."
+msgstr "Nenhuma origem adicionada ainda."
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Could not load the lead sources"
+msgstr "Não foi possível carregar as origens de leads"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Could not create the source"
+msgstr "Não foi possível criar a origem"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Google Ads lead form"
+msgstr "Formulário de lead do Google Ads"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Website form"
+msgstr "Formulário do site"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Typeform"
+msgstr "Typeform"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Other tools (Zapier, Make, API)"
+msgstr "Outras ferramentas (Zapier, Make, API)"
