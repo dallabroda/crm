@@ -10858,3 +10858,123 @@ msgstr "Campanha"
 #: crm/fcrm/doctype/crm_lead/crm_lead.py
 msgid "Ad"
 msgstr "Anúncio"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Facebook and Instagram lead ads"
+msgstr "Anúncios de cadastro do Facebook e do Instagram"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Connected as {0}"
+msgstr "Conectado como {0}"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Connect the Facebook account that manages the page of your ads. Leads from its forms land in the funnel within seconds."
+msgstr "Conecte a conta do Facebook que administra a página dos seus anúncios. Os leads dos formulários entram no funil em segundos."
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Add pages"
+msgstr "Adicionar páginas"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Confirm disconnect"
+msgstr "Confirmar desconexão"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Disconnect"
+msgstr "Desconectar"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Connect with Facebook"
+msgstr "Conectar com Facebook"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "The connection with Facebook stopped working, so new leads are not arriving. Connect again."
+msgstr "A conexão com o Facebook parou de funcionar e os leads novos não estão chegando. Conecte de novo."
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Connect again"
+msgstr "Conectar de novo"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "No page with lead forms was shared with Cred Hub. Use \"Add pages\" and select the pages of your ads."
+msgstr "Nenhuma página com formulários foi liberada para o Cred Hub. Use \"Adicionar páginas\" e selecione as páginas dos seus anúncios."
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "This page has no lead forms yet."
+msgstr "Esta página ainda não tem formulários de cadastro."
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Could not load the Facebook connection"
+msgstr "Não foi possível carregar a conexão com o Facebook"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Could not start the Facebook connection"
+msgstr "Não foi possível iniciar a conexão com o Facebook"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Facebook disconnected. New leads stop arriving."
+msgstr "Facebook desconectado. Os leads novos deixam de chegar."
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Could not disconnect Facebook"
+msgstr "Não foi possível desconectar o Facebook"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Last lead {0}"
+msgstr "Último lead {0}"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Receive leads from this form"
+msgstr "Receber os leads deste formulário"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Choose the funnel first"
+msgstr "Escolha o funil primeiro"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Where each answer of the form goes in the card. Unmapped answers are kept in the card notes."
+msgstr "Em qual campo do card vai cada resposta do formulário. As respostas sem campo ficam nas anotações do card."
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Save fields"
+msgstr "Salvar campos"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Not used"
+msgstr "Não usar"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Saved"
+msgstr "Salvo"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Could not save the form settings"
+msgstr "Não foi possível salvar o formulário"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Latest leads"
+msgstr "Últimos leads"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Reload"
+msgstr "Recarregar"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "No leads received yet. They show up here as soon as someone fills in a connected form."
+msgstr "Nenhum lead recebido ainda. Eles aparecem aqui assim que alguém preencher um formulário conectado."
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Lead without name"
+msgstr "Lead sem nome"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "assigned to {0}"
+msgstr "atribuído a {0}"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Could not load the latest leads"
+msgstr "Não foi possível carregar os últimos leads"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Leads from your ads and forms land in the funnel within seconds, already assigned to a salesperson."
+msgstr "Os leads dos seus anúncios e formulários entram no funil em segundos, já atribuídos a um vendedor."

@@ -1,53 +1,31 @@
 <template>
-  <div class="flex-1 p-6">
-    <LeadSyncSourceForm
-      v-if="step === 'new-source'"
-      :sourceData="source"
-      @updateStep="updateStep"
-    />
-    <LeadSyncSources
-      v-else-if="step === 'source-list'"
-      @updateStep="updateStep"
-    />
-    <LeadSyncSourceForm
-      v-else-if="step === 'edit-source'"
-      :sourceData="source"
-      @updateStep="updateStep"
-    />
+  <div class="flex h-full flex-col gap-6 p-6 text-ink-gray-8">
+    <div class="flex flex-col gap-1 px-2 pt-2">
+      <h2 class="flex h-5 text-2xl-semibold leading-none">
+        {{ __('Lead Sources') }}
+      </h2>
+      <p class="text-p-base text-ink-gray-6">
+        {{
+          __(
+            'Leads from your ads and forms land in the funnel within seconds, already assigned to a salesperson.',
+          )
+        }}
+      </p>
+    </div>
+    <div class="flex flex-1 flex-col gap-8 overflow-y-auto px-2">
+      <MetaLeadsSource @changed="activity?.load()" />
+      <LeadActivity ref="activity" />
+    </div>
   </div>
 </template>
 
 <script setup>
-import LeadSyncSources from './LeadSyncSources.vue'
-import LeadSyncSourceForm from './LeadSyncSourceForm.vue'
+// Lead sources connected by the company admin (credtech#51). The old screen,
+// where a Meta access token was pasted by hand, gave way to "Connect with
+// Facebook": the token never shows up here.
+import MetaLeadsSource from './MetaLeadsSource.vue'
+import LeadActivity from './LeadActivity.vue'
+import { ref } from 'vue'
 
-import { createListResource } from 'frappe-ui'
-import { provide, ref } from 'vue'
-
-const step = ref('source-list')
-const source = ref(null)
-
-const sources = createListResource({
-  type: 'list',
-  doctype: 'Lead Sync Source',
-  cache: 'lead_sync_sources',
-  fields: [
-    'name',
-    'enabled',
-    'type',
-    'last_synced_at',
-    'facebook_lead_form',
-    'pipeline',
-  ],
-  auto: true,
-  orderBy: 'modified desc',
-  pageLength: 20,
-})
-
-provide('sources', sources)
-
-function updateStep(newStep, data) {
-  step.value = newStep
-  source.value = data
-}
+const activity = ref(null)
 </script>
