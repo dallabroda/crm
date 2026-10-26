@@ -76,9 +76,10 @@
 import IndicatorIcon from '@/components/Icons/IndicatorIcon.vue'
 import PipelineEditor from './PipelineEditor.vue'
 import { pipelinesStore } from '@/stores/pipelines'
+import { newPipelineRequested } from '@/composables/settings'
 import { parseColor } from '@/utils'
 import { Badge, LoadingIndicator, toast } from 'frappe-ui'
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 
 const pipelineStore = pipelinesStore()
 
@@ -125,4 +126,15 @@ function onSaved() {
 }
 
 onMounted(load)
+
+// "+" next to the funnels in the sidebar: open the editor of a new funnel
+watch(
+  newPipelineRequested,
+  (requested) => {
+    if (!requested) return
+    newPipelineRequested.value = false
+    editing.value = ''
+  },
+  { immediate: true },
+)
 </script>

@@ -59,22 +59,38 @@
             :opened="section.opened"
           >
             <template #header="{ opened, hide, toggle }">
-              <SidebarLabel
-                v-if="!hide"
-                divider
-                class="mb-1 mt-4 select-none"
-                :class="!isCollapsed && 'cursor-pointer'"
-                @click="toggle()"
-              >
-                <span class="flex items-center gap-1.5">
-                  <span
-                    class="lucide-chevron-right -ml-0.5 size-4 shrink-0 text-ink-gray-9 transition-transform duration-300 ease-in-out"
-                    :class="{ 'rotate-90': opened }"
-                    aria-hidden="true"
-                  />
-                  <span class="truncate">{{ __(section.name) }}</span>
-                </span>
-              </SidebarLabel>
+              <div v-if="!hide" class="relative">
+                <SidebarLabel
+                  divider
+                  class="mb-1 mt-4 select-none"
+                  :class="!isCollapsed && 'cursor-pointer'"
+                  @click="toggle()"
+                >
+                  <span class="flex items-center gap-1.5">
+                    <span
+                      class="lucide-chevron-right -ml-0.5 size-4 shrink-0 text-ink-gray-9 transition-transform duration-300 ease-in-out"
+                      :class="{ 'rotate-90': opened }"
+                      aria-hidden="true"
+                    />
+                    <span class="truncate">{{ __(section.name) }}</span>
+                  </span>
+                </SidebarLabel>
+                <!-- Admins and Pipeline Owners: one click opens the editor of a new funnel -->
+                <Tooltip
+                  v-if="section.name === 'Deals' && showNewPipeline"
+                  :text="__('New funnel')"
+                  side="right"
+                >
+                  <button
+                    type="button"
+                    class="absolute bottom-1.5 right-1 grid size-6 place-items-center rounded text-ink-gray-6 hover:bg-surface-gray-3 hover:text-ink-gray-8"
+                    :aria-label="__('New funnel')"
+                    @click="openNewPipeline"
+                  >
+                    <span class="lucide-plus size-4" aria-hidden="true" />
+                  </button>
+                </Tooltip>
+              </div>
             </template>
             <nav class="flex flex-col gap-1">
               <SidebarItem
@@ -200,6 +216,7 @@ import {
   showSettings,
   activeSettingsPage,
   mobileSidebarOpened,
+  newPipelineRequested,
 } from '@/composables/settings'
 import { useBroadcast } from '@/composables/useBroadcast.js'
 import { call, Sidebar, SidebarItem, SidebarLabel, Tooltip } from 'frappe-ui'
@@ -245,8 +262,20 @@ const isDemoSite = ref(window.is_demo_site)
 const links = getNavigationItems({ mobile: props.mobile })
 
 const pipelineStore = pipelinesStore()
-const { pipelines } = storeToRefs(pipelineStore)
+const { pipelines, canCreate: canCreatePipeline } = storeToRefs(pipelineStore)
 pipelineStore.ensureLoaded()
+pipelineStore.loadCanCreate()
+
+// Settings (where the funnel editor lives) is not available on mobile
+const showNewPipeline = computed(
+  () => canCreatePipeline.value && !props.mobile && !isCollapsed.value,
+)
+
+function openNewPipeline() {
+  newPipelineRequested.value = true
+  activeSettingsPage.value = __('Funnels')
+  showSettings.value = true
+}
 
 function navLink(link) {
   return {
@@ -283,6 +312,8 @@ const allViews = computed(() => {
       name: 'Deals',
       opened: true,
       views: pipelineViews.value,
+      // with no funnel yet, keep the header so the "+" can create the first one
+      keep: showNewPipeline.value,
     },
     {
       name: 'All Views',
@@ -290,7 +321,7 @@ const allViews = computed(() => {
       opened: true,
       views: rest.map(navLink),
     },
-  ].filter((section) => section.views.length)
+  ].filter((section) => section.views.length || section.keep)
   if (getPublicViews().length) {
     _views.push({
       name: 'Public Views',

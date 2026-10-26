@@ -130,13 +130,20 @@ export const pipelinesStore = defineStore('crm-pipelines', () => {
   // (crm.permissions.pipeline). Cached per funnel; reload() clears it.
   let assignableCache = {}
   let pipelineUsers = null
+  function getPipelineUsers() {
+    pipelineUsers ||= apiCall('get_pipeline_users').catch((e) => {
+      pipelineUsers = null
+      throw e
+    })
+    return pipelineUsers
+  }
+
   async function assignableUsers(pipeline) {
     if (!pipeline) return null
     assignableCache[pipeline] ||= (async () => {
-      pipelineUsers ||= apiCall('get_pipeline_users')
       let [config, users] = await Promise.all([
         getConfig(pipeline),
-        pipelineUsers,
+        getPipelineUsers(),
       ])
       let names = new Set((config?.members || []).map((m) => m.user))
       for (let u of users?.users || []) if (u.is_admin) names.add(u.name)
@@ -148,9 +155,23 @@ export const pipelinesStore = defineStore('crm-pipelines', () => {
     return assignableCache[pipeline]
   }
 
+  // Admins and Pipeline Owners may create funnels: the sidebar shows them a
+  // shortcut to a new funnel (crm.api.pipeline.get_pipeline_users)
+  const canCreate = ref(false)
+  async function loadCanCreate() {
+    try {
+      canCreate.value = Boolean((await getPipelineUsers())?.can_create)
+    } catch {
+      canCreate.value = false
+    }
+    return canCreate.value
+  }
+
   return {
     pipelines,
     loaded,
+    canCreate,
+    loadCanCreate,
     defaultPipeline,
     ensureLoaded,
     reload,
