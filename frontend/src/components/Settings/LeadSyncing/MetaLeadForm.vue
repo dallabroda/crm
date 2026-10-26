@@ -25,6 +25,12 @@
         variant="ghost"
         @click="showMapping = !showMapping"
       />
+      <Button
+        :label="__('WhatsApp')"
+        :icon-right="showWelcome ? 'lucide-chevron-up' : 'lucide-chevron-down'"
+        variant="ghost"
+        @click="showWelcome = !showWelcome"
+      />
       <Tooltip
         :text="
           form.pipeline
@@ -77,11 +83,13 @@
         />
       </div>
     </div>
+    <WelcomeMessage v-if="showWelcome" :source="`facebook:${form.id}`" />
   </div>
 </template>
 
 <script setup>
 import PipelineSelect from '@/components/Pipelines/PipelineSelect.vue'
+import WelcomeMessage from './WelcomeMessage.vue'
 import { metaLeadsApi } from './metaLeadsApi'
 import { getMeta } from '@/stores/meta'
 import { timeAgo } from '@/utils'
@@ -96,6 +104,7 @@ const emit = defineEmits(['changed'])
 
 const saving = ref(false)
 const showMapping = ref(false)
+const showWelcome = ref(false)
 
 const savedMapping = () =>
   Object.fromEntries(
