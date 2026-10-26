@@ -10978,3 +10978,63 @@ msgstr "Não foi possível carregar os últimos leads"
 #: frontend/src/components/Settings/LeadSyncing
 msgid "Leads from your ads and forms land in the funnel within seconds, already assigned to a salesperson."
 msgstr "Os leads dos seus anúncios e formulários entram no funil em segundos, já atribuídos a um vendedor."
+
+#: frontend/src/components/Settings/Pipelines/PipelineDistribution.vue
+msgid "Distribution"
+msgstr "Distribuição"
+
+#: frontend/src/components/Settings/Pipelines/PipelineDistribution.vue
+msgid "Who receives the leads that arrive by themselves (ads, forms, integrations). Cards created by hand stay with whoever created them."
+msgstr "Quem recebe os leads que chegam sozinhos (anúncios, formulários, integrações). Cards criados à mão ficam com quem os criou."
+
+#: frontend/src/components/Settings/Pipelines/PipelineDistribution.vue
+msgid "How to distribute"
+msgstr "Como distribuir"
+
+#: frontend/src/components/Settings/Pipelines/PipelineDistribution.vue
+msgid "Rules are checked from top to bottom; the first one that matches decides the salesperson."
+msgstr "As regras são conferidas de cima para baixo; a primeira que servir decide o vendedor."
+
+#: frontend/src/components/Settings/Pipelines/PipelineDistribution.vue
+msgid "If"
+msgstr "Se"
+
+#: frontend/src/components/Settings/Pipelines/PipelineDistribution.vue
+msgid "is"
+msgstr "for"
+
+#: frontend/src/components/Settings/Pipelines/PipelineDistribution.vue
+msgid "Remove rule"
+msgstr "Remover regra"
+
+#: frontend/src/components/Settings/Pipelines/PipelineDistribution.vue
+msgid "Add rule"
+msgstr "Adicionar regra"
+
+#: frontend/src/components/Settings/Pipelines/PipelineDistribution.vue
+msgid "When no rule matches"
+msgstr "Quando nenhuma regra servir"
+
+#: frontend/src/components/Settings/Pipelines/PipelineDistribution.vue
+msgid "Salespeople in the round robin"
+msgstr "Vendedores no rodízio"
+
+#: frontend/src/components/Settings/Pipelines/PipelineDistribution.vue
+msgid "Add members to the funnel to distribute its leads."
+msgstr "Adicione membros ao funil para distribuir os leads dele."
+
+#: frontend/src/components/Settings/Pipelines/PipelineDistribution.vue
+msgid "If the chosen salesperson is not in the funnel anymore, the lead goes to the funnel owner. A lead whose e-mail or phone already has an open card in this funnel does not create another card: it is added to that card and its owner is notified."
+msgstr "Se o vendedor escolhido não estiver mais no funil, o lead vai para o dono do funil. Um lead cujo e-mail ou telefone já tem um card aberto neste funil não cria outro card: entra nesse card e o dono dele é avisado."
+
+#: frontend/src/components/Settings/Pipelines/PipelineDistribution.vue
+msgid "Round robin among salespeople"
+msgstr "Rodízio entre os vendedores"
+
+#: frontend/src/components/Settings/Pipelines/PipelineDistribution.vue
+msgid "By rules"
+msgstr "Por regras"
+
+#: frontend/src/components/Settings/Pipelines/PipelineDistribution.vue
+msgid "Funnel owner"
+msgstr "Dono do funil"
