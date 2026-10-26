@@ -257,6 +257,12 @@ const tabs = computed(() => {
       label: __('Integrations', null, 'FCRM'),
       items: [
         {
+          label: __('Lead Sources'),
+          icon: 'megaphone',
+          component: markRaw(LeadSyncSourcePage),
+          condition: () => isManager(),
+        },
+        {
           label: __('Telephony'),
           icon: PhoneIcon,
           component: markRaw(TelephonyPage),
@@ -271,12 +277,6 @@ const tabs = computed(() => {
           label: __('ERPNext'),
           icon: ERPNextIcon,
           component: markRaw(ERPNextSettings),
-          condition: () => isManager(),
-        },
-        {
-          label: __('Lead Syncing'),
-          icon: 'refresh-cw',
-          component: markRaw(LeadSyncSourcePage),
           condition: () => isManager(),
         },
       ],

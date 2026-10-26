@@ -10858,3 +10858,339 @@ msgstr "Campanha"
 #: crm/fcrm/doctype/crm_lead/crm_lead.py
 msgid "Ad"
 msgstr "Anúncio"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Facebook and Instagram lead ads"
+msgstr "Anúncios de cadastro do Facebook e do Instagram"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Connected as {0}"
+msgstr "Conectado como {0}"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Connect the Facebook account that manages the page of your ads. Leads from its forms land in the funnel within seconds."
+msgstr "Conecte a conta do Facebook que administra a página dos seus anúncios. Os leads dos formulários entram no funil em segundos."
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Add pages"
+msgstr "Adicionar páginas"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Confirm disconnect"
+msgstr "Confirmar desconexão"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Disconnect"
+msgstr "Desconectar"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Connect with Facebook"
+msgstr "Conectar com Facebook"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "The connection with Facebook stopped working, so new leads are not arriving. Connect again."
+msgstr "A conexão com o Facebook parou de funcionar e os leads novos não estão chegando. Conecte de novo."
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Connect again"
+msgstr "Conectar de novo"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "No page with lead forms was shared with Cred Hub. Use \"Add pages\" and select the pages of your ads."
+msgstr "Nenhuma página com formulários foi liberada para o Cred Hub. Use \"Adicionar páginas\" e selecione as páginas dos seus anúncios."
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "This page has no lead forms yet."
+msgstr "Esta página ainda não tem formulários de cadastro."
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Could not load the Facebook connection"
+msgstr "Não foi possível carregar a conexão com o Facebook"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Could not start the Facebook connection"
+msgstr "Não foi possível iniciar a conexão com o Facebook"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Facebook disconnected. New leads stop arriving."
+msgstr "Facebook desconectado. Os leads novos deixam de chegar."
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Could not disconnect Facebook"
+msgstr "Não foi possível desconectar o Facebook"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Last lead {0}"
+msgstr "Último lead {0}"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Receive leads from this form"
+msgstr "Receber os leads deste formulário"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Choose the funnel first"
+msgstr "Escolha o funil primeiro"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Where each answer of the form goes in the card. Unmapped answers are kept in the card notes."
+msgstr "Em qual campo do card vai cada resposta do formulário. As respostas sem campo ficam nas anotações do card."
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Save fields"
+msgstr "Salvar campos"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Not used"
+msgstr "Não usar"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Saved"
+msgstr "Salvo"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Could not save the form settings"
+msgstr "Não foi possível salvar o formulário"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Latest leads"
+msgstr "Últimos leads"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Reload"
+msgstr "Recarregar"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "No leads received yet. They show up here as soon as someone fills in a connected form."
+msgstr "Nenhum lead recebido ainda. Eles aparecem aqui assim que alguém preencher um formulário conectado."
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Lead without name"
+msgstr "Lead sem nome"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "assigned to {0}"
+msgstr "atribuído a {0}"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Could not load the latest leads"
+msgstr "Não foi possível carregar os últimos leads"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Leads from your ads and forms land in the funnel within seconds, already assigned to a salesperson."
+msgstr "Os leads dos seus anúncios e formulários entram no funil em segundos, já atribuídos a um vendedor."
+
+#: frontend/src/components/Settings/Pipelines/PipelineDistribution.vue
+msgid "Distribution"
+msgstr "Distribuição"
+
+#: frontend/src/components/Settings/Pipelines/PipelineDistribution.vue
+msgid "Who receives the leads that arrive by themselves (ads, forms, integrations). Cards created by hand stay with whoever created them."
+msgstr "Quem recebe os leads que chegam sozinhos (anúncios, formulários, integrações). Cards criados à mão ficam com quem os criou."
+
+#: frontend/src/components/Settings/Pipelines/PipelineDistribution.vue
+msgid "How to distribute"
+msgstr "Como distribuir"
+
+#: frontend/src/components/Settings/Pipelines/PipelineDistribution.vue
+msgid "Rules are checked from top to bottom; the first one that matches decides the salesperson. Upper and lower case do not matter."
+msgstr "As regras são conferidas de cima para baixo; a primeira que servir decide o vendedor. Maiúsculas e minúsculas não fazem diferença."
+
+#: frontend/src/components/Settings/Pipelines/PipelineDistribution.vue
+msgid "If"
+msgstr "Se"
+
+#: frontend/src/components/Settings/Pipelines/PipelineDistribution.vue
+msgid "is"
+msgstr "for"
+
+#: frontend/src/components/Settings/Pipelines/PipelineDistribution.vue
+msgid "Remove rule"
+msgstr "Remover regra"
+
+#: frontend/src/components/Settings/Pipelines/PipelineDistribution.vue
+msgid "Add rule"
+msgstr "Adicionar regra"
+
+#: frontend/src/components/Settings/Pipelines/PipelineDistribution.vue
+msgid "When no rule matches"
+msgstr "Quando nenhuma regra servir"
+
+#: frontend/src/components/Settings/Pipelines/PipelineDistribution.vue
+msgid "Salespeople in the round robin"
+msgstr "Vendedores no rodízio"
+
+#: frontend/src/components/Settings/Pipelines/PipelineDistribution.vue
+msgid "Add members to the funnel to distribute its leads."
+msgstr "Adicione membros ao funil para distribuir os leads dele."
+
+#: frontend/src/components/Settings/Pipelines/PipelineDistribution.vue
+msgid "A salesperson who left the funnel is skipped. A lead whose e-mail or phone already has an open card in this funnel does not create another card: it is added to that card and its owner is notified."
+msgstr "Vendedor que saiu do funil é pulado. Um lead cujo e-mail ou telefone já tem um card aberto neste funil não cria outro card: entra nesse card e o dono dele é avisado."
+
+#: frontend/src/components/Settings/Pipelines/PipelineDistribution.vue
+msgid "Round robin among salespeople"
+msgstr "Rodízio entre os vendedores"
+
+#: frontend/src/components/Settings/Pipelines/PipelineDistribution.vue
+msgid "By rules"
+msgstr "Por regras"
+
+#: frontend/src/components/Settings/Pipelines/PipelineDistribution.vue
+msgid "Funnel owner"
+msgstr "Dono do funil"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "How to connect"
+msgstr "Como conectar"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Receive leads from this source"
+msgstr "Receber os leads desta origem"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Address (URL)"
+msgstr "Endereço (URL)"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Copy the key now: for safety it is shown only this once. If you lose it, create a new one."
+msgstr "Copie a chave agora: por segurança ela aparece só desta vez. Se perder, crie uma nova."
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "In Google Ads, open the campaign, then Assets › Lead forms and edit the form."
+msgstr "No Google Ads, abra a campanha, depois Recursos › Formulários de lead e edite o formulário."
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "In \"Lead delivery options\", choose Webhook integration and paste the Address (URL) and the Key above."
+msgstr "Em \"Opções de entrega de leads\", escolha a integração por webhook e cole o Endereço (URL) e a Chave acima."
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Click \"Send test data\": the test lead shows up in Latest leads below."
+msgstr "Clique em \"Enviar dados de teste\": o lead de teste aparece em Últimos leads, abaixo."
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "In Typeform, open the form, then Connect › Webhooks › Add a webhook and paste the Address (URL)."
+msgstr "No Typeform, abra o formulário, depois Connect › Webhooks › Add a webhook e cole o Endereço (URL)."
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "In the webhook settings, turn on Secret and paste the Key above."
+msgstr "Nas configurações do webhook, ative Secret e cole a Chave acima."
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "To know which campaign brought each lead, add the hidden fields utm_source, utm_medium, utm_campaign, utm_content and utm_term to the form."
+msgstr "Para saber qual campanha trouxe cada lead, adicione ao formulário os campos ocultos (hidden fields) utm_source, utm_medium, utm_campaign, utm_content e utm_term."
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Paste this line at the end of every page of the site, before the closing body tag (it keeps the campaign of whoever arrives from an ad):"
+msgstr "Cole esta linha no fim de todas as páginas do site, antes do fechamento da tag body (ela guarda a campanha de quem chega por um anúncio):"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Add data-credhub to each form that should create leads. Fields named name, email, phone and company are recognized; the others go to the card notes."
+msgstr "Adicione data-credhub a cada formulário que deve criar leads. Campos com nome name, email, phone e company são reconhecidos; os outros vão para as anotações do card."
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Send a POST with a JSON body to the Address (URL), with the Key in the X-CredHub-Key header."
+msgstr "Envie um POST com corpo JSON para o Endereço (URL), com a Chave no cabeçalho X-CredHub-Key."
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Recognized fields: name, email, phone, company, utm_source, utm_medium, utm_campaign, utm_content, utm_term, gclid, fbclid. The others go to the card notes."
+msgstr "Campos reconhecidos: name, email, phone, company, utm_source, utm_medium, utm_campaign, utm_content, utm_term, gclid, fbclid. Os outros vão para as anotações do card."
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "In Zapier or Make, use the \"Webhooks\" action with these same settings."
+msgstr "No Zapier ou no Make, use a ação \"Webhooks\" com essas mesmas configurações."
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Confirm removal"
+msgstr "Confirmar remoção"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Remove this source"
+msgstr "Remover esta origem"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Confirm new key"
+msgstr "Confirmar nova chave"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Create a new key"
+msgstr "Criar nova chave"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "The current key stops working at once: the tool where it was pasted must get the new one."
+msgstr "A chave atual para de funcionar na hora: a ferramenta onde ela foi colada precisa receber a nova."
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "YOUR-KEY"
+msgstr "SUA-CHAVE"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Could not save the source"
+msgstr "Não foi possível salvar a origem"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Could not create a new key"
+msgstr "Não foi possível criar uma nova chave"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Source removed. Its leads stop arriving."
+msgstr "Origem removida. Os leads dela deixam de chegar."
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Could not remove the source"
+msgstr "Não foi possível remover a origem"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Google Ads, website and other tools"
+msgstr "Google Ads, site e outras ferramentas"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Each source gets its own address and key. Leads arrive the moment the form is sent, with the campaign that brought them."
+msgstr "Cada origem tem um endereço e uma chave próprios. Os leads chegam no momento em que o formulário é enviado, com a campanha que os trouxe."
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Add source"
+msgstr "Adicionar origem"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "No source added yet."
+msgstr "Nenhuma origem adicionada ainda."
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Could not load the lead sources"
+msgstr "Não foi possível carregar as origens de leads"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Could not create the source"
+msgstr "Não foi possível criar a origem"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Google Ads lead form"
+msgstr "Formulário de lead do Google Ads"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Website form"
+msgstr "Formulário do site"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Typeform"
+msgstr "Typeform"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Other tools (Zapier, Make, API)"
+msgstr "Outras ferramentas (Zapier, Make, API)"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Address of your website"
+msgstr "Endereço do seu site"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Leads are accepted only from these addresses, one per line, starting with https://. Include the version with and without www if your site uses both."
+msgstr "Os leads só são aceitos destes endereços, um por linha, começando com https://. Inclua a versão com e sem www se o seu site usa as duas."
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Save addresses"
+msgstr "Salvar endereços"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Test"
+msgstr "Teste"

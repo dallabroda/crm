@@ -189,6 +189,14 @@
         </div>
       </section>
 
+      <PipelineDistribution
+        v-model="form.distribution"
+        :members="form.members"
+        :field-options="distributionFieldOptions"
+        :can-manage="canManage"
+        :user-name="userName"
+      />
+
       <!-- Fields and per-stage rules -->
       <section class="flex flex-col gap-2">
         <div class="flex items-center justify-between">
@@ -293,7 +301,9 @@
 import IndicatorIcon from '@/components/Icons/IndicatorIcon.vue'
 import UserAvatar from '@/components/UserAvatar.vue'
 import RuleToggle from './RuleToggle.vue'
+import PipelineDistribution from './PipelineDistribution.vue'
 import { pipelinesStore } from '@/stores/pipelines'
+import { getMeta } from '@/stores/meta'
 import { colors, parseColor } from '@/utils'
 import { LOCKED_FIELDS } from '@/utils/pipelines'
 import Draggable from 'vuedraggable'
@@ -337,6 +347,7 @@ const form = reactive({
   stages: [],
   members: [],
   fields: [],
+  distribution: defaultDistribution(),
 })
 // { [fieldname]: { [stageKey]: { visible, required, read_only } } }
 const rules = reactive({})
@@ -365,6 +376,26 @@ const ruleFlags = [
   { key: 'required', short: 'O', label: __('Required to enter the stage') },
   { key: 'read_only', short: 'S', label: __('Read only') },
 ]
+
+function defaultDistribution() {
+  return {
+    mode: 'round_robin',
+    round_robin_users: [],
+    rules: [],
+    fallback: 'round_robin',
+  }
+}
+
+// any card field can decide the salesperson (e.g. campaign, city, product)
+// Rules test the incoming entry (a lead), so only fields that a lead has can
+// decide; fields that exist only on the card would never match
+const { getFields: getLeadFields } = getMeta('CRM Lead')
+const distributionFieldOptions = computed(() => {
+  let leadFields = new Set((getLeadFields() || []).map((f) => f.fieldname))
+  return catalog.value
+    .filter((f) => !f.disabled && leadFields.has(f.fieldname))
+    .map((f) => ({ label: __(f.label), value: f.fieldname }))
+})
 
 function userInfo(user) {
   return props.users.users?.find((u) => u.name === user)
@@ -500,6 +531,16 @@ function payload() {
     members: form.members.map((m) => ({ user: m.user, role: m.role })),
     // in order; position = order (crm.api.pipeline.save_pipeline)
     fields: form.fields.map((f) => f.fieldname),
+    distribution: {
+      ...form.distribution,
+      // incomplete rules are dropped; members who left the funnel too
+      rules: form.distribution.rules.filter(
+        (r) => r.field && r.user && form.members.some((m) => m.user === r.user),
+      ),
+      round_robin_users: form.distribution.round_robin_users.filter((u) =>
+        form.members.some((m) => m.user === u),
+      ),
+    },
   }
   if (form.name) doc.name = form.name
   // Rules can only be sent for stages that already have a key on the server
@@ -581,6 +622,10 @@ function fill(config) {
       required: r.required,
       read_only: r.read_only,
     }
+  }
+  form.distribution = {
+    ...defaultDistribution(),
+    ...(config.distribution || {}),
   }
   myRole.value = config.my_role
 }
