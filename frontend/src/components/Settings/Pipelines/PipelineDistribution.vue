@@ -25,7 +25,7 @@
       <p class="text-p-sm text-ink-gray-5">
         {{
           __(
-            'Rules are checked from top to bottom; the first one that matches decides the salesperson.',
+            'Rules are checked from top to bottom; the first one that matches decides the salesperson. Upper and lower case do not matter.',
           )
         }}
       </p>
@@ -123,7 +123,7 @@
     <p class="text-p-sm text-ink-gray-5">
       {{
         __(
-          'If the chosen salesperson is not in the funnel anymore, the lead goes to the funnel owner. A lead whose e-mail or phone already has an open card in this funnel does not create another card: it is added to that card and its owner is notified.',
+          'A salesperson who left the funnel is skipped. A lead whose e-mail or phone already has an open card in this funnel does not create another card: it is added to that card and its owner is notified.',
         )
       }}
     </p>
@@ -132,8 +132,8 @@
 
 <script setup>
 // Distribution of the leads that reach a funnel by themselves (credtech#51):
-// { mode: 'round_robin' | 'rules', round_robin_users: [user] (empty = every
-//   member), rules: [{ field, value, user }], fallback: 'round_robin' | 'owner' }
+// { mode: 'round_robin' | 'rules', round_robin_users: [user] (empty = the
+//   salespeople), rules: [{ field, value, user }], fallback: 'round_robin' | 'owner' }
 import { Button, Checkbox, FormControl } from 'frappe-ui'
 import { computed } from 'vue'
 
@@ -160,23 +160,31 @@ const salespeopleOptions = computed(() =>
   props.members.map((m) => ({ label: props.userName(m.user), value: m.user })),
 )
 
-// an empty list means every member of the funnel takes part
+// An empty list means the funnel's salespeople (its owners when it has none),
+// as the server reads it
+const defaultRoundRobin = computed(() => {
+  let salespeople = props.members.filter((m) => m.role === 'Member')
+  return (salespeople.length ? salespeople : props.members).map((m) => m.user)
+})
+
 function inRoundRobin(user) {
   let users = model.value.round_robin_users || []
-  return !users.length || users.includes(user)
+  return (users.length ? users : defaultRoundRobin.value).includes(user)
 }
 
 function setRoundRobin(user, enabled) {
   let users = model.value.round_robin_users?.length
     ? [...model.value.round_robin_users]
-    : props.members.map((m) => m.user)
+    : [...defaultRoundRobin.value]
   // at least one salesperson stays in (an empty list would mean everyone)
   if (!enabled && users.length === 1 && users[0] === user) return
   users = enabled
     ? [...new Set([...users, user])]
     : users.filter((u) => u !== user)
-  // everyone checked again: back to "every member", so new members join too
-  model.value.round_robin_users =
-    users.length === props.members.length ? [] : users
+  // back to the default set: keep it empty, so new salespeople join too
+  let sameAsDefault =
+    users.length === defaultRoundRobin.value.length &&
+    users.every((u) => defaultRoundRobin.value.includes(u))
+  model.value.round_robin_users = sameAsDefault ? [] : users
 }
 </script>

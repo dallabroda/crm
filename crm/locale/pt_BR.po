@@ -10992,8 +10992,8 @@ msgid "How to distribute"
 msgstr "Como distribuir"
 
 #: frontend/src/components/Settings/Pipelines/PipelineDistribution.vue
-msgid "Rules are checked from top to bottom; the first one that matches decides the salesperson."
-msgstr "As regras são conferidas de cima para baixo; a primeira que servir decide o vendedor."
+msgid "Rules are checked from top to bottom; the first one that matches decides the salesperson. Upper and lower case do not matter."
+msgstr "As regras são conferidas de cima para baixo; a primeira que servir decide o vendedor. Maiúsculas e minúsculas não fazem diferença."
 
 #: frontend/src/components/Settings/Pipelines/PipelineDistribution.vue
 msgid "If"
@@ -11024,8 +11024,8 @@ msgid "Add members to the funnel to distribute its leads."
 msgstr "Adicione membros ao funil para distribuir os leads dele."
 
 #: frontend/src/components/Settings/Pipelines/PipelineDistribution.vue
-msgid "If the chosen salesperson is not in the funnel anymore, the lead goes to the funnel owner. A lead whose e-mail or phone already has an open card in this funnel does not create another card: it is added to that card and its owner is notified."
-msgstr "Se o vendedor escolhido não estiver mais no funil, o lead vai para o dono do funil. Um lead cujo e-mail ou telefone já tem um card aberto neste funil não cria outro card: entra nesse card e o dono dele é avisado."
+msgid "A salesperson who left the funnel is skipped. A lead whose e-mail or phone already has an open card in this funnel does not create another card: it is added to that card and its owner is notified."
+msgstr "Vendedor que saiu do funil é pulado. Um lead cujo e-mail ou telefone já tem um card aberto neste funil não cria outro card: entra nesse card e o dono dele é avisado."
 
 #: frontend/src/components/Settings/Pipelines/PipelineDistribution.vue
 msgid "Round robin among salespeople"
