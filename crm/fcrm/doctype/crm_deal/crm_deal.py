@@ -351,6 +351,11 @@ class CRMDeal(Document):
 			self.db_set("exchange_rate", exchange_rate)
 
 	@staticmethod
+	def retired_fields():
+		# owner decisions: no probability (credtech#81), one card value (credtech#80)
+		return ["probability", "expected_deal_value"]
+
+	@staticmethod
 	def default_list_data():
 		columns = [
 			{

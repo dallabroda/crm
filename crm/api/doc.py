@@ -21,9 +21,21 @@ COUNT_NAME = (
 )
 
 
+def retired_fields(doctype: str) -> list[str]:
+	"""Fields the Cred Hub took off the screens; the columns and their data stay."""
+	c = get_controller(doctype)
+	return c.retired_fields() if hasattr(c, "retired_fields") else []
+
+
+def offered_fields(doctype: str) -> list:
+	"""Doctype fields the pickers (sort, group by, columns, kanban, field editors) may offer."""
+	retired = retired_fields(doctype)
+	return [field for field in frappe.get_meta(doctype).fields if field.fieldname not in retired]
+
+
 @frappe.whitelist()
 def sort_options(doctype: str):
-	fields = frappe.get_meta(doctype).fields
+	fields = offered_fields(doctype)
 	fields = [field for field in fields if field.fieldtype not in no_value_fields]
 	fields = [
 		{
@@ -76,6 +88,7 @@ def get_filterable_fields(doctype: str):
 	restricted_fields = []
 	if hasattr(c, "get_non_filterable_fields"):
 		restricted_fields = c.get_non_filterable_fields()
+	restricted_fields = [*restricted_fields, *retired_fields(doctype)]
 
 	fields = []
 
@@ -125,7 +138,7 @@ def get_group_by_fields(doctype: str):
 		"Datetime",
 	]
 
-	fields = frappe.get_meta(doctype).fields
+	fields = offered_fields(doctype)
 	fields = [
 		field
 		for field in fields
@@ -453,7 +466,7 @@ def get_data(
 
 			data.append({"column": kc, "fields": kanban_fields, "data": column_data})
 
-	fields = frappe.get_meta(doctype).fields
+	fields = offered_fields(doctype)
 	fields = [field for field in fields if field.fieldtype not in no_value_fields]
 	fields = [
 		{
@@ -647,7 +660,7 @@ def get_fields(doctype: str, allow_all_fieldtypes: bool = False):
 	not_allowed_fieldtypes = [*list(frappe.model.no_value_fields), "Read Only"]
 	if allow_all_fieldtypes:
 		not_allowed_fieldtypes = []
-	fields = frappe.get_meta(doctype).fields
+	fields = offered_fields(doctype)
 
 	_fields = []
 

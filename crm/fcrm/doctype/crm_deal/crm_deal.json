@@ -95,6 +95,7 @@
   {
    "fieldname": "probability",
    "fieldtype": "Percent",
+   "hidden": 1,
    "label": "Probability"
   },
   {
@@ -431,6 +432,7 @@
   {
    "fieldname": "expected_deal_value",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Expected Deal Value",
    "options": "currency"
   },
