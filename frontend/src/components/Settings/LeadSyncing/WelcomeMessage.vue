@@ -189,8 +189,14 @@ function payload() {
 function fill(welcome) {
   form.enabled = Boolean(welcome.enabled)
   form.inbox_id = welcome.inbox_id ? String(welcome.inbox_id) : ''
+  // a record saved while off may lack the language: take the template's own
+  let language =
+    welcome.template_language ||
+    inbox.value?.templates.find((t) => t.name === welcome.template_name)
+      ?.language ||
+    ''
   form.template = welcome.template_name
-    ? `${welcome.template_name}|${welcome.template_language || ''}`
+    ? `${welcome.template_name}|${language}`
     : ''
   form.variables = [...(welcome.variables || [])]
   leadFields.value = welcome.lead_fields || []
@@ -224,9 +230,10 @@ async function save() {
 }
 
 onMounted(load)
-// connected after this panel was opened
+// connected after this panel was opened, or disconnected (which turns every
+// source off): read the settings again on the next connection
 watch(
   () => chat.connected,
-  (connected) => connected && !loaded.value && load(),
+  (connected) => (connected ? load() : (loaded.value = false)),
 )
 </script>
