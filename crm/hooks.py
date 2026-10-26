@@ -18,7 +18,7 @@ add_to_apps_screen = [
 	{
 		"name": "crm",
 		"logo": "/assets/crm/images/logo.svg",
-		"title": "CRM",
+		"title": "Cred Hub",
 		"route": "/crm",
 		"has_permission": "crm.api.check_app_permission",
 	}
@@ -72,6 +72,9 @@ doctype_js = {
 # role_home_page = {
 # "Role": "home_page"
 # }
+
+# Who uses Cred Hub lands on it ("/" and after login), not on the apps screen (/desk stays reachable)
+get_website_user_home_page = "crm.api.get_home_page"
 
 website_route_rules = [
 	{"from_route": "/crm/<path:app_path>", "to_route": "crm"},
