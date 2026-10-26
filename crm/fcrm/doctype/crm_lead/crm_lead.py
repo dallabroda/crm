@@ -2,6 +2,8 @@
 # For license information, please see license.txt
 
 
+import re
+
 import frappe
 from frappe import _
 from frappe.desk.form.assign_to import _add as assign
@@ -9,6 +11,7 @@ from frappe.model.document import Document
 from frappe.utils import validate_email_address
 
 from crm.automation.events import emit_lead_converted
+from crm.fcrm.doctype.crm_pipeline.distribution import pick_salesperson
 from crm.fcrm.doctype.crm_service_level_agreement.utils import get_sla
 from crm.fcrm.doctype.crm_status_change_log.crm_status_change_log import (
 	add_status_change_log,
@@ -122,8 +125,14 @@ class CRMLead(Document):
 		owner = (
 			self.lead_owner
 			if self.lead_owner and get_role_in_pipeline(self.pipeline, self.lead_owner)
-			else None
+			else pick_salesperson(self.pipeline, self.as_dict())
 		)
+		# Owner rule (credtech#51): the same person with an open card in this pipeline gets no new card;
+		# the entry is noted on that card and its owner is told
+		duplicate = open_card_of(self)
+		if duplicate:
+			note_repeat_entry(self, duplicate)
+			return duplicate
 		self.flags.ignore_permissions = True
 		# An entry from outside cannot answer the entry stage's required fields; refusing it would
 		# lose the entry, so the card is created and the fields are asked when someone works it
@@ -654,3 +663,67 @@ def is_custom_field(field):
 		or (field.fieldname or "").startswith("custom_")
 		or field.name == f"{field.parent}-{field.fieldname}"
 	)
+
+
+def open_card_of(lead) -> str | None:
+	"""Open card (not in a Won/Lost stage) of the lead's pipeline with the same e-mail or mobile."""
+	email = (lead.email or "").strip().lower()
+	digits = re.sub(r"\D", "", lead.mobile_no or "")[-10:]
+	if not email and len(digits) < 10:
+		return None
+	closed = frappe.get_all(
+		"CRM Deal Status", {"pipeline": lead.pipeline, "type": ("in", ("Won", "Lost"))}, pluck="name"
+	)
+	matches = []
+	if email:
+		matches.append("lower(email) = %(email)s")
+	if len(digits) == 10:
+		matches.append("right(regexp_replace(ifnull(mobile_no, ''), '[^0-9]', ''), 10) = %(digits)s")
+	rows = frappe.db.sql(
+		f"""select name from `tabCRM Deal`
+		where pipeline = %(pipeline)s and status not in %(closed)s and ({" or ".join(matches)})
+		order by creation desc limit 1""",
+		{"pipeline": lead.pipeline, "closed": closed or [""], "email": email, "digits": digits},
+	)
+	return rows[0][0] if rows else None
+
+
+def note_repeat_entry(lead, card: str):
+	"""The repeat entry stays as a lead (converted, pointing nowhere new) and shows up on the open card."""
+	details = ", ".join(
+		f"{label}: {lead.get(field)}"
+		for field, label in (
+			("source", _("Source")),
+			("ad_campaign_name", _("Campaign")),
+			("ad_name", _("Ad")),
+			("ad_form_name", _("Form")),
+		)
+		if lead.meta.has_field(field) and lead.get(field)
+	)
+	text = _("The same person came in again ({0}).").format(details or lead.name)
+	frappe.get_doc(
+		{
+			"doctype": "Comment",
+			"comment_type": "Comment",
+			"reference_doctype": "CRM Deal",
+			"reference_name": card,
+			"content": text,
+		}
+	).insert(ignore_permissions=True)
+	owner = frappe.db.get_value("CRM Deal", card, "deal_owner")
+	if owner:
+		frappe.get_doc(
+			{
+				"doctype": "CRM Notification",
+				"from_user": "Administrator",
+				"to_user": owner,
+				"type": "Automation",
+				"notification_text": text,
+				"notification_type_doctype": "CRM Deal",
+				"notification_type_doc": card,
+				"reference_doctype": "CRM Deal",
+				"reference_name": card,
+			}
+		).insert(ignore_permissions=True)
+	lead.db_set("converted", 1, update_modified=False)
+	lead.flags.duplicate_of = card

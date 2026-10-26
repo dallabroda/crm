@@ -10,6 +10,7 @@ import json
 import frappe
 from frappe import _
 
+from crm.fcrm.doctype.crm_pipeline import distribution
 from crm.fcrm.doctype.crm_pipeline import fields as field_catalog
 from crm.fcrm.doctype.crm_pipeline.crm_pipeline import get_first_stage
 from crm.fcrm.doctype.crm_pipeline.fields import default_pipeline_fields, sync_rules
@@ -83,6 +84,7 @@ def get_pipeline_config(pipeline: str) -> dict:
 		"is_active": doc.is_active,
 		"my_role": role,
 		"stages": _stages(doc.name),
+		"distribution": distribution.load(doc.distribution),
 		"members": [
 			{"user": m.user, "full_name": full_names.get(m.user) or m.user, "role": m.role}
 			for m in doc.members
@@ -124,6 +126,9 @@ def save_pipeline(doc: str | dict) -> dict:
 	for key in ("pipeline_name", "color", "icon", "position", "is_active"):
 		if key in data:
 			pipeline.set(key, data[key])
+	if "distribution" in data:
+		# Who gets the cards that arrive on their own (credtech#51); unknown keys and incomplete rules dropped
+		pipeline.distribution = json.dumps(distribution.normalize(data.distribution))
 
 	if "members" in data:
 		pipeline.set("members", [])

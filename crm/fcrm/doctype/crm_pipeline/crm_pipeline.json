@@ -16,7 +16,10 @@
   "members",
   "fields_section",
   "fields",
-  "field_rules"
+  "field_rules",
+  "distribution_section",
+  "distribution",
+  "last_assigned"
  ],
  "fields": [
   {
@@ -82,12 +85,32 @@
    "fieldtype": "Table",
    "label": "Field Rules",
    "options": "CRM Pipeline Field Rule"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "distribution_section",
+   "fieldtype": "Section Break",
+   "label": "Distribution"
+  },
+  {
+   "description": "Who gets the cards that arrive on their own: {mode: round_robin | rules, round_robin_users, rules: [{field, value, user}], fallback: round_robin | owner}.",
+   "fieldname": "distribution",
+   "fieldtype": "JSON",
+   "label": "Distribution"
+  },
+  {
+   "fieldname": "last_assigned",
+   "fieldtype": "Link",
+   "options": "User",
+   "label": "Last Assigned",
+   "read_only": 1,
+   "hidden": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-10-24 22:00:00.000000",
+ "modified": "2026-10-26 18:00:00.000000",
  "modified_by": "Administrator",
  "module": "FCRM",
  "name": "CRM Pipeline",

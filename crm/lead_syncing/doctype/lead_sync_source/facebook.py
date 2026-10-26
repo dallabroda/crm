@@ -86,7 +86,7 @@ class FacebookSyncSource:
 		params = {
 			"access_token": self.access_token,
 			"fields": "id,created_time,field_data",
-			"limit": 100000,  # TODO: pagination
+			"limit": 500,
 		}
 
 		filtering = []
@@ -95,10 +95,7 @@ class FacebookSyncSource:
 			filtering.append({"field": "time_created", "operator": "GREATER_THAN", "value": timestamp})
 			params["filtering"] = frappe.as_json(filtering)
 
-		return make_get_request(
-			url,
-			params=params,
-		).get("data", [])
+		return get_all_pages(url, params)
 
 	def get_form_questions_mapping(self):
 		if self.form_questions_mapping:
@@ -158,6 +155,20 @@ class FacebookSyncSource:
 			raise DuplicateLeadError
 
 
+def get_all_pages(url: str, params: dict, max_pages: int = 1000) -> list[dict]:
+	"""Every page of a Graph API list: Meta returns at most `limit` items and a `paging.next` link
+	(the old single call with limit=100000 silently stopped at Meta's own cap and lost leads)."""
+	items = []
+	response = make_get_request(url, params=params)
+	for _ in range(max_pages):
+		items.extend(response.get("data", []))
+		next_url = (response.get("paging") or {}).get("next")
+		if not next_url:
+			break
+		response = make_get_request(next_url)
+	return items
+
+
 def site_time_to_unix(value) -> int:
 	"""Datetimes are stored in the site's time zone, Meta filters on Unix time."""
 	return int(get_datetime(value).replace(tzinfo=ZoneInfo(get_system_timezone())).timestamp())
@@ -210,14 +221,7 @@ def create_facebook_page_in_db(page: dict, account_details: dict) -> None:
 def fetch_and_store_leadgen_forms_from_facebook(page_id: str, page_access_token: str) -> list[dict]:
 	fields = "id,name,questions"
 	url = get_fb_graph_api_url(f"/{page_id}/leadgen_forms")
-	forms = make_get_request(
-		url,
-		params={
-			"access_token": page_access_token,
-			"fields": fields,
-			"limit": 15000,
-		},
-	).get("data", [])
+	forms = get_all_pages(url, {"access_token": page_access_token, "fields": fields, "limit": 100})
 	for form in forms:
 		form_id = form["id"]
 		already_synced = frappe.db.exists("Facebook Lead Form", form_id)
