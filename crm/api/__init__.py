@@ -97,6 +97,13 @@ def check_app_permission():
 	return False
 
 
+def get_home_page(user: str) -> str | None:
+	"""Home page of `user` (hook `get_website_user_home_page`): Cred Hub for whoever may use it."""
+	if user != "Guest" and check_app_permission():
+		return "crm"
+	return None
+
+
 @frappe.whitelist(
 	allow_guest=True
 )  # nosemgrep: frappe-semgrep-rules.rules.security.guest-whitelisted-method — invite key required; rate-limited

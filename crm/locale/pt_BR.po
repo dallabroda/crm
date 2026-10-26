@@ -2768,8 +2768,8 @@ msgid "Description is required"
 msgstr "A descrição é obrigatória"
 
 #: frontend/src/components/UserDropdown.vue:181
-msgid "Desk"
-msgstr "Mesa"
+msgid "Administration"
+msgstr "Administração"
 
 #. Label of the detail (Small Text) field in DocType 'CRM Product Sync Issue'
 #: crm/fcrm/doctype/crm_product_sync_issue/crm_product_sync_issue.json:35

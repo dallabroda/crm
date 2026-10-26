@@ -178,8 +178,8 @@ function deskApp() {
   return {
     name: 'frappe',
     logo: '/assets/frappe/images/framework.png',
-    title: __('Desk'),
-    route: '/desk',
+    title: __('Administration'),
+    route: '/desk/build',
   }
 }
 
