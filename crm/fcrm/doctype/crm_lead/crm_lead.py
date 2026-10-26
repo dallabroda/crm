@@ -122,17 +122,18 @@ class CRMLead(Document):
 	def convert_into_pipeline(self):
 		"""Automatic entries arrive as a lead carrying the pipeline chosen in the integration: turn it
 		into a card there at once (the lead stays only as the record of the original entry)."""
+		# Owner rule (credtech#51): the same person with an open card in this pipeline gets no new card;
+		# the entry is noted on that card and its owner is told. Checked first, so a repeat does not use
+		# up a turn of the round robin.
+		duplicate = open_card_of(self)
+		if duplicate:
+			note_repeat_entry(self, duplicate)
+			return duplicate
 		owner = (
 			self.lead_owner
 			if self.lead_owner and get_role_in_pipeline(self.pipeline, self.lead_owner)
 			else pick_salesperson(self.pipeline, self.as_dict())
 		)
-		# Owner rule (credtech#51): the same person with an open card in this pipeline gets no new card;
-		# the entry is noted on that card and its owner is told
-		duplicate = open_card_of(self)
-		if duplicate:
-			note_repeat_entry(self, duplicate)
-			return duplicate
 		self.flags.ignore_permissions = True
 		# An entry from outside cannot answer the entry stage's required fields; refusing it would
 		# lose the entry, so the card is created and the fields are asked when someone works it
@@ -665,10 +666,16 @@ def is_custom_field(field):
 	)
 
 
+def national_number(phone) -> str:
+	"""Digits of a phone without the Brazilian country code (55) when it is there."""
+	digits = re.sub(r"\D", "", phone or "")
+	return digits[2:] if digits.startswith("55") and len(digits) > 11 else digits
+
+
 def open_card_of(lead) -> str | None:
 	"""Open card (not in a Won/Lost stage) of the lead's pipeline with the same e-mail or mobile."""
 	email = (lead.email or "").strip().lower()
-	digits = re.sub(r"\D", "", lead.mobile_no or "")[-10:]
+	digits = national_number(lead.mobile_no)
 	if not email and len(digits) < 10:
 		return None
 	closed = frappe.get_all(
@@ -677,8 +684,15 @@ def open_card_of(lead) -> str | None:
 	matches = []
 	if email:
 		matches.append("lower(email) = %(email)s")
-	if len(digits) == 10:
-		matches.append("right(regexp_replace(ifnull(mobile_no, ''), '[^0-9]', ''), 10) = %(digits)s")
+	if len(digits) >= 10:
+		# Whole number without the country code: 11 digits for a Brazilian mobile, so (48) and (38) with
+		# the same 9 digits are different people
+		matches.append(
+			"""(case when regexp_replace(ifnull(mobile_no, ''), '[^0-9]', '') like '55%%'
+				and length(regexp_replace(ifnull(mobile_no, ''), '[^0-9]', '')) > 11
+				then substring(regexp_replace(ifnull(mobile_no, ''), '[^0-9]', ''), 3)
+				else regexp_replace(ifnull(mobile_no, ''), '[^0-9]', '') end) = %(digits)s"""
+		)
 	rows = frappe.db.sql(
 		f"""select name from `tabCRM Deal`
 		where pipeline = %(pipeline)s and status not in %(closed)s and ({" or ".join(matches)})
@@ -691,7 +705,7 @@ def open_card_of(lead) -> str | None:
 def note_repeat_entry(lead, card: str):
 	"""The repeat entry stays as a lead (converted, pointing nowhere new) and shows up on the open card."""
 	details = ", ".join(
-		f"{label}: {lead.get(field)}"
+		f"{label}: {frappe.utils.escape_html(str(lead.get(field)))}"
 		for field, label in (
 			("source", _("Source")),
 			("ad_campaign_name", _("Campaign")),

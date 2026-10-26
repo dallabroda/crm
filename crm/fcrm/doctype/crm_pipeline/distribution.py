@@ -57,17 +57,16 @@ def _matches(value, expected) -> bool:
 
 
 def _round_robin(pipeline, candidates):
-	"""Next salesperson after the last one served, under a database lock (leads arrive together)."""
-	lock = f"crm_distribution:{pipeline}"[:64]
-	frappe.db.sql("SELECT GET_LOCK(%s, 10)", lock)
-	try:
-		last = frappe.db.get_value("CRM Pipeline", pipeline, "last_assigned")
-		position = candidates.index(last) + 1 if last in candidates else 0
-		chosen = candidates[position % len(candidates)]
-		frappe.db.set_value("CRM Pipeline", pipeline, "last_assigned", chosen, update_modified=False)
-		return chosen
-	finally:
-		frappe.db.sql("SELECT RELEASE_LOCK(%s)", lock)
+	"""Next salesperson after the last one served. The pipeline row stays locked (FOR UPDATE) until the
+	transaction that creates the card commits, so two leads arriving together go to different people."""
+	rows = frappe.db.sql(
+		"select last_assigned from `tabCRM Pipeline` where name = %s for update", pipeline, as_dict=True
+	)
+	last = rows[0].last_assigned if rows else None
+	position = candidates.index(last) + 1 if last in candidates else 0
+	chosen = candidates[position % len(candidates)]
+	frappe.db.set_value("CRM Pipeline", pipeline, "last_assigned", chosen, update_modified=False)
+	return chosen
 
 
 def pick_salesperson(pipeline: str, values: dict) -> str | None:

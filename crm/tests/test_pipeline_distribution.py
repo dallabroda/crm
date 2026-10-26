@@ -132,3 +132,34 @@ class TestPipelineDistribution(FrappeTestCase):
 		]
 		with patch.object(facebook, "make_get_request", side_effect=pages):
 			self.assertEqual([i["id"] for i in facebook.get_all_pages("https://graph.test", {})], [1, 2, 3])
+
+	def test_repeat_does_not_use_a_round_robin_turn(self):
+		frappe.get_doc(
+			{
+				"doctype": "CRM Lead",
+				"first_name": "Bia",
+				"pipeline": self.pipeline,
+				"email": "bia@example.com",
+			}
+		).insert(ignore_permissions=True)  # 1º vendedor
+		frappe.get_doc(
+			{
+				"doctype": "CRM Lead",
+				"first_name": "Bia",
+				"pipeline": self.pipeline,
+				"email": "bia@example.com",
+			}
+		).insert(ignore_permissions=True)  # repetido: não gasta a vez
+		self.assertEqual(pick_salesperson(self.pipeline, {}), SELLERS[1])
+
+	def test_same_digits_other_area_code_is_another_person(self):
+		def lead(mobile):
+			return frappe.get_doc(
+				{"doctype": "CRM Lead", "first_name": "Cia", "pipeline": self.pipeline, "mobile_no": mobile}
+			).insert(ignore_permissions=True)
+
+		first = lead("+55 (48) 99999-0000")
+		other_area = lead("(38) 99999-0000")
+		same = lead("48999990000")
+		self.assertTrue(frappe.db.exists("CRM Deal", {"lead": other_area.name}))
+		self.assertEqual(same.flags.duplicate_of, frappe.db.get_value("CRM Deal", {"lead": first.name}))
