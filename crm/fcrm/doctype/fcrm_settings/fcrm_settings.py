@@ -82,7 +82,7 @@ class FCRMSettings(Document):
 				delete_property_setter(
 					"CRM Deal",
 					"reqd",
-					"expected_deal_value",
+					"deal_value",
 				)
 			else:
 				self.add_forecasting_section("Side Panel")
@@ -96,7 +96,7 @@ class FCRMSettings(Document):
 				)
 				make_property_setter(
 					"CRM Deal",
-					"expected_deal_value",
+					"deal_value",
 					"reqd",
 					1 if self.enable_forecasting else 0,
 					"Check",
@@ -134,11 +134,7 @@ class FCRMSettings(Document):
 			for column in section.get("columns") or []
 			for field in column.get("fields") or []
 		}
-		fields = [
-			field
-			for field in ("expected_deal_value", "expected_closure_date")
-			if field not in existing_fields
-		]
+		fields = [field for field in ("deal_value", "expected_closure_date") if field not in existing_fields]
 		if not fields:
 			return
 

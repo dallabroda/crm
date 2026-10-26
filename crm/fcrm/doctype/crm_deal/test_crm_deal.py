@@ -468,18 +468,18 @@ class TestCRMDeal(FrappeTestCase):
 		settings.save()
 
 		try:
-			# Should fail without expected_deal_value
+			# Should fail without the card value
 			with self.assertRaises(frappe.exceptions.MandatoryError):
 				create_test_deal(organization="Forecast Org")
 
 			# Should fail without expected_closure_date
 			with self.assertRaises(frappe.exceptions.MandatoryError):
-				create_test_deal(organization="Forecast Org 2", expected_deal_value=5000)
+				create_test_deal(organization="Forecast Org 2", deal_value=5000)
 
 			# Should succeed with both fields
 			deal = create_test_deal(
 				organization="Forecast Org 3",
-				expected_deal_value=5000,
+				deal_value=5000,
 				expected_closure_date="2026-12-31",
 			)
 			self.assertTrue(deal.name)

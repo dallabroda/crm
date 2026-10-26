@@ -5,6 +5,7 @@ import frappe
 from frappe import _
 from frappe.desk.form.assign_to import _add as assign
 from frappe.model.document import Document
+from frappe.utils import flt
 
 from crm.api.exchange_rate import get_exchange_rate
 from crm.fcrm.doctype.crm_pipeline.crm_pipeline import get_first_stage
@@ -303,23 +304,28 @@ class CRMDeal(Document):
 		if self.status == "Won" and not self.closed_date:
 			self.closed_date = frappe.utils.nowdate()
 
-	def update_expected_deal_value(self):
+	def update_deal_value_from_products(self):
 		"""
-		Update the expected deal value based on the net total or total.
+		The card has a single value: with products, it is their total (owner decision,
+		credtech#80); without products, whatever the user typed.
 		"""
-		if (
-			frappe.db.get_single_value("FCRM Settings", "auto_update_expected_deal_value")
-			and (self.net_total or self.total)
-			and self.expected_deal_value
-		):
-			self.expected_deal_value = self.net_total or self.total
+		if not self.get("products"):
+			return
+		# Same math as the product form script, so cards saved through the API get it too
+		for row in self.products:
+			row.amount = flt(row.qty) * flt(row.rate)
+			row.discount_amount = flt(row.discount_percentage) / 100 * row.amount
+			row.net_amount = row.amount - row.discount_amount
+		self.total = sum(row.amount for row in self.products)
+		self.net_total = sum(row.net_amount for row in self.products)
+		self.deal_value = self.net_total
 
 	def validate_forecasting_fields(self):
 		self.update_closed_date()
-		self.update_expected_deal_value()
+		self.update_deal_value_from_products()
 		if frappe.db.get_single_value("FCRM Settings", "enable_forecasting"):
-			if not self.expected_deal_value or self.expected_deal_value == 0:
-				frappe.throw(_("Expected deal value is required."), frappe.MandatoryError)
+			if not self.deal_value:
+				frappe.throw(_("Deal value is required."), frappe.MandatoryError)
 			if not self.expected_closure_date:
 				frappe.throw(_("Expected closure date is required."), frappe.MandatoryError)
 

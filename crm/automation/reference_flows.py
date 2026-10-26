@@ -413,7 +413,7 @@ def high_value_deal_watch() -> dict:
 	"""
 	return {
 		**flow("High value deal watch", "CRM Deal", "Doc Updated"),
-		"condition": f"(doc.expected_deal_value or 0) >= {HIGH_VALUE_AT}",
+		"condition": f"(doc.deal_value or 0) >= {HIGH_VALUE_AT}",
 		"actions": [
 			step(1, "is_committing", "If", condition=f"(doc.probability or 0) >= {COMMIT_PROBABILITY}"),
 			assign_step(
@@ -454,7 +454,7 @@ def high_value_deal_watch() -> dict:
 				"System",
 				[HOT_LEAD_OWNER],
 				"High value deal moved: {{ doc.organization or doc.name }}",
-				"<p>{{ doc.organization or doc.name }} is at {{ doc.expected_deal_value }} "
+				"<p>{{ doc.organization or doc.name }} is at {{ doc.deal_value }} "
 				+ "and {{ doc.probability }}% confidence, closing {{ doc.expected_closure_date }}.</p>",
 			),
 			step(7, "wait_for_movement", "Wait", params={"value": QUIET_DAYS, "unit": "Days"}),
@@ -465,7 +465,7 @@ def high_value_deal_watch() -> dict:
 				"Email",
 				[HOT_LEAD_OWNER],
 				"No contact in {0} days: {{{{ doc.organization or doc.name }}}}".format(QUIET_DAYS),
-				"<p>Nothing has come back on a deal worth {{ doc.expected_deal_value }}. "
+				"<p>Nothing has come back on a deal worth {{ doc.deal_value }}. "
 				+ "It is worth a call before the close date.</p>",
 				parent=8,
 				branch="If",
@@ -589,7 +589,7 @@ def forecast_defaults() -> dict:
 	if not frappe.db.get_single_value("FCRM Settings", "enable_forecasting"):
 		return {}
 	return {
-		"expected_deal_value": 1,
+		"deal_value": 1,
 		"expected_closure_date": frappe.utils.add_months(frappe.utils.nowdate(), 1),
 	}
 
