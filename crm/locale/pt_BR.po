@@ -11622,3 +11622,7 @@ msgstr "Para usar, conecte o seu Cred Chat no quadro \"Cred Chat\", abaixo das o
 #: frontend/src/utils/dashboard.ts
 msgid "{0} to {1}"
 msgstr "{0} a {1}"
+
+#: frontend/src/components/ListViews/ListFooter.vue
+msgid "{0} of {1}"
+msgstr "{0} de {1}"
