@@ -11732,3 +11732,20 @@ msgstr "Sem espaço para este campo"
 #: frontend/src/components/Settings/Fields/FieldsPage.vue
 msgid "Room for {0} more text, list or link fields"
 msgstr "Espaço para mais {0} campos de texto, lista ou vínculo"
+
+#: frontend/src/pages/Deal.vue
+#: frontend/src/components/Modals/DealModal.vue
+msgid "Card fields"
+msgstr "Campos do card"
+
+#: crm/fcrm/doctype/crm_pipeline/form_schema.py
+msgid "Choose a pipeline."
+msgstr "Escolha um funil."
+
+#: crm/fcrm/doctype/crm_pipeline/fields.py
+msgid "Fields can only be created for cards, contacts and companies."
+msgstr "Só dá para criar campos em cards, contatos e empresas."
+
+#: crm/fcrm/doctype/crm_pipeline/fields.py
+msgid "There is no room left for another field of this type in {0}."
+msgstr "Não há mais espaço para outro campo deste tipo em {0}."

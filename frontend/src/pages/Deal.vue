@@ -395,7 +395,12 @@ import MissingFieldsModal from '@/components/Modals/MissingFieldsModal.vue'
 import ChangePipelineModal from '@/components/Modals/ChangePipelineModal.vue'
 import OrganizationRegistry from '@/components/Pipelines/OrganizationRegistry.vue'
 import { pipelinesStore } from '@/stores/pipelines'
-import { applyStageRules } from '@/utils/pipelines'
+import {
+  applyStageRules,
+  funnelSection,
+  withoutFields,
+  LOCKED_FIELDS,
+} from '@/utils/pipelines'
 import { parseLinkFilters } from '@/utils/fieldTransforms'
 import { storeToRefs } from 'pinia'
 import AssignTo from '@/components/AssignTo.vue'
@@ -1075,6 +1080,35 @@ watch(
   { immediate: true },
 )
 
+// Card form of the funnel and stage (dynamic forms, credtech#179): fields in
+// the funnel order with the stage rules, including the ones the company
+// created, which no layout lists
+const formSchema = ref(null)
+let formSchemaRequest = 0
+watch(
+  () => [doc.value.pipeline, doc.value.status],
+  async ([pipeline, stage]) => {
+    let request = ++formSchemaRequest
+    if (!pipeline || !stage) {
+      formSchema.value = null
+      return
+    }
+    try {
+      let schema = await call('crm.api.forms.get_form_schema', {
+        doctype: 'CRM Deal',
+        pipeline,
+        stage,
+      })
+      if (request === formSchemaRequest) formSchema.value = schema
+    } catch (e) {
+      // without it the panel falls back to the layout with the stage rules
+      if (request === formSchemaRequest) formSchema.value = null
+      console.error('[forms] get_form_schema failed', e)
+    }
+  },
+  { immediate: true },
+)
+
 // Owner and assignees must take part in the card's funnel (#68): members + admins.
 // Fields: only the catalog fields the funnel uses (#69).
 const assignableUsers = ref(null)
@@ -1124,12 +1158,26 @@ function restrictOwner(sections, allowed) {
   )
 }
 
-const visibleSections = computed(() =>
-  restrictOwner(
-    applyStageRules(sections.data, stageRules.value, fieldSetup.value || {}),
-    assignableUsers.value,
-  ),
-)
+const visibleSections = computed(() => {
+  let catalog = fieldSetup.value?.catalog
+  let base
+  if (formSchema.value?.fields && catalog) {
+    // the funnel's fields come first, in its order; the layout keeps the rest
+    let funnel = funnelSection(formSchema.value.fields, __('Card fields'))
+    let others = withoutFields(
+      sections.data,
+      catalog.filter((name) => !LOCKED_FIELDS.includes(name)),
+    )
+    base = funnel ? [funnel, ...others] : others
+  } else {
+    base = applyStageRules(
+      sections.data,
+      stageRules.value,
+      fieldSetup.value || {},
+    )
+  }
+  return restrictOwner(base, assignableUsers.value)
+})
 
 // A stage change the server rejects for empty required fields asks for them
 const missingFields = ref(null)

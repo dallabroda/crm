@@ -10,6 +10,8 @@ from frappe import _
 from frappe.custom.doctype.custom_field.custom_field import create_custom_field
 
 DEAL = "CRM Deal"
+# Doctypes whose forms the company configures (dynamic forms, credtech#178): cards, contacts and companies
+FORM_DOCTYPES = (DEAL, "Contact", "CRM Organization")
 # Created fields get this prefix, so they are told apart from standard and app fields
 CREATED_PREFIX = "ch_"
 CREATED_FIELD_LIMIT = 60
@@ -110,15 +112,21 @@ def catalog_fieldnames() -> set[str]:
 	return {f["fieldname"] for f in get_catalog(include_disabled=False)}
 
 
-def created_field_count() -> int:
-	return frappe.db.count("Custom Field", {"dt": DEAL, "fieldname": ("like", f"{CREATED_PREFIX}%")})
+def _form_doctype(doctype: str) -> str:
+	if doctype not in FORM_DOCTYPES:
+		frappe.throw(_("Fields can only be created for cards, contacts and companies."))
+	return doctype
 
 
-def row_size() -> int:
-	"""Bytes the cards table already declares per row (this site's database)."""
+def created_field_count(doctype: str = DEAL) -> int:
+	return frappe.db.count("Custom Field", {"dt": doctype, "fieldname": ("like", f"{CREATED_PREFIX}%")})
+
+
+def row_size(doctype: str = DEAL) -> int:
+	"""Bytes the table already declares per row (this site's database)."""
 	if frappe.db.db_type != "mariadb":
 		return 0
-	return int(frappe.db.sql(_ROW_SIZE_SQL, (f"tab{DEAL}",))[0][0] or 0)
+	return int(frappe.db.sql(_ROW_SIZE_SQL, (f"tab{doctype}",))[0][0] or 0)
 
 
 def field_cost(fieldtype: str) -> int:
@@ -134,14 +142,16 @@ def field_cost(fieldtype: str) -> int:
 	return {"tinyint": 1, "int": 4, "bigint": 8, "date": 3, "datetime": 8, "time": 6}.get(column, 12)
 
 
-def room_by_type() -> dict:
+def room_by_type(doctype: str = DEAL) -> dict:
 	"""How many more fields of each creatable type still fit: the row size and the created-field limit."""
-	left_by_count = max(CREATED_FIELD_LIMIT - created_field_count(), 0)
-	free = ROW_SIZE_LIMIT - ROW_SIZE_MARGIN - row_size()
+	left_by_count = max(CREATED_FIELD_LIMIT - created_field_count(doctype), 0)
+	free = ROW_SIZE_LIMIT - ROW_SIZE_MARGIN - row_size(doctype)
 	return {t: max(min(left_by_count, free // field_cost(t)), 0) for t in FIELD_TYPES}
 
 
-def _no_room_message(fieldtype: str) -> str:
+def _no_room_message(fieldtype: str, doctype: str = DEAL) -> str:
+	if doctype != DEAL:
+		return _("There is no room left for another field of this type in {0}.").format(_(doctype))
 	if fieldtype in ("Data", "Select", "Link"):
 		return _(
 			"There is no room left for another text, list or link field in cards. "
@@ -154,34 +164,39 @@ def _is_row_size_error(e: Exception) -> bool:
 	return bool(getattr(e, "args", None)) and e.args[0] == 1118
 
 
-def create_field(label: str, fieldtype: str, options: str | None = None) -> dict:
+def create_field(label: str, fieldtype: str, options: str | None = None, doctype: str = DEAL) -> dict:
+	doctype = _form_doctype(doctype)
 	label = (label or "").strip()
 	if not label:
 		frappe.throw(_("Give the field a name."))
 	if fieldtype not in FIELD_TYPES:
 		frappe.throw(_("Field type {0} is not supported.").format(frappe.bold(fieldtype)))
-	if created_field_count() >= CREATED_FIELD_LIMIT:
+	if created_field_count(doctype) >= CREATED_FIELD_LIMIT:
 		frappe.throw(_("The limit of {0} created fields was reached.").format(CREATED_FIELD_LIMIT))
-	if row_size() + field_cost(fieldtype) > ROW_SIZE_LIMIT - ROW_SIZE_MARGIN:
-		frappe.throw(_no_room_message(fieldtype), NoRoomForFieldError, title=_("No room for this field"))
+	if row_size(doctype) + field_cost(fieldtype) > ROW_SIZE_LIMIT - ROW_SIZE_MARGIN:
+		frappe.throw(
+			_no_room_message(fieldtype, doctype), NoRoomForFieldError, title=_("No room for this field")
+		)
 	options = _clean_options(fieldtype, options)
 
 	base = fieldname_base(label)
 	fieldname, n = base, 1
-	meta = frappe.get_meta(DEAL)
-	while meta.has_field(fieldname) or frappe.db.exists("Custom Field", {"dt": DEAL, "fieldname": fieldname}):
+	meta = frappe.get_meta(doctype)
+	while meta.has_field(fieldname) or frappe.db.exists(
+		"Custom Field", {"dt": doctype, "fieldname": fieldname}
+	):
 		n += 1
 		fieldname = f"{base}_{n}"
 
 	try:
 		create_custom_field(
-			DEAL,
+			doctype,
 			{
 				"fieldname": fieldname,
 				"label": label,
 				"fieldtype": fieldtype,
 				"options": options,
-				"insert_after": _last_fieldname(),
+				"insert_after": _last_fieldname(doctype),
 			},
 			ignore_validate=False,
 		)
@@ -192,16 +207,21 @@ def create_field(label: str, fieldtype: str, options: str | None = None) -> dict
 		# ALTER TABLE commits implicitly before it runs, so the Custom Field row was already saved:
 		# remove it, or the cards would point to a column that does not exist
 		frappe.db.rollback()
-		frappe.db.delete("Custom Field", {"dt": DEAL, "fieldname": fieldname})
+		frappe.db.delete("Custom Field", {"dt": doctype, "fieldname": fieldname})
 		frappe.db.commit()
-		frappe.clear_cache(doctype=DEAL)
-		frappe.throw(_no_room_message(fieldtype), NoRoomForFieldError, title=_("No room for this field"))
-	frappe.clear_cache(doctype=DEAL)
-	return _catalog_item(fieldname)
+		frappe.clear_cache(doctype=doctype)
+		frappe.throw(
+			_no_room_message(fieldtype, doctype), NoRoomForFieldError, title=_("No room for this field")
+		)
+	frappe.clear_cache(doctype=doctype)
+	return _catalog_item(fieldname, doctype)
 
 
-def update_field(fieldname: str, label: str | None = None, options: str | None = None) -> dict:
-	cf = _created_custom_field(fieldname)
+def update_field(
+	fieldname: str, label: str | None = None, options: str | None = None, doctype: str = DEAL
+) -> dict:
+	doctype = _form_doctype(doctype)
+	cf = _created_custom_field(fieldname, doctype)
 	if label is not None:
 		label = label.strip()
 		if not label:
@@ -210,18 +230,19 @@ def update_field(fieldname: str, label: str | None = None, options: str | None =
 	if options is not None:
 		cf.options = _clean_options(cf.fieldtype, options)
 	cf.save(ignore_permissions=True)
-	frappe.clear_cache(doctype=DEAL)
-	return _catalog_item(cf.fieldname)
+	frappe.clear_cache(doctype=doctype)
+	return _catalog_item(cf.fieldname, doctype)
 
 
-def disable_field(fieldname: str) -> dict:
+def disable_field(fieldname: str, doctype: str = DEAL) -> dict:
 	"""Hide a created field everywhere; its column and values are kept."""
-	cf = _created_custom_field(fieldname)
+	doctype = _form_doctype(doctype)
+	cf = _created_custom_field(fieldname, doctype)
 	cf.hidden = 1
 	cf.save(ignore_permissions=True)
-	frappe.clear_cache(doctype=DEAL)
+	frappe.clear_cache(doctype=doctype)
 	# The lookup ignores accents (database collation): answer with the field actually found
-	return _catalog_item(cf.fieldname)
+	return _catalog_item(cf.fieldname, doctype)
 
 
 def fieldname_base(label: str) -> str:
@@ -232,10 +253,10 @@ def fieldname_base(label: str) -> str:
 	return CREATED_PREFIX + (slug or "field")
 
 
-def _created_custom_field(fieldname: str):
+def _created_custom_field(fieldname: str, doctype: str = DEAL):
 	if not (fieldname or "").startswith(CREATED_PREFIX):
 		frappe.throw(_("Only fields created by the company can be changed."))
-	name = frappe.db.get_value("Custom Field", {"dt": DEAL, "fieldname": fieldname})
+	name = frappe.db.get_value("Custom Field", {"dt": doctype, "fieldname": fieldname})
 	if not name:
 		frappe.throw(_("Field {0} not found.").format(frappe.bold(fieldname)), frappe.DoesNotExistError)
 	return frappe.get_doc("Custom Field", name)
@@ -256,13 +277,15 @@ def _clean_options(fieldtype: str, options: str | None) -> str | None:
 	return None
 
 
-def _last_fieldname() -> str:
-	fields = [df.fieldname for df in frappe.get_meta(DEAL).fields]
+def _last_fieldname(doctype: str = DEAL) -> str:
+	fields = [df.fieldname for df in frappe.get_meta(doctype).fields]
 	return fields[-1] if fields else "status"
 
 
-def _catalog_item(fieldname: str) -> dict:
-	return next(f for f in get_catalog() if f["fieldname"] == fieldname)
+def _catalog_item(fieldname: str, doctype: str = DEAL) -> dict:
+	if doctype == DEAL:
+		return next(f for f in get_catalog() if f["fieldname"] == fieldname)
+	return _field_info(frappe.get_meta(doctype).get_field(fieldname), False)
 
 
 # Rules ---------------------------------------------------------------------

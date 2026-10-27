@@ -78,7 +78,7 @@
             data-testid="stage-required-fields"
           >
             <div class="mb-3 text-sm text-ink-gray-6">
-              {{ __('Required in this stage') }}
+              {{ __('Card fields') }}
             </div>
             <StageFields
               :fields="stageFields"
@@ -123,7 +123,7 @@ import { showQuickEntryModal, quickEntryProps } from '@/composables/modals'
 import { useDocument } from '@/data/document'
 import { useTelemetry } from '@framework/ui/telemetry'
 import { useCrmOnboarding } from '@/composables/onboarding'
-import { Dialog, FormControl, Switch, createResource } from 'frappe-ui'
+import { Dialog, FormControl, Switch, call, createResource } from 'frappe-ui'
 import { computed, ref, onMounted, nextTick, watch } from 'vue'
 import { useRouter } from 'vue-router'
 
@@ -254,8 +254,10 @@ watch([usePipelines, () => tabs.data], ([inUse]) => {
   })
 })
 
-// Required fields of the chosen stage (#69): the server refuses the card
-// without them, so they are asked here unless the quick entry already has them
+// Card fields of the chosen funnel and stage (dynamic forms, credtech#179), in
+// the funnel order, created fields included; the required ones are marked and
+// the server refuses the card without them. Those the quick entry already has
+// are filled there.
 const stageRequired = ref([])
 let stageRequest = 0
 watch(
@@ -267,17 +269,24 @@ watch(
       return
     }
     try {
-      let [rules, catalog] = await Promise.all([
-        pipelineStore.apiCall('get_stage_rules', { pipeline, stage }),
-        pipelineStore.getCatalog(),
-      ])
+      let schema = await call('crm.api.forms.get_form_schema', {
+        doctype: 'CRM Deal',
+        pipeline,
+        stage,
+      })
       if (request !== stageRequest) return
-      stageRequired.value = Object.entries(rules || {})
-        .filter(([, rule]) => rule.required)
-        .map(([fieldname]) =>
-          (catalog?.fields || []).find((f) => f.fieldname === fieldname),
-        )
-        .filter(Boolean)
+      stageRequired.value = (schema?.fields || [])
+        .filter((f) => f.visible && !f.locked)
+        .map((f) => ({
+          fieldname: f.fieldname,
+          label: f.label,
+          fieldtype: f.fieldtype,
+          // StageFields takes the options as text, one per line
+          options: Array.isArray(f.options)
+            ? f.options.map((o) => o.value).join('\n')
+            : f.options || '',
+          required: f.required ? 1 : 0,
+        }))
     } catch (e) {
       if (request === stageRequest) stageRequired.value = []
       console.error('[pipelines] could not load the stage rules', e)
@@ -367,7 +376,10 @@ async function createDeal() {
         error.value = __('Status is required')
         return error.value
       }
-      let missing = emptyRequiredFields(stageRequired.value, deal.doc)
+      let missing = emptyRequiredFields(
+        stageRequired.value.filter((f) => f.required),
+        deal.doc,
+      )
       if (missing.length) {
         error.value = __('Fill in: {0}', [
           missing.map((f) => __(f.label)).join(', '),
