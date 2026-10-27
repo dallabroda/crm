@@ -58,19 +58,19 @@
 import Email2Icon from '@/components/Icons/Email2Icon.vue'
 import EmptyState from '../ListViews/EmptyState.vue'
 import EmailAccountCard from './EmailAccountCard.vue'
-import { createListResource } from 'frappe-ui'
+import { call, createListResource } from 'frappe-ui'
 
 const emit = defineEmits(['update:step'])
 
+// Always read from the server: a cached copy showed stale switches (credtech#191)
 const emailAccounts = createListResource({
   doctype: 'Email Account',
-  cache: true,
   fields: ['*'],
   filters: {
     email_id: ['Not Like', '%example%'],
   },
   pageLength: 10,
-  auto: true,
+  auto: false,
   onSuccess: (accounts) => {
     // convert 0 to false to handle boolean fields
     accounts.forEach((account) => {
@@ -84,4 +84,16 @@ const emailAccounts = createListResource({
     })
   },
 })
+
+// The account that sends the platform's own emails is not the company's to
+// edit: it is left out of the list (crm.api.email_accounts, credtech#191)
+call('crm.api.email_accounts.get_system_email_accounts')
+  .then((names) => {
+    if (!names?.length) return
+    emailAccounts.update({
+      filters: { ...emailAccounts.filters, name: ['not in', names] },
+    })
+  })
+  .catch((e) => console.error('[email] system accounts', e))
+  .finally(() => emailAccounts.reload())
 </script>

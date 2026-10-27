@@ -109,6 +109,9 @@ const props = defineProps({
 
 const emit = defineEmits(['update:step'])
 
+// switches may arrive as 0/1 (or "0"/"1"): read them the same way everywhere
+const flag = (value) => value === true || value === 1 || value === '1'
+
 const state = reactive({
   email_account_name: props.accountData.email_account_name || '',
   service: props.accountData.service || '',
@@ -117,12 +120,13 @@ const state = reactive({
   api_secret: props.accountData?.api_secret || null,
   password: props.accountData?.password || null,
   frappe_mail_site: props.accountData?.frappe_mail_site || '',
-  enable_incoming: props.accountData.enable_incoming || false,
-  enable_outgoing: props.accountData.enable_outgoing || false,
-  default_outgoing: props.accountData.default_outgoing || false,
-  default_incoming: props.accountData.default_incoming || false,
-  create_lead_from_incoming_email:
-    props.accountData.create_lead_from_incoming_email || false,
+  enable_incoming: flag(props.accountData.enable_incoming),
+  enable_outgoing: flag(props.accountData.enable_outgoing),
+  default_outgoing: flag(props.accountData.default_outgoing),
+  default_incoming: flag(props.accountData.default_incoming),
+  create_lead_from_incoming_email: flag(
+    props.accountData.create_lead_from_incoming_email,
+  ),
   crm_pipeline: props.accountData.crm_pipeline || '',
 })
 
@@ -193,12 +197,12 @@ const isDirty = computed(() => {
     state.api_key !== props.accountData.api_key ||
     state.api_secret !== props.accountData.api_secret ||
     state.password !== props.accountData.password ||
-    state.enable_incoming !== props.accountData.enable_incoming ||
-    state.enable_outgoing !== props.accountData.enable_outgoing ||
-    state.default_outgoing !== props.accountData.default_outgoing ||
-    state.default_incoming !== props.accountData.default_incoming ||
+    state.enable_incoming !== flag(props.accountData.enable_incoming) ||
+    state.enable_outgoing !== flag(props.accountData.enable_outgoing) ||
+    state.default_outgoing !== flag(props.accountData.default_outgoing) ||
+    state.default_incoming !== flag(props.accountData.default_incoming) ||
     state.create_lead_from_incoming_email !==
-      props.accountData.create_lead_from_incoming_email ||
+      flag(props.accountData.create_lead_from_incoming_email) ||
     state.crm_pipeline !== (props.accountData.crm_pipeline || '') ||
     state.frappe_mail_site !== props.accountData.frappe_mail_site
   )
@@ -229,8 +233,14 @@ function succesHandler() {
 
 function errorHandler(err) {
   loading.value = false
+  let message = err?.messages?.[0]
+  // Frappe names this field in English inside its message ("{0} is required")
+  if (message?.includes('Email Server')) {
+    message = __(
+      'To receive emails, fill in the incoming server (IMAP) or turn off "Enable Incoming".',
+    )
+  }
   error.value =
-    err?.messages?.[0] ||
-    __('Failed to update email account: invalid credentials')
+    message || __('Failed to update email account: invalid credentials')
 }
 </script>
