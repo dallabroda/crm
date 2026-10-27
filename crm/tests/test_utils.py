@@ -8,7 +8,10 @@ from crm.utils import (
 	_get_communication_status,
 	_should_update_modified,
 	are_same_phone_number,
+	br_phone_key,
 	create_lead_from_incoming_email,
+	get_default_phone_country,
+	is_same_phone_number,
 	on_communication_update,
 	parse_phone_number,
 	seconds_to_duration,
@@ -124,6 +127,38 @@ class TestUtils(FrappeTestCase):
 
 		self.assertTrue(result["success"])
 		self.assertEqual(result["country"], "IN")
+
+	def test_br_phone_key_reduces_every_format_to_ddd_and_subscriber(self):
+		for number in (
+			"5548999998888",
+			"+55 48 99999-8888",
+			"(48) 99999-8888",
+			"048 9999-8888",
+			"4899998888",
+			"0 21 48 99999-8888",
+			"0055 48 99999 8888",
+		):
+			with self.subTest(number=number):
+				self.assertEqual(br_phone_key(number), "48999998888")
+
+	def test_br_phone_key_keeps_landlines_and_numbers_without_ddd(self):
+		self.assertEqual(br_phone_key("+55 (48) 3222-1111"), "4832221111")
+		self.assertEqual(br_phone_key("99999-8888"), "99998888")
+		self.assertIsNone(br_phone_key("+1 415 555 0100"))
+		self.assertIsNone(br_phone_key(""))
+
+	def test_is_same_phone_number_in_brazil(self):
+		self.assertTrue(is_same_phone_number("5548999998888", "048 9999-8888", "BR"))
+		self.assertTrue(is_same_phone_number("99999-8888", "+55 48 99999-8888", "BR"))
+		self.assertFalse(is_same_phone_number("+55 11 99999-8888", "+55 48 99999-8888", "BR"))
+		self.assertFalse(is_same_phone_number("(48) 3222-1111", "(48) 99999-8888", "BR"))
+
+	def test_default_phone_country_follows_system_settings(self):
+		frappe.db.set_single_value("System Settings", "country", "India")
+		self.assertEqual(get_default_phone_country(), "IN")
+		frappe.db.set_single_value("System Settings", "country", None)
+		self.assertEqual(get_default_phone_country(), "BR")
+		frappe.db.rollback()
 
 
 class TestUpdateModifiedTimestamp(FrappeTestCase):

@@ -9,7 +9,7 @@ from frappe.query_builder import Order
 from pypika.functions import Replace
 from werkzeug.wrappers import Response
 
-from crm.utils import are_same_phone_number, parse_phone_number
+from crm.utils import get_default_phone_country, is_same_phone_number, parse_phone_number
 
 
 def _get_recording_credentials(telephony_medium: str) -> tuple | None:
@@ -139,30 +139,35 @@ def add_task_to_call_log(call_sid: str, task: dict):
 
 @frappe.whitelist()
 def get_contact_lead_or_deal_from_number(number: str):
-	"""Get contact, lead or deal from the given number."""
+	"""The most recent open deal of the number's contact, else the contact itself."""
 	contact = get_contact_by_phone_number(number)
+	if contact.get("deal"):
+		return contact.get("deal"), "CRM Deal"
 	if contact.get("name"):
-		doctype = "Contact"
-		docname = contact.get("name")
-		if contact.get("lead"):
-			doctype = "CRM Lead"
-			docname = contact.get("lead")
-		elif contact.get("deal"):
-			doctype = "CRM Deal"
-			docname = contact.get("deal")
-		return docname, doctype
+		return contact.get("name"), "Contact"
 	return None, None
+
+
+def link_call_log_to_number(call_log, phone_number: str) -> dict:
+	"""Link the call to every open deal of the number's contact, or to the contact when it
+	has none. Returns the lookup result so callers can act on a number nobody has."""
+	contact = get_contact_by_phone_number(phone_number)
+	for deal in contact.get("deals") or []:
+		call_log.link_with_reference_doc("CRM Deal", deal)
+	if contact.get("name") and not contact.get("deals"):
+		call_log.link_with_reference_doc("Contact", contact.get("name"))
+	return contact
 
 
 @frappe.whitelist()
 def get_contact_by_phone_number(phone_number: str):
 	"""Get contact by phone number."""
-	number = parse_phone_number(phone_number)
-
+	default_country = get_default_phone_country()
+	number = parse_phone_number(phone_number, default_country)
 	if number.get("is_valid"):
-		return get_contact(number.get("national_number"), number.get("country"))
-	else:
-		return get_contact(phone_number, number.get("country"), exact_match=True)
+		# a number with its own country code (+1 ...) is read in that country
+		return get_contact(phone_number, number.get("country"))
+	return get_contact(phone_number, default_country, exact_match=True)
 
 
 def _resolve_validated_ip(hostname: str, port: int) -> str:
@@ -299,20 +304,22 @@ def get_recording_url(call_log_name: str):
 	return response
 
 
-def get_contact(phone_number: str, country: str = "IN", exact_match: bool = False):
+def get_contact(phone_number: str, country: str | None = None, exact_match: bool = False):
+	"""The contact that has this number, with its open deals (most recently modified first).
+
+	`deal` is the most recent open deal and `deals` all of them: a call or message from
+	the number belongs on every deal still open for that person. Closed deals are left out.
+	"""
 	if not phone_number:
 		return {"mobile_no": phone_number}
 
-	cleaned_number = (
-		phone_number.strip()
-		.replace(" ", "")
-		.replace("-", "")
-		.replace("(", "")
-		.replace(")", "")
-		.replace("+", "")
-	)
+	country = country or get_default_phone_country()
+	digits = "".join(c for c in phone_number if c.isdigit())
+	if not digits:
+		return {"mobile_no": phone_number}
 
-	# Check if the number is associated with a contact.
+	# Pre-filter on the last 8 digits: they survive every format (country code, DDD,
+	# trunk prefix, with or without the mobile 9). The exact match is confirmed below.
 	# Search all of a contact's numbers (phone_nos child table) and not just the
 	# primary mobile_no, so calls from a secondary number still resolve.
 	Contact = frappe.qb.DocType("Contact")
@@ -333,49 +340,40 @@ def get_contact(phone_number: str, country: str = "IN", exact_match: bool = Fals
 			ContactPhone.phone.as_("matched_phone"),
 		)
 		.where(ContactPhone.parenttype == "Contact")
-		.where(normalized_phone.like(f"%{cleaned_number}%"))
+		.where(normalized_phone.like(f"%{digits[-8:]}%"))
 		.orderby(Contact.modified, order=Order.desc)
 	)
-	contacts = query.run(as_dict=True)
+	contacts = [
+		contact
+		for contact in query.run(as_dict=True)
+		if is_same_phone_number(contact.matched_phone, phone_number, country, validate=not exact_match)
+	]
+	if not contacts:
+		return {"mobile_no": phone_number}
 
-	if len(contacts):
-		# Check if the contact is associated with a deal
-		for contact in contacts:
-			if frappe.db.exists("CRM Contacts", {"contact": contact.name, "is_primary": 1}):
-				deal = frappe.db.get_value(
-					"CRM Contacts", {"contact": contact.name, "is_primary": 1}, "parent"
-				)
-				if are_same_phone_number(
-					contact.matched_phone, phone_number, country, validate=not exact_match
-				):
-					contact["deal"] = deal
-					return contact
+	contact = contacts[0]
+	deals = get_open_deals_of_contacts(list(dict.fromkeys(c.name for c in contacts)))
+	if deals:
+		contact["deal"] = deals[0]
+		contact["deals"] = deals
+	return contact
 
-	# Else, Check if the number is associated with a lead
-	Lead = frappe.qb.DocType("CRM Lead")
-	normalized_phone = Replace(
-		Replace(Replace(Replace(Replace(Lead.mobile_no, " ", ""), "-", ""), "(", ""), ")", ""), "+", ""
-	)
 
+def get_open_deals_of_contacts(contacts: list[str]) -> list[str]:
+	"""Deals not yet won or lost that list any of the contacts, most recently modified first."""
+	Deal = frappe.qb.DocType("CRM Deal")
+	DealContact = frappe.qb.DocType("CRM Contacts")
+	Status = frappe.qb.DocType("CRM Deal Status")
 	query = (
-		frappe.qb.from_(Lead)
-		.select(Lead.name, Lead.lead_name, Lead.image, Lead.mobile_no)
-		.where(Lead.converted == 0)
-		.where(normalized_phone.like(f"%{cleaned_number}%"))
-		.orderby("modified", order=Order.desc)
+		frappe.qb.from_(Deal)
+		.join(DealContact)
+		.on((DealContact.parent == Deal.name) & (DealContact.parenttype == "CRM Deal"))
+		.left_join(Status)
+		.on(Status.name == Deal.status)
+		.select(Deal.name, Deal.modified)
+		.distinct()
+		.where(DealContact.contact.isin(contacts))
+		.where(Status.type.isnull() | Status.type.notin(["Won", "Lost"]))
+		.orderby(Deal.modified, order=Order.desc)
 	)
-	leads = query.run(as_dict=True)
-
-	if len(leads):
-		for lead in leads:
-			if are_same_phone_number(lead.mobile_no, phone_number, country, validate=not exact_match):
-				lead["lead"] = lead.name
-				lead["full_name"] = lead.lead_name
-				return lead
-
-	if len(contacts) and are_same_phone_number(
-		contacts[0].matched_phone, phone_number, country, validate=not exact_match
-	):
-		return contacts[0]
-
-	return {"mobile_no": phone_number}
+	return [row.name for row in query.run(as_dict=True)]

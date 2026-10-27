@@ -69,6 +69,53 @@ def are_same_phone_number(number1: str, number2: str, default_region: str = "IN"
 		return False
 
 
+def get_default_phone_country() -> str:
+	"""Region used to read numbers typed without a country code: the site's country, else Brazil."""
+	country = frappe.db.get_single_value("System Settings", "country")
+	code = country and frappe.db.get_value("Country", country, "code")
+	return code.upper() if code else "BR"
+
+
+def br_phone_key(phone_number: str) -> str | None:
+	"""A Brazilian number reduced to DDD + subscriber, with the mobile 9 always present.
+
+	Operators send `5548999998888`, people type `(48) 99999-8888`, `048 9999-8888` or
+	`4899998888`: all become `48999998888`. Without a DDD only the last 8 digits are
+	kept, since the area is unknown. Returns None when it can't be a Brazilian number.
+	"""
+	digits = re.sub(r"\D", "", phone_number or "")
+	if digits.startswith("00"):  # international prefix: 0055...
+		digits = digits[2:]
+	if len(digits) in (12, 13) and digits.startswith("55"):  # country code
+		digits = digits[2:]
+	elif len(digits) in (11, 12) and digits.startswith("0"):  # trunk prefix: 0 + DDD
+		digits = digits[1:]
+	elif len(digits) in (13, 14) and digits.startswith("0"):  # 0 + carrier code + DDD
+		digits = digits[3:]
+
+	if len(digits) == 10 and digits[2] in "6789":  # mobile saved before the 9 was added
+		digits = f"{digits[:2]}9{digits[2:]}"
+	if len(digits) == 10 or (len(digits) == 11 and digits[2] == "9"):
+		return digits
+	if len(digits) in (8, 9):
+		return digits[-8:]
+	return None
+
+
+def is_same_phone_number(number1: str, number2: str, country: str, validate: bool = True) -> bool:
+	"""are_same_phone_number, but Brazilian numbers also match across DDD/9/country-code variants."""
+	if country != "BR":
+		return are_same_phone_number(number1, number2, country, validate=validate)
+
+	key1, key2 = br_phone_key(number1), br_phone_key(number2)
+	if not key1 or not key2:
+		return False
+	if len(key1) >= 10 and len(key2) >= 10:
+		return key1 == key2
+	# one side has no DDD: the subscriber part is all there is to compare
+	return key1[-8:] == key2[-8:]
+
+
 def seconds_to_duration(seconds: float | int) -> str:
 	if not seconds:
 		return "0s"
