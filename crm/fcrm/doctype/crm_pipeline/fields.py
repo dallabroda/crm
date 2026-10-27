@@ -2,6 +2,9 @@
 # For license information, please see license.txt
 """Company field catalog for cards and the per-stage rules (visible / required / read only)."""
 
+import re
+import unicodedata
+
 import frappe
 from frappe import _
 from frappe.custom.doctype.custom_field.custom_field import create_custom_field
@@ -88,7 +91,7 @@ def create_field(label: str, fieldtype: str, options: str | None = None) -> dict
 		frappe.throw(_("The limit of {0} created fields was reached.").format(CREATED_FIELD_LIMIT))
 	options = _clean_options(fieldtype, options)
 
-	base = CREATED_PREFIX + (frappe.scrub(label)[:50] or "field")
+	base = fieldname_base(label)
 	fieldname, n = base, 1
 	meta = frappe.get_meta(DEAL)
 	while meta.has_field(fieldname) or frappe.db.exists("Custom Field", {"dt": DEAL, "fieldname": fieldname}):
@@ -121,7 +124,7 @@ def update_field(fieldname: str, label: str | None = None, options: str | None =
 		cf.options = _clean_options(cf.fieldtype, options)
 	cf.save(ignore_permissions=True)
 	frappe.clear_cache(doctype=DEAL)
-	return _catalog_item(fieldname)
+	return _catalog_item(cf.fieldname)
 
 
 def disable_field(fieldname: str) -> dict:
@@ -130,7 +133,16 @@ def disable_field(fieldname: str) -> dict:
 	cf.hidden = 1
 	cf.save(ignore_permissions=True)
 	frappe.clear_cache(doctype=DEAL)
-	return _catalog_item(fieldname)
+	# The lookup ignores accents (database collation): answer with the field actually found
+	return _catalog_item(cf.fieldname)
+
+
+def fieldname_base(label: str) -> str:
+	"""ch_ + the name without accents, lowercase, letters and digits joined by _ ("CPF/CNPJ" -> ch_cpf_cnpj).
+	frappe.scrub kept accents and symbols: "Renda (R$)" was refused and "Situação" made a column with accents."""
+	plain = unicodedata.normalize("NFKD", label).encode("ascii", "ignore").decode()
+	slug = re.sub(r"[^a-z0-9]+", "_", plain.lower()).strip("_")[:50].rstrip("_")
+	return CREATED_PREFIX + (slug or "field")
 
 
 def _created_custom_field(fieldname: str):
