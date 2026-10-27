@@ -1,6 +1,7 @@
 from unittest.mock import MagicMock, patch
 
 import frappe
+from frappe.utils.password import delete_all_passwords_for
 
 from crm.fcrm.doctype.crm_api4com_settings import crm_api4com_settings as api4com_settings
 from crm.tests import CRMTestCase as FrappeTestCase
@@ -18,6 +19,12 @@ class TestAPI4ComSettings(FrappeTestCase):
 
 	def setUp(self):
 		frappe.set_user("Administrator")
+		# start from scratch whatever the site had (rolled back in tearDown)
+		frappe.db.set_single_value("CRM API4Com Settings", "enabled", 0)
+		delete_all_passwords_for("CRM API4Com Settings", "CRM API4Com Settings")
+		frappe.db.set_value(
+			"CRM Telephony Agent", {"api4com_extension": ("is", "set")}, "api4com_extension", None
+		)
 		self.patch = patch.object(api4com_settings.requests, "patch", return_value=api4com_answers())
 		self.api4com = self.patch.start()
 
@@ -74,6 +81,15 @@ class TestAPI4ComSettings(FrappeTestCase):
 		self.api4com.reset_mock()
 		self.enable(token="another-token")
 		self.assertEqual(self.api4com.call_args.kwargs["headers"], {"Authorization": "another-token"})
+
+	def test_new_token_of_the_same_length_registers_again(self):
+		# the save masks the token as "*" * len before on_update: the length must not hide a new token
+		self.enable()
+		self.api4com.reset_mock()
+		same_length = "x" * len(TOKEN)
+		self.enable(token=same_length)
+		self.api4com.assert_called_once()
+		self.assertEqual(self.api4com.call_args.kwargs["headers"], {"Authorization": same_length})
 
 	def test_refused_token_stops_the_save(self):
 		self.api4com.return_value = api4com_answers(401)

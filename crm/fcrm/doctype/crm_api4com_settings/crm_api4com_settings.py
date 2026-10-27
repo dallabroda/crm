@@ -40,17 +40,17 @@ class CRMAPI4ComSettings(Document):
 			return
 		if not self.get_password("api_token", raise_exception=False):
 			frappe.throw(_("Paste the API4Com API token."))
+		# A token typed now comes in clear; one kept from before is asterisks. Seen here, because the save
+		# masks it before on_update, and a new token as long as the old one would not count as changed there.
+		if self.api_token and not self.is_dummy_password(self.api_token):
+			self.flags.register_webhook = True
 		if not self.get_password("webhook_secret", raise_exception=False):
 			self.webhook_secret = new_secret()
 			self.flags.register_webhook = True
 
 	def on_update(self):
 		# A new token, turning it on or a new secret: (re)register the webhook. A refusal rolls the save back.
-		if self.enabled and (
-			self.flags.register_webhook
-			or self.has_value_changed("api_token")
-			or self.has_value_changed("enabled")
-		):
+		if self.enabled and (self.flags.register_webhook or self.has_value_changed("enabled")):
 			register_webhook(self)
 
 	@frappe.whitelist()
