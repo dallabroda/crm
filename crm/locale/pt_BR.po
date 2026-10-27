@@ -11892,3 +11892,8 @@ msgstr "Escolha etapas do funil {0}."
 #: frontend/src/components/Settings/FormCustomization/FormCustomizationPage.vue
 msgid "Form preview"
 msgstr "Prévia do formulário"
+
+#: frontend/src/components/Settings/Settings.vue
+#: frontend/src/components/Settings/Forms/FormsList.vue
+msgid "Lead capture forms"
+msgstr "Formulários de captura"

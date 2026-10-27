@@ -241,7 +241,7 @@ const tabs = computed(() => {
           component: markRaw(SlaConfig),
         },
         {
-          label: __('Forms'),
+          label: __('Lead capture forms'),
           component: markRaw(FormsSettings),
           icon: markRaw(LucideTextCursorInput),
         },
