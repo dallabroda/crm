@@ -379,11 +379,18 @@ class TestCRMCallLog(FrappeTestCase):
 		self.assertEqual(get_call_log(call.name)["_receiver"]["label"], "Referenced Lead")
 
 	def test_call_log_without_reference_falls_back_to_number(self):
-		create_test_lead("Number Lead", "+919876500002")
+		frappe.get_doc(
+			{
+				"doctype": "Contact",
+				"first_name": "Number",
+				"last_name": "Contact",
+				"phone_nos": [{"phone": "+919876500002", "is_primary_mobile_no": 1}],
+			}
+		).insert()
 
 		call = create_test_call_log(type="Outgoing", caller="Administrator", to="+919876500002")
 
-		self.assertEqual(get_call_log(call.name)["_receiver"]["label"], "Number Lead")
+		self.assertEqual(get_call_log(call.name)["_receiver"]["label"], "Number Contact")
 
 	def test_call_log_hides_referenced_lead_name_user_cannot_read(self):
 		referenced = create_test_lead("Referenced Lead", "+919876500004")

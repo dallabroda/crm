@@ -432,9 +432,7 @@ class TestIntegrations(FrappeTestCase):
 	def test_brazilian_formats_find_the_same_contact(self):
 		"""Operator, typed and old (no 9) formats of a Brazilian mobile all find the contact"""
 		frappe.db.set_single_value("System Settings", "country", "Brazil")
-		contact = frappe.get_doc(
-			{"doctype": "Contact", "first_name": "Maria", "mobile_no": "(48) 99999-8888"}
-		).insert()
+		contact = make_contact("Maria", "(48) 99999-8888")
 
 		for number in (
 			"5548999998888",
@@ -448,7 +446,7 @@ class TestIntegrations(FrappeTestCase):
 
 	def test_brazilian_number_does_not_match_another_ddd(self):
 		frappe.db.set_single_value("System Settings", "country", "Brazil")
-		frappe.get_doc({"doctype": "Contact", "first_name": "Ana", "mobile_no": "(48) 99999-8888"}).insert()
+		make_contact("Ana", "(48) 99999-8888")
 
 		self.assertNotIn("name", get_contact_by_phone_number("+55 11 99999-8888"))
 
@@ -470,9 +468,7 @@ class TestIntegrations(FrappeTestCase):
 	def test_get_contact_returns_every_open_deal_newest_first(self):
 		"""Any open deal listing the contact counts, primary or not; closed ones don't"""
 		frappe.db.set_single_value("System Settings", "country", "Brazil")
-		contact = frappe.get_doc(
-			{"doctype": "Contact", "first_name": "Carla", "mobile_no": "+55 48 97777-6666"}
-		).insert()
+		contact = make_contact("Carla", "+55 48 97777-6666")
 		older = make_deal_with_contact(contact.name, is_primary=1)
 		won = make_deal_with_contact(contact.name, is_primary=1)
 		won.db_set("status", deal_status_of_type(won.pipeline, "Won"))
@@ -487,9 +483,7 @@ class TestIntegrations(FrappeTestCase):
 
 	def test_contact_with_only_closed_deals_has_no_deal(self):
 		frappe.db.set_single_value("System Settings", "country", "Brazil")
-		contact = frappe.get_doc(
-			{"doctype": "Contact", "first_name": "Bruno", "mobile_no": "+55 48 96666-5555"}
-		).insert()
+		contact = make_contact("Bruno", "+55 48 96666-5555")
 		lost = make_deal_with_contact(contact.name, is_primary=1)
 		lost.db_set("status", deal_status_of_type(lost.pipeline, "Lost"))
 
@@ -501,9 +495,7 @@ class TestIntegrations(FrappeTestCase):
 
 	def test_link_call_log_to_number_links_every_open_deal(self):
 		frappe.db.set_single_value("System Settings", "country", "Brazil")
-		contact = frappe.get_doc(
-			{"doctype": "Contact", "first_name": "Davi", "mobile_no": "+55 48 95555-4444"}
-		).insert()
+		contact = make_contact("Davi", "+55 48 95555-4444")
 		first = make_deal_with_contact(contact.name, is_primary=1)
 		second = make_deal_with_contact(contact.name, is_primary=0)
 		call_log = create_test_call_log()
@@ -686,3 +678,14 @@ def deal_status_of_type(pipeline: str, stage_type: str) -> str:
 	return frappe.get_all(
 		"CRM Deal Status", {"pipeline": pipeline, "type": stage_type}, pluck="name", limit=1
 	)[0]
+
+
+def make_contact(first_name: str, phone: str):
+	"""A contact the phone lookup can find: numbers live in the phone_nos table."""
+	return frappe.get_doc(
+		{
+			"doctype": "Contact",
+			"first_name": first_name,
+			"phone_nos": [{"phone": phone, "is_primary_mobile_no": 1}],
+		}
+	).insert()
