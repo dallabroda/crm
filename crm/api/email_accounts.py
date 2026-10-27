@@ -5,7 +5,7 @@
 The account that sends the platform's own emails (invites, password resets, notices, leads) belongs to the
 platform, not to the company: apps name it with the `crm_system_email_accounts` hook (cred_hub: "HubTech
 CRM", formerly "Cred Hub"). It is left out of Settings > Email > Accounts and only Administrator, which is
-who runs the setup scripts, can change, rename or delete it.
+who runs the setup scripts, can change, rename or delete it. Company accounts are never the default for sending.
 """
 
 import frappe
@@ -33,7 +33,13 @@ def _assert_can_change(name: str | None):
 
 def before_validate(doc, method=None):
 	# before Frappe's own validate, which tests the mail servers
-	_assert_can_change(doc.name or doc.email_account_name)
+	name = doc.name or doc.email_account_name
+	_assert_can_change(name)
+	# System emails always go through the system account: a company account is never the default for sending
+	# (Frappe would otherwise switch the system account's default off without any hook)
+	system = system_email_accounts()
+	if system and name not in system and frappe.session.user != "Administrator":
+		doc.default_outgoing = 0
 
 
 def on_trash(doc, method=None):

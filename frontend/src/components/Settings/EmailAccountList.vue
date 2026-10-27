@@ -58,7 +58,8 @@
 import Email2Icon from '@/components/Icons/Email2Icon.vue'
 import EmptyState from '../ListViews/EmptyState.vue'
 import EmailAccountCard from './EmailAccountCard.vue'
-import { call, createListResource } from 'frappe-ui'
+import { getSystemEmailAccounts } from './emailConfig'
+import { createListResource } from 'frappe-ui'
 
 const emit = defineEmits(['update:step'])
 
@@ -87,13 +88,12 @@ const emailAccounts = createListResource({
 
 // The account that sends the platform's own emails is not the company's to
 // edit: it is left out of the list (crm.api.email_accounts, credtech#191)
-call('crm.api.email_accounts.get_system_email_accounts')
+getSystemEmailAccounts()
   .then((names) => {
     if (!names?.length) return
     emailAccounts.update({
       filters: { ...emailAccounts.filters, name: ['not in', names] },
     })
   })
-  .catch((e) => console.error('[email] system accounts', e))
   .finally(() => emailAccounts.reload())
 </script>

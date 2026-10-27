@@ -45,7 +45,7 @@
         </div>
       </div>
       <div class="grid grid-cols-2 gap-4">
-        <template v-for="field in incomingOutgoingFields" :key="field.name">
+        <template v-for="field in switches" :key="field.name">
           <div
             v-if="field.condition ? field.condition(state) : true"
             class="flex flex-col gap-1"
@@ -99,7 +99,8 @@ import {
   popularProviderFields,
   customProviderFields,
   validateInputs,
-  incomingOutgoingFields,
+  accountSwitches,
+  getSystemEmailAccounts,
 } from './emailConfig'
 import CircleAlert from '~icons/lucide/circle-alert'
 
@@ -129,6 +130,12 @@ const state = reactive({
   ),
   crm_pipeline: props.accountData.crm_pipeline || '',
 })
+
+const hasSystemAccount = ref(false)
+getSystemEmailAccounts().then((names) => {
+  hasSystemAccount.value = Boolean(names?.length)
+})
+const switches = computed(() => accountSwitches(hasSystemAccount.value))
 
 const info = {
   description: __('To know more about setting up email accounts, click'),

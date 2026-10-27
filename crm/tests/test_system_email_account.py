@@ -68,3 +68,22 @@ class TestSystemEmailAccount(FrappeTestCase):
 		self.assertEqual(
 			frappe.db.get_value("Email Account", SYSTEM, "email_id"), "no-reply2@system.example.test"
 		)
+
+	def test_company_account_is_never_the_default_for_sending(self):
+		company = frappe.get_doc(
+			{
+				"doctype": "Email Account",
+				"email_account_name": "Company Inbox Test",
+				"email_id": "vendas@company.example.test",
+				"enable_outgoing": 1,
+				"default_outgoing": 1,
+				"smtp_server": "smtp.company.example.test",
+				"awaiting_password": 1,
+			}
+		)
+		frappe.set_user(MANAGER)
+		company.insert(ignore_permissions=True)
+		self.assertEqual(frappe.db.get_value("Email Account", company.name, "default_outgoing"), 0)
+		company.default_outgoing = 1
+		company.save(ignore_permissions=True)
+		self.assertEqual(frappe.db.get_value("Email Account", company.name, "default_outgoing"), 0)
