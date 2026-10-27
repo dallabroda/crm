@@ -35,6 +35,38 @@ class MissingRequiredFieldsError(frappe.ValidationError):
 	pass
 
 
+class NoRoomForFieldError(frappe.ValidationError):
+	pass
+
+
+# MariaDB refuses a table whose columns add up to more than 65,535 bytes per row (error 1118). Cards already
+# declare ~28 KB and each text field takes 562 bytes (140 characters in utf8mb4), so text fields run out long
+# before CREATED_FIELD_LIMIT: in a test the 67th failed. Numbers, dates and Yes/No take a few bytes.
+ROW_SIZE_LIMIT = 65_535
+ROW_SIZE_MARGIN = 256
+
+# Same per-column sizes as frappe.db.get_row_size, but for this site's database only: that query does not
+# filter by schema, so on a server with one database per company it adds up the tables of every company.
+_ROW_SIZE_SQL = """
+	SELECT COALESCE(SUM(CASE DATA_TYPE
+		WHEN 'tinyint' THEN 1 WHEN 'smallint' THEN 2 WHEN 'mediumint' THEN 3 WHEN 'int' THEN 4
+		WHEN 'bigint' THEN 8 WHEN 'float' THEN IF(NUMERIC_PRECISION > 24, 8, 4) WHEN 'double' THEN 8
+		WHEN 'decimal' THEN ((NUMERIC_PRECISION - NUMERIC_SCALE) DIV 9) * 4 + (NUMERIC_SCALE DIV 9) * 4
+			+ CEIL(MOD(NUMERIC_PRECISION - NUMERIC_SCALE, 9) / 2) + CEIL(MOD(NUMERIC_SCALE, 9) / 2)
+		WHEN 'year' THEN 1 WHEN 'date' THEN 3
+		WHEN 'time' THEN 3 + CEIL(DATETIME_PRECISION / 2)
+		WHEN 'datetime' THEN 5 + CEIL(DATETIME_PRECISION / 2)
+		WHEN 'timestamp' THEN 4 + CEIL(DATETIME_PRECISION / 2)
+		WHEN 'char' THEN CHARACTER_OCTET_LENGTH
+		WHEN 'varchar' THEN IF(CHARACTER_OCTET_LENGTH > 255, 2, 1) + CHARACTER_OCTET_LENGTH
+		WHEN 'tinytext' THEN 9 WHEN 'text' THEN 10 WHEN 'mediumtext' THEN 11 WHEN 'longtext' THEN 12
+		WHEN 'tinyblob' THEN 9 WHEN 'blob' THEN 10 WHEN 'mediumblob' THEN 11 WHEN 'longblob' THEN 12
+		WHEN 'json' THEN 12 ELSE 8 END), 0)
+	FROM information_schema.COLUMNS
+	WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = %s
+"""
+
+
 def _field_info(df, is_standard: bool) -> dict:
 	return {
 		"fieldname": df.fieldname,
@@ -81,6 +113,46 @@ def created_field_count() -> int:
 	return frappe.db.count("Custom Field", {"dt": DEAL, "fieldname": ("like", f"{CREATED_PREFIX}%")})
 
 
+def row_size() -> int:
+	"""Bytes the cards table already declares per row (this site's database)."""
+	if frappe.db.db_type != "mariadb":
+		return 0
+	return int(frappe.db.sql(_ROW_SIZE_SQL, (f"tab{DEAL}",))[0][0] or 0)
+
+
+def field_cost(fieldtype: str) -> int:
+	"""Bytes a new column of `fieldtype` adds to the row, from the column type Frappe gives it."""
+	column, length = frappe.db.type_map.get(fieldtype, ("varchar", frappe.db.VARCHAR_LEN))
+	if column == "varchar":
+		octets = int(length or frappe.db.VARCHAR_LEN) * 4
+		return octets + (2 if octets > 255 else 1)
+	if column == "decimal":
+		precision, scale = (int(x) for x in str(length or "21,9").split(","))
+		whole = precision - scale
+		return (whole // 9) * 4 + (scale // 9) * 4 + -(-(whole % 9) // 2) + -(-(scale % 9) // 2)
+	return {"tinyint": 1, "int": 4, "bigint": 8, "date": 3, "datetime": 8, "time": 6}.get(column, 12)
+
+
+def room_by_type() -> dict:
+	"""How many more fields of each creatable type still fit: the row size and the created-field limit."""
+	left_by_count = max(CREATED_FIELD_LIMIT - created_field_count(), 0)
+	free = ROW_SIZE_LIMIT - ROW_SIZE_MARGIN - row_size()
+	return {t: max(min(left_by_count, free // field_cost(t)), 0) for t in FIELD_TYPES}
+
+
+def _no_room_message(fieldtype: str) -> str:
+	if fieldtype in ("Data", "Select", "Link"):
+		return _(
+			"There is no room left for another text, list or link field in cards. "
+			"Number, date and Yes/No fields take much less space and can still be created."
+		)
+	return _("There is no room left for another field of this type in cards.")
+
+
+def _is_row_size_error(e: Exception) -> bool:
+	return bool(getattr(e, "args", None)) and e.args[0] == 1118
+
+
 def create_field(label: str, fieldtype: str, options: str | None = None) -> dict:
 	label = (label or "").strip()
 	if not label:
@@ -89,6 +161,8 @@ def create_field(label: str, fieldtype: str, options: str | None = None) -> dict
 		frappe.throw(_("Field type {0} is not supported.").format(frappe.bold(fieldtype)))
 	if created_field_count() >= CREATED_FIELD_LIMIT:
 		frappe.throw(_("The limit of {0} created fields was reached.").format(CREATED_FIELD_LIMIT))
+	if row_size() + field_cost(fieldtype) > ROW_SIZE_LIMIT - ROW_SIZE_MARGIN:
+		frappe.throw(_no_room_message(fieldtype), NoRoomForFieldError, title=_("No room for this field"))
 	options = _clean_options(fieldtype, options)
 
 	base = fieldname_base(label)
@@ -98,17 +172,29 @@ def create_field(label: str, fieldtype: str, options: str | None = None) -> dict
 		n += 1
 		fieldname = f"{base}_{n}"
 
-	create_custom_field(
-		DEAL,
-		{
-			"fieldname": fieldname,
-			"label": label,
-			"fieldtype": fieldtype,
-			"options": options,
-			"insert_after": _last_fieldname(),
-		},
-		ignore_validate=False,
-	)
+	try:
+		create_custom_field(
+			DEAL,
+			{
+				"fieldname": fieldname,
+				"label": label,
+				"fieldtype": fieldtype,
+				"options": options,
+				"insert_after": _last_fieldname(),
+			},
+			ignore_validate=False,
+		)
+	except frappe.db.OperationalError as e:
+		# The estimate above can miss by a few bytes: never show the raw database error
+		if not _is_row_size_error(e):
+			raise
+		# ALTER TABLE commits implicitly before it runs, so the Custom Field row was already saved:
+		# remove it, or the cards would point to a column that does not exist
+		frappe.db.rollback()
+		frappe.db.delete("Custom Field", {"dt": DEAL, "fieldname": fieldname})
+		frappe.db.commit()
+		frappe.clear_cache(doctype=DEAL)
+		frappe.throw(_no_room_message(fieldtype), NoRoomForFieldError, title=_("No room for this field"))
 	frappe.clear_cache(doctype=DEAL)
 	return _catalog_item(fieldname)
 

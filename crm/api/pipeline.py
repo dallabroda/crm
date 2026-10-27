@@ -374,6 +374,8 @@ def get_field_catalog() -> dict:
 	return {
 		"limit": field_catalog.CREATED_FIELD_LIMIT,
 		"used": field_catalog.created_field_count(),
+		# how many more fields of each type still fit in the cards table (text runs out first)
+		"room": field_catalog.room_by_type(),
 		"fields": field_catalog.get_catalog(),
 	}
 
