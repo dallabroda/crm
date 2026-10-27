@@ -1,6 +1,8 @@
 import frappe
 from frappe import _
 
+from crm.utils.hidden_users import hidden_users
+
 CRM_ALLOWED_ROLES = ["System Manager", "Sales Manager", "Sales User"]
 
 
@@ -103,6 +105,8 @@ def get_users(include_all: bool = False):
 
 	role_priority = ("System Manager", "Sales Manager", "Sales User", "Guest")
 	crm_users = []
+	# Technical users (API keys) are not CRM users: out of the lists, assignments and mentions
+	hidden = hidden_users()
 
 	for user in users:
 		if session_user == user.name:
@@ -126,7 +130,7 @@ def get_users(include_all: bool = False):
 		user.is_telephony_agent = user.name in telephony_agents
 		user.language = user.language or system_language
 
-		if user.role in CRM_ALLOWED_ROLES:
+		if user.role in CRM_ALLOWED_ROLES and user.name not in hidden:
 			crm_users.append(user)
 
 	if not include_all:

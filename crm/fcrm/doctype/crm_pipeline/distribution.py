@@ -14,6 +14,8 @@ import json
 
 import frappe
 
+from crm.utils.hidden_users import hidden_users
+
 DEFAULT = {"mode": "round_robin", "round_robin_users": [], "rules": [], "fallback": "round_robin"}
 
 
@@ -39,7 +41,7 @@ def normalize(value: dict) -> dict:
 
 
 def _members(pipeline) -> dict:
-	"""{user: role} of the pipeline's enabled members, in their order."""
+	"""{user: role} of the pipeline's enabled members, in their order. Hidden users (API keys) never get cards."""
 	rows = frappe.get_all(
 		"CRM Pipeline Member",
 		filters={"parent": pipeline, "parenttype": "CRM Pipeline"},
@@ -49,7 +51,8 @@ def _members(pipeline) -> dict:
 	enabled = set(
 		frappe.get_all("User", {"name": ("in", [r.user for r in rows] or [""]), "enabled": 1}, pluck="name")
 	)
-	return {r.user: r.role for r in rows if r.user in enabled}
+	hidden = hidden_users()
+	return {r.user: r.role for r in rows if r.user in enabled and r.user not in hidden}
 
 
 def _matches(value, expected) -> bool:
