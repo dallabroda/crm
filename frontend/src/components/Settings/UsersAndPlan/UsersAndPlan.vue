@@ -99,10 +99,12 @@
         theme="gray"
         :text="
           __(
-            'Free trial with unlimited users until {0} ({1} days left). From {2}, the users above the {3} free one and the extra users you contract are paused, the most recent first, and pending invitations over the limit are no longer valid. To keep them, contract extra users below or choose who stays by deactivating the users you no longer need.',
+            'Free trial with unlimited users until {0} ({1}). From {2}, the users above the {3} free one and the extra users you contract are paused, the most recent first, and pending invitations over the limit are no longer valid. To keep them, contract extra users below or choose who stays by deactivating the users you no longer need.',
             [
               date(data.trial_ends_on),
-              data.trial_days_left,
+              data.trial_days_left === 1
+                ? __('last day')
+                : __('{0} days left', [data.trial_days_left]),
               date(dayAfterTrial(data)),
               data.free,
             ],

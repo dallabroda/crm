@@ -11640,8 +11640,8 @@ msgid "{0} users, no limit during the trial"
 msgstr "{0} usuários, sem limite durante o teste"
 
 #: frontend/src/components/Settings/UsersAndPlan/UsersAndPlan.vue
-msgid "Free trial with unlimited users until {0} ({1} days left). From {2}, the users above the {3} free one and the extra users you contract are paused, the most recent first, and pending invitations over the limit are no longer valid. To keep them, contract extra users below or choose who stays by deactivating the users you no longer need."
-msgstr "Teste grátis com usuários ilimitados até {0} (faltam {1} dias). A partir de {2}, os usuários acima do {3} grátis e dos extras que você contratar são pausados, a começar pelos mais recentes, e os convites pendentes acima do limite deixam de valer. Para mantê-los, contrate usuários extras abaixo ou escolha quem fica desativando os usuários de que você não precisa mais."
+msgid "Free trial with unlimited users until {0} ({1}). From {2}, the users above the {3} free one and the extra users you contract are paused, the most recent first, and pending invitations over the limit are no longer valid. To keep them, contract extra users below or choose who stays by deactivating the users you no longer need."
+msgstr "Teste grátis com usuários ilimitados até {0} ({1}). A partir de {2}, os usuários acima do {3} grátis e dos extras que você contratar são pausados, a começar pelos mais recentes, e os convites pendentes acima do limite deixam de valer. Para mantê-los, contrate usuários extras abaixo ou escolha quem fica desativando os usuários de que você não precisa mais."
 
 #: frontend/src/components/Settings/UsersAndPlan/UsersAndPlan.vue
 msgid "Their data is kept. They come back on their own when there is a seat again. You can also choose who stays: deactivate a user and re-enable a paused one."
@@ -11650,3 +11650,11 @@ msgstr "Os dados deles continuam guardados. Eles voltam sozinhos quando houver v
 #: frontend/src/components/Settings/UsersAndPlan/UsersAndPlan.vue
 msgid "Nothing is charged during the trial: the first invoice is due on {0}, the day after it ends. Unpaid, the extra users are kept until 3 days after that date. Then {1} per month on the same card."
 msgstr "Nada é cobrado durante o teste: a primeira fatura vence em {0}, no dia seguinte ao fim dele. Sem pagamento, os usuários extras continuam liberados até 3 dias depois dessa data. Depois, {1} por mês no mesmo cartão."
+
+#: frontend/src/components/Settings/UsersAndPlan/UsersAndPlan.vue
+msgid "last day"
+msgstr "último dia"
+
+#: frontend/src/components/Settings/UsersAndPlan/UsersAndPlan.vue
+msgid "{0} days left"
+msgstr "faltam {0} dias"
