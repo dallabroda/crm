@@ -11714,3 +11714,21 @@ msgstr "último dia"
 #: frontend/src/components/Settings/UsersAndPlan/UsersAndPlan.vue
 msgid "{0} days left"
 msgstr "faltam {0} dias"
+
+#: crm/fcrm/doctype/crm_pipeline/fields.py
+#: frontend/src/components/Settings/Fields/FieldsPage.vue
+msgid "There is no room left for another text, list or link field in cards. Number, date and Yes/No fields take much less space and can still be created."
+msgstr "Não há mais espaço para outro campo de texto, lista ou vínculo nos cards. Campos de número, data e sim/não ocupam bem menos espaço e ainda podem ser criados."
+
+#: crm/fcrm/doctype/crm_pipeline/fields.py
+#: frontend/src/components/Settings/Fields/FieldsPage.vue
+msgid "There is no room left for another field of this type in cards."
+msgstr "Não há mais espaço para outro campo deste tipo nos cards."
+
+#: crm/fcrm/doctype/crm_pipeline/fields.py
+msgid "No room for this field"
+msgstr "Sem espaço para este campo"
+
+#: frontend/src/components/Settings/Fields/FieldsPage.vue
+msgid "Room for {0} more text, list or link fields"
+msgstr "Espaço para mais {0} campos de texto, lista ou vínculo"

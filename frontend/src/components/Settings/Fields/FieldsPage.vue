@@ -24,6 +24,13 @@
         <span class="text-xs text-ink-gray-5" data-testid="field-usage">
           {{ __('{0} of {1} custom fields', [catalog.used, catalog.limit]) }}
         </span>
+        <span
+          v-if="textRoomIsTighter"
+          class="text-xs text-ink-gray-5"
+          data-testid="field-text-room"
+        >
+          {{ __('Room for {0} more text, list or link fields', [textRoom]) }}
+        </span>
       </div>
     </div>
 
@@ -105,6 +112,10 @@
           :model-value="dialog.options"
           @update:model-value="(v) => (dialog.options = v)"
         />
+        <ErrorMessage
+          v-if="!dialog.fieldname && noRoomForType"
+          :message="noRoomForType"
+        />
         <ErrorMessage :message="dialog.error" />
       </div>
     </template>
@@ -115,6 +126,7 @@
           variant="solid"
           :label="__('Save')"
           :loading="dialog.saving"
+          :disabled="!dialog.fieldname && Boolean(noRoomForType)"
           @click="saveField"
         />
       </div>
@@ -140,7 +152,28 @@ const pipelineStore = pipelinesStore()
 
 const loading = ref(false)
 const catalog = ref({ limit: 80, used: 0, fields: [] })
-const limitReached = computed(() => catalog.value.used >= catalog.value.limit)
+// The cards table also has a size limit per row: text, list and link fields
+// run out of room before the field limit (see fields.py, room_by_type)
+const room = computed(() => catalog.value.room || null)
+const textRoom = computed(() => room.value?.Data ?? null)
+const textRoomIsTighter = computed(
+  () =>
+    textRoom.value !== null &&
+    textRoom.value < catalog.value.limit - catalog.value.used,
+)
+const limitReached = computed(
+  () =>
+    catalog.value.used >= catalog.value.limit ||
+    (room.value && Object.values(room.value).every((n) => n <= 0)),
+)
+const noRoomForType = computed(() => {
+  if (!room.value || room.value[dialog.fieldtype] !== 0) return ''
+  return ['Data', 'Select', 'Link'].includes(dialog.fieldtype)
+    ? __(
+        'There is no room left for another text, list or link field in cards. Number, date and Yes/No fields take much less space and can still be created.',
+      )
+    : __('There is no room left for another field of this type in cards.')
+})
 
 const typeOptions = fieldTypeOptions()
 const linkOptions = [
