@@ -45,3 +45,21 @@ class TestFieldRoom(FrappeTestCase):
 				field_catalog.create_field("Observação longa", "Data")
 			self.assertEqual(field_catalog.room_by_type()["Data"], 0)
 			self.assertGreater(field_catalog.room_by_type()["Int"], 0)
+
+	def test_row_size_error_after_alter_leaves_no_orphan_field(self):
+		"""ALTER TABLE commits the Custom Field row before failing with 1118: it must be removed."""
+
+		def fail_after_saving(doctype, df, ignore_validate=False):
+			# what create_custom_field leaves behind when the ALTER is refused
+			frappe.get_doc(
+				{"doctype": "Custom Field", "dt": doctype, "fieldtype": df["fieldtype"], **df}
+			).db_insert()
+			frappe.db.commit()  # the implicit commit of ALTER TABLE: a rollback alone would not undo it
+			raise frappe.db.OperationalError(1118, "Row size too large")
+
+		with patch.object(field_catalog, "create_custom_field", side_effect=fail_after_saving):
+			with self.assertRaises(field_catalog.NoRoomForFieldError):
+				field_catalog.create_field("Campo que não cabe", "Data")
+		self.assertFalse(
+			frappe.db.exists("Custom Field", {"dt": field_catalog.DEAL, "fieldname": "ch_campo_que_nao_cabe"})
+		)
