@@ -114,7 +114,11 @@
           <!-- eslint-enable vue/no-v-html -->
         </div>
         <div v-else class="truncate text-base">
-          {{ getRow(itemName, fieldName).label }}
+          {{
+            ['status', 'priority'].includes(fieldName)
+              ? __(getRow(itemName, fieldName).label)
+              : getRow(itemName, fieldName).label
+          }}
         </div>
       </div>
     </template>

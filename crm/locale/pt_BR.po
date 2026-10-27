@@ -11618,3 +11618,7 @@ msgstr "Não foi possível adicionar a aba do Cred Hub"
 #: frontend/src/components/Settings/LeadSyncing
 msgid "Connect your Cred Chat in the \"Cred Chat\" box, below the sources, to use it."
 msgstr "Para usar, conecte o seu Cred Chat no quadro \"Cred Chat\", abaixo das origens."
+
+#: frontend/src/utils/dashboard.ts
+msgid "{0} to {1}"
+msgstr "{0} a {1}"

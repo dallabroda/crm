@@ -32,7 +32,7 @@
             </div>
             <div class="flex gap-2">
               <TaskPriorityIcon :priority="task.priority" />
-              {{ task.priority }}
+              {{ __(task.priority) }}
             </div>
           </div>
         </div>

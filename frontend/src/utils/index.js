@@ -6,6 +6,7 @@ import { gemoji } from 'gemoji'
 import DOMPurify from 'dompurify'
 import { createToast, scriptToast } from '@/utils/scriptToast'
 import { toast, dayjsLocal, dayjs, getConfig } from 'frappe-ui'
+import { localizeFormat } from './locale'
 import { h } from 'vue'
 
 export function formatTime(seconds) {
@@ -35,7 +36,7 @@ export function formatTime(seconds) {
 
 export function formatDate(date, format, onlyDate = false, onlyTime = false) {
   if (!date) return ''
-  format = getFormat(date, format, onlyDate, onlyTime, false)
+  format = localizeFormat(getFormat(date, format, onlyDate, onlyTime, false))
   return dayjsLocal(date).format(format)
 }
 
@@ -241,7 +242,7 @@ export function taskStatusOptions(action, data) {
   return options.map((status) => {
     return {
       icon: () => h(TaskStatusIcon, { status }),
-      label: status,
+      label: __(status),
       onClick: () => action && action(status, data),
     }
   })
@@ -260,7 +261,7 @@ export function taskPriorityOptions(action, data) {
 
   return options.map((priority) => {
     return {
-      label: priority,
+      label: __(priority),
       icon: () => h(TaskPriorityIcon, { priority }),
       onClick: () => action && action(priority, data),
     }

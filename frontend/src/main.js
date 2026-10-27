@@ -6,6 +6,7 @@ import { createDialog } from './utils/dialogs'
 import { initSocket } from './socket'
 import router from './router'
 import translationPlugin from './translation'
+import { applyUserLocale } from './utils/locale'
 import App from './App.vue'
 
 import {
@@ -61,12 +62,14 @@ if (import.meta.env.DEV) {
       for (let key in values) {
         window[key] = values[key]
       }
+      applyUserLocale()
       socket = initSocket()
       app.config.globalProperties.$socket = socket
       app.mount('#app')
     },
   )
 } else {
+  applyUserLocale()
   socket = initSocket()
   app.config.globalProperties.$socket = socket
   app.mount('#app')
