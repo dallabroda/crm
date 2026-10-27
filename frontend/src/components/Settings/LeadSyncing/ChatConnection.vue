@@ -170,6 +170,8 @@ async function installPanel() {
     Object.assign(chat, await welcomeApi.installPanel())
     if (chat.panel_installed)
       toast.success(__('Cred Hub tab added to Cred Chat'))
+    // the backend keeps the reason in panel_error instead of throwing
+    else toast.error(chat.panel_error || __('Could not add the Cred Hub tab'))
   } catch (e) {
     toast.error(e?.messages?.[0] || __('Could not add the Cred Hub tab'))
   } finally {
