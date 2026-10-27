@@ -11749,3 +11749,31 @@ msgstr "Só dá para criar campos em cards, contatos e empresas."
 #: crm/fcrm/doctype/crm_pipeline/fields.py
 msgid "There is no room left for another field of this type in {0}."
 msgstr "Não há mais espaço para outro campo deste tipo em {0}."
+
+#: frontend/src/components/Activities/Activities.vue
+msgid "added"
+msgstr "definiu"
+
+#: frontend/src/components/Activities/Activities.vue
+msgid "as"
+msgstr "como"
+
+#: frontend/src/components/Activities/Activities.vue
+msgid "changed"
+msgstr "alterou"
+
+#: frontend/src/components/Activities/Activities.vue
+msgid "from"
+msgstr "de"
+
+#: frontend/src/components/Activities/Activities.vue
+msgid "removed"
+msgstr "removeu"
+
+#: crm/api/activities.py
+msgid "Automatic entry"
+msgstr "Entrada automática"
+
+#: frontend/src/components/Pipelines/OrganizationRegistry.vue
+msgid "No CNPJ yet: add it in the organization to fetch the Receita data."
+msgstr "Sem CNPJ: preencha na organização para buscar os dados da Receita."
