@@ -59,7 +59,7 @@ import LucideTextCursorInput from '~icons/lucide/text-cursor-input'
 import LucideKanban from '~icons/lucide/kanban'
 import LucideCreditCard from '~icons/lucide/credit-card'
 import PipelinesPage from './Pipelines/PipelinesPage.vue'
-import FieldsPage from './Fields/FieldsPage.vue'
+import FormCustomizationPage from './FormCustomization/FormCustomizationPage.vue'
 import SlidersIcon from '@/components/Icons/SlidersIcon.vue'
 import SparkleIcon from '@/components/Icons/SparkleIcon.vue'
 import WhatsAppIcon from '@/components/Icons/WhatsAppIcon.vue'
@@ -166,10 +166,11 @@ const tabs = computed(() => {
           component: markRaw(PipelinesPage),
         },
         {
-          label: __('Fields'),
+          // fields of the cards and their form per funnel and stage (credtech#180);
+          // funnel owners configure their funnels, others see the preview
+          label: __('Form customization'),
           icon: LucideTextCursorInput,
-          component: markRaw(FieldsPage),
-          condition: () => isManager(),
+          component: markRaw(FormCustomizationPage),
         },
       ],
     },
