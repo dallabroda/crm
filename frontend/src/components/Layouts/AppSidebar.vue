@@ -72,7 +72,9 @@
                       :class="{ 'rotate-90': opened }"
                       aria-hidden="true"
                     />
-                    <span class="truncate">{{ __(section.name) }}</span>
+                    <span class="truncate">{{
+                      __(section.label || section.name)
+                    }}</span>
                   </span>
                 </SidebarLabel>
                 <!-- Admins and Pipeline Owners: one click opens the editor of a new funnel -->
@@ -92,7 +94,15 @@
                 </Tooltip>
               </div>
             </template>
-            <nav class="flex flex-col gap-1">
+            <!-- Funnels sit inside the "Funnels" header: indented, with a guide line -->
+            <nav
+              class="flex flex-col gap-1"
+              :class="
+                section.nested &&
+                !isCollapsed &&
+                'ml-2.5 border-l border-outline-gray-2 pl-1.5'
+              "
+            >
               <SidebarItem
                 v-for="link in section.views"
                 :key="link.key"
@@ -310,6 +320,9 @@ const allViews = computed(() => {
     { name: 'Top', hideLabel: true, opened: true, views: top.map(navLink) },
     {
       name: 'Deals',
+      // the cards live inside funnels: the header says so and the funnels are indented under it
+      label: 'Funnels',
+      nested: true,
       opened: true,
       views: pipelineViews.value,
       // with no funnel yet, keep the header so the "+" can create the first one
