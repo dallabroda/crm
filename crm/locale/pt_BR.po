@@ -11627,6 +11627,46 @@ msgstr "{0} a {1}"
 msgid "{0} of {1}"
 msgstr "{0} de {1}"
 
+#: frontend/src/components/DeleteLinkedDocModal.vue
+msgid "Document"
+msgstr "Documento"
+
+#: frontend/src/components/DeleteLinkedDocModal.vue
+msgid "Are you sure you want to delete all linked items?"
+msgstr "Tem certeza de que deseja excluir todos os itens vinculados?"
+
+#: frontend/src/components/DeleteLinkedDocModal.vue
+msgid "Are you sure you want to unlink all linked items?"
+msgstr "Tem certeza de que deseja desvincular todos os itens vinculados?"
+
+#: frontend/src/components/DeleteLinkedDocModal.vue
+msgid "Could not change the linked documents"
+msgstr "Não foi possível alterar os documentos vinculados"
+
+#: frontend/src/components/ListViews/LinkedDocsListView.vue
+msgid "Call Log"
+msgstr "Registro de ligação"
+
+#: crm/api/doc.py
+msgid "Some linked documents could not be changed:"
+msgstr "Alguns documentos vinculados não puderam ser alterados:"
+
+#: crm/api/doc.py
+msgid "Linked documents"
+msgstr "Documentos vinculados"
+
+#: crm/api/doc.py
+msgid "{0}: not permitted"
+msgstr "{0}: sem permissão"
+
+#: frontend/src/components/DeleteLinkedDocModal.vue
+msgid "Are you sure you want to delete {0} - {1}?"
+msgstr "Tem certeza de que deseja excluir {0} - {1}?"
+
+#: frontend/src/components/DeleteLinkedDocModal.vue
+msgid "Their own tasks, notes and call logs are deleted too."
+msgstr "As tarefas, notas e ligações deles também são excluídas."
+
 #: frontend/src/components/Settings/UsersAndPlan/UsersAndPlan.vue
 msgid "Free trial"
 msgstr "Teste grátis"
