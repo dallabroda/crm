@@ -762,7 +762,11 @@ def clear_links_to(doc, parent_doctype, parent_docname):
 	Dynamic Link pairs (reference_doctype/reference_docname) and child table rows that link to it."""
 	changed = False
 	for df in doc.meta.fields:
-		if df.fieldtype == "Link" and df.options == parent_doctype and doc.get(df.fieldname) == parent_docname:
+		if (
+			df.fieldtype == "Link"
+			and df.options == parent_doctype
+			and doc.get(df.fieldname) == parent_docname
+		):
 			doc.set(df.fieldname, None)
 			changed = True
 		elif (
@@ -779,7 +783,9 @@ def clear_links_to(doc, parent_doctype, parent_docname):
 				row
 				for row in rows
 				if not any(
-					cdf.fieldtype == "Link" and cdf.options == parent_doctype and row.get(cdf.fieldname) == parent_docname
+					cdf.fieldtype == "Link"
+					and cdf.options == parent_doctype
+					and row.get(cdf.fieldname) == parent_docname
 					for cdf in row.meta.fields
 				)
 			]
@@ -854,7 +860,9 @@ def delete_with_dependents(doctype, docname, seen=None, depth=0):
 	seen.add((doctype, docname))
 	if depth < 3:
 		for dependent in get_linked_docs_data(frappe.get_doc(doctype, docname)):
-			delete_with_dependents(dependent["reference_doctype"], dependent["reference_docname"], seen, depth + 1)
+			delete_with_dependents(
+				dependent["reference_doctype"], dependent["reference_docname"], seen, depth + 1
+			)
 	frappe.delete_doc(doctype, docname)
 
 

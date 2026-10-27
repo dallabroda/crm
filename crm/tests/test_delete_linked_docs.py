@@ -46,7 +46,9 @@ class TestDeleteLinkedDocs(FrappeTestCase):
 
 	def test_delete_all_removes_the_deal_with_its_task(self):
 		org, deal, task = self._org_with_deal_and_task("Delete Test Org")
-		remove_linked_doc_reference(self._linked_items(org), delete=True, doctype="CRM Organization", docname=org)
+		remove_linked_doc_reference(
+			self._linked_items(org), delete=True, doctype="CRM Organization", docname=org
+		)
 
 		self.assertFalse(frappe.db.exists("CRM Deal", deal.name))
 		self.assertFalse(frappe.db.exists("CRM Task", task.name))

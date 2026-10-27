@@ -241,7 +241,11 @@ const unlinkLinkedDoc = (doc) => {
       // the server lists what could not be unlinked or deleted; before, the button just did nothing
       linkedDocsResource.reload()
       confirmDeleteInfo.value = { show: false, title: '' }
-      toast.error(err?.messages?.[0] || err?.message || __('Could not change the linked documents'))
+      toast.error(
+        err?.messages?.[0] ||
+          err?.message ||
+          __('Could not change the linked documents'),
+      )
     })
 }
 
