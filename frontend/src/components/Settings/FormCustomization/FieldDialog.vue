@@ -56,6 +56,7 @@
                 <input
                   v-model="places[p.name].all"
                   type="radio"
+                  class="accent-current text-ink-gray-9"
                   :value="true"
                   :name="`stages-${p.name}`"
                 />
@@ -65,6 +66,7 @@
                 <input
                   v-model="places[p.name].all"
                   type="radio"
+                  class="accent-current text-ink-gray-9"
                   :value="false"
                   :name="`stages-${p.name}`"
                 />

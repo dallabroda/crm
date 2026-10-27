@@ -58,38 +58,43 @@
                 </span>
                 <span
                   v-else-if="varyingFlags(row).length"
-                  class="text-xs text-ink-amber-3"
+                  class="text-xs text-ink-amber-6"
                 >
                   {{
                     __('Varies by stage: {0}', [varyingFlags(row).join(', ')])
                   }}
                 </span>
               </div>
-              <div class="flex w-20 justify-center">
-                <Switch
-                  size="sm"
-                  :aria-label="__('Visible')"
-                  :model-value="Boolean(row.visible)"
-                  :disabled="row.locked || !canManage"
-                  @update:model-value="(v) => setFlag(row, 'visible', v)"
-                />
-              </div>
-              <div class="flex w-20 justify-center">
-                <Checkbox
-                  :aria-label="__('Required')"
-                  :model-value="Boolean(row.required)"
-                  :disabled="row.locked || !canManage"
-                  @update:model-value="(v) => setFlag(row, 'required', v)"
-                />
-              </div>
-              <div class="flex w-20 justify-center">
-                <Checkbox
-                  :aria-label="__('Read only')"
-                  :model-value="Boolean(row.read_only)"
-                  :disabled="row.locked || !canManage"
-                  @update:model-value="(v) => setFlag(row, 'read_only', v)"
-                />
-              </div>
+              <template v-if="row.locked">
+                <span class="w-64 shrink-0" />
+              </template>
+              <template v-else>
+                <div class="flex w-20 justify-center">
+                  <Switch
+                    size="sm"
+                    :aria-label="__('Visible')"
+                    :model-value="Boolean(row.visible)"
+                    :disabled="!canManage"
+                    @update:model-value="(v) => setFlag(row, 'visible', v)"
+                  />
+                </div>
+                <div class="flex w-20 justify-center">
+                  <Checkbox
+                    :aria-label="__('Required')"
+                    :model-value="Boolean(row.required)"
+                    :disabled="!canManage"
+                    @update:model-value="(v) => setFlag(row, 'required', v)"
+                  />
+                </div>
+                <div class="flex w-20 justify-center">
+                  <Checkbox
+                    :aria-label="__('Read only')"
+                    :model-value="Boolean(row.read_only)"
+                    :disabled="!canManage"
+                    @update:model-value="(v) => setFlag(row, 'read_only', v)"
+                  />
+                </div>
+              </template>
               <div class="w-7">
                 <Button
                   v-if="!row.locked && !stage && canManage"
@@ -114,7 +119,7 @@
         </div>
         <div
           v-if="confirming"
-          class="rounded bg-surface-amber-1 p-3 text-p-sm text-ink-amber-3"
+          class="rounded bg-surface-amber-1 p-3 text-p-sm text-ink-amber-7"
           data-testid="equalize-warning"
         >
           {{
