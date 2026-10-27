@@ -49,7 +49,9 @@ class CRMInvitation(Document):
 		template = "crm_invitation"
 		# Who invited and to which company (Settings > Brand), so the e-mail says it
 		company = frappe.db.get_single_value("FCRM Settings", "brand_name") or None
-		inviter = frappe.utils.get_fullname(self.invited_by) if self.invited_by else None
+		# "Administrator" is the setup account, not a person: the e-mail then says who invites in general terms
+		person = self.invited_by not in (None, "", "Administrator", "Guest")
+		inviter = frappe.utils.get_fullname(self.invited_by) if person else None
 		if inviter and company:
 			subject = _("{0} invited you to {1} on HubTech CRM").format(inviter, company)
 		else:
