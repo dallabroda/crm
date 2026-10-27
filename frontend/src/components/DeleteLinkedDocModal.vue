@@ -254,9 +254,12 @@ const confirmDelete = () => {
   confirmDeleteInfo.value = {
     show: true,
     title: __('Delete Linked Item'),
-    message: count
-      ? __('Are you sure you want to delete {0} linked item(s)?', [count])
-      : __('Are you sure you want to delete all linked items?'),
+    message:
+      (count
+        ? __('Are you sure you want to delete {0} linked item(s)?', [count])
+        : __('Are you sure you want to delete all linked items?')) +
+      ' ' +
+      __('Their own tasks, notes and call logs are deleted too.'),
     delete: true,
   }
 }

@@ -11662,3 +11662,7 @@ msgstr "{0}: sem permissão"
 #: frontend/src/components/DeleteLinkedDocModal.vue
 msgid "Are you sure you want to delete {0} - {1}?"
 msgstr "Tem certeza de que deseja excluir {0} - {1}?"
+
+#: frontend/src/components/DeleteLinkedDocModal.vue
+msgid "Their own tasks, notes and call logs are deleted too."
+msgstr "As tarefas, notas e ligações deles também são excluídas."
