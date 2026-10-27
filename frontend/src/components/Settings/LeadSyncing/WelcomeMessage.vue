@@ -19,7 +19,7 @@
     <p v-if="!chat.connected" class="text-p-sm text-ink-gray-6">
       {{
         __(
-          'Connect your Cred Chat in "WhatsApp welcome message", below the sources, to use it.',
+          'Connect your Cred Chat in the "Cred Chat" box, below the sources, to use it.',
         )
       }}
     </p>
