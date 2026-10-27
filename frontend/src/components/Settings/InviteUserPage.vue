@@ -91,7 +91,15 @@
         </div>
       </template>
     </div>
-    <ErrorMessage :message="error" />
+    <div class="flex items-center gap-3">
+      <ErrorMessage :message="error" />
+      <Button
+        v-if="limitReached && isAdmin()"
+        class="shrink-0"
+        :label="__('Open Users and Plan')"
+        @click="activeSettingsPage = __('Users and Plan')"
+      />
+    </div>
   </div>
 </template>
 <script setup>
@@ -99,6 +107,7 @@ import { validateEmail, convertArrayToString } from '@/utils'
 import { usersStore } from '@/stores/users'
 import { useTelemetry } from '@framework/ui/telemetry'
 import { useCrmOnboarding } from '@/composables/onboarding'
+import { activeSettingsPage } from '@/composables/settings'
 import {
   toast,
   createListResource,
@@ -114,6 +123,8 @@ const { capture } = useTelemetry()
 const invitees = ref([])
 const role = ref('Sales User')
 const error = ref(null)
+// No seat left in the Cred Hub plan (credtech#25)
+const limitReached = ref(false)
 
 const userExistMessage = computed(() => {
   const inviteesSet = new Set(invitees.value)
@@ -183,6 +194,7 @@ const inviteByEmail = createResource({
   onSuccess() {
     role.value = 'Sales User'
     error.value = null
+    limitReached.value = false
     invitees.value = []
     pendingInvitations.reload()
     toast.success(__('Invitations sent successfully'))
@@ -191,6 +203,7 @@ const inviteByEmail = createResource({
   },
   onError(err) {
     error.value = err?.messages?.[0]
+    limitReached.value = err?.exc_type === 'UserLimitError'
     toast.error(error.value)
   },
 })

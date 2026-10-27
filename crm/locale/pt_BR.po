@@ -11318,3 +11318,167 @@ msgstr "Boas-vindas não enviadas"
 #: frontend/src/components/Settings/LeadSyncing
 msgid "Welcome queued"
 msgstr "Boas-vindas na fila"
+
+#: frontend/src/components/Settings/UsersAndPlan
+msgid "Users and Plan"
+msgstr "Usuários e plano"
+
+#: frontend/src/components/Settings/UsersAndPlan
+msgid "Open Users and Plan"
+msgstr "Abrir Usuários e plano"
+
+#: frontend/src/components/Settings/UsersAndPlan
+msgid "Your plan includes {0} free users. Each extra user costs {1} per month, paid by card."
+msgstr "Seu plano inclui {0} usuários grátis. Cada usuário extra custa {1} por mês, no cartão."
+
+#: frontend/src/components/Settings/UsersAndPlan
+msgid "Your company has no user limit."
+msgstr "Sua empresa não tem limite de usuários."
+
+#: frontend/src/components/Settings/UsersAndPlan
+msgid "{0} of {1} users"
+msgstr "{0} de {1} usuários"
+
+#: frontend/src/components/Settings/UsersAndPlan
+msgid "{0} active, {1} invited"
+msgstr "{0} ativos, {1} convidados"
+
+#: frontend/src/components/Settings/UsersAndPlan
+msgid "Free plan"
+msgstr "Plano grátis"
+
+#: frontend/src/components/Settings/UsersAndPlan
+msgid "Awaiting payment"
+msgstr "Aguardando pagamento"
+
+#: frontend/src/components/Settings/UsersAndPlan
+msgid "Payment overdue"
+msgstr "Pagamento em atraso"
+
+#: frontend/src/components/Settings/UsersAndPlan
+msgid "All seats are in use. To invite someone else, contract extra users below."
+msgstr "Todas as vagas estão em uso. Para convidar mais alguém, contrate usuários extras abaixo."
+
+#: frontend/src/components/Settings/UsersAndPlan
+msgid "Next charge: {0} on {1}"
+msgstr "Próxima cobrança: {0} em {1}"
+
+#: frontend/src/components/Settings/UsersAndPlan
+msgid "Waiting for the first payment. The {0} extra users are released as soon as it is confirmed."
+msgstr "Aguardando o primeiro pagamento. Os {0} usuários extras são liberados assim que ele for confirmado."
+
+#: frontend/src/components/Settings/UsersAndPlan
+msgid "The monthly payment is overdue. Pay by {0} to keep the extra users."
+msgstr "A mensalidade está em atraso. Pague até {0} para manter os usuários extras."
+
+#: frontend/src/components/Settings/UsersAndPlan
+msgid "The monthly payment is overdue. The users above the free ones are paused until it is paid."
+msgstr "A mensalidade está em atraso. Os usuários além dos grátis ficam pausados até o pagamento."
+
+#: frontend/src/components/Settings/UsersAndPlan
+msgid "The new users are already released. Pay the difference by {0}; otherwise only the new users are paused until it is paid."
+msgstr "Os usuários novos já estão liberados. Pague a diferença até {0}; senão, só os usuários novos ficam pausados até o pagamento."
+
+#: frontend/src/components/Settings/UsersAndPlan
+msgid "The difference was not paid by the due date: the new users are paused until it is paid."
+msgstr "A diferença não foi paga no prazo: os usuários novos ficam pausados até o pagamento."
+
+#: frontend/src/components/Settings/UsersAndPlan
+msgid "From {0}, the plan changes to {1} extra users ({2} per month)."
+msgstr "A partir de {0}, o plano passa a ter {1} usuários extras ({2} por mês)."
+
+#: frontend/src/components/Settings/UsersAndPlan
+msgid "The extra users end on {0}. There are no more charges after that."
+msgstr "Os usuários extras terminam em {0}. Depois disso não há mais cobranças."
+
+#: frontend/src/components/Settings/UsersAndPlan
+msgid "Paused by the plan"
+msgstr "Pausados pelo plano"
+
+#: frontend/src/components/Settings/UsersAndPlan
+msgid "Their data is kept. They come back on their own when there is a seat again."
+msgstr "Os dados deles continuam guardados. Eles voltam sozinhos quando houver vaga de novo."
+
+#: frontend/src/components/Settings/UsersAndPlan
+msgid "Extra users"
+msgstr "Usuários extras"
+
+#: frontend/src/components/Settings/UsersAndPlan
+msgid "{0} users in total, {1} per month"
+msgstr "{0} usuários no total, {1} por mês"
+
+#: frontend/src/components/Settings/UsersAndPlan
+msgid "Who pays"
+msgstr "Quem paga"
+
+#: frontend/src/components/Settings/UsersAndPlan
+msgid "Used for the invoice. The card is typed on the payment page, never in Cred Hub."
+msgstr "Usado na fatura. O cartão é digitado na página de pagamento, nunca no Cred Hub."
+
+#: frontend/src/components/Settings/UsersAndPlan
+msgid "Full name or company name"
+msgstr "Nome completo ou razão social"
+
+#: frontend/src/components/Settings/UsersAndPlan
+msgid "CPF or CNPJ"
+msgstr "CPF ou CNPJ"
+
+#: frontend/src/components/Settings/UsersAndPlan
+msgid "E-mail for the invoice"
+msgstr "E-mail para a fatura"
+
+#: frontend/src/components/Settings/UsersAndPlan
+msgid "Phone with area code"
+msgstr "Telefone com DDD"
+
+#: frontend/src/components/Settings/UsersAndPlan
+msgid "CEP"
+msgstr "CEP"
+
+#: frontend/src/components/Settings/UsersAndPlan
+msgid "Save and pay"
+msgstr "Salvar e pagar"
+
+#: frontend/src/components/Settings/UsersAndPlan
+msgid "Pay invoice"
+msgstr "Pagar fatura"
+
+#: frontend/src/components/Settings/UsersAndPlan
+msgid "Plan saved"
+msgstr "Plano salvo"
+
+#: frontend/src/components/Settings/UsersAndPlan
+msgid "Plan saved. Finish the payment on the page that opened."
+msgstr "Plano salvo. Conclua o pagamento na página que abriu."
+
+#: frontend/src/components/Settings/UsersAndPlan
+msgid "You pay the first month on the payment page. The extra users are released as soon as the payment is confirmed. Then {0} per month on the same card."
+msgstr "Você paga o primeiro mês na página de pagamento. Os usuários extras são liberados assim que o pagamento for confirmado. Depois, {0} por mês no mesmo cartão."
+
+#: frontend/src/components/Settings/UsersAndPlan
+msgid "The new users are released now. The prorated difference until {0} goes by payment link, with 3 days to pay. Then {1} per month."
+msgstr "Os usuários novos são liberados agora. A diferença proporcional até {0} vai por link de pagamento, com 3 dias para pagar. Depois, {1} por mês."
+
+#: frontend/src/components/Settings/UsersAndPlan
+msgid "The seats already paid stay until {0}. From then on, {1} per month."
+msgstr "As vagas já pagas continuam até {0}. A partir daí, {1} por mês."
+
+#: frontend/src/components/Settings/UsersAndPlan
+msgid "The seats already paid stay until {0}. There are no more charges after that."
+msgstr "As vagas já pagas continuam até {0}. Depois disso não há mais cobranças."
+
+#: frontend/src/components/Settings/UsersAndPlan
+msgid "Keeps the extra users already paid and drops the pending change."
+msgstr "Mantém os usuários extras já pagos e desfaz a mudança pendente."
+
+#: frontend/src/components/Settings/UsersAndPlan
+msgid "Back to the {0} free users, with no charges."
+msgstr "Volta para os {0} usuários grátis, sem cobrança."
+
+#: frontend/src/components/Settings/UsersAndPlan
+msgid "{0} users above the new limit are paused now, the most recent first. Nothing is deleted."
+msgstr "{0} usuários acima do novo limite são pausados agora, dos mais recentes para os mais antigos. Nada é apagado."
+
+#: frontend/src/components/Settings/UsersAndPlan
+msgid "{0} users above the new limit are paused on {1}, the most recent first. Nothing is deleted."
+msgstr "{0} usuários acima do novo limite são pausados em {1}, dos mais recentes para os mais antigos. Nada é apagado."
