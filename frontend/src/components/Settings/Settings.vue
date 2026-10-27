@@ -57,6 +57,7 @@ import LucideWorkflow from '~icons/lucide/workflow'
 import MonitorCogIcon from '~icons/lucide/monitor-cog'
 import LucideTextCursorInput from '~icons/lucide/text-cursor-input'
 import LucideKanban from '~icons/lucide/kanban'
+import LucideCreditCard from '~icons/lucide/credit-card'
 import PipelinesPage from './Pipelines/PipelinesPage.vue'
 import FieldsPage from './Fields/FieldsPage.vue'
 import SlidersIcon from '@/components/Icons/SlidersIcon.vue'
@@ -71,6 +72,8 @@ import SettingsIcon2 from '@/components/Icons/SettingsIcon2.vue'
 import Users from '@/components/Settings/Users.vue'
 import Hierarchy from '@/components/Settings/Hierarchy/Hierarchy.vue'
 import InviteUserPage from '@/components/Settings/InviteUserPage.vue'
+import UsersAndPlan from '@/components/Settings/UsersAndPlan/UsersAndPlan.vue'
+import { plan, loadPlan } from '@/components/Settings/UsersAndPlan/planApi'
 import ProfilePage from '@/components/Settings/Profile/ProfilePage.vue'
 import PreferencesSettings from '@/components/Settings/PreferencesSettings.vue'
 import WhatsAppSettings from '@/components/Settings/WhatsAppSettings.vue'
@@ -102,7 +105,7 @@ import ShieldCheck from '~icons/lucide/shield-check'
 import LucideZap from '~icons/lucide/zap'
 import SlaConfig from './Sla/SlaConfig.vue'
 
-const { isManager, getUser } = usersStore()
+const { isAdmin, isManager, getUser } = usersStore()
 
 const user = computed(() => getUser() || {})
 
@@ -184,6 +187,13 @@ const tabs = computed(() => {
           icon: 'user-plus',
           component: markRaw(InviteUserPage),
           condition: () => isManager(),
+        },
+        {
+          label: __('Users and Plan'),
+          icon: LucideCreditCard,
+          component: markRaw(UsersAndPlan),
+          // only while extra-user billing is on (credhub_billing)
+          condition: () => isAdmin() && plan.enabled,
         },
         {
           label: __('Sales Hierarchy'),
@@ -318,6 +328,15 @@ function scrollActiveIntoView() {
     el?.scrollIntoView({ block: 'nearest' })
   })
 }
+
+// The plan decides whether "Users and Plan" shows up (credtech#25)
+watch(
+  showSettings,
+  (open) => {
+    if (open && isAdmin()) loadPlan()
+  },
+  { immediate: true },
+)
 
 watch(activeSettingsPage, (activePage) => {
   setActiveTab(activePage)
