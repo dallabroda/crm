@@ -140,6 +140,17 @@ class TestPipelineFields(FrappeTestCase):
 			)
 		enable_field(self.kind)
 
+	def test_fieldname_has_no_accents_or_symbols(self):
+		for label, fieldname in (
+			("Situação do crédito", "ch_situacao_do_credito"),
+			("Renda (R$)", "ch_renda_r"),
+			("CPF/CNPJ do avalista", "ch_cpf_cnpj_do_avalista"),
+			("Nº do contrato", "ch_no_do_contrato"),
+			("  --  ", "ch_field"),
+			("ção" * 30, "ch_" + "cao" * 16 + "ca"),
+		):
+			self.assertEqual(field_catalog.fieldname_base(label), fieldname)
+
 	def test_standard_fields_cannot_be_changed(self):
 		with self.assertRaises(frappe.ValidationError):
 			update_field("organization", label="Company")
