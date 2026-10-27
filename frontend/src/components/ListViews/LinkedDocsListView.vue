@@ -143,6 +143,6 @@ const viewLinkedDoc = (doc) => {
 }
 
 const getDoctypeName = (doctype) => {
-  return doctype.replace(/^(CRM|FCRM)\s*/, '')
+  return __(doctype.replace(/^(CRM|FCRM)\s*/, ''))
 }
 </script>

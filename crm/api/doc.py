@@ -757,8 +757,53 @@ def get_linked_docs_data(doc):
 	return docs_data
 
 
-def remove_doc_link(doctype, docname):
+def clear_links_to(doc, parent_doctype, parent_docname):
+	"""Clears every field of `doc` that points to the parent document: Link fields (e.g. CRM Deal.organization),
+	Dynamic Link pairs (reference_doctype/reference_docname) and child table rows that link to it."""
+	changed = False
+	for df in doc.meta.fields:
+		if (
+			df.fieldtype == "Link"
+			and df.options == parent_doctype
+			and doc.get(df.fieldname) == parent_docname
+		):
+			doc.set(df.fieldname, None)
+			changed = True
+		elif (
+			df.fieldtype == "Dynamic Link"
+			and doc.get(df.options) == parent_doctype
+			and doc.get(df.fieldname) == parent_docname
+		):
+			doc.set(df.fieldname, None)
+			doc.set(df.options, None)
+			changed = True
+		elif df.fieldtype in frappe.model.table_fields:
+			rows = doc.get(df.fieldname) or []
+			kept = [
+				row
+				for row in rows
+				if not any(
+					cdf.fieldtype == "Link"
+					and cdf.options == parent_doctype
+					and row.get(cdf.fieldname) == parent_docname
+					for cdf in row.meta.fields
+				)
+			]
+			if len(kept) != len(rows):
+				doc.set(df.fieldname, kept)
+				changed = True
+	return changed
+
+
+def remove_doc_link(doctype, docname, parent_doctype=None, parent_docname=None):
 	if not doctype or not docname:
+		return
+
+	if parent_doctype and parent_docname:
+		# Unlink from the document being deleted, whatever field holds the link. Errors reach the caller.
+		linked_doc_data = frappe.get_doc(doctype, docname)
+		if clear_links_to(linked_doc_data, parent_doctype, parent_docname):
+			linked_doc_data.save(ignore_permissions=True)
 		return
 
 	try:
@@ -805,28 +850,64 @@ def remove_contact_link(doctype, docname):
 		pass
 
 
+def delete_with_dependents(doctype, docname, seen=None, depth=0):
+	"""Deletes a linked document together with the documents that depend on it (tasks, notes, call logs and
+	notifications of a deal, for instance). Without this, deleting a deal that has a task fails with
+	LinkExistsError, so "Delete all" on an organization never got past its deals."""
+	seen = seen if seen is not None else set()
+	if (doctype, docname) in seen or not frappe.db.exists(doctype, docname):
+		return
+	seen.add((doctype, docname))
+	if depth < 3:
+		for dependent in get_linked_docs_data(frappe.get_doc(doctype, docname)):
+			delete_with_dependents(
+				dependent["reference_doctype"], dependent["reference_docname"], seen, depth + 1
+			)
+	frappe.delete_doc(doctype, docname)
+
+
 @frappe.whitelist()
-def remove_linked_doc_reference(items: str | list, remove_contact: bool = False, delete: bool = False):
+def remove_linked_doc_reference(
+	items: str | list,
+	remove_contact: bool = False,
+	delete: bool = False,
+	doctype: str | None = None,
+	docname: str | None = None,
+):
+	"""Unlinks or deletes the documents linked to `doctype`/`docname` (the one about to be deleted).
+	What could not be unlinked or deleted is reported back instead of being skipped silently."""
 	if isinstance(items, str):
 		items = frappe.parse_json(items)
 
+	failures = []
 	for item in items:
 		if not item.get("doctype") or not item.get("docname"):
 			continue
 
-		if not frappe.has_permission(item["doctype"], "write", item["docname"]):
+		label = f"{_(item['doctype'])} {item['docname']}"
+		if not frappe.has_permission(item["doctype"], "delete" if delete else "write", item["docname"]):
+			failures.append(_("{0}: not permitted").format(label))
 			continue
 
 		try:
-			if remove_contact:
+			if delete:
+				delete_with_dependents(item["doctype"], item["docname"])
+			elif remove_contact:
 				remove_contact_link(item["doctype"], item["docname"])
 			else:
-				remove_doc_link(item["doctype"], item["docname"])
-			if delete:
-				frappe.delete_doc(item["doctype"], item["docname"])
-		except (frappe.DoesNotExistError, frappe.ValidationError):
-			# Skip if document doesn't exist or has validation errors
+				remove_doc_link(item["doctype"], item["docname"], doctype, docname)
+		except frappe.DoesNotExistError:
 			continue
+		except frappe.ValidationError as e:
+			frappe.clear_last_message()
+			failures.append(f"{label}: {frappe.utils.strip_html(str(e))}")
+
+	if failures:
+		# throwing makes the request roll back, so nothing is half done
+		frappe.throw(
+			_("Some linked documents could not be changed:") + "<br>" + "<br>".join(failures),
+			title=_("Linked documents"),
+		)
 
 	return "success"
 
@@ -865,6 +946,8 @@ def delete_bulk_docs(doctype: str, items: str | list, delete_linked: bool = Fals
 					],
 					remove_contact=doctype == "Contact",
 					delete=delete_linked,
+					doctype=doctype,
+					docname=doc,
 				)
 		except Exception as e:
 			frappe.log_error(f"Error processing linked docs for {doctype} {doc}: {e!s}", "Bulk Delete Error")
