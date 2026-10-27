@@ -3,7 +3,7 @@ import requests
 from frappe import _
 from frappe.integrations.utils import create_request_log
 
-from crm.integrations.api import get_contact_by_phone_number
+from crm.integrations.api import link_call_log_to_number
 
 # Endpoints for webhook
 
@@ -229,17 +229,7 @@ def create_call_log(
 
 
 def link(contact_number, call_log):
-	contact = get_contact_by_phone_number(contact_number)
-	if contact.get("name"):
-		doctype = "Contact"
-		docname = contact.get("name")
-		if contact.get("lead"):
-			doctype = "CRM Lead"
-			docname = contact.get("lead")
-		elif contact.get("deal"):
-			doctype = "CRM Deal"
-			docname = contact.get("deal")
-		call_log.link_with_reference_doc(doctype, docname)
+	link_call_log_to_number(call_log, contact_number)
 
 
 def get_call_log(call_payload):

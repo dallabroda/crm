@@ -12,6 +12,7 @@ from crm.integrations.api import (
 	get_contact_lead_or_deal_from_number,
 	get_user_default_calling_medium,
 	is_call_integration_enabled,
+	link_call_log_to_number,
 	set_default_calling_medium,
 )
 from crm.integrations.exotel.handler import (
@@ -277,25 +278,6 @@ class TestIntegrations(FrappeTestCase):
 		if "name" in result:
 			self.assertEqual(result["name"], contact.name)
 
-	def test_get_contact_by_phone_number_finds_lead(self):
-		"""Test get_contact_by_phone_number finds lead when no contact exists"""
-		# Create a test lead with valid Indian phone number
-		lead = frappe.get_doc(
-			{
-				"doctype": "CRM Lead",
-				"first_name": "Lead",
-				"last_name": "User",
-				"mobile_no": "+91 98765 43210",
-				"lead_owner": "Administrator",
-			}
-		).insert()
-
-		result = get_contact_by_phone_number("+91 98765 43210")
-
-		self.assertEqual(result["name"], lead.name)
-		self.assertEqual(result["full_name"], "Lead User")
-		self.assertEqual(result["lead"], lead.name)
-
 	def test_get_contact_by_phone_number_prioritizes_contact_with_deal(self):
 		"""Test get_contact_by_phone_number prioritizes contacts linked to deals"""
 		# Create organization for deal
@@ -345,25 +327,6 @@ class TestIntegrations(FrappeTestCase):
 		self.assertEqual(result["mobile_no"], "+9999999999")
 		self.assertNotIn("name", result)
 		self.assertNotIn("full_name", result)
-
-	def test_get_contact_by_phone_number_skips_converted_leads(self):
-		"""Test get_contact_by_phone_number doesn't return converted leads"""
-		# Create a lead and mark as converted
-		frappe.get_doc(
-			{
-				"doctype": "CRM Lead",
-				"first_name": "Converted",
-				"last_name": "Lead",
-				"mobile_no": "+91 98765 43211",
-				"lead_owner": "Administrator",
-				"converted": 1,
-			}
-		).insert()
-
-		result = get_contact_by_phone_number("+91 98765 43211")
-
-		# Should not find the converted lead - should return just the phone number
-		self.assertNotIn("lead", result)
 
 	def test_integration_workflow_call_with_note_and_task(self):
 		"""Test complete workflow: call log with note and task"""
@@ -421,26 +384,6 @@ class TestIntegrations(FrappeTestCase):
 			self.assertEqual(doctype, "Contact")
 			self.assertEqual(docname, contact.name)
 
-	def test_get_contact_lead_or_deal_from_number_returns_lead(self):
-		"""Test get_contact_lead_or_deal_from_number prioritizes lead over contact"""
-		# Create a lead
-		lead = frappe.get_doc(
-			{
-				"doctype": "CRM Lead",
-				"first_name": "Test",
-				"last_name": "Lead",
-				"mobile_no": "+91 98765 43212",
-				"lead_owner": "Administrator",
-			}
-		).insert()
-
-		docname, doctype = get_contact_lead_or_deal_from_number("+91 98765 43212")
-
-		# Should return lead
-		if docname:
-			self.assertEqual(doctype, "CRM Lead")
-			self.assertEqual(docname, lead.name)
-
 	def test_get_contact_lead_or_deal_from_number_returns_deal(self):
 		"""Test get_contact_lead_or_deal_from_number prioritizes deal over contact"""
 		# Create organization and contact with deal
@@ -486,25 +429,81 @@ class TestIntegrations(FrappeTestCase):
 		self.assertIsNone(docname)
 		self.assertIsNone(doctype)
 
-	def test_get_contact_lead_or_deal_from_number_ignores_converted_leads(self):
-		"""Test get_contact_lead_or_deal_from_number doesn't return converted leads"""
-		# Create a converted lead
+	def test_brazilian_formats_find_the_same_contact(self):
+		"""Operator, typed and old (no 9) formats of a Brazilian mobile all find the contact"""
+		frappe.db.set_single_value("System Settings", "country", "Brazil")
+		contact = make_contact("Maria", "(48) 99999-8888")
+
+		for number in (
+			"5548999998888",
+			"+55 48 99999-8888",
+			"(48) 99999-8888",
+			"048 9999-8888",
+			"4899998888",
+		):
+			with self.subTest(number=number):
+				self.assertEqual(get_contact_by_phone_number(number).get("name"), contact.name)
+
+	def test_brazilian_number_does_not_match_another_ddd(self):
+		frappe.db.set_single_value("System Settings", "country", "Brazil")
+		make_contact("Ana", "(48) 99999-8888")
+
+		self.assertNotIn("name", get_contact_by_phone_number("+55 11 99999-8888"))
+
+	def test_get_contact_by_phone_number_ignores_crm_lead(self):
+		"""Leads are no longer used: a number only on a lead finds nothing"""
+		frappe.db.set_single_value("System Settings", "country", "Brazil")
 		frappe.get_doc(
 			{
 				"doctype": "CRM Lead",
-				"first_name": "Converted",
+				"first_name": "Old",
 				"last_name": "Lead",
-				"mobile_no": "+91 98765 43213",
+				"mobile_no": "+55 48 98888-7777",
 				"lead_owner": "Administrator",
-				"converted": 1,
 			}
 		).insert()
 
-		docname, doctype = get_contact_lead_or_deal_from_number("+91 98765 43213")
+		self.assertEqual(get_contact_lead_or_deal_from_number("+55 48 98888-7777"), (None, None))
 
-		# Should return None since lead is converted
-		self.assertIsNone(docname)
-		self.assertIsNone(doctype)
+	def test_get_contact_returns_every_open_deal_newest_first(self):
+		"""Any open deal listing the contact counts, primary or not; closed ones don't"""
+		frappe.db.set_single_value("System Settings", "country", "Brazil")
+		contact = make_contact("Carla", "+55 48 97777-6666")
+		older = make_deal_with_contact(contact.name, is_primary=1)
+		won = make_deal_with_contact(contact.name, is_primary=1)
+		won.db_set("status", deal_status_of_type(won.pipeline, "Won"))
+		newer = make_deal_with_contact(contact.name, is_primary=0)
+		frappe.db.set_value("CRM Deal", older.name, "modified", "2026-01-01 00:00:00", update_modified=False)
+
+		result = get_contact_by_phone_number("5548977776666")
+
+		self.assertEqual(result["deals"], [newer.name, older.name])
+		self.assertEqual(result["deal"], newer.name)
+		self.assertEqual(get_contact_lead_or_deal_from_number("5548977776666"), (newer.name, "CRM Deal"))
+
+	def test_contact_with_only_closed_deals_has_no_deal(self):
+		frappe.db.set_single_value("System Settings", "country", "Brazil")
+		contact = make_contact("Bruno", "+55 48 96666-5555")
+		lost = make_deal_with_contact(contact.name, is_primary=1)
+		lost.db_set("status", deal_status_of_type(lost.pipeline, "Lost"))
+
+		result = get_contact_by_phone_number("5548966665555")
+
+		self.assertEqual(result["name"], contact.name)
+		self.assertNotIn("deal", result)
+		self.assertEqual(get_contact_lead_or_deal_from_number("5548966665555"), (contact.name, "Contact"))
+
+	def test_link_call_log_to_number_links_every_open_deal(self):
+		frappe.db.set_single_value("System Settings", "country", "Brazil")
+		contact = make_contact("Davi", "+55 48 95555-4444")
+		first = make_deal_with_contact(contact.name, is_primary=1)
+		second = make_deal_with_contact(contact.name, is_primary=0)
+		call_log = create_test_call_log()
+
+		link_call_log_to_number(call_log, "5548955554444")
+
+		linked = {(link.link_doctype, link.link_name) for link in call_log.links}
+		self.assertEqual(linked, {("CRM Deal", first.name), ("CRM Deal", second.name)})
 
 
 class TestExotelCallStatus(FrappeTestCase):
@@ -665,3 +664,28 @@ def create_test_call_log(**kwargs):
 	call_log = frappe.get_doc(data)
 	call_log.insert()
 	return call_log
+
+
+def make_deal_with_contact(contact: str, is_primary: int):
+	deal = frappe.get_doc(
+		{"doctype": "CRM Deal", "pipeline": default_test_pipeline(), "deal_owner": "Administrator"}
+	)
+	deal.append("contacts", {"contact": contact, "is_primary": is_primary})
+	return deal.insert()
+
+
+def deal_status_of_type(pipeline: str, stage_type: str) -> str:
+	return frappe.get_all(
+		"CRM Deal Status", {"pipeline": pipeline, "type": stage_type}, pluck="name", limit=1
+	)[0]
+
+
+def make_contact(first_name: str, phone: str):
+	"""A contact the phone lookup can find: numbers live in the phone_nos table."""
+	return frappe.get_doc(
+		{
+			"doctype": "Contact",
+			"first_name": first_name,
+			"phone_nos": [{"phone": phone, "is_primary_mobile_no": 1}],
+		}
+	).insert()
