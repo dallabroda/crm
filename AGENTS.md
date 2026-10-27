@@ -1,5 +1,13 @@
 # CRM — Project Context
 
+## CredTech: Cred Hub is a definitive fork (read first)
+
+This repository is the **Cred Hub** CRM, a product of CredTech built on Frappe CRM v1.89.1. It is a **definitive fork**: it no longer follows Frappe (CRM, Framework, frappe-ui). The owner's decision is recorded in ADR 0005 of the platform repo (`dallabroda/credtech`, `docs/decisoes/0005-cred-hub-sem-atualizacoes-do-frappe.md`); the platform rules live in that repo's `AGENTS.md`.
+
+- **Build new features directly here** (screens, DocTypes, server code). "Stay compatible with Frappe updates" or "keep customizations in a separate app" are **not** reasons to reject a change or pick a worse design.
+- **Never merge, rebase or pull from Frappe repositories**, and never point builds back to them. Security fixes are ours: read Frappe's public advisories and apply fixes by hand when relevant.
+- **License still applies:** Frappe CRM is AGPL-3.0, so the code stays public with the original notices. Do not use the "Frappe" name or logo in the product; it is "Cred Hub".
+
 ## What this project is
 
 Frappe CRM frontend. Vue 3 + frappe-ui. The backend is Frappe Python. Scripts in
