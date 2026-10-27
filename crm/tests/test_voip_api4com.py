@@ -146,25 +146,27 @@ class TestAPI4ComWebhook(FrappeTestCase):
 		self.assertEqual(log.recording_url, DOC_FIXTURE["recordUrl"])
 
 	def test_repeated_delivery_updates_the_same_call(self):
-		self.post(hangup(id="repeat-1", recordUrl=""))
-		deals = frappe.db.count("CRM Deal")
+		deal = make_deal("+55 48 3332-8530")
+		self.post(hangup(id="repeat-1", recordUrl="", metadata={"entityId": deal}))
 
-		self.post(hangup(id="repeat-1"))
+		self.post(hangup(id="repeat-1", metadata={"entityId": deal}))
 
 		self.assertEqual(frappe.db.count("CRM Call Log", {"id": "repeat-1"}), 1)
-		self.assertEqual(frappe.db.count("CRM Deal"), deals)
+		self.assertEqual(frappe.db.get_value("CRM Call Log", "repeat-1", "reference_docname"), deal)
 		self.assertEqual(
 			frappe.db.get_value("CRM Call Log", "repeat-1", "recording_url"), DOC_FIXTURE["recordUrl"]
 		)
 
-	def test_unknown_number_opens_a_deal_in_the_entry_pipeline(self):
+	def test_unknown_number_only_stays_in_the_call_history(self):
+		"""Owner rule (credtech#47): a call never opens a deal"""
+		deals, leads = frappe.db.count("CRM Deal"), frappe.db.count("CRM Lead")
+
 		self.post(hangup(id="unknown-1", called="+55 21 98888-1234", metadata={}))
 
-		deal = frappe.db.get_value("CRM Call Log", "unknown-1", "reference_docname")
-		self.assertTrue(deal)
-		self.assertEqual(frappe.db.get_value("CRM Deal", deal, "pipeline"), default_test_pipeline())
-		lead = frappe.db.get_value("CRM Deal", deal, "lead")
-		self.assertEqual(frappe.db.get_value("CRM Lead", lead, "source"), "API4Com")
+		log = frappe.get_doc("CRM Call Log", "unknown-1")
+		self.assertIsNone(log.reference_docname)
+		self.assertEqual(log.links, [])
+		self.assertEqual((frappe.db.count("CRM Deal"), frappe.db.count("CRM Lead")), (deals, leads))
 
 	def test_call_goes_on_every_open_deal_of_the_number(self):
 		first = make_deal("+55 48 99999-7777")
@@ -181,7 +183,7 @@ class TestAPI4ComWebhook(FrappeTestCase):
 		self.assertNotIn(log.reference_docname, {link.link_name for link in log.links})
 		self.assertEqual((log.type, log.receiver), ("Incoming", "Administrator"))
 
-	def test_contact_with_only_closed_deals_gets_a_new_deal(self):
+	def test_contact_with_only_closed_deals_gets_the_call_on_the_contact(self):
 		closed = make_deal("+55 48 97777-1111")
 		pipeline = frappe.db.get_value("CRM Deal", closed, "pipeline")
 		won = frappe.get_all("CRM Deal Status", {"pipeline": pipeline, "type": "Won"}, pluck="name", limit=1)[
@@ -189,12 +191,14 @@ class TestAPI4ComWebhook(FrappeTestCase):
 		]
 		frappe.db.set_value("CRM Deal", closed, "status", won)
 		contact = frappe.db.get_value("CRM Contacts", {"parent": closed}, "contact")
+		deals = frappe.db.count("CRM Deal")
 
 		self.post(hangup(id="closed-only", called="048 97777-1111", metadata={}))
 
-		deal = frappe.db.get_value("CRM Call Log", "closed-only", "reference_docname")
-		self.assertNotEqual(deal, closed)
-		self.assertEqual(frappe.db.get_value("CRM Contacts", {"parent": deal}, "contact"), contact)
+		log = frappe.get_doc("CRM Call Log", "closed-only")
+		self.assertIsNone(log.reference_docname)
+		self.assertEqual([(link.link_doctype, link.link_name) for link in log.links], [("Contact", contact)])
+		self.assertEqual(frappe.db.count("CRM Deal"), deals)
 
 
 def make_deal(phone: str | None = None, contact: str | None = None) -> str:

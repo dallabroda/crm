@@ -10,7 +10,6 @@ import frappe
 from frappe import _
 from frappe.integrations.utils import create_request_log
 
-from crm.fcrm.doctype.crm_pipeline.crm_pipeline import get_default_pipeline
 from crm.integrations.api import get_contact_by_phone_number
 from crm.integrations.voip import api4com as api4com_adapter
 
@@ -37,7 +36,7 @@ def api4com(**kwargs):
 	)
 	frappe.db.commit()  # the log survives a failed recording's rollback
 	try:
-		record_call(api4com_adapter.parse_hangup(payload), "API4Com", settings.pipeline)
+		record_call(api4com_adapter.parse_hangup(payload), "API4Com")
 		request_log.status = "Completed"
 	except Exception:
 		frappe.db.rollback()
@@ -55,9 +54,9 @@ def authorize(key: str | None, settings):
 		frappe.throw(_("Not permitted"), frappe.PermissionError)
 
 
-def record_call(call: dict, medium: str, pipeline: str | None):
+def record_call(call: dict, medium: str):
 	"""One call log per call id: a repeated delivery updates the same row and links nothing new.
-	The lock is held until after the commit, so two deliveries of a call can't both create a deal."""
+	The lock is held until after the commit, so two deliveries of a call can't both create the row."""
 	lock = f"crm_voip:{medium}:{call['id']}"[:64]
 	if not frappe.db.sql("SELECT GET_LOCK(%s, 30)", lock)[0][0]:
 		frappe.throw(_("Call {0} is being recorded").format(call["id"]))
@@ -85,7 +84,7 @@ def record_call(call: dict, medium: str, pipeline: str | None):
 		if agent:
 			call_log.set("caller" if outgoing else "receiver", agent)
 		if is_new:
-			link_to_deals(call_log, call, pipeline, agent)
+			link_to_deals(call_log, call)
 		call_log.save(ignore_permissions=True)
 		frappe.db.commit()
 	finally:
@@ -98,48 +97,21 @@ def agent_of_extension(extension: str, medium: str) -> str | None:
 	return frappe.db.get_value("CRM Telephony Agent", {"api4com_extension": extension}, "user")
 
 
-def link_to_deals(call_log, call: dict, pipeline: str | None, agent: str | None):
-	"""The deal the click-to-call came from; else every open deal of the number (owner rule,
-	credtech#99); else a new deal in the entry pipeline. The first deal is the call's reference,
-	the others are links, so the call shows once on each timeline."""
+def link_to_deals(call_log, call: dict):
+	"""The deal the click-to-call came from; else every open deal of the number (credtech#99). The first
+	deal is the call's reference, the others are links, so the call shows once on each timeline.
+	Owner rule (credtech#47, 26/10/2026): a call never opens a deal. A number without an open deal only
+	stays in the call history, linked to its contact when there is one."""
 	if call["deal"] and frappe.db.exists("CRM Deal", call["deal"]):
 		deals = [call["deal"]]
 	else:
 		contact = get_contact_by_phone_number(call["number"]) if call["number"] else {}
-		deals = contact.get("deals") or [create_deal_for_call(call["number"], contact, pipeline, agent)]
-	deals = [deal for deal in deals if deal]
-	if not deals:
-		return
+		deals = contact.get("deals") or []
+		if not deals:
+			if contact.get("name"):
+				call_log.link_with_reference_doc("Contact", contact["name"])
+			return
 	call_log.reference_doctype = "CRM Deal"
 	call_log.reference_docname = deals[0]
 	for deal in deals[1:]:
 		call_log.link_with_reference_doc("CRM Deal", deal)
-
-
-def create_deal_for_call(number: str, contact: dict, pipeline: str | None, agent: str | None) -> str | None:
-	"""Owner rule (credtech#47, #99): a number nobody has, or whose deals are all closed, opens a deal
-	in the entry pipeline, the same way as the other automatic entries (credtech#70). The person who
-	took or made the call owns it when they are in that pipeline; otherwise its distribution decides."""
-	if not number:  # anonymous caller: nothing to open a deal for
-		return None
-	pipeline = pipeline or get_default_pipeline("Administrator")
-	if not pipeline:
-		frappe.throw(_("No pipeline to open a deal for the call"))
-	lead = frappe.get_doc(
-		{
-			"doctype": "CRM Lead",
-			"first_name": contact.get("full_name") or number,
-			# the number exactly as the contact has it, so the deal reuses that contact
-			"mobile_no": contact.get("matched_phone") or number,
-			"source": lead_source("API4Com"),
-			"pipeline": pipeline,
-			"lead_owner": agent,
-		}
-	).insert(ignore_permissions=True)
-	return lead.flags.duplicate_of or frappe.db.get_value("CRM Deal", {"lead": lead.name})
-
-
-def lead_source(name: str) -> str:
-	if not frappe.db.exists("CRM Lead Source", name):
-		frappe.get_doc({"doctype": "CRM Lead Source", "source_name": name}).insert(ignore_permissions=True)
-	return name

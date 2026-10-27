@@ -5,8 +5,6 @@
  "engine": "InnoDB",
  "field_order": [
   "enabled",
-  "column_break_api4",
-  "pipeline",
   "section_break_api4",
   "api_token",
   "column_break_secret",
@@ -18,18 +16,6 @@
    "fieldname": "enabled",
    "fieldtype": "Check",
    "label": "Enabled"
-  },
-  {
-   "fieldname": "column_break_api4",
-   "fieldtype": "Column Break"
-  },
-  {
-   "depends_on": "enabled",
-   "description": "Calls from numbers without an open deal open a deal here",
-   "fieldname": "pipeline",
-   "fieldtype": "Link",
-   "label": "Entry Pipeline",
-   "options": "CRM Pipeline"
   },
   {
    "depends_on": "enabled",

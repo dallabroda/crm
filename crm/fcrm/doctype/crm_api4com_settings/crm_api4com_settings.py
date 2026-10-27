@@ -15,7 +15,6 @@ class CRMAPI4ComSettings(Document):
 
 		api_token: DF.Password | None
 		enabled: DF.Check
-		pipeline: DF.Link | None
 		webhook_secret: DF.Password | None
 	# end: auto-generated types
 
