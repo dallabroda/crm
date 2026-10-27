@@ -29,6 +29,9 @@ def _get_recording_credentials(telephony_medium: str) -> tuple | None:
 		s = frappe.get_single("CRM Exotel Settings")
 		token = s.get_password("api_token", raise_exception=False)
 		return (s.api_key, token) if s.api_key and token else None
+	elif telephony_medium == "API4Com":
+		# recordUrl is a plain link in their doc; whether it ever asks for the token is credtech#100
+		return None
 	# manual or unrecognized medium: no provider auth to apply
 	return None
 

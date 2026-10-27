@@ -1,0 +1,86 @@
+{
+ "actions": [],
+ "creation": "2026-10-27 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "enabled",
+  "column_break_api4",
+  "pipeline",
+  "section_break_api4",
+  "api_token",
+  "column_break_secret",
+  "webhook_secret"
+ ],
+ "fields": [
+  {
+   "default": "0",
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "label": "Enabled"
+  },
+  {
+   "fieldname": "column_break_api4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "enabled",
+   "description": "Calls from numbers without an open deal open a deal here",
+   "fieldname": "pipeline",
+   "fieldtype": "Link",
+   "label": "Entry Pipeline",
+   "options": "CRM Pipeline"
+  },
+  {
+   "depends_on": "enabled",
+   "fieldname": "section_break_api4",
+   "fieldtype": "Section Break",
+   "hide_border": 1
+  },
+  {
+   "depends_on": "enabled",
+   "fieldname": "api_token",
+   "fieldtype": "Password",
+   "label": "API Token",
+   "mandatory_depends_on": "enabled"
+  },
+  {
+   "fieldname": "column_break_secret",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "enabled",
+   "description": "Sent by API4Com in the webhook URL (?key=)",
+   "fieldname": "webhook_secret",
+   "fieldtype": "Password",
+   "label": "Webhook Secret"
+  }
+ ],
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-10-27 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "FCRM",
+ "name": "CRM API4Com Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "Sales Manager",
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}
