@@ -204,8 +204,8 @@ import {
   ListHeaderItem,
   ListSelectBanner,
   ListRowItem,
-  ListFooter,
 } from 'frappe-ui/experimental'
+import ListFooter from '@/components/ListViews/ListFooter.vue'
 import { sessionStore } from '@/stores/session'
 import { ref, computed, watch } from 'vue'
 

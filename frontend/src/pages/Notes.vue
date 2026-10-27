@@ -137,7 +137,7 @@ import { usersStore } from '@/stores/users'
 import { timeAgo, formatDate, sanitizeHTML, copyToClipboard } from '@/utils'
 import { useTelemetry } from '@framework/ui/telemetry'
 import { call, Dropdown, Tooltip } from 'frappe-ui'
-import { ListFooter } from 'frappe-ui/experimental'
+import ListFooter from '@/components/ListViews/ListFooter.vue'
 import { ref, watch, onMounted } from 'vue'
 
 const { getUser } = usersStore()
