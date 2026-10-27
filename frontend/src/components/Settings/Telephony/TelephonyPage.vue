@@ -11,11 +11,16 @@
     v-else-if="step === 'exotel-settings'"
     @updateStep="updateStep"
   />
+  <API4ComSettings
+    v-else-if="step === 'api4com-settings'"
+    @updateStep="updateStep"
+  />
 </template>
 <script setup>
 import TelephonySettings from './TelephonySettings.vue'
 import ExotelSettings from './ExotelSettings.vue'
 import TwilioSettings from './TwilioSettings.vue'
+import API4ComSettings from './API4ComSettings.vue'
 import { ref } from 'vue'
 
 const step = ref('telephony-settings')

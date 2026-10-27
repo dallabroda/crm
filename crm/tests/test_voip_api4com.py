@@ -87,7 +87,9 @@ class TestAPI4ComWebhook(FrappeTestCase):
 				"pipeline": default_test_pipeline(),
 			}
 		)
-		settings.save()
+		# registering the webhook at API4Com is covered (mocked) in test_api4com_settings
+		with patch("crm.fcrm.doctype.crm_api4com_settings.crm_api4com_settings.register_webhook"):
+			settings.save()
 		if not frappe.db.exists("CRM Telephony Agent", "Administrator"):
 			frappe.get_doc({"doctype": "CRM Telephony Agent", "user": "Administrator"}).insert()
 		frappe.db.set_value("CRM Telephony Agent", "Administrator", "api4com_extension", "1000")
