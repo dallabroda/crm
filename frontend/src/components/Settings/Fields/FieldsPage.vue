@@ -54,7 +54,7 @@
             </span>
           </div>
           <div class="w-3/12 text-base text-ink-gray-6">
-            {{ typeLabel(field) }}
+            {{ fieldTypeLabel(field) }}
           </div>
           <div class="w-2/12 text-base text-ink-gray-6">
             {{ field.is_standard ? __('Standard') : __('Created') }}
@@ -124,6 +124,7 @@
 
 <script setup>
 import { pipelinesStore } from '@/stores/pipelines'
+import { fieldTypeLabel, fieldTypeOptions } from './fieldTypes'
 import { ConfirmDelete } from '@/utils'
 import {
   Dialog,
@@ -141,33 +142,11 @@ const loading = ref(false)
 const catalog = ref({ limit: 80, used: 0, fields: [] })
 const limitReached = computed(() => catalog.value.used >= catalog.value.limit)
 
-// Types agreed with the owner (cred-hub-funis.md, "Tipos de campo")
-const typeOptions = [
-  { label: __('Text'), value: 'Data' },
-  { label: __('Number'), value: 'Int' },
-  { label: __('Decimal number'), value: 'Float' },
-  { label: __('Amount (R$)'), value: 'Currency' },
-  { label: __('Date'), value: 'Date' },
-  { label: __('List of options'), value: 'Select' },
-  { label: __('Yes/No'), value: 'Check' },
-  { label: __('File'), value: 'Attach' },
-  { label: __('Link to contact or organization'), value: 'Link' },
-]
+const typeOptions = fieldTypeOptions()
 const linkOptions = [
   { label: __('Contact'), value: 'Contact' },
   { label: __('Organization'), value: 'CRM Organization' },
 ]
-
-function typeLabel(field) {
-  if (field.fieldtype === 'Link') {
-    let target = linkOptions.find((o) => o.value === field.options)
-    return target ? `${__('Link')}: ${target.label}` : __('Link')
-  }
-  return (
-    typeOptions.find((o) => o.value === field.fieldtype)?.label ||
-    field.fieldtype
-  )
-}
 
 const dialog = reactive({
   show: false,
