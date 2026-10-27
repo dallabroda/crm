@@ -5,7 +5,7 @@
         <WhatsAppIcon class="mt-0.5 size-6 shrink-0" />
         <div class="flex flex-col gap-1">
           <div class="text-base-semibold text-ink-gray-9">
-            {{ __('WhatsApp welcome message') }}
+            {{ __('Cred Chat') }}
           </div>
           <p class="text-p-sm text-ink-gray-6">
             <template v-if="chat.connected">
@@ -14,7 +14,7 @@
             <template v-else>
               {{
                 __(
-                  'Connect your Cred Chat to send a WhatsApp message to each new lead the moment it arrives. Then turn it on in each source above.',
+                  'Connect your Cred Chat to send a WhatsApp welcome message to each new lead (turn it on in each source above) and to see the Cred Hub cards inside Cred Chat conversations.',
                 )
               }}
             </template>
@@ -38,10 +38,38 @@
       {{ chat.error }}
     </div>
 
+    <!-- Cred Hub panel in Cred Chat conversations (credtech#45), installed by this connection -->
+    <div
+      v-if="chat.connected"
+      class="flex items-center justify-between gap-4 rounded px-3 py-2 text-p-sm"
+      :class="
+        chat.panel_installed
+          ? 'bg-surface-gray-2 text-ink-gray-7'
+          : 'bg-surface-amber-1 text-ink-amber-7'
+      "
+    >
+      <span>
+        {{
+          chat.panel_installed
+            ? __(
+                'The "Cred Hub" tab shows the contact\'s cards in every Cred Chat conversation.',
+              )
+            : chat.panel_error ||
+              __('The Cred Hub tab is not in Cred Chat conversations yet.')
+        }}
+      </span>
+      <Button
+        v-if="!chat.panel_installed"
+        :label="__('Try again')"
+        :loading="installing"
+        @click="installPanel"
+      />
+    </div>
+
     <p v-if="confirmDisconnect" class="text-p-sm text-ink-red-6">
       {{
         __(
-          'The welcome message is turned off on every source and the access key is erased.',
+          'The welcome message is turned off on every source, the Cred Hub tab leaves Cred Chat and the access key is erased.',
         )
       }}
     </p>
@@ -102,6 +130,7 @@ import { computed, onMounted, ref } from 'vue'
 const accountId = ref('')
 const accessToken = ref('')
 const busy = ref(false)
+const installing = ref(false)
 const confirmDisconnect = ref(false)
 
 const accountLabel = computed(
@@ -131,6 +160,19 @@ async function connect() {
     toast.error(e?.messages?.[0] || __('Could not connect the Cred Chat'))
   } finally {
     busy.value = false
+  }
+}
+
+// e.g. after the key's user became a Cred Chat administrator
+async function installPanel() {
+  installing.value = true
+  try {
+    Object.assign(chat, await welcomeApi.installPanel())
+    if (chat.panel_installed) toast.success(__('Cred Hub tab added to Cred Chat'))
+  } catch (e) {
+    toast.error(e?.messages?.[0] || __('Could not add the Cred Hub tab'))
+  } finally {
+    installing.value = false
   }
 }
 
