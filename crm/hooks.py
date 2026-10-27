@@ -288,6 +288,12 @@ doc_events = {
 			"crm.automation.events.on_whatsapp_message",
 		],
 	},
+	"Email Account": {
+		# the platform's sending account is not the company's to change (credtech#191)
+		"before_validate": ["crm.api.email_accounts.before_validate"],
+		"on_trash": ["crm.api.email_accounts.on_trash"],
+		"before_rename": ["crm.api.email_accounts.before_rename"],
+	},
 	"CRM Deal": {
 		"on_update": [
 			"crm.fcrm.doctype.erpnext_crm_settings.erpnext_crm_settings.create_customer_in_erpnext",
