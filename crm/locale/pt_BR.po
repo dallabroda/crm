@@ -11753,3 +11753,63 @@ msgstr "Não há mais espaço para outro campo deste tipo em {0}."
 #: crm/fcrm/doctype/crm_invitation/crm_invitation.py
 msgid "{0} invited you to {1} on HubTech CRM"
 msgstr "{0} convidou você para {1} no HubTech CRM"
+
+msgid "Invite users"
+msgstr "Convidar usuários"
+
+msgid "Invite people by e-mail and choose what each one can do. Access to the company is only by invitation."
+msgstr "Convide pessoas por e-mail e escolha o que cada uma pode fazer. O acesso à empresa é só por convite."
+
+msgid "Can manage everything in the CRM, including users, plan, customizations and settings."
+msgstr "Pode gerenciar tudo no CRM, inclusive usuários, plano, personalizações e configurações."
+
+msgid "Can invite and manage salespeople and create views (reports) for the whole team."
+msgstr "Pode convidar e gerenciar vendedores e criar visões (relatórios) para toda a equipe."
+
+msgid "Works with the cards of their funnels and creates their own views (reports)."
+msgstr "Trabalha com os cards dos seus funis e cria as próprias visões (relatórios)."
+
+msgid "Invitations not accepted yet"
+msgstr "Convites ainda não aceitos"
+
+msgid "Invited by {0} on {1}"
+msgstr "Convidado por {0} em {1}"
+
+msgid "Sent on {0}"
+msgstr "Enviado em {0}"
+
+msgid "Expired on {0}"
+msgstr "Expirou em {0}"
+
+msgid "Valid until {0}"
+msgstr "Vale até {0}"
+
+msgid "Resend"
+msgstr "Reenviar"
+
+msgid "Cancel invitation"
+msgstr "Cancelar convite"
+
+msgid "Cancel invitation?"
+msgstr "Cancelar o convite?"
+
+msgid "{0} will no longer be able to use the invitation link. You can invite them again later."
+msgstr "{0} não vai mais conseguir usar o link do convite. Você pode convidar de novo depois."
+
+msgid "Invitation sent again to {0}"
+msgstr "Convite reenviado para {0}"
+
+msgid "Invitation canceled"
+msgstr "Convite cancelado"
+
+msgid "Invite users and choose their role to control what they can see and do."
+msgstr "Convide usuários e escolha o perfil de cada um para definir o que podem ver e fazer."
+
+msgid "People join the company only by invitation: invite them by e-mail in Settings > Invite user."
+msgstr "As pessoas entram na empresa só por convite: convide por e-mail em Configurações > Convidar usuário."
+
+msgid "This invitation was already accepted."
+msgstr "Este convite já foi aceito."
+
+msgid "You are not allowed to invite {0}"
+msgstr "Você não pode convidar {0}"

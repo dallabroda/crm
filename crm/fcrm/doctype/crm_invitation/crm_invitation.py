@@ -81,7 +81,14 @@ class CRMInvitation(Document):
 			# the invitee was not around to set a password, mail them a link to do it
 			frappe.get_doc("User", self.email).send_welcome_mail_to_user()
 
+	def valid_until(self):
+		"""The invitation is valid for INVITATION_DAYS from the last e-mail (a resend renews it)."""
+		return valid_until(self.email_sent_at, self.creation)
+
 	def accept(self):
+		if self.status == "Pending" and frappe.utils.now_datetime() > self.valid_until():
+			# the daily job may not have run yet: an old link must not get in
+			self.db_set("status", "Expired")
 		if self.status != "Pending":
 			frappe.throw(_("Invalid or expired key"))
 
@@ -135,15 +142,63 @@ class CRMInvitation(Document):
 		return frappe.get_doc("User", self.email), False
 
 
-def expire_invitations():
-	"""expire invitations after INVITATION_DAYS days"""
-	from frappe.utils import add_days, now
+def valid_until(email_sent_at, creation):
+	return frappe.utils.add_days(frappe.utils.get_datetime(email_sent_at or creation), INVITATION_DAYS)
 
-	days = INVITATION_DAYS
-	invitations_to_expire = frappe.db.get_all(
-		"CRM Invitation", filters={"status": "Pending", "creation": ["<", add_days(now(), -days)]}
+
+def expire_invitations():
+	"""expire invitations INVITATION_DAYS days after the last e-mail"""
+	now = frappe.utils.now_datetime()
+	pending = frappe.db.get_all(
+		"CRM Invitation", filters={"status": "Pending"}, fields=["name", "email_sent_at", "creation"]
 	)
-	for invitation in invitations_to_expire:
-		invitation = frappe.get_doc("CRM Invitation", invitation.name)
-		invitation.status = "Expired"
-		invitation.save(ignore_permissions=True)
+	for row in pending:
+		if valid_until(row.email_sent_at, row.creation) < now:
+			invitation = frappe.get_doc("CRM Invitation", row.name)
+			invitation.status = "Expired"
+			invitation.save(ignore_permissions=True)
+
+
+def _assert_can_invite(role: str):
+	"""Same rule as crm.api.invite_by_email: managers invite salespeople, admins invite anyone."""
+	frappe.only_for(["Sales Manager", "System Manager"], True)
+	if role in ("System Manager", "Sales Manager") and "System Manager" not in frappe.get_roles():
+		frappe.throw(_("You are not allowed to invite {0}").format(_(role)), frappe.PermissionError)
+
+
+@frappe.whitelist()
+def get_invitations() -> list[dict]:
+	"""Invitations not accepted yet (pending or expired), newest first, with who invited, when the last
+	e-mail went out and until when the link works."""
+	frappe.only_for(["Sales Manager", "System Manager"], True)
+	now = frappe.utils.now_datetime()
+	rows = frappe.db.get_all(
+		"CRM Invitation",
+		filters={"status": ("in", ("Pending", "Expired"))},
+		fields=["name", "email", "role", "status", "invited_by", "email_sent_at", "creation"],
+		order_by="creation desc",
+	)
+	for row in rows:
+		row.sent_on = row.email_sent_at or row.creation
+		row.valid_until = valid_until(row.email_sent_at, row.creation)
+		row.expired = row.status == "Expired" or row.valid_until < now
+		row.invited_by_name = frappe.utils.get_fullname(row.invited_by) if row.invited_by else None
+	return rows
+
+
+@frappe.whitelist(methods=["POST"])
+def resend_invitation(name: str) -> str:
+	"""Send the invitation e-mail again, valid for INVITATION_DAYS more. An expired one becomes a new
+	invitation (so the plan's seat check runs again) and the old record goes away."""
+	invitation = frappe.get_doc("CRM Invitation", name)
+	_assert_can_invite(invitation.role)
+	if invitation.status not in ("Pending", "Expired"):
+		frappe.throw(_("This invitation was already accepted."))
+	if invitation.status == "Expired" or frappe.utils.now_datetime() > invitation.valid_until():
+		renewed = frappe.get_doc(
+			{"doctype": "CRM Invitation", "email": invitation.email, "role": invitation.role}
+		).insert(ignore_permissions=True)
+		frappe.delete_doc("CRM Invitation", invitation.name, ignore_permissions=True)
+		return renewed.name
+	invitation.invite_via_email()
+	return invitation.name
