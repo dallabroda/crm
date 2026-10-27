@@ -168,6 +168,15 @@ describe('overLimitAfter', () => {
     expect(overLimitAfter(active({ used_active: 5 }), 1)).toBe(2)
     expect(overLimitAfter(active({ used_active: 3 }), 1)).toBe(0)
   })
+
+  it('does not count pending invitations, which are not paused', () => {
+    expect(overLimitAfter(active({ used_active: 5, used_invited: 2 }), 1)).toBe(
+      2,
+    )
+    expect(overLimitAfter(active({ used_active: 2, used_invited: 3 }), 0)).toBe(
+      0,
+    )
+  })
 })
 
 describe('inGrace', () => {

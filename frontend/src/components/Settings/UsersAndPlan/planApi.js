@@ -105,9 +105,10 @@ export function chosenExtras(data) {
   return data.status === 'Past Due' ? data.extras || 0 : 0
 }
 
-// Users that take a seat beyond the new limit, so a decrease can warn who is
-// paused at the turn (most recent first)
+// Active users beyond the new limit, so a decrease can warn how many are paused
+// at the turn (most recent first). Pending invitations take a seat but are not
+// paused (cred_hub.billing.pause_over_limit only pauses active users).
 export function overLimitAfter(data, quantity) {
   const limit = (data?.free || 0) + Math.max(0, parseInt(quantity, 10) || 0)
-  return Math.max(0, usage(data).used - limit)
+  return Math.max(0, (data?.used_active || 0) - limit)
 }

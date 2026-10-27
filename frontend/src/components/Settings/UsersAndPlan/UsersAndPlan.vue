@@ -319,7 +319,7 @@ const explanation = computed(() => {
       [monthly],
     ),
     increase: __(
-      'The new users are released now. The prorated difference until {0} goes by payment link, with 3 days to pay. Then {1} per month.',
+      'The new users are released now. The prorated difference until {0} goes by payment link, with 3 days to pay (a very small difference goes on the next invoice instead). Then {1} per month.',
       [nextDue, monthly],
     ),
     decrease: __(
@@ -399,5 +399,6 @@ function date(value) {
   return formatDate(value, null, true)
 }
 
-onMounted(loadPlan)
+// Fresh counts each time the page opens, unless Settings is loading it already
+onMounted(() => plan.loading || loadPlan())
 </script>

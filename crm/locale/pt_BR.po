@@ -11456,8 +11456,8 @@ msgid "You pay the first month on the payment page. The extra users are released
 msgstr "Você paga o primeiro mês na página de pagamento. Os usuários extras são liberados assim que o pagamento for confirmado. Depois, {0} por mês no mesmo cartão."
 
 #: frontend/src/components/Settings/UsersAndPlan
-msgid "The new users are released now. The prorated difference until {0} goes by payment link, with 3 days to pay. Then {1} per month."
-msgstr "Os usuários novos são liberados agora. A diferença proporcional até {0} vai por link de pagamento, com 3 dias para pagar. Depois, {1} por mês."
+msgid "The new users are released now. The prorated difference until {0} goes by payment link, with 3 days to pay (a very small difference goes on the next invoice instead). Then {1} per month."
+msgstr "Os usuários novos são liberados agora. A diferença proporcional até {0} vai por link de pagamento, com 3 dias para pagar (uma diferença muito pequena entra na próxima fatura). Depois, {1} por mês."
 
 #: frontend/src/components/Settings/UsersAndPlan
 msgid "The seats already paid stay until {0}. From then on, {1} per month."
