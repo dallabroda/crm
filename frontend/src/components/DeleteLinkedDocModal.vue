@@ -41,12 +41,12 @@
               :rows="linkedDocs"
               :columns="[
                 {
-                  label: 'Document',
+                  label: __('Document'),
                   key: 'title',
                   width: '19rem',
                 },
                 {
-                  label: 'Master',
+                  label: __('Type'),
                   key: 'reference_doctype',
                   width: '12rem',
                 },
@@ -61,7 +61,7 @@
           <div v-if="linkedDocs?.length == 0" class="text-ink-gray-5 text-base">
             {{
               __('Are you sure you want to delete {0} - {1}?', [
-                props.doctype,
+                __(props.doctype),
                 props.docname,
               ])
             }}
@@ -226,37 +226,45 @@ const unlinkLinkedDoc = (doc) => {
     items: selectedDocs,
     remove_contact: props.doctype == 'Contact',
     delete: doc.delete,
-  }).then(() => {
-    linkedDocsResource.reload()
-    confirmDeleteInfo.value = {
-      show: false,
-      title: '',
-    }
+    // the document being deleted, so the server clears the right field (e.g. a deal's organization)
+    doctype: props.doctype,
+    docname: props.docname,
   })
+    .then(() => {
+      linkedDocsResource.reload()
+      confirmDeleteInfo.value = {
+        show: false,
+        title: '',
+      }
+    })
+    .catch((err) => {
+      // the server lists what could not be unlinked or deleted; before, the button just did nothing
+      linkedDocsResource.reload()
+      confirmDeleteInfo.value = { show: false, title: '' }
+      toast.error(err?.messages?.[0] || err?.message || __('Could not change the linked documents'))
+    })
 }
 
 const confirmDelete = () => {
-  const items =
-    viewControls.value.selections.length == 0
-      ? 'all'
-      : viewControls.value.selections.length
+  const count = viewControls.value.selections.length
   confirmDeleteInfo.value = {
     show: true,
     title: __('Delete Linked Item'),
-    message: __('Are you sure you want to delete {0} linked item(s)?', [items]),
+    message: count
+      ? __('Are you sure you want to delete {0} linked item(s)?', [count])
+      : __('Are you sure you want to delete all linked items?'),
     delete: true,
   }
 }
 
 const confirmUnlink = () => {
-  const items =
-    viewControls.value.selections.length == 0
-      ? 'all'
-      : viewControls.value.selections.length
+  const count = viewControls.value.selections.length
   confirmDeleteInfo.value = {
     show: true,
     title: __('Unlink Linked Item'),
-    message: __('Are you sure you want to unlink {0} linked item(s)?', [items]),
+    message: count
+      ? __('Are you sure you want to unlink {0} linked item(s)?', [count])
+      : __('Are you sure you want to unlink all linked items?'),
     delete: false,
   }
 }
