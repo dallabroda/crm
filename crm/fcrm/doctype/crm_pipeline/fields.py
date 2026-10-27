@@ -12,7 +12,7 @@ from frappe.custom.doctype.custom_field.custom_field import create_custom_field
 DEAL = "CRM Deal"
 # Created fields get this prefix, so they are told apart from standard and app fields
 CREATED_PREFIX = "ch_"
-CREATED_FIELD_LIMIT = 80
+CREATED_FIELD_LIMIT = 60
 # Always shown and editable: a card cannot exist without them
 LOCKED_FIELDS = ("pipeline", "status", "deal_owner")
 STANDARD_FIELDS = (
@@ -40,8 +40,9 @@ class NoRoomForFieldError(frappe.ValidationError):
 
 
 # MariaDB refuses a table whose columns add up to more than 65,535 bytes per row (error 1118). Cards already
-# declare ~28 KB and each text field takes 562 bytes (140 characters in utf8mb4), so text fields run out long
-# before CREATED_FIELD_LIMIT: in a test the 67th failed. Numbers, dates and Yes/No take a few bytes.
+# declare ~28 KB and each text field takes 562 bytes (140 characters in utf8mb4): in a test the 67th text field
+# failed. CREATED_FIELD_LIMIT (60, owner decision) stays below that, but fields added by apps also take room, so
+# the size is still checked. Numbers, dates and Yes/No take a few bytes.
 ROW_SIZE_LIMIT = 65_535
 ROW_SIZE_MARGIN = 256
 
