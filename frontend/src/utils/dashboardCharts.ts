@@ -7,6 +7,7 @@ import type {
   SeriesStyle,
   TimeGrain,
 } from 'frappe-ui/charts'
+import { userLocale } from './locale'
 
 type Row = Record<string, unknown>
 
@@ -75,6 +76,14 @@ export type AxisChartKind = 'line' | 'area' | 'bar'
 export function toNumberCardProps(config: NumberChartConfig): NumberCardProps {
   const props = { ...config }
   delete props.tooltip
+  // Outside English the currency sign is set apart from the amount: "R$ 4.852,91"
+  if (
+    props.prefix &&
+    !props.prefix.endsWith(' ') &&
+    !userLocale().startsWith('en')
+  ) {
+    props.prefix = `${props.prefix}\u00a0`
+  }
   return props
 }
 

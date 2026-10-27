@@ -397,7 +397,7 @@ function getDealRowObject(deal) {
     },
     deal_value: getFormattedCurrency('deal_value', deal),
     status: {
-      label: deal.status,
+      label: __(deal.status),
       color: getDealStatus(deal.status)?.color,
     },
     email: deal.email,

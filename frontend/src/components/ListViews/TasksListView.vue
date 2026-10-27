@@ -246,6 +246,8 @@ function onColumnWidthUpdated({ width, save }, column) {
 function getLabel(label, column) {
   if (column.type === 'Duration') return formatDuration(label)
   if (column.options && isTranslatable(column.options)) return __(label)
+  // Select values (status, priority) are stored in English
+  if (column.type === 'Select') return __(label)
   return label
 }
 

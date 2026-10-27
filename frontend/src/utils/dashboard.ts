@@ -1,4 +1,5 @@
 import { dayjs } from 'frappe-ui'
+import { userLocale } from './locale'
 
 export type DashboardDateRange = string | [string, string] | [] | null
 
@@ -20,12 +21,12 @@ export function parseDateRange(range: DashboardDateRange): [string, string] {
 
 export function formatter(range: DashboardDateRange) {
   const [from, to] = parseDateRange(range)
-  return `${formatRange(from)} to ${formatRange(to)}`
+  return __('{0} to {1}', [formatRange(from), formatRange(to)])
 }
 
 export function formatRange(date: string) {
   const dateObj = new Date(date)
-  return dateObj.toLocaleDateString('en-US', {
+  return dateObj.toLocaleDateString(userLocale(), {
     month: 'short',
     day: 'numeric',
     year:

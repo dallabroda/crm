@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vitest'
 import {
   getAxisChartKind,
   toAxisChartProps,
@@ -148,5 +148,25 @@ describe('toNumberCardProps', () => {
       delta: -5.7,
       negativeIsBetter: true,
     })
+  })
+})
+
+describe('toNumberCardProps currency prefix', () => {
+  afterEach(() => {
+    delete (window as any).lang
+  })
+
+  it('sets the currency sign apart from the amount outside English', () => {
+    ;(window as any).lang = 'pt-BR'
+    expect(
+      toNumberCardProps({ title: 'Avg', value: 4852.91, prefix: 'R$' }).prefix,
+    ).toBe('R$\u00a0')
+  })
+
+  it('keeps the sign next to the amount in English', () => {
+    ;(window as any).lang = 'en'
+    expect(
+      toNumberCardProps({ title: 'Avg', value: 4852.91, prefix: '$' }).prefix,
+    ).toBe('$')
   })
 })

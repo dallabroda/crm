@@ -69,6 +69,7 @@ def get_boot():
 	return frappe._dict(
 		{
 			"frappe_version": frappe.__version__,
+			"lang": frappe.local.lang,
 			"has_automation_engine": HAS_AUTOMATION_ENGINE,
 			"default_route": get_default_route(),
 			"site_name": frappe.local.site,

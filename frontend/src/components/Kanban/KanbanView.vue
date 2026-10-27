@@ -54,7 +54,7 @@
                 </template>
               </Popover>
               <div class="text-ink-gray-9">
-                {{ column.column.label || column.column.name }}
+                {{ __(column.column.label || column.column.name) }}
               </div>
             </div>
             <div class="flex">
