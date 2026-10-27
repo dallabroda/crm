@@ -151,7 +151,7 @@ import { computed, onMounted, reactive, ref } from 'vue'
 const pipelineStore = pipelinesStore()
 
 const loading = ref(false)
-const catalog = ref({ limit: 80, used: 0, fields: [] })
+const catalog = ref({ limit: 60, used: 0, fields: [] })
 // The cards table also has a size limit per row: text, list and link fields
 // run out of room before the field limit (see fields.py, room_by_type)
 const room = computed(() => catalog.value.room || null)
