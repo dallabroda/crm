@@ -11582,3 +11582,39 @@ msgstr "O endereço atual para de funcionar na hora e o novo é cadastrado na AP
 #: telephony/api4com
 msgid "Your company hires API4Com directly. Each call made or received at API4Com lands on the timeline of the deal of that number, in the name of the salesperson of the extension."
 msgstr "Sua empresa contrata a API4Com diretamente. Cada ligação feita ou recebida na API4Com aparece na linha do tempo do negócio daquele número, em nome do vendedor do ramal."
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Cred Chat"
+msgstr "Cred Chat"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Connect your Cred Chat to send a WhatsApp welcome message to each new lead (turn it on in each source above) and to see the Cred Hub cards inside Cred Chat conversations."
+msgstr "Conecte o seu Cred Chat para mandar uma mensagem de boas-vindas no WhatsApp para cada lead novo (ligue em cada origem acima) e para ver os cards do Cred Hub dentro das conversas do Cred Chat."
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "The \"Cred Hub\" tab shows the contact's cards in every Cred Chat conversation."
+msgstr "A aba \"Cred Hub\" mostra os cards do contato em toda conversa do Cred Chat."
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "The Cred Hub tab is not in Cred Chat conversations yet."
+msgstr "A aba do Cred Hub ainda não está nas conversas do Cred Chat."
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Try again"
+msgstr "Tentar de novo"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "The welcome message is turned off on every source, the Cred Hub tab leaves Cred Chat and the access key is erased."
+msgstr "A mensagem de boas-vindas é desligada em todas as origens, a aba do Cred Hub sai do Cred Chat e a chave de acesso é apagada."
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Cred Hub tab added to Cred Chat"
+msgstr "Aba do Cred Hub adicionada ao Cred Chat"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Could not add the Cred Hub tab"
+msgstr "Não foi possível adicionar a aba do Cred Hub"
+
+#: frontend/src/components/Settings/LeadSyncing
+msgid "Connect your Cred Chat in the \"Cred Chat\" box, below the sources, to use it."
+msgstr "Para usar, conecte o seu Cred Chat no quadro \"Cred Chat\", abaixo das origens."
