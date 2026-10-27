@@ -8,8 +8,8 @@
         <p class="text-p-base text-ink-gray-6">
           {{
             __(
-              'Your plan includes {0} free users. Each extra user costs {1} per month, paid by card.',
-              [data?.free ?? 2, money(data?.price_per_user)],
+              'After the free trial, your plan includes {0} free user. Each extra user costs {1} per month, paid by card.',
+              [data?.free ?? 1, money(data?.price_per_user)],
             )
           }}
         </p>
@@ -38,7 +38,11 @@
         <div class="flex items-center justify-between gap-4">
           <div class="flex flex-col gap-0.5">
             <span class="text-lg-semibold text-ink-gray-8">
-              {{ __('{0} of {1} users', [seats.used, seats.limit]) }}
+              {{
+                seats.unlimited
+                  ? __('{0} users, no limit during the trial', [seats.used])
+                  : __('{0} of {1} users', [seats.used, seats.limit])
+              }}
             </span>
             <span class="text-p-sm text-ink-gray-5">
               {{
@@ -50,13 +54,14 @@
             </span>
           </div>
           <Badge
-            :label="statusBadge(data.status).label"
-            :theme="statusBadge(data.status).theme"
+            :label="statusBadge(data.status, data.in_trial).label"
+            :theme="statusBadge(data.status, data.in_trial).theme"
             variant="subtle"
             size="lg"
           />
         </div>
         <div
+          v-if="!seats.unlimited"
           class="h-1.5 w-full overflow-hidden rounded-full bg-surface-gray-3"
         >
           <div
@@ -89,6 +94,21 @@
       </div>
 
       <!-- What needs attention -->
+      <PlanNotice
+        v-if="data.in_trial"
+        theme="gray"
+        :text="
+          __(
+            'Free trial with unlimited users until {0} ({1} days left). From {2}, the users above the {3} free one and the extra users you contract are paused, the most recent first, and pending invitations over the limit are no longer valid. To keep them, contract extra users below or choose who stays by deactivating the users you no longer need.',
+            [
+              date(data.trial_ends_on),
+              data.trial_days_left,
+              date(dayAfterTrial(data)),
+              data.free,
+            ],
+          )
+        "
+      />
       <PlanNotice
         v-if="data.status === 'Awaiting Payment'"
         theme="orange"
@@ -161,7 +181,7 @@
         <p class="text-p-sm text-ink-gray-6">
           {{
             __(
-              'Their data is kept. They come back on their own when there is a seat again.',
+              'Their data is kept. They come back on their own when there is a seat again. You can also choose who stays: deactivate a user and re-enable a paused one.',
             )
           }}
         </p>
@@ -270,6 +290,7 @@ import {
   statusBadge,
   inGrace,
   openInvoice,
+  dayAfterTrial,
 } from './planApi'
 import { Badge, Button, ErrorMessage, FormControl, toast } from 'frappe-ui'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
@@ -314,10 +335,15 @@ const explanation = computed(() => {
   const nextDue = date(data.value?.next_due)
   const monthly = money(change.value.monthly)
   return {
-    subscribe: __(
-      'You pay the first month on the payment page. The extra users are released as soon as the payment is confirmed. Then {0} per month on the same card.',
-      [monthly],
-    ),
+    subscribe: data.value?.in_trial
+      ? __(
+          'Nothing is charged during the trial: the first invoice is due on {0}, the day after it ends. Unpaid, the extra users are kept until 3 days after that date. Then {1} per month on the same card.',
+          [date(dayAfterTrial(data.value)), monthly],
+        )
+      : __(
+          'You pay the first month on the payment page. The extra users are released as soon as the payment is confirmed. Then {0} per month on the same card.',
+          [monthly],
+        ),
     increase: __(
       'The new users are released now. The prorated difference until {0} goes by payment link, with 3 days to pay (a very small difference goes on the next invoice instead). Then {1} per month.',
       [nextDue, monthly],
@@ -344,6 +370,12 @@ const pausedWarning = computed(() => {
   if (!['decrease', 'cancel', 'free'].includes(kind)) return null
   const over = overLimitAfter(data.value, extras.value)
   if (!over) return null
+  if (data.value.in_trial) {
+    return __(
+      '{0} users above the new limit are paused on {1}, the most recent first. Nothing is deleted.',
+      [over, date(dayAfterTrial(data.value))],
+    )
+  }
   return kind === 'free'
     ? __(
         '{0} users above the new limit are paused now, the most recent first. Nothing is deleted.',
@@ -395,8 +427,9 @@ function money(value) {
   return formatCurrency(value || 0, null, data.value?.currency || 'BRL')
 }
 
+// Plan dates come as YYYY-MM-DD: "Nov 9, 2026" in English, "9 nov 2026" in Portuguese
 function date(value) {
-  return formatDate(value, null, true)
+  return formatDate(value, 'MMM D, YYYY')
 }
 
 // Fresh counts each time the page opens, unless Settings is loading it already

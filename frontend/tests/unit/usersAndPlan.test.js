@@ -11,6 +11,7 @@ const {
   overLimitAfter,
   inGrace,
   statusBadge,
+  dayAfterTrial,
 } = await import('@/components/Settings/UsersAndPlan/planApi')
 
 // Shape of cred_hub.billing.get_plan with billing on
@@ -84,6 +85,7 @@ describe('usage', () => {
     expect(usage(planData({ used_active: 1, used_invited: 1 }))).toEqual({
       used: 2,
       limit: 2,
+      unlimited: false,
       full: true,
     })
   })
@@ -195,5 +197,31 @@ describe('statusBadge', () => {
       theme: 'red',
     })
     expect(statusBadge('Awaiting Payment').theme).toBe('orange')
+  })
+})
+
+describe('free trial', () => {
+  it('has no limit and is not full during the trial', () => {
+    const data = planData({ in_trial: true, limit: 1000000, used_active: 7 })
+    expect(usage(data)).toMatchObject({ used: 7, unlimited: true, full: false })
+  })
+
+  it('shows the trial instead of the free plan', () => {
+    expect(statusBadge('Free', true).label).toBe('Free trial')
+    expect(statusBadge('Free', false).label).toBe('Free plan')
+    expect(statusBadge('Awaiting Payment', true).label).toBe('Awaiting payment')
+  })
+
+  it('knows the day after the trial, across months and years', () => {
+    expect(dayAfterTrial(planData({ trial_ends_on: '2026-11-09' }))).toBe(
+      '2026-11-10',
+    )
+    expect(dayAfterTrial(planData({ trial_ends_on: '2026-10-31' }))).toBe(
+      '2026-11-01',
+    )
+    expect(dayAfterTrial(planData({ trial_ends_on: '2026-12-31' }))).toBe(
+      '2027-01-01',
+    )
+    expect(dayAfterTrial(planData())).toBeNull()
   })
 })

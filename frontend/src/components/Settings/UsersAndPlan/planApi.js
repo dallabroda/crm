@@ -2,14 +2,15 @@ import { call } from 'frappe-ui'
 import { reactive } from 'vue'
 import { getRequest } from '../LeadSyncing/metaLeadsApi'
 
-// Users and Plan (credtech#25), served by the cred_hub app: 2 free users per
-// company, extra users paid monthly by card on Asaas. The card is typed on the
+// Users and Plan (credtech#25), served by the cred_hub app: a 14-day trial
+// with unlimited users from the company's creation, then 1 free user per
+// company and extra users paid monthly by card on Asaas. The card is typed on the
 // Asaas invoice page, never here. Off while `credhub_billing` is off: the page
 // does not show up.
 const API = 'cred_hub.billing.'
 
 export const planApi = {
-  // { enabled, limit, free, extras, pending_extras, scheduled_extras,
+  // { enabled, limit, free, in_trial, trial_ends_on, trial_days_left, extras, pending_extras, scheduled_extras,
   //   scheduled_from, upgrade: { extras, paid_extras, due_date, overdue,
   //   invoice_url } | null, grace_until, used_active, used_invited, status:
   //   Free | Awaiting Payment | Active | Past Due | Canceled, next_due, amount,
@@ -46,7 +47,10 @@ export function openInvoice(url) {
 }
 
 // Plan status (English in the backend) as the admin reads it
-export function statusBadge(status) {
+export function statusBadge(status, inTrial = false) {
+  if (inTrial && status === 'Free') {
+    return { label: __('Free trial'), theme: 'blue' }
+  }
   return (
     {
       Free: { label: __('Free plan'), theme: 'gray' },
@@ -72,7 +76,19 @@ function localToday() {
 export function usage(data) {
   const used = (data?.used_active || 0) + (data?.used_invited || 0)
   const limit = data?.limit || 0
-  return { used, limit, full: !data?.unlimited && used >= limit }
+  // During the trial there is no limit (get_plan sends a huge one)
+  const unlimited = Boolean(data?.unlimited || data?.in_trial)
+  return { used, limit, unlimited, full: !unlimited && used >= limit }
+}
+
+// The day after the trial: when users over the limit are paused and the
+// first invoice of extras contracted in the trial is due
+export function dayAfterTrial(data) {
+  if (!data?.trial_ends_on) return null
+  const [year, month, day] = data.trial_ends_on.split('-').map(Number)
+  const next = new Date(year, month - 1, day + 1)
+  const pad = (n) => String(n).padStart(2, '0')
+  return `${next.getFullYear()}-${pad(next.getMonth() + 1)}-${pad(next.getDate())}`
 }
 
 // What saving `quantity` extra users does, so the page can say it before the
