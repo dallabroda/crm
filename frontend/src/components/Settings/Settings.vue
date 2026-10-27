@@ -74,6 +74,9 @@ import Hierarchy from '@/components/Settings/Hierarchy/Hierarchy.vue'
 import InviteUserPage from '@/components/Settings/InviteUserPage.vue'
 import UsersAndPlan from '@/components/Settings/UsersAndPlan/UsersAndPlan.vue'
 import { plan, loadPlan } from '@/components/Settings/UsersAndPlan/planApi'
+import ApiKeysPage from '@/components/Settings/ApiKeys/ApiKeysPage.vue'
+import { apiKeys, loadApiKeys } from '@/components/Settings/ApiKeys/apiKeysApi'
+import LucideKeyRound from '~icons/lucide/key-round'
 import ProfilePage from '@/components/Settings/Profile/ProfilePage.vue'
 import PreferencesSettings from '@/components/Settings/PreferencesSettings.vue'
 import WhatsAppSettings from '@/components/Settings/WhatsAppSettings.vue'
@@ -289,6 +292,13 @@ const tabs = computed(() => {
           component: markRaw(ERPNextSettings),
           condition: () => isManager(),
         },
+        {
+          label: __('API'),
+          icon: LucideKeyRound,
+          component: markRaw(ApiKeysPage),
+          // admins only, with the cred_hub app (credtech#175)
+          condition: () => isAdmin() && apiKeys.enabled,
+        },
       ],
     },
   ]
@@ -333,7 +343,10 @@ function scrollActiveIntoView() {
 watch(
   showSettings,
   (open) => {
-    if (open && isAdmin()) loadPlan()
+    if (open && isAdmin()) {
+      loadPlan()
+      loadApiKeys()
+    }
   },
   { immediate: true },
 )
