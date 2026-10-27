@@ -5120,7 +5120,7 @@ msgstr "Semelhante"
 
 #: frontend/src/components/FilesUploader/FilesUploaderArea.vue:51 frontend/src/components/Settings/Fields/FieldsPage.vue:164 frontend/src/components/Settings/Forms/FormBuilderPanel.vue:383
 msgid "Link"
-msgstr "Ligação"
+msgstr "Link"
 
 #. Label of the link_priority_order (Table) field in DocType 'CRM Enrichment
 #. Settings'
@@ -5130,7 +5130,7 @@ msgstr "Ordem de prioridade dos links"
 
 #: frontend/src/components/Settings/Fields/FieldsPage.vue:154
 msgid "Link to contact or organization"
-msgstr "Ligação com contato ou organização"
+msgstr "Vínculo com contato ou organização"
 
 #: crm/fcrm/doctype/crm_product/reconcile_job.py:79
 #, python-brace-format
@@ -5151,7 +5151,7 @@ msgstr "Links"
 
 #: frontend/src/components/Settings/Fields/FieldsPage.vue:102
 msgid "Links to"
-msgstr "Liga-se a"
+msgstr "Vinculado a"
 
 #. Option for the 'Apply To' (Select) field in DocType 'CRM Form Script'
 #. Label of the list_tab (Tab Break) field in DocType 'CRM View Settings'
@@ -11626,6 +11626,22 @@ msgstr "{0} a {1}"
 #: frontend/src/components/ListViews/ListFooter.vue
 msgid "{0} of {1}"
 msgstr "{0} de {1}"
+
+#: frontend/src/components/Settings/Fields/fieldTypes.js
+msgid "Linked record"
+msgstr "Vínculo"
+
+#: frontend/src/components/Settings/Fields/fieldTypes.js
+msgid "Date and time"
+msgstr "Data e hora"
+
+#: frontend/src/components/Settings/Fields/fieldTypes.js
+msgid "Long text"
+msgstr "Texto longo"
+
+#: frontend/src/components/Settings/Fields/fieldTypes.js
+msgid "Percentage"
+msgstr "Porcentagem"
 
 #: frontend/src/components/DeleteLinkedDocModal.vue
 msgid "Document"
