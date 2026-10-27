@@ -11482,3 +11482,103 @@ msgstr "{0} usuários acima do novo limite são pausados agora, dos mais recente
 #: frontend/src/components/Settings/UsersAndPlan
 msgid "{0} users above the new limit are paused on {1}, the most recent first. Nothing is deleted."
 msgstr "{0} usuários acima do novo limite são pausados em {1}, dos mais recentes para os mais antigos. Nada é apagado."
+
+#: telephony/api4com
+msgid "API4Com API token"
+msgstr "Token da API da API4Com"
+
+#: telephony/api4com
+msgid "API4Com Integration Disabled"
+msgstr "Integração com a API4Com desligada"
+
+#: telephony/api4com
+msgid "API4Com Settings"
+msgstr "Configurações da API4Com"
+
+#: telephony/api4com
+msgid "API4Com refused the token. Check that it was copied whole and has not expired."
+msgstr "A API4Com recusou o token. Confira se ele foi copiado inteiro e se não expirou."
+
+#: telephony/api4com
+msgid "API4Com refused the webhook registration (HTTP {0})."
+msgstr "A API4Com recusou o cadastro do webhook (HTTP {0})."
+
+#: telephony/api4com
+msgid "API4Com settings saved"
+msgstr "Configurações da API4Com salvas"
+
+#: telephony/api4com
+msgid "An extension has 1 to 6 digits."
+msgstr "O ramal tem de 1 a 6 dígitos."
+
+#: telephony/api4com
+msgid "Call webhook"
+msgstr "Webhook das ligações"
+
+#: telephony/api4com
+msgid "Copied"
+msgstr "Copiado"
+
+#: telephony/api4com
+msgid "Could not reach API4Com. Please try again in a few minutes."
+msgstr "Não foi possível falar com a API4Com. Tente de novo em alguns minutos."
+
+#: telephony/api4com
+msgid "Create a token that does not expire in the API4Com panel and paste it here. It is never shown again."
+msgstr "Crie no painel da API4Com um token que não expira e cole aqui. Ele não é exibido de novo."
+
+#: telephony/api4com
+msgid "Enable API4Com to record the calls of your API4Com account on the timeline of your deals"
+msgstr "Ligue a API4Com para registrar as ligações da sua conta API4Com na linha do tempo dos seus negócios"
+
+#: telephony/api4com
+msgid "Extension"
+msgstr "Ramal"
+
+#: telephony/api4com
+msgid "Extension saved"
+msgstr "Ramal salvo"
+
+#: telephony/api4com
+msgid "Extension {0} already belongs to {1}."
+msgstr "O ramal {0} já é de {1}."
+
+#: telephony/api4com
+msgid "Extensions"
+msgstr "Ramais"
+
+#: telephony/api4com
+msgid "Generate"
+msgstr "Gerar"
+
+#: telephony/api4com
+msgid "Generate new secret"
+msgstr "Gerar novo segredo"
+
+#: telephony/api4com
+msgid "New secret generated and registered at API4Com"
+msgstr "Novo segredo gerado e cadastrado na API4Com"
+
+#: telephony/api4com
+msgid "Paste the API4Com API token."
+msgstr "Cole o token da API da API4Com."
+
+#: telephony/api4com
+msgid "Record the calls of your API4Com account on the timeline of your deals"
+msgstr "Registre as ligações da sua conta API4Com na linha do tempo dos seus negócios"
+
+#: telephony/api4com
+msgid "Registered at API4Com automatically when the token is saved. Only needed by hand if API4Com support asks for it."
+msgstr "Cadastrado na API4Com automaticamente quando o token é salvo. Só é preciso usar à mão se o suporte da API4Com pedir."
+
+#: telephony/api4com
+msgid "The API4Com extension of each user, so each call goes in the name of who made or answered it."
+msgstr "O ramal da API4Com de cada usuário, para cada ligação ficar em nome de quem fez ou atendeu."
+
+#: telephony/api4com
+msgid "The current address stops working at once and the new one is registered at API4Com."
+msgstr "O endereço atual para de funcionar na hora e o novo é cadastrado na API4Com."
+
+#: telephony/api4com
+msgid "Your company hires API4Com directly. Each call made or received at API4Com lands on the timeline of the deal of that number, in the name of the salesperson of the extension."
+msgstr "Sua empresa contrata a API4Com diretamente. Cada ligação feita ou recebida na API4Com aparece na linha do tempo do negócio daquele número, em nome do vendedor do ramal."
