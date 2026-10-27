@@ -64,14 +64,12 @@
         </p>
       </div>
 
-      <p
-        v-if="activeCount >= data.limit"
-        class="text-p-sm text-ink-gray-6"
-      >
+      <p v-if="activeCount >= data.limit" class="text-p-sm text-ink-gray-6">
         {{
-          __('Your company can have up to {0} active keys. Revoke one to create another.', [
-            data.limit,
-          ])
+          __(
+            'Your company can have up to {0} active keys. Revoke one to create another.',
+            [data.limit],
+          )
         }}
       </p>
 
@@ -108,7 +106,9 @@
             <Button :label="__('Edit')" @click="openForm(key)" />
             <Button
               :label="
-                confirm.rotate === key.name ? __('Confirm new secret') : __('New secret')
+                confirm.rotate === key.name
+                  ? __('Confirm new secret')
+                  : __('New secret')
               "
               :theme="confirm.rotate === key.name ? 'red' : 'gray'"
               :loading="busy === key.name + ':rotate'"
@@ -116,7 +116,11 @@
               @blur="confirm.rotate = null"
             />
             <Button
-              :label="confirm.revoke === key.name ? __('Confirm revoke') : __('Revoke')"
+              :label="
+                confirm.revoke === key.name
+                  ? __('Confirm revoke')
+                  : __('Revoke')
+              "
               :theme="confirm.revoke === key.name ? 'red' : 'gray'"
               :loading="busy === key.name + ':revoke'"
               @click="revoke(key)"
@@ -239,7 +243,11 @@
     </template>
     <template #actions>
       <div class="flex gap-2 justify-end">
-        <Button variant="subtle" :label="__('Cancel')" @click="form.show = false" />
+        <Button
+          variant="subtle"
+          :label="__('Cancel')"
+          @click="form.show = false"
+        />
         <Button
           variant="solid"
           :label="form.name ? __('Save') : __('Create key')"
@@ -254,13 +262,7 @@
   <Dialog v-model:open="secret.show" :title="__('Copy the key now')">
     <template #default>
       <div class="flex flex-col gap-3">
-        <p class="text-p-base text-ink-gray-7">
-          {{
-            __(
-              'This is the only time the key is shown. Store it in the system that will use it, sent as the header "Authorization: Bearer <key>".',
-            )
-          }}
-        </p>
+        <p class="text-p-base text-ink-gray-7">{{ secretHelp }}</p>
         <div
           class="break-all rounded bg-surface-gray-2 px-3 py-2 font-mono text-p-sm text-ink-gray-9"
         >
@@ -270,7 +272,11 @@
     </template>
     <template #actions>
       <div class="flex gap-2 justify-end">
-        <Button :label="__('Copy')" icon-left="copy" @click="copyToClipboard(secret.token)" />
+        <Button
+          :label="__('Copy')"
+          icon-left="copy"
+          @click="copyToClipboard(secret.token)"
+        />
         <Button variant="solid" :label="__('Done')" @click="closeSecret" />
       </div>
     </template>
@@ -278,7 +284,14 @@
 </template>
 
 <script setup>
-import { Badge, Button, Dialog, ErrorMessage, FormControl, toast } from 'frappe-ui'
+import {
+  Badge,
+  Button,
+  Dialog,
+  ErrorMessage,
+  FormControl,
+  toast,
+} from 'frappe-ui'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { pipelinesStore } from '@/stores/pipelines'
 import { copyToClipboard, formatDate } from '@/utils'
@@ -310,6 +323,10 @@ const form = reactive({
   error: '',
 })
 const secret = reactive({ show: false, token: '' })
+// In the script: "<key>" inside the template would read as an HTML tag
+const secretHelp = __(
+  'This is the only time the key is shown. Store it in the system that will use it, sent as the header "Authorization: Bearer <key>".',
+)
 
 const selectedScopes = computed(() =>
   Object.keys(form.scopes).filter((s) => form.scopes[s]),
@@ -347,7 +364,9 @@ function openForm(key = null) {
 }
 
 function errorText(e) {
-  return e?.messages?.[0] || e?.message || __('Something went wrong. Try again.')
+  return (
+    e?.messages?.[0] || e?.message || __('Something went wrong. Try again.')
+  )
 }
 
 async function save() {

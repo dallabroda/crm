@@ -13,7 +13,9 @@ describe('API keys screen helpers', () => {
   })
 
   it('old keys still work on the last day and stop the day after', () => {
-    expect(legacyStopped('2026-11-27', new Date(2026, 10, 27, 23, 59))).toBe(false)
+    expect(legacyStopped('2026-11-27', new Date(2026, 10, 27, 23, 59))).toBe(
+      false,
+    )
     expect(legacyStopped('2026-11-27', new Date(2026, 10, 28, 0, 1))).toBe(true)
     expect(legacyStopped(null)).toBe(false)
   })
