@@ -11749,3 +11749,7 @@ msgstr "Só dá para criar campos em cards, contatos e empresas."
 #: crm/fcrm/doctype/crm_pipeline/fields.py
 msgid "There is no room left for another field of this type in {0}."
 msgstr "Não há mais espaço para outro campo deste tipo em {0}."
+
+#: crm/fcrm/doctype/crm_invitation/crm_invitation.py
+msgid "{0} invited you to {1} on HubTech CRM"
+msgstr "{0} convidou você para {1} no HubTech CRM"

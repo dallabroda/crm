@@ -7,6 +7,9 @@ from frappe.model.document import Document
 
 from crm.api.user import validate_no_role_profile
 
+# Days a pending invitation stays valid (expire_invitations); also said in the e-mail
+INVITATION_DAYS = 3
+
 
 class CRMInvitation(Document):
 	# begin: auto-generated types
@@ -42,14 +45,29 @@ class CRMInvitation(Document):
 		if frappe.local.dev_server:
 			print(f"Invite link for {self.email}: {invite_link}")  # nosemgrep
 
-		title = "Cred Hub"
+		title = "HubTech CRM"
 		template = "crm_invitation"
+		# Who invited and to which company (Settings > Brand), so the e-mail says it
+		company = frappe.db.get_single_value("FCRM Settings", "brand_name") or None
+		inviter = frappe.utils.get_fullname(self.invited_by) if self.invited_by else None
+		if inviter and company:
+			subject = _("{0} invited you to {1} on HubTech CRM").format(inviter, company)
+		else:
+			subject = _("You have been invited to join {0}").format(company or title)
 
 		frappe.sendmail(
 			recipients=self.email,
-			subject=_("You have been invited to join {0}").format(title),
+			subject=subject,
 			template=template,
-			args={"title": title, "invite_link": invite_link},
+			args={
+				"title": title,
+				"invite_link": invite_link,
+				"inviter": inviter,
+				"company": company,
+				"role": self.role,
+				"email": self.email,
+				"days": INVITATION_DAYS,
+			},
 			now=True,
 		)
 		self.db_set("email_sent_at", frappe.utils.now())
@@ -116,10 +134,10 @@ class CRMInvitation(Document):
 
 
 def expire_invitations():
-	"""expire invitations after 3 days"""
+	"""expire invitations after INVITATION_DAYS days"""
 	from frappe.utils import add_days, now
 
-	days = 3
+	days = INVITATION_DAYS
 	invitations_to_expire = frappe.db.get_all(
 		"CRM Invitation", filters={"status": "Pending", "creation": ["<", add_days(now(), -days)]}
 	)
