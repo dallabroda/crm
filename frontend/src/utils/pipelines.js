@@ -132,6 +132,7 @@ export function funnelSection(schemaFields, label) {
     name: 'funnel_fields',
     label,
     opened: true,
+    notInLayout: true,
     columns: [{ name: 'funnel_fields_column', fields }],
   }
 }

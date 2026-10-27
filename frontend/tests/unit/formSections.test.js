@@ -13,6 +13,8 @@ describe('funnelSection', () => {
   it('keeps the visible, unlocked fields in the funnel order', () => {
     let section = funnelSection(schema, 'Card fields')
     expect(section.label).toBe('Card fields')
+    // the layout pencil does not edit this section
+    expect(section.notInLayout).toBe(true)
     expect(section.columns[0].fields.map((f) => f.fieldname)).toEqual([
       'ch_renda',
       'deal_value',
