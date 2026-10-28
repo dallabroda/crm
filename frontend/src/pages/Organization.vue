@@ -145,7 +145,7 @@
         class="flex flex-1 flex-col justify-between overflow-hidden"
       >
         <SidePanelLayout
-          :sections="sections.data"
+          :sections="panelSections"
           doctype="CRM Organization"
           :docname="organization.doc.name"
           @reload="sections.reload"
@@ -248,6 +248,7 @@ import { getMeta } from '@/stores/meta'
 import { usersStore } from '@/stores/users'
 import { statusesStore } from '@/stores/statuses'
 import { getView } from '@/utils/view'
+import { globalFormSections } from '@/utils/pipelines'
 import {
   validateIsImageFile,
   setupCustomizations,
@@ -404,6 +405,24 @@ const sections = createResource({
   auto: true,
   transform: (data) => getParsedSections(data),
 })
+
+// The company's form of organizations (dynamic forms, credtech#181): its
+// fields in its order once saved; created fields show up by themselves
+const formSchema = createResource({
+  url: 'crm.api.forms.get_form_schema',
+  cache: ['formSchema', 'CRM Organization'],
+  params: { doctype: 'CRM Organization' },
+  auto: true,
+})
+
+const panelSections = computed(() =>
+  getParsedSections(
+    globalFormSections(sections.data, formSchema.data, {
+      form: __('Organization fields'),
+      created: __('Created fields'),
+    }),
+  ),
+)
 
 function getParsedSections(_sections) {
   return _sections.map((section) => {

@@ -202,6 +202,7 @@ import { usersStore } from '@/stores/users.js'
 import { organizationsStore } from '@/stores/organizations.js'
 import { statusesStore } from '@/stores/statuses'
 import { callEnabled } from '@/composables/telephony'
+import { globalFormSections } from '@/utils/pipelines'
 import {
   Breadcrumbs,
   Avatar,
@@ -358,9 +359,22 @@ const sections = createResource({
   auto: true,
 })
 
+// The company's form of contacts (dynamic forms, credtech#181): its fields in
+// its order once saved; created fields show up by themselves
+const formSchema = createResource({
+  url: 'crm.api.forms.get_form_schema',
+  cache: ['formSchema', 'Contact'],
+  params: { doctype: 'Contact' },
+  auto: true,
+})
+
 const parsedSections = computed(() => {
   if (!sections.data) return []
-  return sections.data.map((section) => ({
+  let panel = globalFormSections(sections.data, formSchema.data, {
+    form: __('Contact fields'),
+    created: __('Created fields'),
+  })
+  return panel.map((section) => ({
     ...section,
     columns: section.columns.map((column) => ({
       ...column,
