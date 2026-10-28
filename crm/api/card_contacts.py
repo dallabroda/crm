@@ -25,7 +25,9 @@ def before_validate(doc, method=None):
 	if doc.second_organization and doc.second_organization == doc.organization:
 		frappe.throw(_("The second organization must be another organization."))
 	if doc.is_new() and not doc.contacts_from and doc.pipeline:
-		doc.contacts_from = frappe.db.get_value("CRM Pipeline", doc.pipeline, "default_contacts_from") or FIRST
+		doc.contacts_from = (
+			frappe.db.get_value("CRM Pipeline", doc.pipeline, "default_contacts_from") or FIRST
+		)
 
 
 def chosen_organizations(doc) -> list[tuple[str, str]]:

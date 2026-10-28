@@ -618,7 +618,10 @@ function parsedSection(section, editButtonAdded) {
     section = { ...section, ...overrides }
   }
 
-  let isContactSection = section.name == 'contacts_section'
+  // sections drawn by the page (no layout fields): always shown, no pencil
+  let isContactSection = ['contacts_section', 'organization_contacts'].includes(
+    section.name,
+  )
   // the funnel's section (credtech#179) is not in the layout: its pencil would
   // edit something else, so the pencil goes to the next section
   section.showEditButton = !(

@@ -296,6 +296,11 @@
                 {{ __('No Contacts Added') }}
               </div>
             </div>
+            <OrganizationContacts
+              v-else-if="section.name == 'organization_contacts'"
+              :deal="dealId"
+              :version="`${doc.organization}|${doc.second_organization}|${doc.contacts_from}`"
+            />
           </template>
         </SidePanelLayout>
       </div>
@@ -409,6 +414,7 @@ import ContactModal from '@/components/Modals/ContactModal.vue'
 import Link from '@/components/Controls/Link.vue'
 import Section from '@/components/CollapsibleSection.vue'
 import SidePanelLayout from '@/components/SidePanelLayout.vue'
+import OrganizationContacts from '@/components/Pipelines/OrganizationContacts.vue'
 import SLASection from '@/components/SLASection.vue'
 import CustomActions from '@/components/CustomActions.vue'
 import EnrichFromWebsite from '@/components/EnrichFromWebsite.vue'
@@ -1177,8 +1183,24 @@ const visibleSections = computed(() => {
       fieldSetup.value || {},
     )
   }
-  return restrictOwner(base, assignableUsers.value)
+  return withOrganizationContacts(restrictOwner(base, assignableUsers.value))
 })
+
+// A card with two organizations shows whose contacts it uses, after the card's
+// own contacts (credtech#195); with one organization nothing changes
+function withOrganizationContacts(sections) {
+  if (!doc.value?.second_organization) return sections
+  let section = {
+    name: 'organization_contacts',
+    label: __('Organization contacts'),
+    opened: true,
+    columns: [{ name: 'organization_contacts_column', fields: [] }],
+  }
+  let at = sections.findIndex((s) => s.name === 'contacts_section')
+  return at < 0
+    ? [...sections, section]
+    : [...sections.slice(0, at + 1), section, ...sections.slice(at + 1)]
+}
 
 // A stage change the server rejects for empty required fields asks for them
 const missingFields = ref(null)
