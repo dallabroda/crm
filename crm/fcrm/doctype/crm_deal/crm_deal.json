@@ -9,6 +9,7 @@
  "field_order": [
   "organization_tab",
   "naming_series",
+  "deal_name",
   "organization",
   "second_organization",
   "contacts_from",
@@ -542,12 +543,23 @@
    "fieldtype": "Select",
    "label": "Contacts from",
    "options": "\nOrganization\nSecond organization\nBoth"
+  },
+  {
+   "bold": 1,
+   "description": "The card's name, shown as its title. Filled with the organization or the person when left empty (credtech#182).",
+   "fieldname": "deal_name",
+   "fieldtype": "Data",
+   "in_global_search": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Card Name",
+   "length": 140
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-10-28 18:00:00.000000",
+ "modified": "2026-10-28 23:00:00.000000",
  "modified_by": "Administrator",
  "module": "FCRM",
  "name": "CRM Deal",
@@ -596,7 +608,8 @@
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],
- "title_field": "organization",
+ "title_field": "deal_name",
  "track_changes": 1,
- "track_seen": 1
+ "track_seen": 1,
+ "search_fields": "organization"
 }

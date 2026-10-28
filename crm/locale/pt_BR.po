@@ -12341,3 +12341,12 @@ msgstr "Use Nova anotação para escrever algo sobre este cadastro."
 
 msgid "More"
 msgstr "Mais"
+
+msgid "Card Name"
+msgstr "Nome do card"
+
+msgid "New card"
+msgstr "Novo card"
+
+msgid "The card's name, shown as its title. Filled with the organization or the person when left empty (credtech#182)."
+msgstr "Nome do card, mostrado como título. Se ficar vazio, recebe o nome da organização ou da pessoa."

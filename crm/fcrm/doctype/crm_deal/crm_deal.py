@@ -40,6 +40,7 @@ class CRMDeal(Document):
 		contacts: DF.Table[CRMContacts]
 		contacts_from: DF.Literal["", "Organization", "Second organization", "Both"]
 		currency: DF.Link | None
+		deal_name: DF.Data | None
 		deal_owner: DF.Link | None
 		deal_value: DF.Currency
 		email: DF.Data | None
@@ -93,6 +94,12 @@ class CRMDeal(Document):
 
 	def before_validate(self):
 		self.set_sla()
+		self.set_card_name()
+
+	def set_card_name(self):
+		"""The card's name is always filled (credtech#182): left empty, by a person or by an automatic entry (site,
+		ads, SmartChat, lead conversion), it takes the organization's name, else the person's."""
+		self.deal_name = (self.deal_name or "").strip() or default_card_name(self)
 
 	def validate(self):
 		self.validate_status()
@@ -361,6 +368,12 @@ class CRMDeal(Document):
 	def default_list_data():
 		columns = [
 			{
+				"label": "Card Name",
+				"type": "Data",
+				"key": "deal_name",
+				"width": "14rem",
+			},
+			{
 				"label": "Organization",
 				"type": "Link",
 				"key": "organization",
@@ -407,6 +420,7 @@ class CRMDeal(Document):
 			},
 		]
 		rows = [
+			"deal_name",
 			"name",
 			"organization",
 			"annual_revenue",
@@ -428,12 +442,32 @@ class CRMDeal(Document):
 	def default_kanban_settings():
 		return {
 			"column_field": "status",
-			"title_field": "organization",
+			"title_field": "deal_name",
 			# The card's own value and owner (annual_revenue is the organization's, usually empty);
 			# no _assign: it is almost always the owner again
 			"kanban_fields": '["deal_value", "deal_owner", "modified"]',
 		}
 
+
+
+
+def default_card_name(doc) -> str:
+	"""Organization, else the primary contact, else the person on the card, else its e-mail or phone."""
+	if doc.get("organization"):
+		return doc.organization
+	contact = next((c.contact for c in doc.get("contacts") or [] if c.is_primary), None) or next(
+		(c.contact for c in doc.get("contacts") or []), None
+	)
+	if contact:
+		name = frappe.db.get_value("Contact", contact, "full_name")
+		if name:
+			return name
+	person = " ".join(p for p in (doc.get("first_name"), doc.get("last_name")) if p)
+	if person.strip():
+		return person.strip()
+	if doc.get("lead") and (lead_name := frappe.db.get_value("CRM Lead", doc.lead, "lead_name")):
+		return lead_name
+	return doc.get("email") or doc.get("mobile_no") or _("New card")
 
 @frappe.whitelist()
 def add_contact(deal: str, contact: str):

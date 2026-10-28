@@ -16,7 +16,7 @@ FORM_DOCTYPES = (DEAL, "Contact", "CRM Organization")
 CREATED_PREFIX = "ch_"
 CREATED_FIELD_LIMIT = 60
 # Always shown and editable: a card cannot exist without them
-LOCKED_FIELDS = ("pipeline", "status", "deal_owner")
+LOCKED_FIELDS = ("deal_name", "pipeline", "status", "deal_owner")
 STANDARD_FIELDS = (
 	"organization",
 	# offered in every funnel, but a funnel uses it only when someone adds it (credtech#195)

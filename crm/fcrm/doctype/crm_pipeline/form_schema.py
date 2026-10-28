@@ -80,7 +80,8 @@ def _locked_rows(doctype: str, meta) -> list[dict]:
 				{
 					"fieldname": fieldname,
 					"visible": 1,
-					"required": int(bool(df.reqd)),
+					# the card's name is required on screen; the server fills it when an entry leaves it empty
+					"required": int(bool(df.reqd) or fieldname == "deal_name"),
 					"read_only": 0,
 					"locked": 1,
 				}
