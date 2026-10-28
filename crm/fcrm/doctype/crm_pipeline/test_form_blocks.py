@@ -39,6 +39,13 @@ class TestFormBlocks(FrappeTestCase):
 			stage=self.proposal,
 			block=catalog.ORGANIZATION,
 		)
+		# the contact's mobile is in the funnel but only shows (and is required) in the proposal stage
+		save_form_config(
+			"CRM Deal",
+			[{"fieldname": "mobile_no", "visible": 0}],
+			self.pipeline["name"],
+			block=catalog.CONTACT,
+		)
 		save_form_config(
 			"CRM Deal",
 			[{"fieldname": "mobile_no", "visible": 1, "required": 1}],
