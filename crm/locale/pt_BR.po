@@ -11733,6 +11733,135 @@ msgstr "Sem espaço para este campo"
 msgid "Room for {0} more text, list or link fields"
 msgstr "Espaço para mais {0} campos de texto, lista ou vínculo"
 
+msgid "API"
+msgstr "API"
+
+msgid "Keys for other systems to read and write your cards, contacts and organizations. Each key only reaches the funnels you choose and does not take a user seat."
+msgstr "Chaves para outros sistemas lerem e gravarem seus cards, contatos e empresas. Cada chave só alcança os funis que você escolher e não ocupa vaga de usuário."
+
+msgid "New key"
+msgstr "Nova chave"
+
+msgid "The old API keys stopped on {0}."
+msgstr "As chaves antigas da API pararam em {0}."
+
+msgid "The old API keys stop on {0}."
+msgstr "As chaves antigas da API param em {0}."
+
+msgid "Create a key here for each integration and replace it in the system that uses it. Users with an old key: {0}."
+msgstr "Crie aqui uma chave para cada integração e troque no sistema que a usa. Usuários com chave antiga: {0}."
+
+msgid "Your company can have up to {0} active keys. Revoke one to create another."
+msgstr "Sua empresa pode ter até {0} chaves ativas. Revogue uma para criar outra."
+
+msgid "No API keys yet."
+msgstr "Nenhuma chave da API ainda."
+
+msgid "Revoked"
+msgstr "Revogada"
+
+msgid "Confirm new secret"
+msgstr "Confirmar novo segredo"
+
+msgid "New secret"
+msgstr "Novo segredo"
+
+msgid "Confirm revoke"
+msgstr "Confirmar revogação"
+
+msgid "Revoke"
+msgstr "Revogar"
+
+msgid "The current secret stops working right away."
+msgstr "O segredo atual para de funcionar na hora."
+
+msgid "The key stops working right away. This cannot be undone."
+msgstr "A chave para de funcionar na hora. Isso não pode ser desfeito."
+
+msgid "Permissions: {0}"
+msgstr "Permissões: {0}"
+
+msgid "Funnels: {0}"
+msgstr "Funis: {0}"
+
+msgid "IPs: {0}"
+msgstr "IPs: {0}"
+
+msgid "Valid until {0}"
+msgstr "Vale até {0}"
+
+msgid "Last used {0} from {1}"
+msgstr "Último uso em {0}, de {1}"
+
+msgid "Never used"
+msgstr "Nunca usada"
+
+msgid "Created by {0} on {1}"
+msgstr "Criada por {0} em {1}"
+
+msgid "Edit API key"
+msgstr "Editar chave da API"
+
+msgid "New API key"
+msgstr "Nova chave da API"
+
+msgid "e.g. ERP, website, data warehouse"
+msgstr "ex.: ERP, site, data warehouse"
+
+msgid "Permissions"
+msgstr "Permissões"
+
+msgid "Write"
+msgstr "Escrita"
+
+msgid "Fields and rules of the stages (admin)"
+msgstr "Campos e regras das etapas (admin)"
+
+msgid "The key can change which fields the chosen funnels use and the rules of each stage (visible, required, read-only)."
+msgstr "A chave pode mudar quais campos os funis escolhidos usam e as regras de cada etapa (visível, obrigatório, só leitura)."
+
+msgid "Allowed IPs (optional)"
+msgstr "IPs permitidos (opcional)"
+
+msgid "One IP address or range per line"
+msgstr "Um endereço IP ou faixa por linha"
+
+msgid "Valid until (optional)"
+msgstr "Vale até (opcional)"
+
+msgid "Create key"
+msgstr "Criar chave"
+
+msgid "Copy the key now"
+msgstr "Copie a chave agora"
+
+msgid "This is the only time the key is shown. Store it in the system that will use it, sent as the header \"Authorization: Bearer <key>\"."
+msgstr "Esta é a única vez que a chave aparece. Guarde no sistema que vai usá-la, enviada no cabeçalho \"Authorization: Bearer <chave>\"."
+
+msgid "Something went wrong. Try again."
+msgstr "Algo deu errado. Tente de novo."
+
+msgid "Key saved"
+msgstr "Chave salva"
+
+msgid "Key revoked"
+msgstr "Chave revogada"
+
+msgid "In use"
+msgstr "Em uso"
+
+msgid "read"
+msgstr "ler"
+
+msgid "write"
+msgstr "escrever"
+
+msgid "create"
+msgstr "criar"
+
+msgid "Incoming contacts"
+msgstr "Contatos de entrada"
+
 #: frontend/src/pages/Deal.vue
 #: frontend/src/components/Modals/DealModal.vue
 msgid "Card fields"
