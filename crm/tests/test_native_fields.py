@@ -22,8 +22,10 @@ class TestNativeFields(FrappeTestCase):
 			self.assertNotIn(fieldname, organization)
 		self.assertIn("no_of_employees", organization)
 		contact = self.catalog("Contact")
-		for fieldname in ("salutation", "gender", "address", "middle_name", "last_name", "company_name"):
+		for fieldname in ("salutation", "gender", "address", "middle_name", "last_name"):
 			self.assertNotIn(fieldname, contact)
+		# the contact's organization, not a free-text name
+		self.assertIn("company_name", contact)
 		self.assertIn("phone", contact)
 		self.assertIn("first_name", contact)
 
