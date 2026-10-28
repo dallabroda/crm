@@ -103,4 +103,32 @@ describe('useDocument setValue.onError toasts', () => {
       'Mandatory field error: first_name, email',
     )
   })
+
+  it('translates field labels extracted from MandatoryError messages', () => {
+    const prev = globalThis.__
+    const dict = {
+      'Organization Name': 'Nome da Organização',
+      'Mandatory field error: {0}': 'Erro de campo obrigatório: {0}',
+    }
+    globalThis.__ = (msg, args) => {
+      let str = dict[msg] || msg
+      if (Array.isArray(args)) {
+        args.forEach((arg, i) => {
+          str = str.replace(`{${i}}`, arg)
+        })
+      }
+      return str
+    }
+    try {
+      onError({
+        exc_type: 'MandatoryError',
+        messages: ['Error: Value missing for CRM Organization: Organization Name'],
+      })
+      expect(toast.error).toHaveBeenCalledWith(
+        'Erro de campo obrigatório: Nome da Organização',
+      )
+    } finally {
+      globalThis.__ = prev
+    }
+  })
 })
