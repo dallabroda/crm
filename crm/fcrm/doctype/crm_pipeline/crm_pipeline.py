@@ -37,6 +37,7 @@ class CRMPipeline(Document):
 			"violet",
 			"purple",
 		]
+		default_contacts_from: DF.Literal["Organization", "Second organization", "Both"]
 		field_rules: DF.Table[CRMPipelineFieldRule]
 		fields: DF.Table[CRMPipelineField]
 		icon: DF.Data | None
@@ -44,6 +45,7 @@ class CRMPipeline(Document):
 		members: DF.Table[CRMPipelineMember]
 		pipeline_name: DF.Data
 		position: DF.Int
+		second_organization_label: DF.Data | None
 	# end: auto-generated types
 
 	def validate(self):

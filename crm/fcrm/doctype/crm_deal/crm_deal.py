@@ -38,6 +38,7 @@ class CRMDeal(Document):
 		communication_status: DF.Link | None
 		contact: DF.Link | None
 		contacts: DF.Table[CRMContacts]
+		contacts_from: DF.Literal["", "Organization", "Second organization", "Both"]
 		currency: DF.Link | None
 		deal_owner: DF.Link | None
 		deal_value: DF.Currency
@@ -72,6 +73,7 @@ class CRMDeal(Document):
 		response_by: DF.Datetime | None
 		rolling_responses: DF.Table[CRMRollingResponseTime]
 		salutation: DF.Link | None
+		second_organization: DF.Link | None
 		sla: DF.Link | None
 		sla_creation: DF.Datetime | None
 		sla_status: DF.Literal["", "First Response Due", "Rolling Response Due", "Failed", "Fulfilled"]

@@ -53,6 +53,22 @@
           <Switch v-model="isActive" :disabled="!canManage" />
           <span class="text-base text-ink-gray-7">{{ __('Active') }}</span>
         </div>
+        <!-- the card's second organization in this funnel (credtech#195) -->
+        <FormControl
+          v-model="form.second_organization_label"
+          :label="__('Name of the second organization')"
+          :disabled="!canManage"
+          :placeholder="__('Second organization')"
+          :description="__('e.g. Debtor, Guarantor')"
+        />
+        <FormControl
+          type="select"
+          :label="__('Contacts of cards with two organizations')"
+          :options="contactsFromOptions"
+          :disabled="!canManage"
+          :model-value="form.default_contacts_from"
+          @update:model-value="(v) => (form.default_contacts_from = v)"
+        />
       </section>
 
       <!-- Stages -->
@@ -255,6 +271,8 @@ const form = reactive({
   pipeline_name: '',
   color: 'blue',
   is_active: 1,
+  second_organization_label: '',
+  default_contacts_from: 'Organization',
   stages: [],
   members: [],
   distribution: defaultDistribution(),
@@ -272,6 +290,11 @@ const isActive = computed({
 })
 
 const colorOptions = colors.map((c) => ({ label: __(c), value: c }))
+const contactsFromOptions = [
+  { label: __('Organization'), value: 'Organization' },
+  { label: __('Second organization'), value: 'Second organization' },
+  { label: __('Both'), value: 'Both' },
+]
 const typeOptions = [
   { label: __('Open'), value: 'Open' },
   { label: __('Ongoing'), value: 'Ongoing' },
@@ -377,6 +400,8 @@ function payload() {
     pipeline_name: form.pipeline_name.trim(),
     color: form.color,
     is_active: form.is_active,
+    second_organization_label: (form.second_organization_label || '').trim(),
+    default_contacts_from: form.default_contacts_from || 'Organization',
     stages: form.stages.map((s) => ({
       ...(s.name ? { name: s.name } : {}),
       deal_status: s.deal_status.trim(),
@@ -434,6 +459,8 @@ function fill(config) {
   form.pipeline_name = config.pipeline_name
   form.color = config.color || 'blue'
   form.is_active = config.is_active ?? 1
+  form.second_organization_label = config.second_organization_label || ''
+  form.default_contacts_from = config.default_contacts_from || 'Organization'
   form.stages = (config.stages || []).map((s) => ({ ...s, _key: s.name }))
   form.members = (config.members || []).map((m) => ({
     user: m.user,

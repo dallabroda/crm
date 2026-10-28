@@ -12180,3 +12180,116 @@ msgstr "1 campo está oculto neste formulário."
 #: frontend/src/components/Settings/FormCustomization/FormPreview.vue
 msgid "{0} fields are hidden in this form."
 msgstr "{0} campos estão ocultos neste formulário."
+
+#: frontend/src/components/Pipelines/OrganizationContacts.vue
+msgid "Show contacts from"
+msgstr "Mostrar contatos de"
+
+#: frontend/src/components/Pipelines/OrganizationContacts.vue
+msgid "Call"
+msgstr "Ligar"
+
+#: frontend/src/components/Pipelines/OrganizationContacts.vue
+msgid "No contacts in this organization yet."
+msgstr "Ainda não há contatos nesta organização."
+
+#: crm/api/card_contacts.py
+#: crm/fcrm/doctype/crm_deal/crm_deal.json
+msgid "Second organization"
+msgstr "Segunda organização"
+
+#: frontend/src/components/Pipelines/OrganizationContacts.vue
+msgid "Both"
+msgstr "As duas"
+
+#: frontend/src/components/Pipelines/OrganizationContacts.vue
+msgid "Receita record"
+msgstr "Cadastro da Receita"
+
+#: frontend/src/components/Pipelines/OrganizationContacts.vue
+msgid "Could not save the choice"
+msgstr "Não foi possível salvar a escolha"
+
+#: frontend/src/pages/Deal.vue
+msgid "Organization contacts"
+msgstr "Contatos das organizações"
+
+#: frontend/src/components/Settings/Pipelines/PipelineEditor.vue
+msgid "Name of the second organization"
+msgstr "Nome da segunda organização"
+
+#: frontend/src/components/Settings/Pipelines/PipelineEditor.vue
+msgid "e.g. Debtor, Guarantor"
+msgstr "ex.: Sacado, Avalista"
+
+#: frontend/src/components/Settings/Pipelines/PipelineEditor.vue
+msgid "Contacts of cards with two organizations"
+msgstr "Contatos dos cards com duas organizações"
+
+#: crm/api/card_contacts.py
+msgid "The second organization must be another organization."
+msgstr "A segunda organização precisa ser outra organização."
+
+#: crm/fcrm/doctype/crm_deal/crm_deal.json
+msgid "Contacts from"
+msgstr "Contatos de"
+
+#: crm/fcrm/doctype/crm_pipeline/crm_pipeline.json
+msgid "Second organization label"
+msgstr "Nome da segunda organização"
+
+#: crm/fcrm/doctype/crm_pipeline/crm_pipeline.json
+msgid "Contacts from (default)"
+msgstr "Contatos de (padrão)"
+
+#: crm/fcrm/doctype/crm_deal/crm_deal.json
+msgid "A second company of the card (e.g. the debtor of a receivable). Its label can change per funnel."
+msgstr "Uma segunda empresa do card (ex.: o sacado de um recebível). O nome pode mudar por funil."
+
+#: crm/fcrm/doctype/crm_deal/crm_deal.json
+msgid "With two organizations: whose contacts the card shows."
+msgstr "Com duas organizações: de quem são os contatos que o card mostra."
+
+#: crm/fcrm/doctype/crm_pipeline/crm_pipeline.json
+msgid "Name of the card's second organization in this funnel (e.g. Debtor). Empty: Second organization."
+msgstr "Nome da segunda organização do card neste funil (ex.: Sacado). Vazio: Segunda organização."
+
+#: crm/fcrm/doctype/crm_pipeline/crm_pipeline.json
+msgid "Whose contacts a new card with two organizations shows."
+msgstr "De quem são os contatos que um card novo com duas organizações mostra."
+
+msgid "Send WhatsApp"
+msgstr "Enviar WhatsApp"
+
+msgid "Loading SmartChat inboxes..."
+msgstr "Carregando as caixas do SmartChat..."
+
+msgid "Connect the company's SmartChat first (Settings › Integrations › Lead Sources)."
+msgstr "Conecte primeiro o SmartChat da empresa (Configurações › Integrações › Origens)."
+
+msgid "You are not a member of any WhatsApp inbox in SmartChat."
+msgstr "Você não é membro de nenhuma caixa de WhatsApp no SmartChat."
+
+msgid "Message sent through SmartChat."
+msgstr "Mensagem enviada pelo SmartChat."
+
+msgid "Outside the 24-hour window, WhatsApp only accepts a template approved by Meta."
+msgstr "Fora da janela de 24 horas, o WhatsApp só aceita um modelo aprovado pela Meta."
+
+msgid "This number has no approved text template."
+msgstr "Este número não tem modelo de texto aprovado."
+
+msgid "Template"
+msgstr "Modelo"
+
+msgid "Open in SmartChat"
+msgstr "Abrir no SmartChat"
+
+msgid "QR Code"
+msgstr "QR Code"
+
+msgid "WhatsApp sent"
+msgstr "WhatsApp enviado"
+
+msgid "Could not send the message"
+msgstr "Não foi possível enviar a mensagem"

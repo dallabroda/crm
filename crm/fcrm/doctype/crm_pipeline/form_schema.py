@@ -38,6 +38,14 @@ def get_form_schema(doctype: str, pipeline: str | None = None, stage: str | None
 	meta = frappe.get_meta(doctype)
 	fields = [_field(doctype, meta, row) for row in rows]
 	schema = {"doctype": doctype, "pipeline": pipeline, "stage": stage, "fields": [f for f in fields if f]}
+	if doctype == catalog.DEAL:
+		# the funnel may name the card's second organization (e.g. "Debtor", credtech#195)
+		from crm.api.card_contacts import second_organization_label
+
+		schema["second_organization_label"] = second_organization_label(pipeline)
+		for field in schema["fields"]:
+			if field["fieldname"] == "second_organization":
+				field["label"] = schema["second_organization_label"]
 	if doctype != catalog.DEAL:
 		# until the company saves this form, its screens keep the side panel layout
 		schema["configured"] = frappe.db.exists(FORM_CONFIG, doctype) is not None

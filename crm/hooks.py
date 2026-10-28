@@ -301,6 +301,8 @@ doc_events = {
 	# the company's form of companies: required fields (credtech#181)
 	"CRM Organization": {"validate": ["crm.fcrm.doctype.crm_pipeline.form_schema.validate_required"]},
 	"CRM Deal": {
+		# second organization and whose contacts the card shows (credtech#195)
+		"before_validate": ["crm.api.card_contacts.before_validate"],
 		"on_update": [
 			"crm.fcrm.doctype.erpnext_crm_settings.erpnext_crm_settings.create_customer_in_erpnext",
 			"crm.automation.events.on_deal_update",

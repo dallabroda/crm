@@ -85,6 +85,9 @@ def get_pipeline_config(pipeline: str) -> dict:
 		"icon": doc.icon,
 		"position": doc.position,
 		"is_active": doc.is_active,
+		# the card's second organization in this funnel (credtech#195)
+		"second_organization_label": doc.second_organization_label or "",
+		"default_contacts_from": doc.default_contacts_from or "Organization",
 		"my_role": role,
 		"stages": _stages(doc.name),
 		"distribution": distribution.load(doc.distribution),
@@ -126,7 +129,15 @@ def save_pipeline(doc: str | dict) -> dict:
 			frappe.throw(_("Only pipeline owners can create pipelines."), frappe.PermissionError)
 		pipeline = frappe.new_doc("CRM Pipeline")
 
-	for key in ("pipeline_name", "color", "icon", "position", "is_active"):
+	for key in (
+		"pipeline_name",
+		"color",
+		"icon",
+		"position",
+		"is_active",
+		"second_organization_label",
+		"default_contacts_from",
+	):
 		if key in data:
 			pipeline.set(key, data[key])
 	if "distribution" in data:
