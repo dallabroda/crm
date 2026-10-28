@@ -350,7 +350,8 @@ class TestCRMDeal(FrappeTestCase):
 
 		# Verify contact was created
 		contact = frappe.get_doc("Contact", deal.contacts[0].contact)
-		self.assertEqual(contact.first_name, "Deal")
+		# a contact keeps one full name (owner decision of 28/10/2026)
+		self.assertEqual(contact.first_name, "Deal Creator")
 		self.assertEqual(contact.email_id, "dealcreator@example.com")
 
 	def test_create_deal_with_existing_organization(self):

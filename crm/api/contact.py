@@ -6,6 +6,17 @@ def validate(doc, method):
 	update_deals_email_mobile_no(doc)
 
 
+def single_name(doc, method=None):
+	"""A contact has one name field, the full name (owner decision of 28/10/2026): a middle or last name that
+	comes from somewhere (a converted lead, an import, the API) joins the first name."""
+	parts = [doc.get("first_name"), doc.get("middle_name"), doc.get("last_name")]
+	if not (doc.get("middle_name") or doc.get("last_name")):
+		return
+	doc.first_name = " ".join(p.strip() for p in parts if p and p.strip())
+	doc.middle_name = None
+	doc.last_name = None
+
+
 def update_deals_email_mobile_no(doc):
 	linked_deals = frappe.get_all(
 		"CRM Contacts",

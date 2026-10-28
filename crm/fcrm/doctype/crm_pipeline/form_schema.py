@@ -118,9 +118,19 @@ def _card_rows(pipeline: str, stage: str | None, block: str = catalog.CARD) -> l
 	return rows
 
 
-# Fields of contacts and companies that are not part of their form: bookkeeping of lookups, sync and system data
+# Fields of contacts and companies that are not part of their form: bookkeeping of lookups, sync and system data,
+# and repeated or unused fields the owner took out on 28/10/2026 (the values stay saved): territory; the Receita
+# legal and trade names (the organization name becomes the legal name when the CNPJ is filled); the employee
+# count and range found by the company lookup (the employees field keeps the standard range); a contact's
+# salutation, gender, address, middle and last name (one full name). A contact's company_name stays: it is the
+# contact's organization (the screens show it as Organization)
 NOT_IN_FORM = {
 	"CRM Organization": (
+		"territory",
+		"legal_name",
+		"trade_name",
+		"employee_count",
+		"employee_range",
 		"currency",
 		"exchange_rate",
 		"organization_logo",
@@ -129,6 +139,11 @@ NOT_IN_FORM = {
 		"employee_source",
 	),
 	"Contact": (
+		"salutation",
+		"gender",
+		"address",
+		"middle_name",
+		"last_name",
 		"full_name",
 		"user",
 		"image",
