@@ -9,7 +9,13 @@ export const SCOPE_ROWS = [
     read: 'organizations_read',
     write: 'organizations_write',
   },
-  { label: 'Leads', read: null, write: 'leads_write', writeLabel: 'Create' },
+  // CRM Lead: the incoming contact that becomes a card (the word "lead" is not shown, credtech#192)
+  {
+    label: 'Incoming contacts',
+    read: null,
+    write: 'leads_write',
+    writeLabel: 'Create',
+  },
   { label: 'Funnels', read: 'pipelines_read', write: null },
 ]
 export const ADMIN_SCOPE = 'fields_admin'
@@ -19,6 +25,34 @@ export function needsPipelines(scopes) {
   return ['cards_read', 'cards_write', ADMIN_SCOPE].some((s) =>
     scopes.includes(s),
   )
+}
+
+// "Cards: read / write, Contacts: read": one part per resource, words translated by `t`
+export function scopeSummary(scopes, t = (text) => __(text)) {
+  let parts = SCOPE_ROWS.map((row) => {
+    let verbs = []
+    if (row.read && scopes.includes(row.read)) verbs.push(t('read'))
+    if (row.write && scopes.includes(row.write))
+      verbs.push(t(row.writeLabel ? row.writeLabel.toLowerCase() : 'write'))
+    return verbs.length ? `${t(row.label)}: ${verbs.join(' / ')}` : null
+  }).filter(Boolean)
+  if (scopes.includes(ADMIN_SCOPE))
+    parts.push(t('Fields and rules of the stages (admin)'))
+  return parts.join(', ')
+}
+
+// "28/10/2026" from the server's "2026-10-28[ 05:37:12]" (no timezone change: it is already the company's)
+export function brDate(value) {
+  if (!value) return ''
+  let [year, month, day] = String(value).slice(0, 10).split('-')
+  return `${day}/${month}/${year}`
+}
+
+// "28/10/2026 05:37"
+export function brDateTime(value) {
+  if (!value) return ''
+  let time = String(value).slice(11, 16)
+  return time ? `${brDate(value)} ${time}` : brDate(value)
 }
 
 // "DD/MM" for the warning about the old keys

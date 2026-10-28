@@ -135,7 +135,7 @@
           {{ __('The key stops working right away. This cannot be undone.') }}
         </p>
         <div class="flex flex-wrap gap-x-6 gap-y-1 text-p-sm text-ink-gray-6">
-          <span>{{ __('Permissions: {0}', [scopeLabels(key.scopes)]) }}</span>
+          <span>{{ __('Permissions: {0}', [scopeSummary(key.scopes)]) }}</span>
           <span v-if="key.pipelines.length">
             {{ __('Funnels: {0}', [pipelineLabels(key.pipelines)]) }}
           </span>
@@ -143,13 +143,13 @@
             {{ __('IPs: {0}', [key.allowed_ips.split('\n').join(', ')]) }}
           </span>
           <span v-if="key.expires_on">
-            {{ __('Valid until {0}', [formatDate(key.expires_on, '', true)]) }}
+            {{ __('Valid until {0}', [brDate(key.expires_on)]) }}
           </span>
           <span>
             {{
               key.last_used_on
                 ? __('Last used {0} from {1}', [
-                    formatDate(key.last_used_on),
+                    brDateTime(key.last_used_on),
                     key.last_used_ip,
                   ])
                 : __('Never used')
@@ -159,7 +159,7 @@
             {{
               __('Created by {0} on {1}', [
                 key.created_by,
-                formatDate(key.created_on, '', true),
+                brDate(key.created_on),
               ])
             }}
           </span>
@@ -294,15 +294,18 @@ import {
 } from 'frappe-ui'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { pipelinesStore } from '@/stores/pipelines'
-import { copyToClipboard, formatDate } from '@/utils'
+import { copyToClipboard } from '@/utils'
 import { apiKeys, apiKeysApi, loadApiKeys } from './apiKeysApi'
 import {
   ADMIN_SCOPE,
   SCOPE_ROWS,
+  brDate,
+  brDateTime,
   cleanIps,
   dayMonth,
   legacyStopped,
   needsPipelines,
+  scopeSummary,
 } from './apiKeysUtils'
 
 const pipelines = pipelinesStore()
@@ -336,13 +339,6 @@ onMounted(() => {
   loadApiKeys()
   pipelines.ensureLoaded()
 })
-
-function scopeLabels(scopes) {
-  let labels = Object.fromEntries(
-    (data.value?.scopes || []).map((s) => [s.value, s.label]),
-  )
-  return scopes.map((s) => labels[s] || s).join(', ')
-}
 
 function pipelineLabels(names) {
   return names

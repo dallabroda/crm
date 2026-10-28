@@ -11849,3 +11849,15 @@ msgstr "Chave revogada"
 
 msgid "In use"
 msgstr "Em uso"
+
+msgid "read"
+msgstr "ler"
+
+msgid "write"
+msgstr "escrever"
+
+msgid "create"
+msgstr "criar"
+
+msgid "Incoming contacts"
+msgstr "Contatos de entrada"
