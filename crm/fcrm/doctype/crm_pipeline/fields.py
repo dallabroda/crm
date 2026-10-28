@@ -462,6 +462,9 @@ def get_missing_fields(doc, stage: str) -> list[dict]:
 
 			labels = {b: _(b) for b in BLOCKS} | {SECOND_ORGANIZATION: second_organization_label(doc.pipeline)}
 		values = doc if block == CARD else frappe.db.get_value(doctype, record, list(rules), as_dict=True) or {}
+		title = record
+		if doctype == "Contact":
+			title = frappe.db.get_value("Contact", record, "full_name") or record
 		for fieldname in rules:
 			df = meta.get_field(fieldname)
 			if df and is_empty(df, values.get(fieldname)):
@@ -475,6 +478,7 @@ def get_missing_fields(doc, stage: str) -> list[dict]:
 						"block_label": labels[block],
 						"doctype": doctype,
 						"docname": record,
+						"record_title": title,
 					}
 				)
 	return missing

@@ -89,7 +89,7 @@ const groups = computed(() => {
         title:
           f.block === 'Card'
             ? __('Card')
-            : `${f.block_label || __(f.block)}: ${f.docname}`,
+            : `${f.block_label || __(f.block)}: ${f.record_title || f.docname}`,
         fields: [],
       }
       groups.push(group)
