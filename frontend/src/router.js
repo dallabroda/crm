@@ -44,10 +44,11 @@ const routes = [
     component: () => import('@/pages/Dashboard.vue'),
   },
   {
+    // There is no leads list in HubTech CRM (credtech#192): old links open the funnels
     alias: '/leads',
     path: '/leads/view/:viewType?',
     name: 'Leads',
-    component: () => import('@/pages/Leads.vue'),
+    redirect: { name: 'Deals' },
   },
   {
     path: '/leads/:leadId',

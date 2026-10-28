@@ -28,7 +28,7 @@
           </div>
           <ThemeSwitcher
             :logo="brand.logo || CRMLogo"
-            :name="brand.name || 'Cred Hub'"
+            :name="brand.name || 'HubTech CRM'"
           />
         </div>
         <div class="flex items-center justify-between">

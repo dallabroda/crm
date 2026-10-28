@@ -122,10 +122,6 @@ msgstr ""
 msgid "<b>SHORTCUTS</b>"
 msgstr "<b>ATALHOS</b>"
 
-#: frontend/src/components/Settings/EmailTemplate/EditEmailTemplate.vue:96 frontend/src/components/Settings/EmailTemplate/NewEmailTemplate.vue:97
-msgid "<p>Dear {{ lead_name }},</p>\\n\\n<p>This is a reminder for the payment of {{ grand_total }}.</p>\\n\\n<p>Thanks,</p>\\n<p>Frappé</p>"
-msgstr ""
-
 #. Header text in the Frappe CRM Workspace
 #: crm/fcrm/workspace/frappe_crm/frappe_crm.json:3
 msgid "<span class=\"h5\"><b>PORTAL</b></span>"
@@ -153,11 +149,11 @@ msgstr "O funil precisa de pelo menos uma etapa."
 
 #: frontend/src/pages/Leads.vue:246
 msgid "A lead is someone who might buy from you. Add one yourself, import a list, or capture them from a web form."
-msgstr "Um lead é alguém que pode comprar de você. Adicione manualmente, importe uma lista ou capture por um formulário na web."
+msgstr "Um card é uma ação dentro de um funil: uma venda, uma cobrança, uma análise de crédito. Crie à mão, importe uma lista ou receba por um formulário."
 
 #: crm/lead_syncing/doctype/lead_sync_source/lead_sync_source.py:55
 msgid "A lead sync source is already enabled for this Facebook Lead Form!"
-msgstr "Já existe uma fonte de sincronização de leads ativa para este formulário de leads do Facebook!"
+msgstr "Já existe uma fonte de sincronização ativa para este formulário do Facebook!"
 
 #: crm/fcrm/doctype/crm_pipeline/fields.py:155
 msgid "A link field points to a contact or an organization."
@@ -557,7 +553,7 @@ msgstr "Crie, edite e gerencie modelos de e-mail para as comunicações do CRM."
 
 #: frontend/src/components/Settings/LeadSyncing/LeadSyncSources.vue:12
 msgid "Add, edit, and manage sources for automatic lead syncing to your CRM."
-msgstr "Crie, edite e gerencie fontes para sincronizar leads automaticamente com o CRM."
+msgstr "Crie, edite e gerencie fontes para receber contatos automaticamente no CRM."
 
 #. Label of the address (Link) field in DocType 'CRM Organization'
 #: crm/fcrm/doctype/crm_organization/crm_organization.json:84
@@ -681,7 +677,7 @@ msgstr "Qualquer documento"
 
 #: frontend/src/components/Settings/LeadSyncing/FailureLogs.vue:69
 msgid "Any failed lead syncs will show up here"
-msgstr "As sincronizações de leads que falharem aparecerão aqui"
+msgstr "As sincronizações que falharem aparecerão aqui"
 
 #. Label of the app_name (Data) field in DocType 'CRM Twilio Settings'
 #: crm/fcrm/doctype/crm_twilio_settings/crm_twilio_settings.json:109
@@ -933,7 +929,7 @@ msgstr "Atualizar automaticamente o valor esperado do card"
 
 #: frontend/src/components/Settings/AssignmentRules/AssignmentRules.vue:13
 msgid "Auto-assign leads/deals to the right sales user based on predefined conditions."
-msgstr "Atribua leads/cards automaticamente ao vendedor certo com base em condições predefinidas."
+msgstr "Atribua cards automaticamente ao vendedor certo com base em condições predefinidas."
 
 #. Label of the auto_enrich (Check) field in DocType 'CRM Enrichment Settings'
 #: crm/domain_enrichment/doctype/crm_enrichment_settings/crm_enrichment_settings.json:54 frontend/src/components/Settings/Enrichment/GeneralTab.vue:62
@@ -955,31 +951,31 @@ msgstr "Entradas automáticas (formulários, anúncios, e-mail, ligações) com 
 #. Enrichment Settings'
 #: crm/domain_enrichment/doctype/crm_enrichment_settings/crm_enrichment_settings.json:51
 msgid "Automatically enrich a new CRM Lead, Deal or Organization in the background as soon as it is created (requires a website on the record). Only applies to the doctypes enabled above. When off, enrichment is triggered manually with the Enrich button."
-msgstr "Enriquece automaticamente, em segundo plano, um novo lead, card ou organização assim que é criado (o registro precisa ter um site). Vale só para os tipos ativados acima. Quando desligado, o enriquecimento é feito manualmente pelo botão Enriquecer."
+msgstr "Enriquece automaticamente, em segundo plano, um novo card ou organização assim que é criado (o registro precisa ter um site). Vale só para os tipos ativados acima. Quando desligado, o enriquecimento é feito manualmente pelo botão Enriquecer."
 
 #: frontend/src/components/Settings/Enrichment/GeneralTab.vue:66
 msgid "Automatically enrich new Leads, Deals and Organizations in the background when they have a website. When off, use the Enrich button on the record."
-msgstr "Enriquece automaticamente, em segundo plano, novos leads, cards e organizações que tenham site. Quando desligado, use o botão Enriquecer no registro."
+msgstr "Enriquece automaticamente, em segundo plano, novos cards e organizações que tenham site. Quando desligado, use o botão Enriquecer no registro."
 
 #. Description of the 'Reopen lead/deal on new communication' (Check) field in
 #. DocType 'FCRM Settings'
 #: crm/fcrm/doctype/fcrm_settings/fcrm_settings.json:149
 msgid "Automatically sets Communication Status to “Open” for the lead or deal when a new communication is created. Applies only when SLA is enabled"
-msgstr "Define automaticamente o status de comunicação como “Aberto” no lead ou card quando uma nova comunicação é criada. Vale só com o SLA ativado"
+msgstr "Define automaticamente o status de comunicação como “Aberto” no card quando uma nova comunicação é criada. Vale só com o SLA ativado"
 
 #. Description of the 'Mark lead/deal as replied on response' (Check) field in
 #. DocType 'FCRM Settings'
 #: crm/fcrm/doctype/fcrm_settings/fcrm_settings.json:142
 msgid "Automatically sets Communication Status to “Replied” for the lead or deal when a response is received. Applies only when SLA is enabled"
-msgstr "Define automaticamente o status de comunicação como “Respondido” no lead ou card quando uma resposta é recebida. Vale só com o SLA ativado"
+msgstr "Define automaticamente o status de comunicação como “Respondido” no card quando uma resposta é recebida. Vale só com o SLA ativado"
 
 #: frontend/src/components/Settings/GeneralSettings.vue:64
 msgid "Automatically sets communication status to “Open” for the lead or deal when a new communication is created. Applies only when SLA is enabled"
-msgstr "Define automaticamente o status de comunicação como “Aberto” no lead ou card quando uma nova comunicação é criada. Vale só com o SLA ativado"
+msgstr "Define automaticamente o status de comunicação como “Aberto” no card quando uma nova comunicação é criada. Vale só com o SLA ativado"
 
 #: frontend/src/components/Settings/GeneralSettings.vue:42
 msgid "Automatically sets communication status to “Replied” for the lead or deal when a response is received. Applies only when SLA is enabled"
-msgstr "Define automaticamente o status de comunicação como “Respondido” no lead ou card quando uma resposta é recebida. Vale só com o SLA ativado"
+msgstr "Define automaticamente o status de comunicação como “Respondido” no card quando uma resposta é recebida. Vale só com o SLA ativado"
 
 #. Description of the 'Auto update Expected Deal Value' (Check) field in
 #. DocType 'FCRM Settings'
@@ -1048,7 +1044,7 @@ msgstr "Tempo médio entre a criação e o fechamento do card"
 
 #: crm/api/dashboard.py:480
 msgid "Average time taken from lead creation to deal closure"
-msgstr "Tempo médio entre a criação do lead e o fechamento do card"
+msgstr "Tempo médio entre a criação e o fechamento do card"
 
 #: frontend/src/components/Dashboard/AddChartModal.vue:77
 msgid "Avg Deal Value"
@@ -1064,7 +1060,7 @@ msgstr "Tempo médio para fechar um card"
 
 #: frontend/src/components/Dashboard/AddChartModal.vue:79
 msgid "Avg Time to Close a Lead"
-msgstr "Tempo médio para fechar um lead"
+msgstr "Tempo médio para fechar um card"
 
 #: frontend/src/components/Dashboard/AddChartModal.vue:76
 msgid "Avg Won Deal Value"
@@ -1084,7 +1080,7 @@ msgstr "Tempo médio para fechar um card"
 
 #: crm/api/dashboard.py:479
 msgid "Avg. time to close a lead"
-msgstr "Tempo médio para fechar um lead"
+msgstr "Tempo médio para fechar um card"
 
 #: crm/api/dashboard.py:361
 msgid "Avg. won deal value"
@@ -1339,17 +1335,17 @@ msgstr "Convite do CRM"
 #. Name of a DocType
 #: crm/fcrm/doctype/crm_lead/crm_lead.json:494
 msgid "CRM Lead"
-msgstr "Lead"
+msgstr "Contato de entrada"
 
 #. Name of a DocType
 #: crm/fcrm/doctype/crm_lead_source/crm_lead_source.json:36
 msgid "CRM Lead Source"
-msgstr "Origem do lead"
+msgstr "Origem"
 
 #. Name of a DocType
 #: crm/fcrm/doctype/crm_lead_status/crm_lead_status.json:57
 msgid "CRM Lead Status"
-msgstr "Status do lead"
+msgstr "Status de entrada"
 
 #. Name of a DocType
 #: crm/fcrm/doctype/crm_lost_reason/crm_lost_reason.json:33
@@ -1511,7 +1507,7 @@ msgstr "Ligações"
 
 #: frontend/src/pages/CallLogs.vue:57
 msgid "Calls made through Twilio or Exotel are logged here, along with calls you log by hand on a lead or deal."
-msgstr "As chamadas feitas pelo Twilio ou Exotel ficam registradas aqui, junto com as chamadas que você registra manualmente em um lead ou card."
+msgstr "As chamadas feitas pelo Twilio ou Exotel ficam registradas aqui, junto com as chamadas que você registra manualmente em um card."
 
 #: frontend/src/components/FilesUploader/FilesUploaderArea.vue:55
 msgid "Camera"
@@ -1546,11 +1542,11 @@ msgstr "Não é possível alterar o perfil de um usuário com acesso de administ
 #: crm/fcrm/doctype/crm_lead/crm_lead.py:580
 #, python-brace-format
 msgid "Cannot convert a lead with status {0}"
-msgstr "Não é possível converter um lead com status {0}"
+msgstr "Não é possível converter um contato com status {0}"
 
 #: frontend/src/pages/Lead.vue:41 frontend/src/pages/MobileLead.vue:55
 msgid "Cannot convert a lost lead to deal"
-msgstr "Não é possível converter um lead perdido em card"
+msgstr "Não é possível converter um contato perdido em card"
 
 #: crm/fcrm/doctype/fcrm_settings/fcrm_settings.py:70
 #, python-brace-format
@@ -1585,7 +1581,7 @@ msgstr "Capturar"
 
 #: frontend/src/components/Settings/Forms/FormsList.vue:13
 msgid "Capture leads and deals from public forms you embed on your website."
-msgstr "Capture leads e cards a partir de formulários públicos incorporados ao seu site."
+msgstr "Crie cards a partir de formulários públicos incorporados ao seu site."
 
 #: frontend/src/pages/Deal.vue:1184
 msgid "Card moved to the other funnel"
@@ -1678,7 +1674,7 @@ msgstr "Escolha um funil"
 
 #: crm/automation/actions.py:113
 msgid "Choose a lead temperature"
-msgstr "Escolha a temperatura do lead"
+msgstr "Escolha a temperatura do contato"
 
 #: crm/fcrm/doctype/crm_deal/crm_deal.py:132
 msgid "Choose a pipeline for the card."
@@ -1739,7 +1735,7 @@ msgstr "Escolha o funil que recebe os cards criados a partir de e-mails recebido
 
 #: crm/lead_syncing/doctype/lead_sync_source/lead_sync_source.py:40
 msgid "Choose the pipeline that receives these leads."
-msgstr "Escolha o funil que recebe estes leads."
+msgstr "Escolha o funil que recebe estes contatos."
 
 #: frontend/src/components/Settings/WorkflowAutomations/WorkflowParamEditor.vue:41
 msgid "Choose value"
@@ -1755,7 +1751,7 @@ msgstr "Escolha o que este passo faz"
 
 #: frontend/src/components/Settings/Sla/SlaPolicyView.vue:107
 msgid "Choose which leads/deals are affected by this policy."
-msgstr "Escolha quais leads/cards são afetados por esta política."
+msgstr "Escolha quais cards são afetados por esta política."
 
 #: frontend/src/components/Settings/AssignmentRules/AssignmentRuleView.vue:222
 #, python-brace-format
@@ -2002,7 +1998,7 @@ msgstr "Confirmar {0}"
 
 #: frontend/src/components/Settings/ERPNextSettings.vue:431
 msgid "Connect ERPNext to Cred Hub"
-msgstr "Conectar o ERPNext ao Cred Hub"
+msgstr "Conectar o ERPNext ao HubTech CRM"
 
 #: frontend/src/components/Setup/SetupEmail.vue:124
 msgid "Connect account"
@@ -2076,7 +2072,7 @@ msgstr "Contatos"
 
 #: frontend/src/pages/Contacts.vue:56
 msgid "Contacts are the people you talk to at your leads and customers. They are added when you convert a lead, or you can add them here."
-msgstr "Contatos são as pessoas com quem você fala nos seus leads e clientes. Eles são criados quando você converte um lead, ou você pode adicioná-los aqui."
+msgstr "Contatos são as pessoas com quem você fala. Eles são criados junto com os cards que chegam pelas origens, ou você pode adicioná-los aqui."
 
 #. Label of the content (Text Editor) field in DocType 'FCRM Note'
 #: crm/fcrm/doctype/fcrm_note/fcrm_note.json:33 frontend/src/components/Settings/EmailTemplate/EditEmailTemplate.vue:92 frontend/src/components/Settings/EmailTemplate/EditEmailTemplate.vue:103 frontend/src/components/Settings/EmailTemplate/NewEmailTemplate.vue:93 frontend/src/components/Settings/EmailTemplate/NewEmailTemplate.vue:104
@@ -2281,7 +2277,7 @@ msgstr "Criar card"
 
 #: frontend/src/components/Modals/LeadModal.vue:9
 msgid "Create Lead"
-msgstr "Criar lead"
+msgstr "Criar card"
 
 #. Label of the create_missing_link (Check) field in DocType 'CRM Enrichment
 #. Field Mapping'
@@ -2333,7 +2329,7 @@ msgstr "Criar formulário"
 
 #: frontend/src/components/Settings/Forms/FormsList.vue:40
 msgid "Create one to start capturing leads."
-msgstr "Crie um para começar a capturar leads."
+msgstr "Crie uma para começar a receber contatos."
 
 #: crm/fcrm/doctype/crm_product/crm_product.js:14 crm/fcrm/doctype/crm_product/crm_product_list.js:10 frontend/src/composables/document.js:32
 msgid "Create products as Items in ERPNext"
@@ -2438,7 +2434,7 @@ msgstr "Diário"
 
 #: crm/api/dashboard.py:636
 msgid "Daily performance of leads, deals, and wins"
-msgstr "Desempenho diário de leads, cards e vendas ganhas"
+msgstr "Desempenho diário de contatos recebidos, cards e cards ganhos"
 
 #: frontend/src/components/Settings/ThemeSwitcher.vue:89
 msgid "Dark"
@@ -2541,7 +2537,7 @@ msgstr "Valor do card"
 #. Label of a shortcut in the Frappe CRM Workspace
 #: crm/fcrm/workspace/frappe_crm/frappe_crm.json:86 frontend/src/pages/Deal.vue:564 frontend/src/pages/InvalidPage.vue:9 frontend/src/pages/MobileContact.vue:303 frontend/src/pages/MobileDeal.vue:396 frontend/src/pages/MobileOrganization.vue:338
 msgid "Deals"
-msgstr "Negócios"
+msgstr "Cards"
 
 #: frontend/src/components/Dashboard/AddChartModal.vue:93
 msgid "Deals by Ongoing & Won Stage"
@@ -2582,10 +2578,6 @@ msgstr "Cards por etapa"
 #: crm/api/dashboard.py:1064
 msgid "Deals by territory"
 msgstr "Cards por território"
-
-#: frontend/src/components/Settings/EmailTemplate/EditEmailTemplate.vue:110 frontend/src/components/Settings/EmailTemplate/NewEmailTemplate.vue:111
-msgid "Dear {{ lead_name }}, \\n\\nThis is a reminder for the payment of {{ grand_total }}. \\n\\nThanks, \\nFrappé"
-msgstr "Prezado(a) {{ lead_name }}, \\n\\nEste é um lembrete do pagamento de {{ grand_total }}. \\n\\nObrigado, \\nFrappé"
 
 #: frontend/src/components/Settings/Fields/FieldsPage.vue:148
 msgid "Decimal number"
@@ -3141,7 +3133,7 @@ msgstr "Contas de e-mail"
 
 #: frontend/src/components/EmailEditor.vue:229
 msgid "Email From Lead"
-msgstr "E-mail do lead"
+msgstr "E-mail do contato"
 
 #: frontend/src/components/Settings/emailConfig.js:19
 msgid "Email ID"
@@ -3468,7 +3460,7 @@ msgstr "Erro ao criar o card: {0}"
 
 #: frontend/src/components/Settings/LeadSyncing/LeadSyncSourceForm.vue:310
 msgid "Error creating lead sync source"
-msgstr "Erro ao criar a fonte de sincronização de leads"
+msgstr "Erro ao criar a fonte de sincronização"
 
 #: frontend/src/pages/Lead.vue:361 frontend/src/pages/MobileDeal.vue:362
 msgid "Error occurred"
@@ -3476,15 +3468,15 @@ msgstr "Ocorreu um erro"
 
 #: frontend/src/components/Settings/LeadSyncing/FailureLogs.vue:139
 msgid "Error syncing lead"
-msgstr "Erro ao sincronizar o lead"
+msgstr "Erro ao sincronizar o contato"
 
 #: frontend/src/components/Settings/LeadSyncing/LeadSyncSourceForm.vue:402
 msgid "Error syncing leads"
-msgstr "Erro ao sincronizar os leads"
+msgstr "Erro ao sincronizar os contatos"
 
 #: frontend/src/components/Settings/LeadSyncing/LeadSyncSourceForm.vue:291
 msgid "Error updating lead sync source"
-msgstr "Erro ao atualizar a fonte de sincronização de leads"
+msgstr "Erro ao atualizar a fonte de sincronização"
 
 #: frontend/src/components/Settings/WorkflowAutomations/WorkflowAutomationInspector.vue:39 frontend/src/components/Settings/WorkflowAutomations/WorkflowAutomationInspector.vue:156
 msgid "Event"
@@ -3652,17 +3644,17 @@ msgstr "ID do formulário do Facebook"
 #. Label of the facebook_lead_form (Link) field in DocType 'Lead Sync Source'
 #: crm/lead_syncing/doctype/facebook_lead_form/facebook_lead_form.json:58 crm/lead_syncing/doctype/lead_sync_source/lead_sync_source.json:57
 msgid "Facebook Lead Form"
-msgstr "Formulário de leads do Facebook"
+msgstr "Formulário do Facebook"
 
 #. Name of a DocType
 #: crm/lead_syncing/doctype/facebook_lead_form_question/facebook_lead_form_question.json:59
 msgid "Facebook Lead Form Question"
-msgstr "Pergunta do formulário de leads do Facebook"
+msgstr "Pergunta do formulário do Facebook"
 
 #. Label of the facebook_lead_id (Data) field in DocType 'CRM Lead'
 #: crm/fcrm/doctype/crm_lead/crm_lead.json:376
 msgid "Facebook Lead ID"
-msgstr "ID do lead no Facebook"
+msgstr "ID do contato no Facebook"
 
 #. Name of a DocType
 #. Label of the facebook_page (Link) field in DocType 'Lead Sync Source'
@@ -3683,7 +3675,7 @@ msgstr "Falhou"
 #. Name of a DocType
 #: crm/lead_syncing/doctype/failed_lead_sync_log/failed_lead_sync_log.json:69
 msgid "Failed Lead Sync Log"
-msgstr "Registro de sincronizações de leads com falha"
+msgstr "Registro de sincronizações com falha"
 
 #: frontend/src/components/Modals/AddExistingUserModal.vue:113
 msgid "Failed to Add Users"
@@ -3711,7 +3703,7 @@ msgstr "Falha ao excluir o comentário"
 
 #: frontend/src/components/Settings/LeadSyncing/LeadSyncSources.vue:178
 msgid "Failed to delete lead sync source"
-msgstr "Falha ao excluir a fonte de sincronização de leads"
+msgstr "Falha ao excluir a fonte de sincronização"
 
 #: frontend/src/components/Activities/NoteArea.vue:116
 msgid "Failed to delete note"
@@ -3949,7 +3941,7 @@ msgstr "Preencher se vazio: só grava quando o campo está em branco. Sempre atu
 
 #: frontend/src/components/Settings/Enrichment/GeneralTab.vue:10
 msgid "Fill in company details on Leads, Deals and Organizations from their website."
-msgstr "Preencha os dados da empresa em leads, cards e organizações a partir do site deles."
+msgstr "Preencha os dados da empresa em cards e organizações a partir do site deles."
 
 #: frontend/src/pages/Deal.vue:1153
 msgid "Fill in the required fields of this stage before moving the card."
@@ -4112,7 +4104,7 @@ msgstr "Os formulários só podem ser mapeados para: {0}"
 #. Name of a Workspace
 #: crm/fcrm/workspace/frappe_crm/frappe_crm.json:14
 msgid "Frappe CRM"
-msgstr "Cred Hub"
+msgstr "HubTech CRM"
 
 #: frontend/src/components/Settings/emailConfig.js:81
 msgid "Frappe Mail Site"
@@ -4646,7 +4638,7 @@ msgstr "Formato inválido. Tente: 1h 30m 45s, 1:30:45, 90s"
 
 #: crm/fcrm/doctype/crm_call_log/crm_call_log.py:322
 msgid "Invalid lead details supplied."
-msgstr "Os dados do lead informados são inválidos."
+msgstr "Os dados do contato informados são inválidos."
 
 #: crm/domain_enrichment/doctype/crm_enrichment_settings/crm_enrichment_settings.py:60
 msgid "Invalid maximum pages"
@@ -4963,126 +4955,126 @@ msgstr "Disposição"
 #. Label of the lead (Link) field in DocType 'CRM Deal'
 #: crm/fcrm/doctype/crm_deal/crm_deal.json:121 frontend/src/components/Settings/AssignmentRules/AssigneeRules.vue:19 frontend/src/components/Settings/EmailTemplate/EditEmailTemplate.vue:55 frontend/src/components/Settings/EmailTemplate/EmailTemplates.vue:76 frontend/src/components/Settings/EmailTemplate/NewEmailTemplate.vue:56 frontend/src/components/Telephony/ExotelCallUI.vue:197 frontend/src/pages/Tasks.vue:132
 msgid "Lead"
-msgstr "Lead"
+msgstr "Contato"
 
 #. Label of the lead_data (Code) field in DocType 'Failed Lead Sync Log'
 #: crm/lead_syncing/doctype/failed_lead_sync_log/failed_lead_sync_log.json:30 frontend/src/components/Settings/LeadSyncing/FailureLogs.vue:40
 msgid "Lead Data"
-msgstr "Dados do lead"
+msgstr "Dados do contato"
 
 #. Label of the lead_details_tab (Tab Break) field in DocType 'CRM Deal'
 #: crm/fcrm/doctype/crm_deal/crm_deal.json:293
 msgid "Lead Details"
-msgstr "Detalhes do lead"
+msgstr "Detalhes do contato"
 
 #. Label of the lead_name (Data) field in DocType 'CRM Deal'
 #: crm/fcrm/doctype/crm_deal/crm_deal.json:284
 msgid "Lead Name"
-msgstr "Nome do lead"
+msgstr "Nome do contato"
 
 #. Label of the lead_owner (Link) field in DocType 'CRM Lead'
 #: crm/fcrm/doctype/crm_lead/crm_lead.json:176
 msgid "Lead Owner"
-msgstr "Proprietário do Lead"
+msgstr "Responsável pelo contato"
 
 #: crm/fcrm/doctype/crm_lead/crm_lead.py:184
 msgid "Lead Owner cannot be same as the Lead Email Address"
-msgstr "O responsável pelo lead não pode ser igual ao e-mail do lead"
+msgstr "O responsável pelo contato não pode ser o próprio contato"
 
 #. Label of the lead_score (Int) field in DocType 'CRM Lead'
 #: crm/fcrm/doctype/crm_lead/crm_lead.json:234
 msgid "Lead Score"
-msgstr "Pontuação do lead"
+msgstr "Pontuação do contato"
 
 #. Label of a shortcut in the Frappe CRM Workspace
 #: crm/fcrm/workspace/frappe_crm/frappe_crm.json:102 frontend/src/components/Settings/LeadSyncing/LeadSyncSources.vue:7
 msgid "Lead Sources"
-msgstr "Origens de leads"
+msgstr "Origens"
 
 #. Label of a shortcut in the Frappe CRM Workspace
 #: crm/fcrm/workspace/frappe_crm/frappe_crm.json:62
 msgid "Lead Statuses"
-msgstr "Status dos leads"
+msgstr "Status dos contatos"
 
 #. Name of a DocType
 #: crm/lead_syncing/doctype/lead_sync_source/lead_sync_source.json:105
 msgid "Lead Sync Source"
-msgstr "Fonte de sincronização de leads"
+msgstr "Fonte de sincronização"
 
 #: frontend/src/components/Settings/Settings.vue:277
 msgid "Lead Syncing"
-msgstr "Sincronização de leads"
+msgstr "Sincronização de contatos"
 
 #. Label of the lead_temperature (Select) field in DocType 'CRM Lead'
 #: crm/fcrm/doctype/crm_lead/crm_lead.json:240
 msgid "Lead Temperature"
-msgstr "Temperatura do lead"
+msgstr "Temperatura do contato"
 
 #: frontend/src/components/Settings/Hierarchy/Hierarchy.vue:305
 msgid "Lead and deal visibility will no longer be restricted by the reporting tree. Are you sure?"
-msgstr "A visibilidade de leads e cards deixará de ser limitada pela hierarquia de subordinação. Tem certeza?"
+msgstr "A visibilidade dos cards deixará de ser limitada pela hierarquia de subordinação. Tem certeza?"
 
 #: crm/fcrm/doctype/crm_call_log/crm_call_log.py:340
 #, python-brace-format
 msgid "Lead from call {0}"
-msgstr "Lead da chamada {0}"
+msgstr "Contato da chamada {0}"
 
 #: crm/api/dashboard.py:982
 msgid "Lead generation channel analysis"
-msgstr "Análise dos canais de geração de leads"
+msgstr "Análise das origens dos contatos"
 
 #: crm/automation/scoring.py:47
 #, python-brace-format
 msgid "Lead is now {0}"
-msgstr "O lead agora está {0}"
+msgstr "O contato agora está {0}"
 
 #: crm/automation/scoring.py:29
 #, python-brace-format
 msgid "Lead score {0} → {1}{2}"
-msgstr "Pontuação do lead {0} → {1}{2}"
+msgstr "Pontuação do contato {0} → {1}{2}"
 
 #: crm/lead_syncing/doctype/lead_sync_source/lead_sync_source.js:10
 msgid "Lead sync initiated."
-msgstr "Sincronização de leads iniciada."
+msgstr "Sincronização de contatos iniciada."
 
 #: frontend/src/components/Settings/LeadSyncing/LeadSyncSourceForm.vue:305
 msgid "Lead sync source created successfully"
-msgstr "Fonte de sincronização de leads criada com sucesso"
+msgstr "Fonte de sincronização criada com sucesso"
 
 #: frontend/src/components/Settings/LeadSyncing/LeadSyncSources.vue:175
 msgid "Lead sync source deleted successfully"
-msgstr "Fonte de sincronização de leads excluída com sucesso"
+msgstr "Fonte de sincronização excluída com sucesso"
 
 #: crm/automation/scoring.py:42
 #, python-brace-format
 msgid "Lead temperature must be one of {0}"
-msgstr "A temperatura do lead deve ser uma destas: {0}"
+msgstr "A temperatura do contato deve ser uma destas: {0}"
 
 #: crm/api/dashboard.py:785
 msgid "Lead to deal conversion pipeline"
-msgstr "Funil de conversão de lead em card"
+msgstr "Funil de conversão de contato em card"
 
 #: crm/fcrm/doctype/crm_lead/crm_lead.py:610
 #, python-brace-format
 msgid "Lead {0} is already converted to Deal {1}"
-msgstr "O lead {0} já foi convertido no card {1}"
+msgstr "O contato {0} já foi convertido no card {1}"
 
 #. Label of a shortcut in the Frappe CRM Workspace
 #: crm/fcrm/workspace/frappe_crm/frappe_crm.json:39 frontend/src/pages/Lead.vue:391 frontend/src/pages/MobileLead.vue:253
 msgid "Leads"
-msgstr "Leads"
+msgstr "Contatos"
 
 #: frontend/src/components/Dashboard/AddChartModal.vue:102
 msgid "Leads by Source"
-msgstr "Leads por origem"
+msgstr "Contatos por origem"
 
 #: crm/api/dashboard.py:981
 msgid "Leads by source"
-msgstr "Leads por origem"
+msgstr "Contatos por origem"
 
 #: frontend/src/components/Settings/LeadSyncing/LeadSyncSourceForm.vue:94
 msgid "Leads from this source become cards in this funnel."
-msgstr "Os leads desta origem viram cards neste funil."
+msgstr "Os contatos desta origem viram cards neste funil."
 
 #. Label of the lft (Int) field in DocType 'CRM Sales Hierarchy'
 #. Label of the lft (Int) field in DocType 'CRM Territory'
@@ -5363,7 +5355,7 @@ msgstr "Marcar tudo como lido"
 #. Settings'
 #: crm/fcrm/doctype/fcrm_settings/fcrm_settings.json:145 frontend/src/components/Settings/GeneralSettings.vue:38
 msgid "Mark lead/deal as replied on response"
-msgstr "Marcar lead/card como respondido quando houver resposta"
+msgstr "Marcar card como respondido quando houver resposta"
 
 #. Description of the 'Enabled' (Check) field in DocType 'CRM Enrichment
 #. Settings'
@@ -5638,7 +5630,7 @@ msgstr "Novo e-mail"
 
 #: frontend/src/components/Settings/LeadSyncing/LeadSyncSourceForm.vue:9
 msgid "New Lead Sync Source"
-msgstr "Nova fonte de sincronização de leads"
+msgstr "Nova fonte de sincronização"
 
 #: frontend/src/components/Activities/ActivityHeader.vue:56
 msgid "New Message"
@@ -5923,7 +5915,7 @@ msgstr "Nenhuma regra de setor ainda"
 
 #: frontend/src/pages/Leads.vue:244
 msgid "No leads yet"
-msgstr "Nenhum lead ainda"
+msgstr "Nenhum contato ainda"
 
 #: frontend/src/components/Settings/Hierarchy/Hierarchy.vue:99
 msgid "No matching users"
@@ -6054,7 +6046,7 @@ msgstr "Sem permissão para adicionar contato ao card"
 
 #: crm/fcrm/doctype/crm_lead/crm_lead.py:594
 msgid "Not allowed to convert Lead to Deal"
-msgstr "Sem permissão para converter lead em card"
+msgstr "Sem permissão para converter contato em card"
 
 #: crm/fcrm/doctype/crm_deal/crm_deal.py:444
 msgid "Not allowed to remove contact from Deal"
@@ -6121,7 +6113,7 @@ msgstr "Visualização de anotações"
 
 #: frontend/src/pages/Notes.vue:118
 msgid "Notes keep what you learned on a call or in a meeting next to the lead or deal it belongs to."
-msgstr "As anotações guardam o que você aprendeu numa ligação ou reunião junto do lead ou card a que pertencem."
+msgstr "As anotações guardam o que você aprendeu numa ligação ou reunião junto do card a que pertencem."
 
 #: frontend/src/components/Settings/WorkflowAutomations/WorkflowStepSummary.vue:22
 msgid "Nothing here"
@@ -6370,7 +6362,7 @@ msgstr "Opções (uma por linha)"
 
 #: frontend/src/pages/Welcome.vue:40
 msgid "Or create leads manually"
-msgstr "Ou crie leads manualmente"
+msgstr "Ou crie cards manualmente"
 
 #. Label of the order_by_tab (Tab Break) field in DocType 'CRM View Settings'
 #. Label of the order_by (Code) field in DocType 'CRM View Settings'
@@ -6562,14 +6554,6 @@ msgstr "Pausa até que um evento seja disparado para este registro."
 msgid "Payment Reminder"
 msgstr "Lembrete de pagamento"
 
-#: frontend/src/components/Settings/EmailTemplate/NewEmailTemplate.vue:70
-msgid "Payment Reminder from Frappé - (#{{ name }})"
-msgstr "Lembrete de pagamento da Frappé - (#{{ name }})"
-
-#: frontend/src/components/Settings/EmailTemplate/EditEmailTemplate.vue:69
-msgid "Payment reminder from Frappé - (#{{ name }})"
-msgstr "Lembrete de pagamento da Frappé - (#{{ name }})"
-
 #. Option for the 'Status' (Select) field in DocType 'CRM Invitation'
 #: crm/fcrm/doctype/crm_invitation/crm_invitation.json:54
 msgid "Pending"
@@ -6693,7 +6677,7 @@ msgstr "Dono do funil"
 #. Description of the 'Pipeline' (Link) field in DocType 'Lead Sync Source'
 #: crm/lead_syncing/doctype/lead_sync_source/lead_sync_source.json:86
 msgid "Pipeline that receives the synced leads as cards."
-msgstr "Funil que recebe os leads sincronizados como cards."
+msgstr "Funil que recebe os contatos sincronizados como cards."
 
 #: crm/fcrm/doctype/crm_pipeline/crm_pipeline.py:76
 #, python-brace-format
@@ -6754,7 +6738,7 @@ msgstr "Selecione uma moeda antes de salvar."
 
 #: crm/lead_syncing/doctype/lead_sync_source/lead_sync_source.py:73
 msgid "Please select a lead gen form before syncing!"
-msgstr "Selecione um formulário de geração de leads antes de sincronizar!"
+msgstr "Selecione um formulário antes de sincronizar!"
 
 #: frontend/src/components/Settings/Sla/EditResponseResolutionModal.vue:88
 msgid "Please select a priority"
@@ -6794,7 +6778,7 @@ msgstr "Informe o motivo da perda do card."
 
 #: crm/fcrm/doctype/crm_lead/crm_lead.py:192
 msgid "Please specify a reason for losing the lead."
-msgstr "Informe o motivo da perda do lead."
+msgstr "Informe o motivo da perda do card."
 
 #: crm/fcrm/doctype/crm_deal/crm_deal.py:341
 msgid "Please specify the reason for losing the deal."
@@ -6802,7 +6786,7 @@ msgstr "Informe o motivo da perda do card."
 
 #: crm/fcrm/doctype/crm_lead/crm_lead.py:194
 msgid "Please specify the reason for losing the lead."
-msgstr "Informe o motivo da perda do lead."
+msgstr "Informe o motivo da perda do card."
 
 #: frontend/src/components/Settings/Sla/SlaPolicyList.vue:70
 msgid "Policy Name"
@@ -7260,7 +7244,7 @@ msgstr "Renomear"
 #. Settings'
 #: crm/fcrm/doctype/fcrm_settings/fcrm_settings.json:152 frontend/src/components/Settings/GeneralSettings.vue:60
 msgid "Reopen lead/deal on new communication"
-msgstr "Reabrir lead/card quando houver nova comunicação"
+msgstr "Reabrir card quando houver nova comunicação"
 
 #: frontend/src/components/Modals/ViewModal.vue:45
 msgid "Replace with an icon..."
@@ -7390,11 +7374,11 @@ msgstr "Restaurar dados de demonstração"
 #. DocType 'FCRM Settings'
 #: crm/fcrm/doctype/fcrm_settings/fcrm_settings.json:86
 msgid "Restrict Lead and Deal visibility based on the Sales Hierarchy tree. Managers can see all records owned by or assigned to their reports."
-msgstr "Limita a visibilidade de leads e cards pela hierarquia de vendas. Gestores veem todos os registros dos seus subordinados ou atribuídos a eles."
+msgstr "Limita a visibilidade dos cards pela hierarquia de vendas. Gestores veem todos os registros dos seus subordinados ou atribuídos a eles."
 
 #: frontend/src/components/Settings/Hierarchy/Hierarchy.vue:12
 msgid "Restrict visibility of Leads and Deals based on a reporting tree."
-msgstr "Limite a visibilidade de leads e cards por uma hierarquia de subordinação."
+msgstr "Limite a visibilidade dos cards por uma hierarquia de subordinação."
 
 #: frontend/src/components/Settings/Hierarchy/Hierarchy.vue:57
 msgid "Restrict visibility using a reporting tree"
@@ -8064,7 +8048,7 @@ msgstr "Defina o nome da sua marca. Aparece na barra lateral esquerda."
 
 #: frontend/src/pages/Setup.vue:192
 msgid "Set up Cred Hub"
-msgstr "Configurar o Cred Hub"
+msgstr "Configurar o HubTech CRM"
 
 #: frontend/src/components/Settings/Enrichment/EnrichmentSettings.vue:16
 msgid "Set up enrichment availability and match website data to CRM fields."
@@ -8491,7 +8475,7 @@ msgstr "A hora de início é obrigatória"
 
 #: frontend/src/pages/Welcome.vue:21
 msgid "Start with sample 10 leads"
-msgstr "Começar com 10 leads de exemplo"
+msgstr "Começar com 10 cards de exemplo"
 
 #. Label of the started_on (Datetime) field in DocType 'CRM Enrichment Run'
 #: crm/domain_enrichment/doctype/crm_enrichment_run/crm_enrichment_run.json:82
@@ -8629,7 +8613,7 @@ msgstr "Sincronizar agora"
 #: crm/lead_syncing/doctype/failed_lead_sync_log/failed_lead_sync_log.js:18
 #, python-brace-format
 msgid "Sync Successful, CRM Lead: {0}!"
-msgstr "Sincronização concluída, lead: {0}!"
+msgstr "Sincronização concluída, contato: {0}!"
 
 #: frontend/src/components/Setup/SetupEmail.vue:80
 msgid "Sync options"
@@ -8720,7 +8704,7 @@ msgstr "Tarefas"
 
 #: frontend/src/pages/Tasks.vue:187
 msgid "Tasks are to-dos for you and your team, like a follow-up call or sending a quote. Add them here or from a lead or deal."
-msgstr "Tarefas são pendências para você e sua equipe, como uma ligação de retorno ou o envio de um orçamento. Adicione aqui ou a partir de um lead ou card."
+msgstr "Tarefas são pendências para você e sua equipe, como uma ligação de retorno ou o envio de um orçamento. Adicione aqui ou a partir de um card."
 
 #: frontend/src/components/Setup/SetupInvite.vue:28
 #, python-brace-format
@@ -9125,7 +9109,7 @@ msgstr "Total de feriados"
 
 #: frontend/src/components/Dashboard/AddChartModal.vue:72
 msgid "Total Leads"
-msgstr "Total de leads"
+msgstr "Total de contatos recebidos"
 
 #. Description of the 'Net Total' (Currency) field in DocType 'CRM Deal'
 #. Description of the 'Net Total' (Currency) field in DocType 'CRM Lead'
@@ -9135,11 +9119,11 @@ msgstr "Total com desconto"
 
 #: crm/api/dashboard.py:127
 msgid "Total leads"
-msgstr "Total de leads"
+msgstr "Total de contatos recebidos"
 
 #: crm/api/dashboard.py:128
 msgid "Total number of leads"
-msgstr "Número total de leads"
+msgstr "Número total de contatos recebidos"
 
 #: crm/api/dashboard.py:187
 msgid "Total number of non won/lost deals"
@@ -9420,11 +9404,11 @@ msgstr "Atualizar configuração"
 #. DocType 'FCRM Settings'
 #: crm/fcrm/doctype/fcrm_settings/fcrm_settings.json:135
 msgid "Update the modified timestamp on new email communication & comment for leads & deals"
-msgstr "Atualizar a data de modificação de leads e cards quando houver nova comunicação por e-mail ou comentário"
+msgstr "Atualizar a data de modificação dos cards quando houver nova comunicação por e-mail ou comentário"
 
 #: frontend/src/components/Settings/GeneralSettings.vue:20
 msgid "Update the modified timestamp on new email communication & comments for leads & deals"
-msgstr "Atualizar a data de modificação de leads e cards quando houver nova comunicação por e-mail ou comentários"
+msgstr "Atualizar a data de modificação dos cards quando houver nova comunicação por e-mail ou comentários"
 
 #. Label of the update_timestamp_on_new_communication (Check) field in DocType
 #. 'FCRM Settings'
@@ -9679,7 +9663,7 @@ msgstr "Mensagem de boas-vindas"
 #: frontend/src/pages/Welcome.vue:4
 #, python-brace-format
 msgid "Welcome {0}, lets add your first lead"
-msgstr "Bem-vindo(a), {0}! Vamos adicionar seu primeiro lead"
+msgstr "Boas-vindas, {0}! Vamos criar seu primeiro card"
 
 #. Option for the 'Type' (Select) field in DocType 'CRM Notification'
 #: crm/fcrm/doctype/crm_notification/crm_notification.json:37 frontend/src/components/Settings/Settings.vue:265 frontend/src/pages/Deal.vue:849 frontend/src/pages/Lead.vue:614 frontend/src/pages/MobileDeal.vue:497 frontend/src/pages/MobileLead.vue:353
@@ -9812,7 +9796,7 @@ msgstr "Você não tem permissão para acessar este recurso."
 
 #: crm/fcrm/doctype/crm_call_log/crm_call_log.py:318
 msgid "You are not permitted to create leads."
-msgstr "Você não tem permissão para criar leads."
+msgstr "Você não tem permissão para criar contatos."
 
 #: crm/fcrm/doctype/crm_call_log/crm_call_log.py:315
 msgid "You are not permitted to update this call log."
@@ -9840,7 +9824,7 @@ msgstr "Você não tem um número do Exotel definido no seu agente de telefonia"
 
 #: frontend/src/pages/NotPermitted.vue:12
 msgid "You do not have enough permissions to access Cred Hub. Please contact your administrator if you believe this is an error."
-msgstr "Você não tem permissão para acessar o Cred Hub. Fale com o administrador se achar que isto é um erro."
+msgstr "Você não tem permissão para acessar o HubTech CRM. Fale com o administrador se achar que isto é um erro."
 
 #: crm/integrations/exotel/handler.py:102
 msgid "You do not have mobile number set in your Telephony Agent"
@@ -9848,7 +9832,7 @@ msgstr "Você não tem um celular definido no seu agente de telefonia"
 
 #: crm/www/crm.py:20
 msgid "You do not have permission to access Cred Hub"
-msgstr "Você não tem permissão para acessar o Cred Hub"
+msgstr "Você não tem permissão para acessar o HubTech CRM"
 
 #: frontend/src/data/document.js:114
 msgid "You do not have permission to access this document"
@@ -9881,7 +9865,7 @@ msgstr "Você será levado à página de convite de usuários; as alterações n
 
 #: frontend/src/components/Settings/LeadSyncing/leadSyncSourceConfig.js:8
 msgid "You will need a Meta developer account and an access token to sync leads from Facebook. Read more"
-msgstr "Você precisará de uma conta de desenvolvedor Meta e um token de acesso para sincronizar leads do Facebook. Leia mais"
+msgstr "Você precisará de uma conta de desenvolvedor Meta e um token de acesso para receber contatos do Facebook. Leia mais"
 
 #: frontend/src/pages/Setup.vue:150
 msgid "You won't see this guided setup again. You can still connect email and invite your team from Settings."
@@ -10003,7 +9987,7 @@ msgstr ""
 
 #: crm/api/activities.py:53
 msgid "converted the lead to this deal"
-msgstr "converteu o lead neste card"
+msgstr "converteu o contato neste card"
 
 #: crm/api/activities.py:50
 msgid "created this deal"
@@ -10011,7 +9995,7 @@ msgstr "criou este card"
 
 #: crm/api/activities.py:214
 msgid "created this lead"
-msgstr "criou este lead"
+msgstr "criou este contato"
 
 #. Option for the 'Color' (Select) field in DocType 'CRM Availability Status'
 #. Option for the 'Color' (Select) field in DocType 'CRM Deal Status'
@@ -10251,11 +10235,11 @@ msgstr "rótulo"
 
 #: crm/fcrm/doctype/fcrm_note/fcrm_note.py:84
 msgid "lead"
-msgstr "lead"
+msgstr "contato"
 
 #: frontend/src/components/Settings/AssignmentRules/AssigneeRules.vue:133 frontend/src/components/Settings/AssignmentRules/AssignmentRuleView.vue:349
 msgid "leads"
-msgstr "leads"
+msgstr "contatos"
 
 #. Option for the 'Source Key' (Select) field in DocType 'CRM Enrichment Field
 #. Mapping'
@@ -10742,19 +10726,19 @@ msgid "Fill in: {0}"
 msgstr "Preencha: {0}"
 
 msgid "{0} of {1} leads could not be converted"
-msgstr "{0} de {1} leads não puderam ser convertidos"
+msgstr "{0} de {1} contatos não puderam ser convertidos"
 
 msgid "You do not have permission to access Frappe CRM"
-msgstr "Você não tem permissão para acessar o Cred Hub"
+msgstr "Você não tem permissão para acessar o HubTech CRM"
 
 msgid "How many people will use Frappe CRM?"
-msgstr "Quantas pessoas vão usar o Cred Hub?"
+msgstr "Quantas pessoas vão usar o HubTech CRM?"
 
 msgid "We are changing how permissions work in Frappe CRM"
-msgstr "Estamos mudando como as permissões funcionam no Cred Hub"
+msgstr "Estamos mudando como as permissões funcionam no HubTech CRM"
 
 msgid "Welcome to Frappe CRM"
-msgstr "Boas-vindas ao Cred Hub"
+msgstr "Boas-vindas ao HubTech CRM"
 
 msgid "Free software under the AGPL-3.0 license, built on open source projects (credits in the source code)."
 msgstr "Software livre sob a licença AGPL-3.0, construído sobre projetos de código aberto (créditos no código-fonte)."
@@ -10869,7 +10853,7 @@ msgstr "Conectado como {0}"
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "Connect the Facebook account that manages the page of your ads. Leads from its forms land in the funnel within seconds."
-msgstr "Conecte a conta do Facebook que administra a página dos seus anúncios. Os leads dos formulários entram no funil em segundos."
+msgstr "Conecte a conta do Facebook que administra a página dos seus anúncios. Os contatos dos formulários entram no funil em segundos."
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "Add pages"
@@ -10889,7 +10873,7 @@ msgstr "Conectar com Facebook"
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "The connection with Facebook stopped working, so new leads are not arriving. Connect again."
-msgstr "A conexão com o Facebook parou de funcionar e os leads novos não estão chegando. Conecte de novo."
+msgstr "A conexão com o Facebook parou de funcionar e os contatos novos não estão chegando. Conecte de novo."
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "Connect again"
@@ -10897,7 +10881,7 @@ msgstr "Conectar de novo"
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "No page with lead forms was shared with Cred Hub. Use \"Add pages\" and select the pages of your ads."
-msgstr "Nenhuma página com formulários foi liberada para o Cred Hub. Use \"Adicionar páginas\" e selecione as páginas dos seus anúncios."
+msgstr "Nenhuma página com formulários foi liberada para o HubTech CRM. Use \"Adicionar páginas\" e selecione as páginas dos seus anúncios."
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "This page has no lead forms yet."
@@ -10913,7 +10897,7 @@ msgstr "Não foi possível iniciar a conexão com o Facebook"
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "Facebook disconnected. New leads stop arriving."
-msgstr "Facebook desconectado. Os leads novos deixam de chegar."
+msgstr "Facebook desconectado. Os contatos novos deixam de chegar."
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "Could not disconnect Facebook"
@@ -10921,11 +10905,11 @@ msgstr "Não foi possível desconectar o Facebook"
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "Last lead {0}"
-msgstr "Último lead {0}"
+msgstr "Último contato recebido {0}"
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "Receive leads from this form"
-msgstr "Receber os leads deste formulário"
+msgstr "Receber os contatos deste formulário"
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "Choose the funnel first"
@@ -10953,7 +10937,7 @@ msgstr "Não foi possível salvar o formulário"
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "Latest leads"
-msgstr "Últimos leads"
+msgstr "Últimos contatos recebidos"
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "Reload"
@@ -10961,11 +10945,11 @@ msgstr "Recarregar"
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "No leads received yet. They show up here as soon as someone fills in a connected form."
-msgstr "Nenhum lead recebido ainda. Eles aparecem aqui assim que alguém preencher um formulário conectado."
+msgstr "Nenhum contato recebido ainda. Eles aparecem aqui assim que alguém preencher um formulário conectado."
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "Lead without name"
-msgstr "Lead sem nome"
+msgstr "Contato sem nome"
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "assigned to {0}"
@@ -10973,11 +10957,11 @@ msgstr "atribuído a {0}"
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "Could not load the latest leads"
-msgstr "Não foi possível carregar os últimos leads"
+msgstr "Não foi possível carregar os últimos contatos recebidos"
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "Leads from your ads and forms land in the funnel within seconds, already assigned to a salesperson."
-msgstr "Os leads dos seus anúncios e formulários entram no funil em segundos, já atribuídos a um vendedor."
+msgstr "Os contatos dos seus anúncios e formulários entram no funil em segundos, já atribuídos a um vendedor."
 
 #: frontend/src/components/Settings/Pipelines/PipelineDistribution.vue
 msgid "Distribution"
@@ -10985,7 +10969,7 @@ msgstr "Distribuição"
 
 #: frontend/src/components/Settings/Pipelines/PipelineDistribution.vue
 msgid "Who receives the leads that arrive by themselves (ads, forms, integrations). Cards created by hand stay with whoever created them."
-msgstr "Quem recebe os leads que chegam sozinhos (anúncios, formulários, integrações). Cards criados à mão ficam com quem os criou."
+msgstr "Quem recebe os contatos que chegam sozinhos (anúncios, formulários, integrações). Cards criados à mão ficam com quem os criou."
 
 #: frontend/src/components/Settings/Pipelines/PipelineDistribution.vue
 msgid "How to distribute"
@@ -11021,11 +11005,11 @@ msgstr "Vendedores no rodízio"
 
 #: frontend/src/components/Settings/Pipelines/PipelineDistribution.vue
 msgid "Add members to the funnel to distribute its leads."
-msgstr "Adicione membros ao funil para distribuir os leads dele."
+msgstr "Adicione membros ao funil para distribuir os cards dele."
 
 #: frontend/src/components/Settings/Pipelines/PipelineDistribution.vue
 msgid "A salesperson who left the funnel is skipped. A lead whose e-mail or phone already has an open card in this funnel does not create another card: it is added to that card and its owner is notified."
-msgstr "Vendedor que saiu do funil é pulado. Um lead cujo e-mail ou telefone já tem um card aberto neste funil não cria outro card: entra nesse card e o dono dele é avisado."
+msgstr "Vendedor que saiu do funil é pulado. Um contato cujo e-mail ou telefone já tem um card aberto neste funil não cria outro card: entra nesse card e o dono dele é avisado."
 
 #: frontend/src/components/Settings/Pipelines/PipelineDistribution.vue
 msgid "Round robin among salespeople"
@@ -11045,7 +11029,7 @@ msgstr "Como conectar"
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "Receive leads from this source"
-msgstr "Receber os leads desta origem"
+msgstr "Receber os contatos desta origem"
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "Address (URL)"
@@ -11065,7 +11049,7 @@ msgstr "Em \"Opções de entrega de leads\", escolha a integração por webhook 
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "Click \"Send test data\": the test lead shows up in Latest leads below."
-msgstr "Clique em \"Enviar dados de teste\": o lead de teste aparece em Últimos leads, abaixo."
+msgstr "Clique em \"Enviar dados de teste\": o contato de teste aparece em Últimos contatos recebidos, abaixo."
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "In Typeform, open the form, then Connect › Webhooks › Add a webhook and paste the Address (URL)."
@@ -11077,7 +11061,7 @@ msgstr "Nas configurações do webhook, ative Secret e cole a Chave acima."
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "To know which campaign brought each lead, add the hidden fields utm_source, utm_medium, utm_campaign, utm_content and utm_term to the form."
-msgstr "Para saber qual campanha trouxe cada lead, adicione ao formulário os campos ocultos (hidden fields) utm_source, utm_medium, utm_campaign, utm_content e utm_term."
+msgstr "Para saber qual campanha trouxe cada contato, adicione ao formulário os campos ocultos (hidden fields) utm_source, utm_medium, utm_campaign, utm_content e utm_term."
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "Paste this line at the end of every page of the site, before the closing body tag (it keeps the campaign of whoever arrives from an ad):"
@@ -11085,7 +11069,7 @@ msgstr "Cole esta linha no fim de todas as páginas do site, antes do fechamento
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "Add data-credhub to each form that should create leads. Fields named name, email, phone and company are recognized; the others go to the card notes."
-msgstr "Adicione data-credhub a cada formulário que deve criar leads. Campos com nome name, email, phone e company são reconhecidos; os outros vão para as anotações do card."
+msgstr "Adicione data-credhub a cada formulário que deve criar cards. Campos com nome name, email, phone e company são reconhecidos; os outros vão para as anotações do card."
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "Send a POST with a JSON body to the Address (URL), with the Key in the X-CredHub-Key header."
@@ -11133,7 +11117,7 @@ msgstr "Não foi possível criar uma nova chave"
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "Source removed. Its leads stop arriving."
-msgstr "Origem removida. Os leads dela deixam de chegar."
+msgstr "Origem removida. Os contatos dela deixam de chegar."
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "Could not remove the source"
@@ -11145,7 +11129,7 @@ msgstr "Google Ads, site e outras ferramentas"
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "Each source gets its own address and key. Leads arrive the moment the form is sent, with the campaign that brought them."
-msgstr "Cada origem tem um endereço e uma chave próprios. Os leads chegam no momento em que o formulário é enviado, com a campanha que os trouxe."
+msgstr "Cada origem tem um endereço e uma chave próprios. Os contatos chegam no momento em que o formulário é enviado, com a campanha que os trouxe."
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "Add source"
@@ -11157,7 +11141,7 @@ msgstr "Nenhuma origem adicionada ainda."
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "Could not load the lead sources"
-msgstr "Não foi possível carregar as origens de leads"
+msgstr "Não foi possível carregar as origens"
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "Could not create the source"
@@ -11165,7 +11149,7 @@ msgstr "Não foi possível criar a origem"
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "Google Ads lead form"
-msgstr "Formulário de lead do Google Ads"
+msgstr "Formulário do Google Ads"
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "Website form"
@@ -11185,7 +11169,7 @@ msgstr "Endereço do seu site"
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "Leads are accepted only from these addresses, one per line, starting with https://. Include the version with and without www if your site uses both."
-msgstr "Os leads só são aceitos destes endereços, um por linha, começando com https://. Inclua a versão com e sem www se o seu site usa as duas."
+msgstr "Os envios só são aceitos destes endereços, um por linha, começando com https://. Inclua a versão com e sem www se o seu site usa as duas."
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "Save addresses"
@@ -11201,11 +11185,11 @@ msgstr "Mensagem de boas-vindas no WhatsApp"
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "Connected to the Cred Chat account {0}"
-msgstr "Conectado à conta {0} do Cred Chat"
+msgstr "Conectado à conta {0} do SmartChat"
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "Connect your Cred Chat to send a WhatsApp message to each new lead the moment it arrives. Then turn it on in each source above."
-msgstr "Conecte o seu Cred Chat para mandar uma mensagem no WhatsApp para cada lead novo assim que ele chegar. Depois ligue em cada origem acima."
+msgstr "Conecte o seu SmartChat para mandar uma mensagem no WhatsApp para cada contato novo assim que ele chegar. Depois ligue em cada origem acima."
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "The welcome message is turned off on every source and the access key is erased."
@@ -11213,11 +11197,11 @@ msgstr "A mensagem de boas-vindas é desligada em todas as origens e a chave de 
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "In Cred Chat, the account number is the number after /accounts/ in the address bar."
-msgstr "No Cred Chat, o número da conta é o número depois de /accounts/ na barra de endereço."
+msgstr "No SmartChat, o número da conta é o número depois de /accounts/ na barra de endereço."
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "The access key is in Cred Chat › Profile settings › Access token. Use the key of an administrator of the account."
-msgstr "A chave de acesso fica em Cred Chat › Configurações do perfil › Token de acesso. Use a chave de um administrador da conta."
+msgstr "A chave de acesso fica em SmartChat › Configurações do perfil › Token de acesso. Use a chave de um administrador da conta."
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "Account number"
@@ -11233,31 +11217,31 @@ msgstr "Conectar"
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "Could not load the Cred Chat connection"
-msgstr "Não foi possível carregar a conexão com o Cred Chat"
+msgstr "Não foi possível carregar a conexão com o SmartChat"
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "Cred Chat connected"
-msgstr "Cred Chat conectado"
+msgstr "SmartChat conectado"
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "Could not connect the Cred Chat"
-msgstr "Não foi possível conectar o Cred Chat"
+msgstr "Não foi possível conectar o SmartChat"
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "Cred Chat disconnected. No welcome message is sent."
-msgstr "Cred Chat desconectado. Nenhuma mensagem de boas-vindas é enviada."
+msgstr "SmartChat desconectado. Nenhuma mensagem de boas-vindas é enviada."
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "Could not disconnect the Cred Chat"
-msgstr "Não foi possível desconectar o Cred Chat"
+msgstr "Não foi possível desconectar o SmartChat"
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "Sent to each new lead of this source, from your WhatsApp number in Cred Chat."
-msgstr "Enviada para cada lead novo desta origem, pelo seu número de WhatsApp no Cred Chat."
+msgstr "Enviada para cada contato novo desta origem, pelo seu número de WhatsApp no SmartChat."
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "Connect your Cred Chat in \"WhatsApp welcome message\", below the sources, to use it."
-msgstr "Para usar, conecte o seu Cred Chat em \"Mensagem de boas-vindas no WhatsApp\", abaixo das origens."
+msgstr "Para usar, conecte o seu SmartChat em \"Mensagem de boas-vindas no WhatsApp\", abaixo das origens."
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "WhatsApp number"
@@ -11269,11 +11253,11 @@ msgstr "Mensagem (template aprovado)"
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "This number has no approved text template yet. Create one in Cred Chat › Settings › Templates and wait for Meta to approve it."
-msgstr "Este número ainda não tem template de texto aprovado. Crie um em Cred Chat › Configurações › Templates e espere a Meta aprovar."
+msgstr "Este número ainda não tem template de texto aprovado. Crie um em SmartChat › Configurações › Templates e espere a Meta aprovar."
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "Meta charges each conversation started by the company on your WhatsApp account. Leads without a valid mobile number get no message."
-msgstr "A Meta cobra cada conversa iniciada pela empresa na sua conta de WhatsApp. Lead sem celular válido não recebe mensagem."
+msgstr "A Meta cobra cada conversa iniciada pela empresa na sua conta de WhatsApp. Contato sem celular válido não recebe mensagem."
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "Save welcome message"
@@ -11281,7 +11265,7 @@ msgstr "Salvar boas-vindas"
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "Choose a lead field"
-msgstr "Escolha um campo do lead"
+msgstr "Escolha um campo do contato"
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "Could not load the welcome message"
@@ -11301,7 +11285,7 @@ msgstr "Não foi possível salvar a mensagem de boas-vindas"
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "Open the conversation in Cred Chat"
-msgstr "Abrir a conversa no Cred Chat"
+msgstr "Abrir a conversa no SmartChat"
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "Waiting to be sent"
@@ -11413,7 +11397,7 @@ msgstr "Quem paga"
 
 #: frontend/src/components/Settings/UsersAndPlan
 msgid "Used for the invoice. The card is typed on the payment page, never in Cred Hub."
-msgstr "Usado na fatura. O cartão é digitado na página de pagamento, nunca no Cred Hub."
+msgstr "Usado na fatura. O cartão é digitado na página de pagamento, nunca no HubTech CRM."
 
 #: frontend/src/components/Settings/UsersAndPlan
 msgid "Full name or company name"
@@ -11529,7 +11513,7 @@ msgstr "Crie no painel da API4Com um token que não expira e cole aqui. Ele não
 
 #: telephony/api4com
 msgid "Enable API4Com to record the calls of your API4Com account on the timeline of your deals"
-msgstr "Ligue a API4Com para registrar as ligações da sua conta API4Com na linha do tempo dos seus negócios"
+msgstr "Ligue a API4Com para registrar as ligações da sua conta API4Com na linha do tempo dos seus cards"
 
 #: telephony/api4com
 msgid "Extension"
@@ -11565,7 +11549,7 @@ msgstr "Cole o token da API da API4Com."
 
 #: telephony/api4com
 msgid "Record the calls of your API4Com account on the timeline of your deals"
-msgstr "Registre as ligações da sua conta API4Com na linha do tempo dos seus negócios"
+msgstr "Registre as ligações da sua conta API4Com na linha do tempo dos seus cards"
 
 #: telephony/api4com
 msgid "Registered at API4Com automatically when the token is saved. Only needed by hand if API4Com support asks for it."
@@ -11581,23 +11565,23 @@ msgstr "O endereço atual para de funcionar na hora e o novo é cadastrado na AP
 
 #: telephony/api4com
 msgid "Your company hires API4Com directly. Each call made or received at API4Com lands on the timeline of the deal of that number, in the name of the salesperson of the extension."
-msgstr "Sua empresa contrata a API4Com diretamente. Cada ligação feita ou recebida na API4Com aparece na linha do tempo do negócio daquele número, em nome do vendedor do ramal."
+msgstr "Sua empresa contrata a API4Com diretamente. Cada ligação feita ou recebida na API4Com aparece na linha do tempo do card daquele número, em nome do vendedor do ramal."
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "Cred Chat"
-msgstr "Cred Chat"
+msgstr "SmartChat"
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "Connect your Cred Chat to send a WhatsApp welcome message to each new lead (turn it on in each source above) and to see the Cred Hub cards inside Cred Chat conversations."
-msgstr "Conecte o seu Cred Chat para mandar uma mensagem de boas-vindas no WhatsApp para cada lead novo (ligue em cada origem acima) e para ver os cards do Cred Hub dentro das conversas do Cred Chat."
+msgstr "Conecte o seu SmartChat para mandar uma mensagem de boas-vindas no WhatsApp para cada contato novo (ligue em cada origem acima) e para ver os cards do HubTech CRM dentro das conversas do SmartChat."
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "The \"Cred Hub\" tab shows the contact's cards in every Cred Chat conversation."
-msgstr "A aba \"Cred Hub\" mostra os cards do contato em toda conversa do Cred Chat."
+msgstr "A aba \"HubTech CRM\" mostra os cards do contato em toda conversa do SmartChat."
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "The Cred Hub tab is not in Cred Chat conversations yet."
-msgstr "A aba do Cred Hub ainda não está nas conversas do Cred Chat."
+msgstr "A aba do HubTech CRM ainda não está nas conversas do SmartChat."
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "Try again"
@@ -11605,19 +11589,19 @@ msgstr "Tentar de novo"
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "The welcome message is turned off on every source, the Cred Hub tab leaves Cred Chat and the access key is erased."
-msgstr "A mensagem de boas-vindas é desligada em todas as origens, a aba do Cred Hub sai do Cred Chat e a chave de acesso é apagada."
+msgstr "A mensagem de boas-vindas é desligada em todas as origens, a aba do HubTech CRM sai do SmartChat e a chave de acesso é apagada."
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "Cred Hub tab added to Cred Chat"
-msgstr "Aba do Cred Hub adicionada ao Cred Chat"
+msgstr "Aba do HubTech CRM adicionada ao SmartChat"
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "Could not add the Cred Hub tab"
-msgstr "Não foi possível adicionar a aba do Cred Hub"
+msgstr "Não foi possível adicionar a aba do HubTech CRM"
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "Connect your Cred Chat in the \"Cred Chat\" box, below the sources, to use it."
-msgstr "Para usar, conecte o seu Cred Chat no quadro \"Cred Chat\", abaixo das origens."
+msgstr "Para usar, conecte o seu SmartChat no quadro \"SmartChat\", abaixo das origens."
 
 #: frontend/src/utils/dashboard.ts
 msgid "{0} to {1}"
@@ -11879,6 +11863,18 @@ msgstr "Só dá para criar campos em cards, contatos e empresas."
 msgid "There is no room left for another field of this type in {0}."
 msgstr "Não há mais espaço para outro campo deste tipo em {0}."
 
+#: frontend/src/components/Settings/EmailTemplate/NewEmailTemplate.vue
+msgid "Payment reminder - card {{ name }}"
+msgstr "Lembrete de pagamento - card {{ name }}"
+
+#: frontend/src/components/Settings/EmailTemplate/NewEmailTemplate.vue
+msgid "<p>Hello, {{ lead_name }}!</p>\\n\\n<p>This is a reminder about the payment of {{ grand_total }}.</p>\\n\\n<p>Thank you,</p>\\n<p>Your team</p>"
+msgstr "<p>Olá, {{ lead_name }}!</p>\\n\\n<p>Este é um lembrete do pagamento de {{ grand_total }}.</p>\\n\\n<p>Obrigado,</p>\\n<p>Sua equipe</p>"
+
+#: frontend/src/components/Settings/EmailTemplate/NewEmailTemplate.vue
+msgid "Hello, {{ lead_name }}! \\n\\nThis is a reminder about the payment of {{ grand_total }}. \\n\\nThank you, \\nYour team"
+msgstr "Olá, {{ lead_name }}! \\n\\nEste é um lembrete do pagamento de {{ grand_total }}. \\n\\nObrigado, \\nSua equipe"
+
 #: crm/api/email_accounts.py
 msgid "This account sends the system emails and is managed by CredTech."
 msgstr "Esta conta envia os e-mails do sistema e é gerenciada pela CredTech."
@@ -11949,9 +11945,6 @@ msgstr "Enviado em {0}"
 
 msgid "Expired on {0}"
 msgstr "Expirou em {0}"
-
-msgid "Valid until {0}"
-msgstr "Vale até {0}"
 
 msgid "Resend"
 msgstr "Reenviar"
