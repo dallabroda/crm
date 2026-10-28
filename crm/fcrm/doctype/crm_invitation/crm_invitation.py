@@ -4,6 +4,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.rate_limiter import rate_limit
 
 from crm.api.user import validate_no_role_profile
 
@@ -187,6 +188,8 @@ def get_invitations() -> list[dict]:
 
 
 @frappe.whitelist(methods=["POST"])
+# the same invitation, from the same place: at most 3 e-mails an hour
+@rate_limit(key="name", limit=3, seconds=60 * 60)
 def resend_invitation(name: str) -> str:
 	"""Send the invitation e-mail again, valid for INVITATION_DAYS more. An expired one becomes a new
 	invitation (so the plan's seat check runs again) and the old record goes away."""
