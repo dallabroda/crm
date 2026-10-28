@@ -260,7 +260,11 @@ if int(frappe.__version__.split(".")[0]) < 16:
 
 doc_events = {
 	"Contact": {
-		"validate": ["crm.api.contact.validate"],
+		# the company's form of contacts: required fields (credtech#181)
+		"validate": [
+			"crm.api.contact.validate",
+			"crm.fcrm.doctype.crm_pipeline.form_schema.validate_required",
+		],
 	},
 	"Notification Log": {
 		"before_insert": ["crm.extends.notification_log.before_insert"],
@@ -288,6 +292,8 @@ doc_events = {
 			"crm.automation.events.on_whatsapp_message",
 		],
 	},
+	# the company's form of companies: required fields (credtech#181)
+	"CRM Organization": {"validate": ["crm.fcrm.doctype.crm_pipeline.form_schema.validate_required"]},
 	"CRM Deal": {
 		"on_update": [
 			"crm.fcrm.doctype.erpnext_crm_settings.erpnext_crm_settings.create_customer_in_erpnext",

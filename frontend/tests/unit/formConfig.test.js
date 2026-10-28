@@ -63,6 +63,19 @@ describe('setFlag', () => {
     expect([row.visible, row.required, row.read_only]).toEqual([0, 0, 0])
   })
 
+  it('does not require a field the system fills in', () => {
+    let [row] = configRows([
+      {
+        fieldname: 'years_in_business',
+        visible: 1,
+        required: 0,
+        can_require: 0,
+      },
+    ])
+    setFlag(row, 'required', true)
+    expect(row.required).toBe(0)
+  })
+
   it('does not touch locked fields', () => {
     let [row] = configRows(schema)
     setFlag(row, 'visible', false)

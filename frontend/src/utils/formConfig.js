@@ -22,6 +22,8 @@ export function configRows(schemaFields) {
       options: f.options,
       locked: Boolean(f.locked),
       is_created: Boolean(f.is_created),
+      // read-only fields are filled by the system: never required
+      can_require: f.can_require === undefined ? true : Boolean(f.can_require),
       ...flags,
       original: { ...flags },
     }
@@ -32,6 +34,7 @@ export function configRows(schemaFields) {
 // hidden field is neither required nor read only
 export function setFlag(row, flag, value) {
   if (row.locked) return row
+  if (flag === 'required' && value && !row.can_require) return row
   row[flag] = value ? 1 : 0
   if (flag !== 'visible' && row[flag]) row.visible = 1
   if (flag === 'visible' && !row.visible) {
@@ -79,6 +82,7 @@ export function newRow(field) {
     options: field.options,
     locked: false,
     is_created: !field.is_standard,
+    can_require: true,
     ...flags,
     original: { ...flags },
   }

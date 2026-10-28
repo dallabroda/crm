@@ -13,7 +13,7 @@
           }}
         </p>
       </div>
-      <div v-if="isAdmin()" class="flex w-4/12 flex-col items-end gap-1">
+      <div v-if="isManager()" class="flex w-4/12 flex-col items-end gap-1">
         <div class="flex gap-2">
           <Button
             :label="__('Created fields')"
@@ -41,21 +41,29 @@
       </div>
     </div>
 
-    <!-- Companies and Contacts come with phase 3 (credtech#181) -->
     <div class="px-2">
       <TabButtons v-model="tab" :options="tabs" />
     </div>
 
     <div class="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-2">
       <div
-        v-if="!pipelines.length && !loading"
+        v-if="isCards && !pipelines.length && !loading"
         class="text-p-base text-ink-gray-5"
       >
         {{ __('You do not take part in any funnel yet.') }}
       </div>
       <template v-else>
         <div class="flex flex-wrap items-end gap-3">
-          <div class="w-56">
+          <p v-if="!isCards" class="flex-1 text-p-sm text-ink-gray-5">
+            {{
+              isCompanies
+                ? __(
+                    'One form for every organization of the company, including the Receita Federal data the CNPJ lookup fills in.',
+                  )
+                : __('One form for every contact of the company.')
+            }}
+          </p>
+          <div v-if="isCards" class="w-56">
             <FormControl
               type="select"
               :label="__('Funnel')"
@@ -64,7 +72,7 @@
               @update:model-value="(v) => (pipeline = v)"
             />
           </div>
-          <div class="w-64">
+          <div v-if="isCards" class="w-64">
             <FormControl
               type="select"
               :label="__('Stage')"
@@ -75,7 +83,7 @@
           </div>
           <div class="flex flex-1 items-center justify-end gap-2">
             <Badge
-              v-if="pipeline && !canManage"
+              v-if="(pipeline || !isCards) && !canManage"
               :label="__('Read only')"
               variant="subtle"
             />
@@ -96,7 +104,7 @@
               {{ __('Form preview') }}
             </span>
             <span class="text-sm text-ink-gray-5">
-              {{ __('As the salesperson sees the card') }}
+              {{ previewHint }}
             </span>
           </div>
           <div v-if="loadingSchema" class="flex justify-center py-6">
@@ -112,9 +120,11 @@
   <FormConfigModal
     v-if="schema"
     v-model="showConfig"
-    :pipeline="pipeline"
+    :doctype="doctype"
+    :form-label="formLabel"
+    :pipeline="isCards ? pipeline : ''"
     :pipeline-label="currentPipeline ? __(currentPipeline.pipeline_name) : ''"
-    :stage="stage"
+    :stage="isCards ? stage : ''"
     :stage-label="stageLabel"
     :fields="schema.fields"
     :catalog="catalog.fields"
@@ -124,8 +134,9 @@
 
   <FieldDialog
     v-model="showField"
+    :doctype="doctype"
     :field="editing"
-    :pipelines="manageablePipelines"
+    :pipelines="isCards ? manageablePipelines : []"
     :pipeline="pipeline"
     :stage="stage"
     :room="catalog.room"
@@ -192,10 +203,36 @@ import {
 import { computed, onMounted, ref, watch } from 'vue'
 
 const pipelineStore = pipelinesStore()
-const { isAdmin } = usersStore()
+// admins on the server (crm.permissions.pipeline.is_admin) include Sales
+// Managers outside the sales hierarchy; the server still checks every change
+const { isManager } = usersStore()
 
+// one tab per form: cards (per funnel and stage), organizations and contacts
+// (one form each for the whole company)
+const FORMS = {
+  cards: 'CRM Deal',
+  organizations: 'CRM Organization',
+  contacts: 'Contact',
+}
 const tab = ref('cards')
-const tabs = [{ label: __('Cards'), value: 'cards' }]
+const tabs = [
+  { label: __('Cards'), value: 'cards' },
+  { label: __('Organizations'), value: 'organizations' },
+  { label: __('Contacts'), value: 'contacts' },
+]
+const doctype = computed(() => FORMS[tab.value])
+const isCards = computed(() => tab.value === 'cards')
+const isCompanies = computed(() => tab.value === 'organizations')
+const formLabel = computed(
+  () => tabs.find((t) => t.value === tab.value)?.label || '',
+)
+const previewHint = computed(() =>
+  isCards.value
+    ? __('As the salesperson sees the card')
+    : isCompanies.value
+      ? __('As the team sees an organization')
+      : __('As the team sees a contact'),
+)
 
 const loading = ref(true)
 const pipeline = ref('')
@@ -215,8 +252,11 @@ const pipelines = computed(() => pipelineStore.pipelines)
 const currentPipeline = computed(() =>
   pipelineStore.getPipeline(pipeline.value),
 )
+// cards: funnel owners; organizations and contacts: admins (managers)
 const canManage = computed(() =>
-  ['Admin', 'Owner'].includes(currentPipeline.value?.my_role),
+  isCards.value
+    ? ['Admin', 'Owner'].includes(currentPipeline.value?.my_role)
+    : isManager(),
 )
 const manageablePipelines = computed(() =>
   pipelines.value.filter((p) => ['Admin', 'Owner'].includes(p.my_role)),
@@ -257,18 +297,23 @@ const createdFields = computed(() =>
 let schemaRequest = 0
 async function loadSchema() {
   let request = ++schemaRequest
-  if (!pipeline.value) {
+  if (isCards.value && !pipeline.value) {
     schema.value = null
     return
   }
   loadingSchema.value = true
   schemaError.value = ''
   try {
-    let result = await call('crm.api.forms.get_form_schema', {
-      doctype: 'CRM Deal',
-      pipeline: pipeline.value,
-      stage: stage.value || null,
-    })
+    let result = await call(
+      'crm.api.forms.get_form_schema',
+      isCards.value
+        ? {
+            doctype: doctype.value,
+            pipeline: pipeline.value,
+            stage: stage.value || null,
+          }
+        : { doctype: doctype.value },
+    )
     if (request === schemaRequest) schema.value = result
   } catch (e) {
     if (request !== schemaRequest) return
@@ -284,11 +329,16 @@ watch(pipeline, () => {
   loadSchema()
 })
 watch(stage, loadSchema)
+watch(tab, () => {
+  schema.value = null
+  Promise.all([loadCatalog(), loadSchema()])
+})
 
 async function loadCatalog() {
   try {
     catalog.value =
-      (await pipelineStore.apiCall('get_field_catalog')) || catalog.value
+      (await call('crm.api.forms.get_fields', { doctype: doctype.value })) ||
+      catalog.value
   } catch (e) {
     toast.error(e?.messages?.[0] || __('Could not load the fields'))
   }
@@ -318,7 +368,10 @@ function openField(field) {
 
 async function disable(field) {
   try {
-    await call('crm.api.forms.disable_field', { fieldname: field.fieldname })
+    await call('crm.api.forms.disable_field', {
+      fieldname: field.fieldname,
+      doctype: doctype.value,
+    })
     toast.success(__('Field disabled. Its values stay saved.'))
     await refresh()
   } catch (e) {

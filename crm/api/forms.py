@@ -4,8 +4,7 @@
 
 Routes /api/method/crm.api.forms.* (prefix agreed with the API keys proposal). Cards: the funnel decides
 which fields and their order, the stage decides visible, required and read only, and "all stages" is a
-batch edit of every stage (proposal, section 3.2). Contacts and companies get their own configuration in
-phase 3.
+batch edit of every stage (proposal, section 3.2). Contacts and companies have one form each (phase 3).
 """
 
 import json
@@ -13,7 +12,14 @@ import json
 import frappe
 from frappe import _
 
-from crm.api.pipeline import _assert_admin, _assert_can_manage, _assert_can_view, _stages, save_pipeline
+from crm.api.pipeline import (
+	CRM_ROLES,
+	_assert_admin,
+	_assert_can_manage,
+	_assert_can_view,
+	_stages,
+	save_pipeline,
+)
 from crm.fcrm.doctype.crm_pipeline import fields as catalog
 from crm.fcrm.doctype.crm_pipeline import form_schema
 
@@ -47,7 +53,9 @@ def save_form_config(
 	"""
 	doctype = catalog._form_doctype(doctype)
 	if doctype != catalog.DEAL:
-		frappe.throw(_("Contact and company forms can not be configured yet."))
+		# contacts and companies: one form for the whole company, set by admins
+		_assert_admin()
+		return form_schema.save_global_form(doctype, _json(fields) or [])
 	if not pipeline:
 		frappe.throw(_("Choose a pipeline."))
 	_assert_can_manage(pipeline)
@@ -76,6 +84,20 @@ def save_form_config(
 
 	save_pipeline({"name": pipeline, "fields": fieldnames, "field_rules": field_rules})
 	return form_schema.get_form_schema(doctype, pipeline, stage)
+
+
+@frappe.whitelist()
+def get_fields(doctype: str) -> dict:
+	"""Fields of a form's catalog, with the created-field limit and the room left in the table."""
+	frappe.only_for(CRM_ROLES)
+	doctype = catalog._form_doctype(doctype)
+	fields = catalog.get_catalog() if doctype == catalog.DEAL else form_schema.form_catalog(doctype)
+	return {
+		"limit": catalog.CREATED_FIELD_LIMIT,
+		"used": catalog.created_field_count(doctype),
+		"room": catalog.room_by_type(doctype),
+		"fields": fields,
+	}
 
 
 @frappe.whitelist()
