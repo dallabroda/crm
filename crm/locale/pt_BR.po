@@ -11997,3 +11997,24 @@ msgstr "O campo {0} não faz parte deste formulário."
 #: crm/fcrm/doctype/crm_pipeline/form_schema.py
 msgid "{0} is filled in by the system and cannot be required."
 msgstr "{0} é preenchido pelo sistema e não pode ser obrigatório."
+
+#: frontend/src/pages/Organization.vue
+msgid "Organization fields"
+msgstr "Campos da organização"
+
+#: frontend/src/pages/Contact.vue
+msgid "Contact fields"
+msgstr "Campos do contato"
+
+#: frontend/src/components/Modals/OrganizationModal.vue
+#: frontend/src/components/Modals/ContactModal.vue
+msgid "Required by the form"
+msgstr "Obrigatórios do formulário"
+
+#: frontend/src/components/Settings/FormCustomization/FormPreview.vue
+msgid "1 field is hidden in this form."
+msgstr "1 campo está oculto neste formulário."
+
+#: frontend/src/components/Settings/FormCustomization/FormPreview.vue
+msgid "{0} fields are hidden in this form."
+msgstr "{0} campos estão ocultos neste formulário."
