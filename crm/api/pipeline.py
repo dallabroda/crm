@@ -123,7 +123,15 @@ def save_pipeline(doc: str | dict) -> dict:
 			frappe.throw(_("Only pipeline owners can create pipelines."), frappe.PermissionError)
 		pipeline = frappe.new_doc("CRM Pipeline")
 
-	for key in ("pipeline_name", "color", "icon", "position", "is_active"):
+	for key in (
+		"pipeline_name",
+		"color",
+		"icon",
+		"position",
+		"is_active",
+		"second_organization_label",
+		"default_contacts_from",
+	):
 		if key in data:
 			pipeline.set(key, data[key])
 	if "distribution" in data:

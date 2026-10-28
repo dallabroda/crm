@@ -19,6 +19,8 @@ CREATED_FIELD_LIMIT = 60
 LOCKED_FIELDS = ("pipeline", "status", "deal_owner")
 STANDARD_FIELDS = (
 	"organization",
+	# offered in every funnel, but a funnel uses it only when someone adds it (credtech#195)
+	"second_organization",
 	"deal_value",
 	"expected_closure_date",
 	"next_step",
@@ -293,7 +295,7 @@ def _catalog_item(fieldname: str, doctype: str = DEAL) -> dict:
 def default_pipeline_fields() -> list[str]:
 	"""Fields a new pipeline starts with: the standard ones."""
 	meta = frappe.get_meta(DEAL)
-	return [f for f in STANDARD_FIELDS if meta.has_field(f)]
+	return [f for f in STANDARD_FIELDS if meta.has_field(f) and f != "second_organization"]
 
 
 def setup_default_fields(pipeline: str):

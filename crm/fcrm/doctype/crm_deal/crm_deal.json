@@ -10,6 +10,8 @@
   "organization_tab",
   "naming_series",
   "organization",
+  "second_organization",
+  "contacts_from",
   "next_step",
   "column_break_ijan",
   "pipeline",
@@ -524,12 +526,28 @@
    "options": "CRM Pipeline",
    "reqd": 1,
    "search_index": 1
+  },
+  {
+   "description": "A second company of the card (e.g. the debtor of a receivable). Its label can change per funnel.",
+   "fieldname": "second_organization",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Second organization",
+   "options": "CRM Organization",
+   "search_index": 1
+  },
+  {
+   "description": "With two organizations: whose contacts the card shows.",
+   "fieldname": "contacts_from",
+   "fieldtype": "Select",
+   "label": "Contacts from",
+   "options": "\nOrganization\nSecond organization\nBoth"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-10-25 19:00:00.000000",
+ "modified": "2026-10-28 18:00:00.000000",
  "modified_by": "Administrator",
  "module": "FCRM",
  "name": "CRM Deal",

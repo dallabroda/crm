@@ -12,6 +12,9 @@
   "position",
   "color",
   "icon",
+  "cards_section",
+  "second_organization_label",
+  "default_contacts_from",
   "members_section",
   "members",
   "fields_section",
@@ -105,12 +108,31 @@
    "label": "Last Assigned",
    "read_only": 1,
    "hidden": 1
+  },
+  {
+   "fieldname": "cards_section",
+   "fieldtype": "Section Break",
+   "label": "Cards"
+  },
+  {
+   "description": "Name of the card's second organization in this funnel (e.g. Debtor). Empty: Second organization.",
+   "fieldname": "second_organization_label",
+   "fieldtype": "Data",
+   "label": "Second organization label"
+  },
+  {
+   "default": "Organization",
+   "description": "Whose contacts a new card with two organizations shows.",
+   "fieldname": "default_contacts_from",
+   "fieldtype": "Select",
+   "label": "Contacts from (default)",
+   "options": "Organization\nSecond organization\nBoth"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-10-26 18:00:00.000000",
+ "modified": "2026-10-28 18:00:00.000000",
  "modified_by": "Administrator",
  "module": "FCRM",
  "name": "CRM Pipeline",
