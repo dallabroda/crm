@@ -152,6 +152,7 @@
         v-model="doc"
         @updateField="updateField"
       />
+      <ProbableCompany :deal="doc" @changed="onProbableCompany" />
       <OrganizationRegistry :organization="organization" />
       <div
         v-if="sections.data"
@@ -415,6 +416,7 @@ import LostReasonModal from '@/components/Modals/LostReasonModal.vue'
 import MissingFieldsModal from '@/components/Modals/MissingFieldsModal.vue'
 import ChangePipelineModal from '@/components/Modals/ChangePipelineModal.vue'
 import OrganizationRegistry from '@/components/Pipelines/OrganizationRegistry.vue'
+import ProbableCompany from '@/components/Pipelines/ProbableCompany.vue'
 import { pipelinesStore } from '@/stores/pipelines'
 import {
   applyStageRules,
@@ -1043,6 +1045,12 @@ function openWhatsApp() {
 
 function reloadActivities() {
   activities.value?.all_activities?.reload()
+}
+
+// the probable company from the e-mail was confirmed or dismissed (credtech#187)
+function onProbableCompany() {
+  document.reload()
+  reloadActivities()
 }
 
 async function triggerStatusChange(value) {
