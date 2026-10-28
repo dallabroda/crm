@@ -1312,8 +1312,25 @@ const stopMissingFields = onMissingRequiredFields(
 )
 onBeforeUnmount(stopMissingFields)
 
-function saveMissingFields(values) {
+async function saveMissingFields(values) {
   missingFields.value = null
+  if (['organization', 'second_organization', 'contact'].some((k) => k in values)) {
+    // fields of the linked records are saved on them, with the move (credtech#196)
+    try {
+      await call('crm.api.pipeline.move_card', {
+        deal: props.dealId,
+        stage: document.doc.status,
+        values,
+      })
+      document.reload()
+      reloadResources({ status: document.doc.status })
+      cardBlocks.reload()
+    } catch (e) {
+      toast.error(e?.messages?.[0] || __('Could not move the card'))
+      document.reload()
+    }
+    return
+  }
   Object.assign(document.doc, values)
   document.save.submit(null, {
     onSuccess: () => reloadResources({ status: document.doc.status }),

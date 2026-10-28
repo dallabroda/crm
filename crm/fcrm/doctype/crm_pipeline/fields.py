@@ -449,6 +449,7 @@ def get_missing_fields(doc, stage: str) -> list[dict]:
 	"""Required fields of `stage` that are empty on the card and on the records linked to it (its
 	organization, second organization and primary contact; a block without a record is skipped)."""
 	missing = []
+	labels = None
 	for block in BLOCKS:
 		rules = {f: r for f, r in get_stage_rules(doc.pipeline, stage, block).items() if r["required"]}
 		record = block_record(doc, block)
@@ -456,6 +457,10 @@ def get_missing_fields(doc, stage: str) -> list[dict]:
 			continue
 		doctype = BLOCK_DOCTYPES[block]
 		meta = frappe.get_meta(doctype)
+		if labels is None:
+			from crm.api.card_contacts import second_organization_label
+
+			labels = {b: _(b) for b in BLOCKS} | {SECOND_ORGANIZATION: second_organization_label(doc.pipeline)}
 		values = doc if block == CARD else frappe.db.get_value(doctype, record, list(rules), as_dict=True) or {}
 		for fieldname in rules:
 			df = meta.get_field(fieldname)
@@ -467,6 +472,7 @@ def get_missing_fields(doc, stage: str) -> list[dict]:
 						"fieldtype": df.fieldtype,
 						"options": df.options or "",
 						"block": block,
+						"block_label": labels[block],
 						"doctype": doctype,
 						"docname": record,
 					}
