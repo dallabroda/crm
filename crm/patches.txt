@@ -48,3 +48,4 @@ crm.patches.credhub.single_card_value
 crm.patches.credhub.move_company_fields_to_organization
 crm.patches.credhub.pipeline_field_blocks
 crm.patches.credhub.contact_single_name
+crm.patches.credhub.card_name

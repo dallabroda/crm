@@ -276,7 +276,8 @@ watch(
       })
       if (request !== stageRequest) return
       stageRequired.value = (schema?.fields || [])
-        .filter((f) => f.visible && !f.locked)
+        // the card's name is locked (always shown) and asked here (credtech#182)
+        .filter((f) => f.visible && (!f.locked || f.fieldname === 'deal_name'))
         .map((f) => ({
           fieldname: f.fieldname,
           label: f.label,
@@ -320,6 +321,17 @@ watch(
     })
   },
   { immediate: true },
+)
+
+// The card's name starts as the chosen organization's, until someone types
+// another one (credtech#182)
+watch(
+  () => deal.doc.organization,
+  (organization, previous) => {
+    if (!deal.doc.deal_name || deal.doc.deal_name === previous) {
+      deal.doc.deal_name = organization || ''
+    }
+  },
 )
 
 // A contact picked for another organization would not match the filter.
