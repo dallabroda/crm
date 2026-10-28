@@ -9,29 +9,18 @@
         <p class="text-p-base text-ink-gray-6">
           {{
             __(
-              'Add or invite users and choose their role to control what they can see and do.',
+              'Invite users and choose their role to control what they can see and do.',
             )
           }}
         </p>
       </div>
       <div class="flex item-center space-x-2 w-3/12 justify-end">
-        <Dropdown
-          :options="[
-            {
-              label: __('Add Existing User'),
-              onClick: () => (showAddExistingModal = true),
-            },
-            {
-              label: __('Invite New User'),
-              onClick: () => (activeSettingsPage = 'Invite User'),
-            },
-          ]"
-          :button="{
-            label: __('New'),
-            iconLeft: 'lucide-plus',
-            variant: 'solid',
-          }"
-          align="end"
+        <!-- Access is only by invitation (credtech#190): "New" opens the invitation -->
+        <Button
+          :label="__('New')"
+          icon-left="lucide-plus"
+          variant="solid"
+          @click="activeSettingsPage = 'Invite User'"
         />
       </div>
     </div>
@@ -165,14 +154,9 @@
       </ul>
     </div>
   </div>
-  <AddExistingUserModal
-    v-if="showAddExistingModal"
-    v-model="showAddExistingModal"
-  />
 </template>
 
 <script setup>
-import AddExistingUserModal from '@/components/Modals/AddExistingUserModal.vue'
 import AvailabilityDot from '@/components/AvailabilityDot.vue'
 import EmptyState from '@/components/ListViews/EmptyState.vue'
 import { activeSettingsPage } from '@/composables/settings'
@@ -191,7 +175,6 @@ import { ConfirmDelete } from '../../utils'
 
 const { users, isAdmin, isManager } = usersStore()
 
-const showAddExistingModal = ref(false)
 const searchRef = ref(null)
 const search = ref('')
 const currentRole = ref('All')

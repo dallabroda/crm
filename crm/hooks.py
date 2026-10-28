@@ -260,7 +260,11 @@ if int(frappe.__version__.split(".")[0]) < 16:
 
 doc_events = {
 	"Contact": {
-		"validate": ["crm.api.contact.validate"],
+		# the company's form of contacts: required fields (credtech#181)
+		"validate": [
+			"crm.api.contact.validate",
+			"crm.fcrm.doctype.crm_pipeline.form_schema.validate_required",
+		],
 	},
 	"Notification Log": {
 		"before_insert": ["crm.extends.notification_log.before_insert"],
@@ -294,14 +298,18 @@ doc_events = {
 		"on_trash": ["crm.api.email_accounts.on_trash"],
 		"before_rename": ["crm.api.email_accounts.before_rename"],
 	},
+	# the company's form of companies: required fields (credtech#181)
+	"CRM Organization": {"validate": ["crm.fcrm.doctype.crm_pipeline.form_schema.validate_required"]},
 	"CRM Deal": {
 		"on_update": [
 			"crm.fcrm.doctype.erpnext_crm_settings.erpnext_crm_settings.create_customer_in_erpnext",
 			"crm.automation.events.on_deal_update",
 		],
+		"on_trash": ["crm.api.doc.unlink_kept_records"],
 	},
 	"CRM Lead": {
 		"on_update": ["crm.automation.events.on_lead_update"],
+		"on_trash": ["crm.api.doc.unlink_kept_records"],
 	},
 	"Sales Order": {
 		"before_validate": [

@@ -5,7 +5,7 @@
       <div class="flex flex-col gap-1 w-9/12">
         <div class="flex gap-2 items-center">
           <h2 class="flex text-2xl-semibold leading-none h-5">
-            {{ __('Forms') }}
+            {{ __('Lead capture forms') }}
           </h2>
         </div>
         <p class="text-p-base text-ink-gray-6">

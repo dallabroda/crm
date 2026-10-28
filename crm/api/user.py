@@ -113,23 +113,12 @@ def has_password(user: str) -> bool:
 
 @frappe.whitelist()
 def add_existing_users(users: str | list, role: str = "Sales User"):
-	"""
-	Add existing users to the CRM by assigning them a role (Sales User or Sales Manager).
-	:param users: List of user names to be added
-	"""
-	frappe.only_for(["System Manager", "Sales Manager"], True)
-	is_system_manager = "System Manager" in frappe.get_roles()
-
-	if role == "System Manager" and not is_system_manager:
-		frappe.throw(_("Only System Managers can assign the System Manager role"), frappe.PermissionError)
-
-	if role == "Sales Manager" and not is_system_manager:
-		frappe.throw(_("Only System Managers can assign the Sales Manager role"), frappe.PermissionError)
-
-	users = frappe.parse_json(users)
-
-	for user in users:
-		update_user_role(user, role)
+	"""Closed in HubTech CRM: people join a company only by invitation (owner's decision, credtech#190).
+	The roles of someone already in the company change through update_user_role."""
+	frappe.throw(
+		_("People join the company only by invitation: invite them by e-mail in Settings > Invite user."),
+		frappe.PermissionError,
+	)
 
 
 @frappe.whitelist()

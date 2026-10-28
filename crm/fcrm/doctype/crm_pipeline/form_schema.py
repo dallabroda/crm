@@ -5,7 +5,7 @@
 Cards: the pipeline decides which fields and their order (CRM Pipeline Field); the stage decides visible,
 required and read only (CRM Pipeline Field Rule). Without a stage the answer covers "all stages": a flag is
 returned when the stages agree, None when they differ (`varies`). Contacts and companies have one global
-form; until its own configuration exists (phase 3) it follows the side panel layout.
+form, saved in CRM Form Config (phase 3, credtech#181).
 """
 
 import frappe
@@ -37,7 +37,11 @@ def get_form_schema(doctype: str, pipeline: str | None = None, stage: str | None
 		rows = _global_rows(doctype)
 	meta = frappe.get_meta(doctype)
 	fields = [_field(doctype, meta, row) for row in rows]
-	return {"doctype": doctype, "pipeline": pipeline, "stage": stage, "fields": [f for f in fields if f]}
+	schema = {"doctype": doctype, "pipeline": pipeline, "stage": stage, "fields": [f for f in fields if f]}
+	if doctype != catalog.DEAL:
+		# until the company saves this form, its screens keep the side panel layout
+		schema["configured"] = frappe.db.exists(FORM_CONFIG, doctype) is not None
+	return schema
 
 
 def _locked_rows(doctype: str, meta) -> list[dict]:
@@ -86,36 +90,196 @@ def _card_rows(pipeline: str, stage: str | None) -> list[dict]:
 	return rows
 
 
-def _global_rows(doctype: str) -> list[dict]:
-	"""Contacts and companies: the side panel layout order, then created fields it does not have yet."""
+# Fields of contacts and companies that are not part of their form: bookkeeping of lookups, sync and system data
+NOT_IN_FORM = {
+	"CRM Organization": (
+		"currency",
+		"exchange_rate",
+		"organization_logo",
+		"cnpj_checked_on",
+		"company_checked_on",
+		"employee_source",
+	),
+	"Contact": (
+		"full_name",
+		"user",
+		"image",
+		"status",
+		"is_primary_contact",
+		"unsubscribed",
+		"sync_with_google_contacts",
+		"google_contacts",
+		"google_contacts_id",
+		"pulled_from_google_contacts",
+	),
+}
+FORM_CONFIG = "CRM Form Config"
+# Read-only in the doctype but filled by the record from its tables (a contact's primary e-mail and mobile, which
+# the screens turn into table rows), so the person does fill them in: they can be required. `phone` is not: the
+# screens do not turn it into a row, so Contact.validate clears it (review of crm#53)
+FILLED_FROM_TABLES = {"Contact": ("email_id", "mobile_no")}
+
+
+def can_require(doctype: str, df) -> bool:
+	"""Read-only fields are filled by the system: they can be shown, not required."""
+	return not df.read_only or df.fieldname in FILLED_FROM_TABLES.get(doctype, ())
+
+
+def form_catalog(doctype: str) -> list[dict]:
+	"""Contacts and companies: their own fields (native, including the Receita Federal data the CNPJ lookup
+	fills, and created ones), each saying whether it is locked and whether it can be required (read-only
+	fields are filled by the system, so they can be shown but not required)."""
 	meta = frappe.get_meta(doctype)
-	rows = _locked_rows(doctype, meta)
-	seen = {r["fieldname"] for r in rows}
+	locked = LOCKED_FIELDS.get(doctype, ())
+	skip = set(NOT_IN_FORM.get(doctype, ()))
+	fields = []
+	for df in meta.fields:
+		if (
+			df.fieldtype in frappe.model.no_value_fields
+			or df.fieldtype in frappe.model.table_fields
+			or df.fieldname in skip
+		):
+			continue
+		created = df.fieldname.startswith(catalog.CREATED_PREFIX)
+		if df.hidden and not created:
+			continue
+		info = catalog._field_info(df, not created)
+		info["locked"] = int(df.fieldname in locked)
+		info["can_require"] = int(can_require(doctype, df))
+		fields.append(info)
+	return fields
+
+
+def _layout_order(doctype: str) -> list[str]:
 	order = []
 	for section in get_sidepanel_sections(doctype):
 		for column in section.get("columns") or []:
 			for field in column.get("fields") or []:
 				order.append(field.get("fieldname") if isinstance(field, dict) else field)
-	created = [
-		df.fieldname
-		for df in meta.fields
-		if df.fieldname.startswith(catalog.CREATED_PREFIX) and not df.hidden
-	]
-	for fieldname in [*order, *created]:
-		df = meta.get_field(fieldname) if fieldname else None
-		if not df or fieldname in seen:
+	return order
+
+
+def _saved_config(doctype: str) -> list[dict] | None:
+	if not frappe.db.exists(FORM_CONFIG, doctype):
+		return None
+	rows = frappe.get_doc(FORM_CONFIG, doctype).fields
+	return [r.as_dict() for r in sorted(rows, key=lambda r: (r.position or 0, r.idx))]
+
+
+def _global_rows(doctype: str) -> list[dict]:
+	"""Contacts and companies: the saved form (CRM Form Config). Before it is first saved, the side panel layout
+	order is the form (those fields visible), then the created fields (visible), then the other native fields
+	(hidden). Fields created after the form was saved come at the end, visible."""
+	meta = frappe.get_meta(doctype)
+	rows = _locked_rows(doctype, meta)
+	seen = {r["fieldname"] for r in rows}
+	fields = {f["fieldname"]: f for f in form_catalog(doctype) if not f["disabled"]}
+	saved = _saved_config(doctype)
+	if saved is not None:
+		ordered = [(r.fieldname, r.visible, r.required) for r in saved]
+		rest = [(f, 1, 0) for f in fields if f.startswith(catalog.CREATED_PREFIX)]
+		rest += [(f, 0, 0) for f in fields if not f.startswith(catalog.CREATED_PREFIX)]
+	else:
+		layout = _layout_order(doctype)
+		ordered = [(f, 1, 0) for f in layout]
+		rest = [(f, 1, 0) for f in fields if f.startswith(catalog.CREATED_PREFIX)]
+		rest += [(f, 0, 0) for f in fields if not f.startswith(catalog.CREATED_PREFIX)]
+	for fieldname, visible, required in [*ordered, *rest]:
+		field = fields.get(fieldname)
+		if not field or fieldname in seen:
 			continue
 		seen.add(fieldname)
+		df = meta.get_field(fieldname)
 		rows.append(
 			{
 				"fieldname": fieldname,
-				"visible": 1,
-				"required": int(bool(df.reqd)),
-				"read_only": int(bool(df.read_only)),
+				"visible": int(bool(visible or required)),
+				"required": int(bool(required) and field["can_require"]),
+				# shown as "read only": filled by the system, not by the person
+				"read_only": int(not can_require(doctype, df)),
 				"locked": 0,
 			}
 		)
 	return rows
+
+
+def save_global_form(doctype: str, rows: list[dict]) -> dict:
+	"""Save the form of contacts or companies: the order and, for each field, visible and required.
+	Locked fields are always shown and are ignored here; required implies visible."""
+	fields = {f["fieldname"]: f for f in form_catalog(doctype) if not f["disabled"]}
+	locked = set(LOCKED_FIELDS.get(doctype, ()))
+	saved, seen = [], set()
+	for row in rows:
+		row = frappe._dict(row)
+		if row.fieldname in locked:
+			continue
+		field = fields.get(row.fieldname)
+		if not field:
+			frappe.throw(_("Field {0} is not in this form.").format(frappe.bold(row.fieldname)))
+		if row.fieldname in seen:
+			frappe.throw(_("Field {0} appears more than once.").format(frappe.bold(row.fieldname)))
+		seen.add(row.fieldname)
+		required = frappe.utils.cint(row.get("required"))
+		if required and not field["can_require"]:
+			frappe.throw(
+				_("{0} is filled in by the system and cannot be required.").format(
+					frappe.bold(_(field["label"]))
+				)
+			)
+		visible = 1 if required else frappe.utils.cint(row.get("visible", 1))
+		saved.append(
+			{"fieldname": row.fieldname, "position": len(saved) + 1, "visible": visible, "required": required}
+		)
+	if frappe.db.exists(FORM_CONFIG, doctype):
+		config = frappe.get_doc(FORM_CONFIG, doctype)
+	else:
+		config = frappe.new_doc(FORM_CONFIG)
+		config.form_doctype = doctype
+	config.set("fields", saved)
+	config.save(ignore_permissions=True)
+	return get_form_schema(doctype)
+
+
+def _direct_entry(doc) -> bool:
+	"""The record is being created by itself (its own form or the REST API), not as a side effect of another
+	flow (converting a lead, a card with a new company, a CNPJ lookup) nor by an automatic entry."""
+	if frappe.flags.get("crm_automatic_entry"):
+		return False
+	form = frappe.local.form_dict
+	if (form.get("cmd") or "") in ("frappe.client.insert", "frappe.client.save"):
+		# only when the request's own document is this record's doctype
+		sent = form.get("doc")
+		sent = frappe.parse_json(sent) if isinstance(sent, str) else sent
+		return isinstance(sent, dict) and sent.get("doctype") == doc.doctype
+	request = getattr(frappe.local, "request", None)
+	path = getattr(request, "path", "") or ""
+	return path.startswith((f"/api/resource/{doc.doctype}", f"/api/v2/document/{doc.doctype}"))
+
+
+def validate_required(doc, method=None):
+	"""validate of contacts and companies: the form's required fields (dynamic forms, credtech#181).
+	Creating the record directly needs them; once saved, a required field that was filled cannot be emptied.
+	Records saved before the field became required are not blocked until someone fills the field."""
+	saved = _saved_config(doc.doctype)
+	if not saved or frappe.flags.in_install or frappe.flags.in_patch or frappe.flags.in_migrate:
+		return
+	before = None if doc.is_new() else doc.get_doc_before_save()
+	creating = doc.is_new() and _direct_entry(doc)
+	missing = []
+	for row in saved:
+		df = doc.meta.get_field(row.fieldname)
+		if (
+			not row.required
+			or not df
+			or not can_require(doc.doctype, df)
+			or not catalog.is_empty(df, doc.get(row.fieldname))
+		):
+			continue
+		emptied = before is not None and not catalog.is_empty(df, before.get(row.fieldname))
+		if creating or emptied:
+			missing.append(_(df.label))
+	if missing:
+		frappe.throw(_("Fill in: {0}").format(", ".join(missing)), title=_("Required fields"))
 
 
 def _field(doctype: str, meta, row: dict) -> dict | None:
@@ -135,6 +299,7 @@ def _field(doctype: str, meta, row: dict) -> dict | None:
 			"locked": row["locked"],
 			"read_only_rule": row["read_only"],
 			"is_created": int(row["fieldname"].startswith(catalog.CREATED_PREFIX)),
+			"can_require": int(can_require(doctype, df)),
 			"varies": row.get("varies") or {},
 		}
 	)
