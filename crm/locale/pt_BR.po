@@ -11750,6 +11750,18 @@ msgstr "Só dá para criar campos em cards, contatos e empresas."
 msgid "There is no room left for another field of this type in {0}."
 msgstr "Não há mais espaço para outro campo deste tipo em {0}."
 
+#: crm/api/email_accounts.py
+msgid "This account sends the system emails and is managed by CredTech."
+msgstr "Esta conta envia os e-mails do sistema e é gerenciada pela CredTech."
+
+#: crm/api/email_accounts.py
+msgid "System email account"
+msgstr "Conta de e-mail do sistema"
+
+#: frontend/src/components/Settings/EmailEdit.vue
+msgid "To receive emails, fill in the incoming server (IMAP) or turn off \"Enable Incoming\"."
+msgstr "Para receber e-mails, preencha o servidor de entrada (IMAP) ou desligue \"Ativar recebimento\"."
+
 #: frontend/src/components/Activities/Activities.vue
 msgid "added"
 msgstr "definiu"
