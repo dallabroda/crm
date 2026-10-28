@@ -194,7 +194,8 @@ def _global_rows(doctype: str) -> list[dict]:
 				"fieldname": fieldname,
 				"visible": int(bool(visible or required)),
 				"required": int(bool(required) and field["can_require"]),
-				"read_only": int(bool(df.read_only)),
+				# shown as "read only": filled by the system, not by the person
+				"read_only": int(not can_require(doctype, df)),
 				"locked": 0,
 			}
 		)

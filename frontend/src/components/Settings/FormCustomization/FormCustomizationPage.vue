@@ -111,7 +111,11 @@
             <LoadingIndicator class="w-4" />
           </div>
           <ErrorMessage v-else-if="schemaError" :message="schemaError" />
-          <FormPreview v-else :fields="schema?.fields || []" />
+          <FormPreview
+            v-else
+            :fields="schema?.fields || []"
+            :in-funnel="isCards"
+          />
         </div>
       </template>
     </div>
