@@ -45,3 +45,4 @@ crm.patches.credhub.stop_email_append_to_lead
 crm.patches.credhub.kanban_card_value #no-assign
 crm.patches.credhub.remove_probability
 crm.patches.credhub.single_card_value
+crm.patches.credhub.move_company_fields_to_organization
