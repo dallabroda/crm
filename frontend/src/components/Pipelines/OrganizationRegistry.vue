@@ -1,6 +1,6 @@
 <template>
   <div
-    v-if="organization?.name && rows.length"
+    v-if="organization?.name && section.columns && (rows.length || !hasCnpj)"
     class="border-b px-4 py-3"
     data-testid="organization-registry"
   >
@@ -18,7 +18,12 @@
         {{ __('Edit in the organization') }}
       </router-link>
     </div>
-    <div class="flex flex-col gap-1.5">
+    <p v-if="!hasCnpj" class="text-p-sm text-ink-gray-5">
+      {{
+        __('No CNPJ yet: add it in the organization to fetch the Receita data.')
+      }}
+    </p>
+    <div v-else class="flex flex-col gap-1.5">
       <div
         v-for="row in rows"
         :key="row.fieldname"
@@ -60,8 +65,18 @@ const section = computed(
   () => (sections.data || []).find((s) => s.name === SECTION) || {},
 )
 
+// Without a CNPJ there is nothing from the Receita; and before the first check
+// numbers are only the empty default 0, not data (credtech#188)
+const hasCnpj = computed(() => Boolean(props.organization?.cnpj))
+
 function display(field, value) {
   if (value === null || value === undefined || value === '') return ''
+  if (
+    ['Int', 'Float', 'Currency'].includes(field.fieldtype) &&
+    !Number(value) &&
+    !props.organization?.cnpj_checked_on
+  )
+    return ''
   if (field.fieldtype === 'Date') return formatDate(value, '', true)
   if (field.fieldtype === 'Check') return value ? __('Yes') : __('No')
   if (['Currency', 'Float'].includes(field.fieldtype)) {
