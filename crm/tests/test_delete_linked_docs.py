@@ -144,3 +144,30 @@ class TestDeleteLinkedDocs(FrappeTestCase):
 		frappe.delete_doc("CRM Deal", deal.name)
 		frappe.set_user("Administrator")
 		self.assertFalse(frappe.db.exists("CRM Deal", deal.name))
+
+	def test_notification_to_someone_else_does_not_block_the_delete(self):
+		"""A card assigned to a salesperson has a notification only that salesperson can see; a manager
+		deleting the card must not be blocked by it."""
+		_org, deal, _task = self._org_with_deal_and_task("Notified Card Test Org")
+		frappe.get_doc(
+			{
+				"doctype": "CRM Notification",
+				"from_user": "Administrator",
+				"to_user": "crm.user1@example.com",
+				"type": "Assignment",
+				"notification_type_doctype": "CRM Deal",
+				"notification_type_doc": deal.name,
+				"reference_doctype": "CRM Deal",
+				"reference_name": deal.name,
+			}
+		).insert(ignore_permissions=True)
+		frappe.set_user("crm.manager@example.com")
+		items = [
+			{"doctype": d["reference_doctype"], "docname": d["reference_docname"]}
+			for d in get_linked_docs_of_document("CRM Deal", deal.name)
+		]
+		remove_linked_doc_reference(items, delete=True, doctype="CRM Deal", docname=deal.name)
+		frappe.delete_doc("CRM Deal", deal.name)
+		frappe.set_user("Administrator")
+		self.assertFalse(frappe.db.exists("CRM Deal", deal.name))
+		self.assertFalse(frappe.db.exists("CRM Notification", {"reference_name": deal.name}))

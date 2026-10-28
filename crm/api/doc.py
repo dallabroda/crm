@@ -731,6 +731,17 @@ def unlink_kept_records(doc, method=None):
 				frappe.qb.update(table).set(table[df.fieldname], None).set(table[df.options], None).where(
 					(table[df.options] == doc.doctype) & (table[df.fieldname] == doc.name)
 				).run()
+	# Notifications only point to the card or lead (assignments, mentions). Each one is visible only to the
+	# person it was sent to, so someone else deleting the card could neither see nor delete them and the
+	# delete failed with LinkExistsError. They go away with the card.
+	notification = frappe.qb.DocType("CRM Notification")
+	frappe.qb.from_(notification).delete().where(
+		((notification.reference_doctype == doc.doctype) & (notification.reference_name == doc.name))
+		| (
+			(notification.notification_type_doctype == doc.doctype)
+			& (notification.notification_type_doc == doc.name)
+		)
+	).run()
 
 
 @frappe.whitelist()
@@ -892,8 +903,9 @@ def delete_with_dependents(doctype, docname, seen=None, depth=0):
 	if depth < 3:
 		kept = kept_doctypes()
 		for dependent in get_linked_docs_data(frappe.get_doc(doctype, docname)):
-			# history records stay; the card's or lead's on_trash clears their link
-			if dependent["reference_doctype"] in kept:
+			# history records stay; the card's or lead's on_trash clears their link (and deletes its notifications,
+			# which the user may not be allowed to see)
+			if dependent["reference_doctype"] in kept or dependent["reference_doctype"] == "CRM Notification":
 				continue
 			delete_with_dependents(
 				dependent["reference_doctype"], dependent["reference_docname"], seen, depth + 1
