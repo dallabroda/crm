@@ -114,9 +114,10 @@ NOT_IN_FORM = {
 	),
 }
 FORM_CONFIG = "CRM Form Config"
-# Read-only in the doctype but filled by the record from its tables (a contact's e-mails and phones), so the
-# person does fill them in: they can be required
-FILLED_FROM_TABLES = {"Contact": ("email_id", "phone", "mobile_no")}
+# Read-only in the doctype but filled by the record from its tables (a contact's primary e-mail and mobile, which
+# the screens turn into table rows), so the person does fill them in: they can be required. `phone` is not: the
+# screens do not turn it into a row, so Contact.validate clears it (review of crm#53)
+FILLED_FROM_TABLES = {"Contact": ("email_id", "mobile_no")}
 
 
 def can_require(doctype: str, df) -> bool:
