@@ -125,7 +125,7 @@ export function useDocument(doctype, docname, resourceOverrides = {}) {
                 const fieldName = err.messages
                   .map((msg) => {
                     let arr = msg.split(': ')
-                    return arr[arr.length - 1].trim()
+                    return __(arr[arr.length - 1].trim())
                   })
                   .join(', ')
                 toast.error(__('Mandatory field error: {0}', [fieldName]))
@@ -295,10 +295,11 @@ export function useDocument(doctype, docname, resourceOverrides = {}) {
     })
 
     if (missingFields.length > 0) {
+      const translatedFields = missingFields.map((f) => __(f)).join(', ')
       toast.error(
-        __('Mandatory fields required: {0}', [missingFields.join(', ')]),
+        __('Mandatory fields required: {0}', [translatedFields]),
       )
-      return __('Mandatory fields required: {0}', [missingFields.join(', ')])
+      return __('Mandatory fields required: {0}', [translatedFields])
     }
   }
 

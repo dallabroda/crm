@@ -573,7 +573,7 @@ def test_submit_form(name: str, values: dict | str) -> dict:
 			continue
 		value = values.get(f.fieldname)
 		if f.reqd and (value is None or value == ""):
-			frappe.throw(_("{0} is required").format(f.label or f.fieldname))
+			frappe.throw(_("{0} is required").format(_(f.label or f.fieldname)))
 	return {"test": True}
 
 
