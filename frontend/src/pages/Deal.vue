@@ -103,6 +103,12 @@
             />
 
             <Button
+              :tooltip="__('Send WhatsApp')"
+              :icon="WhatsAppIcon"
+              @click="openWhatsApp"
+            />
+
+            <Button
               :tooltip="__('Send an Email')"
               :icon="Email2Icon"
               @click="
@@ -300,6 +306,7 @@
               v-else-if="section.name == 'organization_contacts'"
               :deal="dealId"
               :version="`${doc.organization}|${doc.second_organization}|${doc.contacts_from}`"
+              @sent="reloadActivities"
             />
           </template>
         </SidePanelLayout>
@@ -370,6 +377,15 @@
     :currentPipeline="doc.pipeline"
     @moved="onPipelineChanged"
   />
+  <SmartChatWhatsAppModal
+    v-if="whatsapp"
+    :open="Boolean(whatsapp)"
+    :deal="dealId"
+    :phone="whatsapp.phone"
+    :name="whatsapp.name"
+    @update:open="(v) => !v && (whatsapp = null)"
+    @sent="reloadActivities"
+  />
 </template>
 <script setup>
 import DeleteLinkedDocModal from '@/components/DeleteLinkedDocModal.vue'
@@ -415,6 +431,7 @@ import Link from '@/components/Controls/Link.vue'
 import Section from '@/components/CollapsibleSection.vue'
 import SidePanelLayout from '@/components/SidePanelLayout.vue'
 import OrganizationContacts from '@/components/Pipelines/OrganizationContacts.vue'
+import SmartChatWhatsAppModal from '@/components/Modals/SmartChatWhatsAppModal.vue'
 import SLASection from '@/components/SLASection.vue'
 import CustomActions from '@/components/CustomActions.vue'
 import EnrichFromWebsite from '@/components/EnrichFromWebsite.vue'
@@ -1010,6 +1027,22 @@ function triggerCall() {
   }
 
   makeCall(mobile_no)
+}
+
+// WhatsApp to the primary contact, through the company's SmartChat (credtech#211)
+const whatsapp = ref(null)
+function openWhatsApp() {
+  let primary = dealContacts.data?.find((c) => c.is_primary)
+  let phone = primary?.mobile_no || doc.value?.mobile_no
+  if (!phone) {
+    toast.error(__('No Mobile Number Set'))
+    return
+  }
+  whatsapp.value = { phone, name: primary?.full_name || primary?.name || '' }
+}
+
+function reloadActivities() {
+  activities.value?.all_activities?.reload()
 }
 
 async function triggerStatusChange(value) {

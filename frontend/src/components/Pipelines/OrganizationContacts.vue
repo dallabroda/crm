@@ -49,9 +49,9 @@
           v-if="row.phone"
           variant="ghost"
           icon="lucide-message-circle"
-          :tooltip="__('WhatsApp')"
-          :aria-label="__('WhatsApp')"
-          :link="whatsappLink(row.phone)"
+          :tooltip="__('Send WhatsApp')"
+          :aria-label="__('Send WhatsApp')"
+          @click="whatsappTo = row"
         />
         <Button
           v-if="row.email"
@@ -66,6 +66,15 @@
         {{ __('No contacts in this organization yet.') }}
       </p>
     </div>
+    <SmartChatWhatsAppModal
+      v-if="whatsappTo"
+      :open="Boolean(whatsappTo)"
+      :deal="deal"
+      :phone="whatsappTo.phone"
+      :name="whatsappTo.contact ? whatsappTo.name : ''"
+      @update:open="(v) => !v && (whatsappTo = null)"
+      @sent="$emit('sent')"
+    />
   </div>
 </template>
 
@@ -73,7 +82,8 @@
 import { callEnabled } from '@/composables/telephony'
 import { globalStore } from '@/stores/global'
 import { FormControl, call as apiCall, createResource, toast } from 'frappe-ui'
-import { computed, watch } from 'vue'
+import SmartChatWhatsAppModal from '@/components/Modals/SmartChatWhatsAppModal.vue'
+import { computed, ref, watch } from 'vue'
 
 // Contacts of a card with two organizations (dynamic forms phase 4,
 // credtech#195): for each chosen organization, its Receita phone and e-mail
@@ -85,6 +95,10 @@ const props = defineProps({
 })
 
 const { makeCall } = globalStore()
+defineEmits(['sent'])
+
+// contact row whose WhatsApp window is open (sent through SmartChat, credtech#211)
+const whatsappTo = ref(null)
 
 const contacts = createResource({
   url: 'crm.api.card_contacts.get_card_contacts',
@@ -120,6 +134,7 @@ function rows(org) {
   for (let c of org.contacts || []) {
     list.push({
       key: c.name,
+      contact: true,
       name: c.full_name || c.name,
       phone: c.mobile_no || c.phone,
       email: c.email_id,
@@ -131,13 +146,6 @@ function rows(org) {
 function call(number) {
   if (callEnabled.value) makeCall(number)
   else window.location.href = `tel:${number}`
-}
-
-// Brazilian numbers without the country code get 55
-function whatsappLink(number) {
-  let digits = String(number).replace(/\D/g, '')
-  if (digits.length === 10 || digits.length === 11) digits = `55${digits}`
-  return `https://wa.me/${digits}`
 }
 
 async function choose(value) {
