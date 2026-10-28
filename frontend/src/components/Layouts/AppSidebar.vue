@@ -182,7 +182,7 @@
       :afterSkipAll="() => capture('onboarding_steps_skipped')"
       :afterReset="(step) => capture('onboarding_step_reset_' + step)"
       :afterResetAll="() => capture('onboarding_steps_reset')"
-      title="Cred Hub"
+      title="HubTech CRM"
       docsLink="https://credtechdigital.com.br"
     />
     <IntermediateStepModal
@@ -618,6 +618,9 @@ onMounted(async () => {
   // newly introduced steps, preserves completion). No-op when already aligned.
   await reconcileOnboarding(filteredSteps)
   setUp(filteredSteps)
+  // the getting-started panel opened by itself on every page and covered the
+  // screen (credtech#206); it now opens only from the sidebar banner
+  showHelpModal.value = false
   flushPendingSteps()
 })
 
