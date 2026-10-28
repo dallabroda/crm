@@ -377,6 +377,15 @@ def get_field_catalog() -> dict:
 		# how many more fields of each type still fit in the cards table (text runs out first)
 		"room": field_catalog.room_by_type(),
 		"fields": field_catalog.get_catalog(),
+		# card fields that moved to the organization: left out of the card's screens, still usable in
+		# distribution rules (they test the incoming lead)
+		"moved": [
+			field_catalog._field_info(df, True)
+			for df in (
+				frappe.get_meta(field_catalog.DEAL).get_field(f) for f in field_catalog.MOVED_TO_ORGANIZATION
+			)
+			if df
+		],
 	}
 
 

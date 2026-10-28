@@ -1164,10 +1164,11 @@ const visibleSections = computed(() => {
   if (formSchema.value?.fields && catalog) {
     // the funnel's fields come first, in its order; the layout keeps the rest
     let funnel = funnelSection(formSchema.value.fields, __('Card fields'))
-    let others = withoutFields(
-      sections.data,
-      catalog.filter((name) => !LOCKED_FIELDS.includes(name)),
-    )
+    let others = withoutFields(sections.data, [
+      ...catalog.filter((name) => !LOCKED_FIELDS.includes(name)),
+      // they are the organization's now: shown in its section, not as card fields
+      ...(fieldSetup.value?.moved || []),
+    ])
     base = funnel ? [funnel, ...others] : others
   } else {
     base = applyStageRules(
