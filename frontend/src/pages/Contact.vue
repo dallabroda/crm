@@ -150,8 +150,14 @@
           :options="{ selectable: false, showTooltip: false }"
         />
 
+        <RecordNotes
+          v-if="tab.value === 'notes' && docName"
+          :doctype="'Contact'"
+          :docname="docName"
+          @count="(n) => (notesCount = n)"
+        />
         <EmptyState
-          v-if="!rows.length"
+          v-if="tab.value !== 'notes' && !rows.length"
           :icon="tab.iconLeft"
           name="Deals"
           :description="__('Use New Deal to create a deal for this contact.')"
@@ -179,6 +185,8 @@
 </template>
 
 <script setup>
+import RecordNotes from '@/components/RecordNotes.vue'
+import NoteIcon from '@/components/Icons/NoteIcon.vue'
 import ErrorPage from '@/components/ErrorPage.vue'
 import Resizer from '@/components/Resizer.vue'
 import Icon from '@/components/Icon.vue'
@@ -337,7 +345,16 @@ const tabs = [
     iconLeft: DealsIcon,
     count: computed(() => deals.data?.length),
   },
+  // the contact's own notes (credtech#214)
+  {
+    value: 'notes',
+    label: 'Notes',
+    iconLeft: NoteIcon,
+    count: computed(() => notesCount.value),
+  },
 ]
+const notesCount = ref(0)
+const docName = computed(() => contact.doc?.name)
 
 const deals = createResource({
   url: 'crm.api.contact.get_linked_deals',

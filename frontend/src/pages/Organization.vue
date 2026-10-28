@@ -185,8 +185,14 @@
           :columns="columns"
           :options="{ selectable: false, showTooltip: false }"
         />
+        <RecordNotes
+          v-if="tab.value === 'notes' && docName"
+          :doctype="'CRM Organization'"
+          :docname="docName"
+          @count="(n) => (notesCount = n)"
+        />
         <EmptyState
-          v-if="!rows.length"
+          v-if="tab.value !== 'notes' && !rows.length"
           :icon="tab.iconLeft"
           :name="__(tab.label)"
           :description="
@@ -224,6 +230,8 @@
 </template>
 
 <script setup>
+import RecordNotes from '@/components/RecordNotes.vue'
+import NoteIcon from '@/components/Icons/NoteIcon.vue'
 import ErrorPage from '@/components/ErrorPage.vue'
 import Resizer from '@/components/Resizer.vue'
 import SidePanelLayout from '@/components/SidePanelLayout.vue'
@@ -463,7 +471,16 @@ const tabs = [
     iconLeft: ContactsIcon,
     count: computed(() => contacts.data?.length),
   },
+  // the organization's own notes (credtech#214)
+  {
+    value: 'notes',
+    label: 'Notes',
+    iconLeft: NoteIcon,
+    count: computed(() => notesCount.value),
+  },
 ]
+const notesCount = ref(0)
+const docName = computed(() => organization.doc?.name)
 
 const deals = createListResource({
   type: 'list',
