@@ -3,7 +3,21 @@
     <template #default>
       <div class="flex flex-col gap-3">
         <p class="text-p-base text-ink-gray-7">
-          {{ isCards ? `${pipelineLabel} · ${stageLabel}` : formLabel }}
+          {{
+            isCards
+              ? [pipelineLabel, isBlock ? blockLabel : '', stageLabel]
+                  .filter(Boolean)
+                  .join(' · ')
+              : formLabel
+          }}
+        </p>
+        <p v-if="isBlock" class="text-p-sm text-ink-gray-5">
+          {{
+            __(
+              'These fields belong to the {0} linked to the card: what is filled in on the card is saved there. Required ones are asked when the card moves to the stage.',
+              [blockLabel],
+            )
+          }}
         </p>
         <p class="text-p-sm text-ink-gray-5">
           {{
@@ -28,7 +42,7 @@
           <span class="flex-1">{{ __('Field') }}</span>
           <span class="w-20 text-center">{{ __('Visible') }}</span>
           <span class="w-20 text-center">{{ __('Required') }}</span>
-          <span v-if="isCards" class="w-20 text-center">{{
+          <span v-if="isCards && !isBlock" class="w-20 text-center">{{
             __('Read only')
           }}</span>
           <span class="w-7" />
@@ -74,7 +88,7 @@
               <template v-if="row.locked">
                 <span
                   class="shrink-0"
-                  :class="isCards ? 'w-64' : 'w-[10.5rem]'"
+                  :class="isCards && !isBlock ? 'w-64' : 'w-[10.5rem]'"
                 />
               </template>
               <template v-else>
@@ -95,7 +109,10 @@
                     @update:model-value="(v) => setFlag(row, 'required', v)"
                   />
                 </div>
-                <div v-if="isCards" class="flex w-20 justify-center">
+                <div
+                  v-if="isCards && !isBlock"
+                  class="flex w-20 justify-center"
+                >
                   <Checkbox
                     :aria-label="__('Read only')"
                     :model-value="Boolean(row.read_only)"
@@ -195,11 +212,15 @@ const props = defineProps({
   // crm.api.pipeline.get_field_catalog().fields
   catalog: { type: Array, default: () => [] },
   canManage: { type: Boolean, default: false },
+  // cards: Card, Organization, Second organization or Contact (credtech#196)
+  block: { type: String, default: 'Card' },
+  blockLabel: { type: String, default: '' },
 })
 
 const emit = defineEmits(['saved'])
 
 const isCards = computed(() => props.doctype === 'CRM Deal')
+const isBlock = computed(() => isCards.value && props.block !== 'Card')
 
 const rows = ref([])
 const saving = ref(false)
@@ -255,6 +276,7 @@ async function save() {
       doctype: props.doctype,
       pipeline: props.pipeline || null,
       stage: props.stage || null,
+      block: isCards.value ? props.block : null,
       fields: configPayload(rows.value),
     })
     emit('saved', schema)

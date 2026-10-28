@@ -311,6 +311,16 @@
             />
           </template>
         </SidePanelLayout>
+        <!-- fields of the organization, second organization and contact that
+             the stage shows, saved on those records (credtech#196) -->
+        <SidePanelLayout
+          v-for="b in cardBlocks.data || []"
+          :key="`${b.block}:${b.docname}`"
+          :sections="blockSections(b)"
+          :doctype="b.doctype"
+          :docname="b.docname"
+          @afterFieldChange="cardBlocks.reload()"
+        />
       </div>
     </Resizer>
   </div>
@@ -1045,6 +1055,35 @@ function openWhatsApp() {
 
 function reloadActivities() {
   activities.value?.all_activities?.reload()
+}
+
+// Blocks of the stage (credtech#196): the organization's, second
+// organization's and primary contact's fields the funnel shows on the card
+const cardBlocks = createResource({
+  url: 'crm.api.forms.get_card_blocks',
+  makeParams: () => ({ deal: props.dealId }),
+  auto: true,
+})
+watch(
+  () =>
+    [
+      doc.value?.status,
+      doc.value?.organization,
+      doc.value?.second_organization,
+      (dealContacts.data || []).map((c) => `${c.name}:${c.is_primary}`),
+    ].join('|'),
+  () => cardBlocks.reload(),
+)
+
+function blockSections(b) {
+  return [
+    {
+      name: `card_block_${b.block}`,
+      label: b.label,
+      opened: true,
+      columns: [{ name: `card_block_${b.block}_column`, fields: b.fields }],
+    },
+  ]
 }
 
 // the probable company from the e-mail was confirmed or dismissed (credtech#187)

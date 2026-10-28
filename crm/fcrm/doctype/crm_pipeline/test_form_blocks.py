@@ -150,3 +150,23 @@ class TestFormBlocks(FrappeTestCase):
 				self.pipeline["name"],
 				block=catalog.ORGANIZATION,
 			)
+
+	def test_the_card_shows_the_blocks_of_its_stage(self):
+		from crm.api.forms import get_card_blocks
+
+		card = self.card()
+		blocks = {b["block"]: b for b in get_card_blocks(card.name)}
+		# first stage: the organization's website shows (not required); the contact's mobile only in proposal
+		self.assertEqual(list(blocks), [catalog.ORGANIZATION])
+		self.assertEqual(blocks[catalog.ORGANIZATION]["docname"], card.organization)
+		self.assertEqual([f["fieldname"] for f in blocks[catalog.ORGANIZATION]["fields"]], ["website"])
+		frappe.db.set_value(ORG, card.organization, "website", "https://x.example")
+		frappe.db.set_value(
+			"Contact", card.contacts[0].contact, "mobile_no", "48999990000"
+		)
+		card.reload()
+		card.status = self.proposal
+		card.save()
+		blocks = {b["block"]: b for b in get_card_blocks(card.name)}
+		self.assertEqual(sorted(blocks), [catalog.CONTACT, catalog.ORGANIZATION])
+		self.assertEqual(blocks[catalog.CONTACT]["fields"][0]["reqd"], 1)

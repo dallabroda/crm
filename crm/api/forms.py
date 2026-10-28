@@ -113,6 +113,30 @@ def save_form_config(
 
 
 @frappe.whitelist()
+def get_card_blocks(deal: str) -> list[dict]:
+	"""Fields of the card's organization, second organization and primary contact that its current stage shows
+	(credtech#196), each block with the record it edits. Blocks without a record or without visible fields are
+	left out."""
+	doc = frappe.get_doc(catalog.DEAL, deal)
+	doc.check_permission("read")
+	if not doc.pipeline:
+		return []
+	blocks = []
+	for block in catalog.BLOCKS:
+		record = catalog.block_record(doc, block) if block != catalog.CARD else None
+		if not record:
+			continue
+		schema = form_schema.get_form_schema(catalog.DEAL, doc.pipeline, doc.status, block)
+		fields = [f for f in schema["fields"] if f.get("visible")]
+		if fields:
+			label = next(b["label"] for b in schema["blocks"] if b["block"] == block)
+			blocks.append(
+				{"block": block, "label": label, "doctype": schema["block_doctype"], "docname": record, "fields": fields}
+			)
+	return blocks
+
+
+@frappe.whitelist()
 def get_fields(doctype: str) -> dict:
 	"""Fields of a form's catalog, with the created-field limit and the room left in the table."""
 	frappe.only_for(CRM_ROLES)
