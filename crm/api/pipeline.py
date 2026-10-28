@@ -368,6 +368,8 @@ def move_card(deal: str, stage: str, values: str | dict | None = None) -> dict:
 	by_block = values and set(values) <= set(VALUE_BLOCKS) and all(isinstance(v, dict) for v in values.values())
 	if by_block:
 		_set_linked_values(doc, stage, values)
+		# saving a contact or organization also updates the card (its e-mail, phone, name): read it again
+		doc.reload()
 		values = values.get("card") or {}
 	_set_values(doc, values)
 	doc.status = stage
