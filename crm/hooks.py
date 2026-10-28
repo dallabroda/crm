@@ -260,6 +260,8 @@ if int(frappe.__version__.split(".")[0]) < 16:
 
 doc_events = {
 	"Contact": {
+		# one name field: the full name (owner decision of 28/10/2026)
+		"before_validate": ["crm.api.contact.single_name"],
 		# the company's form of contacts: required fields (credtech#181)
 		"validate": [
 			"crm.api.contact.validate",

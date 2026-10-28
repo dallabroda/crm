@@ -229,8 +229,8 @@ class TestCRMLead(FrappeTestCase):
 		self.assertTrue(contact_name)
 
 		contact = frappe.get_doc("Contact", contact_name)
-		self.assertEqual(contact.first_name, "Michael")
-		self.assertEqual(contact.last_name, "Jordan")
+		# a contact keeps one full name (owner decision of 28/10/2026)
+		self.assertEqual((contact.first_name, contact.last_name), ("Michael Jordan", None))
 		self.assertEqual(contact.email_id, "mj@bulls.com")
 		self.assertEqual(contact.mobile_no, "+1234567890")
 		self.assertEqual(contact.company_name, "Chicago Bulls")
@@ -330,8 +330,8 @@ class TestCRMLead(FrappeTestCase):
 		self.assertTrue(len(deal.contacts) > 0)
 		contact_name = deal.contacts[0].contact
 		contact = frappe.get_doc("Contact", contact_name)
-		self.assertEqual(contact.first_name, "Deal")
-		self.assertEqual(contact.last_name, "Maker")
+		# a contact keeps one full name (owner decision of 28/10/2026)
+		self.assertEqual((contact.first_name, contact.last_name), ("Deal Maker", None))
 		self.assertEqual(contact.email_id, "dealmaker@example.com")
 
 		# Verify organization was created
@@ -412,7 +412,8 @@ class TestCRMLead(FrappeTestCase):
 		self.assertTrue(len(deal.contacts) > 0)
 		contact_name = deal.contacts[0].contact
 		contact = frappe.get_doc("Contact", contact_name)
-		self.assertEqual(contact.first_name, "API")
+		# a contact keeps one full name (owner decision of 28/10/2026)
+		self.assertEqual(contact.first_name, "API Test")
 		self.assertEqual(contact.email_id, "apitest@example.com")
 
 		# Verify organization was created
