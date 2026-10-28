@@ -18,6 +18,16 @@ class TestCRMInvitation(FrappeTestCase):
 				role=role,
 			).insert(ignore_permissions=True)
 
+	def age(self, invitation, days):
+		"""Pretend the invitation (and its last e-mail) went out `days` ago."""
+		frappe.db.set_value(
+			"CRM Invitation",
+			invitation.name,
+			{"creation": add_days(now(), -days), "email_sent_at": add_days(now(), -days)},
+			update_modified=False,
+		)
+		invitation.reload()
+
 	def test_new_invitation_is_pending_with_key(self):
 		invitation = self.make_invitation()
 		self.assertEqual(invitation.status, "Pending")
@@ -134,9 +144,8 @@ class TestCRMInvitation(FrappeTestCase):
 		from crm.fcrm.doctype.crm_invitation.crm_invitation import expire_invitations
 
 		invitation = self.make_invitation(email="stale@example.com")
-		frappe.db.set_value(
-			"CRM Invitation", invitation.name, "creation", add_days(now(), -4), update_modified=False
-		)
+		# valid for INVITATION_DAYS from the last e-mail
+		self.age(invitation, 4)
 
 		expire_invitations()
 
@@ -151,3 +160,69 @@ class TestCRMInvitation(FrappeTestCase):
 		user_roles = {r.role for r in user.roles}
 		self.assertIn("Sales Manager", user_roles)
 		self.assertIn("Sales User", user_roles)
+
+	# Pending invitations screen (credtech#190)
+
+	def test_list_shows_who_invited_and_until_when(self):
+		from crm.fcrm.doctype.crm_invitation.crm_invitation import INVITATION_DAYS, get_invitations
+
+		invitation = self.make_invitation(email="listed@example.com")
+		row = next(r for r in get_invitations() if r.name == invitation.name)
+		self.assertEqual(row.invited_by, frappe.session.user)
+		self.assertTrue(row.invited_by_name)
+		self.assertFalse(row.expired)
+		self.assertEqual(
+			frappe.utils.getdate(row.valid_until),
+			frappe.utils.getdate(add_days(row.sent_on, INVITATION_DAYS)),
+		)
+
+	def test_resend_pending_sends_again_and_renews(self):
+		from crm.fcrm.doctype.crm_invitation.crm_invitation import resend_invitation
+
+		invitation = self.make_invitation(email="again@example.com")
+		self.age(invitation, 2)
+		with patch.object(frappe, "sendmail") as mail:
+			self.assertEqual(resend_invitation(invitation.name), invitation.name)
+		mail.assert_called_once()
+		self.assertEqual(mail.call_args.kwargs["template"], "crm_invitation")
+		invitation.reload()
+		self.assertGreater(
+			invitation.valid_until(), frappe.utils.now_datetime() + frappe.utils.datetime.timedelta(days=2)
+		)
+
+	def test_resend_expired_makes_a_new_invitation(self):
+		from crm.fcrm.doctype.crm_invitation.crm_invitation import expire_invitations, resend_invitation
+
+		invitation = self.make_invitation(email="late@example.com")
+		self.age(invitation, 5)
+		expire_invitations()
+		with patch.object(frappe, "sendmail"):
+			renewed = resend_invitation(invitation.name)
+		self.assertNotEqual(renewed, invitation.name)
+		self.assertFalse(frappe.db.exists("CRM Invitation", invitation.name))
+		self.assertEqual(
+			frappe.db.get_value("CRM Invitation", renewed, ["email", "status"]),
+			("late@example.com", "Pending"),
+		)
+
+	def test_old_link_does_not_get_in_before_the_daily_job(self):
+		invitation = self.make_invitation(email="oldlink@example.com")
+		self.age(invitation, 4)
+		with self.assertRaises(frappe.ValidationError):
+			invitation.accept()
+		self.assertEqual(frappe.db.get_value("CRM Invitation", invitation.name, "status"), "Expired")
+
+	def test_inviting_again_replaces_an_expired_invitation(self):
+		from crm.api import invite_by_email
+		from crm.fcrm.doctype.crm_invitation.crm_invitation import expire_invitations
+
+		invitation = self.make_invitation(email="replaced@example.com")
+		self.age(invitation, 5)
+		expire_invitations()
+		with patch.object(frappe, "sendmail"):
+			result = invite_by_email("replaced@example.com", "Sales User")
+		self.assertEqual(result["to_invite"], ["replaced@example.com"])
+		self.assertFalse(frappe.db.exists("CRM Invitation", invitation.name))
+		self.assertTrue(
+			frappe.db.exists("CRM Invitation", {"email": "replaced@example.com", "status": "Pending"})
+		)

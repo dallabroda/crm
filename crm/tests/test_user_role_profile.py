@@ -60,8 +60,9 @@ class TestUserRoleProfile(FrappeTestCase):
 
 		self.assertNotIn("Sales Manager", user_roles(self.profiled.name))
 
-	def test_add_existing_users_throws_when_role_profile_assigned(self):
-		with self.assertRaises(frappe.ValidationError):
+	def test_add_existing_users_is_closed(self):
+		# access only by invitation (credtech#190): nobody joins without one
+		with self.assertRaises(frappe.PermissionError):
 			add_existing_users([self.profiled.name], "Sales Manager")
 
 		self.assertNotIn("Sales Manager", user_roles(self.profiled.name))

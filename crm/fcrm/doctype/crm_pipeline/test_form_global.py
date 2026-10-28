@@ -169,6 +169,10 @@ class TestGlobalForms(FrappeTestCase):
 		self.assertEqual(contact["limit"], field_catalog.CREATED_FIELD_LIMIT)
 		self.assertIn(self.created, {f["fieldname"] for f in contact["fields"]})
 
+	def test_contact_phone_is_filled_by_the_system(self):
+		names = {f["fieldname"]: f for f in form_catalog("Contact")}
+		self.assertEqual((names["mobile_no"]["can_require"], names["phone"]["can_require"]), (1, 0))
+
 	def test_contact_email_and_phone_can_be_required(self):
 		# read-only in the doctype, but filled from the contact's e-mails and phones
 		save_form_config("Contact", [{"fieldname": "email_id", "required": 1}])

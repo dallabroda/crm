@@ -791,7 +791,8 @@ function sortByModified(list) {
 }
 
 function update_activities_details(activity) {
-  activity.owner_name = getUser(activity.owner).full_name
+  // automatic entries come with the name of their source (credtech#188)
+  activity.owner_name = activity.owner_name || getUser(activity.owner).full_name
   activity.type = ''
   activity.value = ''
   activity.to = ''

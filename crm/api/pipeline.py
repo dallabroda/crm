@@ -15,6 +15,7 @@ from crm.fcrm.doctype.crm_pipeline import fields as field_catalog
 from crm.fcrm.doctype.crm_pipeline.crm_pipeline import get_first_stage
 from crm.fcrm.doctype.crm_pipeline.fields import default_pipeline_fields, sync_rules
 from crm.permissions.pipeline import PIPELINE_OWNER_ROLE, get_role_in_pipeline, is_admin
+from crm.utils.hidden_users import hidden_users
 
 CRM_ROLES = ("Sales User", "Sales Manager", "System Manager")
 STAGE_FIELDS = ("name", "deal_status", "color", "type", "position")
@@ -69,7 +70,9 @@ def get_pipeline_config(pipeline: str) -> dict:
 	"""Full pipeline: stages, members, fields in use and per-stage field rules."""
 	role = _assert_can_view(pipeline)
 	doc = frappe.get_doc("CRM Pipeline", pipeline)
-	users = [m.user for m in doc.members]
+	hidden = hidden_users()
+	members = [m for m in doc.members if m.user not in hidden]
+	users = [m.user for m in members]
 	full_names = (
 		dict(frappe.get_all("User", {"name": ("in", users)}, ["name", "full_name"], as_list=True))
 		if users
@@ -87,7 +90,7 @@ def get_pipeline_config(pipeline: str) -> dict:
 		"distribution": distribution.load(doc.distribution),
 		"members": [
 			{"user": m.user, "full_name": full_names.get(m.user) or m.user, "role": m.role}
-			for m in doc.members
+			for m in members
 		],
 		"fields": [{"fieldname": f.fieldname, "position": f.position} for f in doc.fields],
 		"field_rules": [
@@ -131,9 +134,16 @@ def save_pipeline(doc: str | dict) -> dict:
 		pipeline.distribution = json.dumps(distribution.normalize(data.distribution))
 
 	if "members" in data:
+		# Hidden users (API keys) are not on the screen, so saving the members keeps them as they were
+		hidden = hidden_users()
+		kept = [{"user": m.user, "role": m.role} for m in pipeline.members if m.user in hidden]
 		pipeline.set("members", [])
 		for member in data.members or []:
+			if member.get("user") in hidden:
+				continue
 			pipeline.append("members", {"user": member.get("user"), "role": member.get("role") or "Member"})
+		for member in kept:
+			pipeline.append("members", member)
 
 	creating = pipeline.is_new()
 	if (
@@ -269,9 +279,10 @@ def get_pipeline_users() -> dict:
 		order_by="full_name asc",
 	)
 	result = []
+	hidden = hidden_users()
 	for user in users:
 		roles = set(frappe.get_roles(user.name))
-		if not roles & set(CRM_ROLES):
+		if not roles & set(CRM_ROLES) or user.name in hidden:
 			continue
 		admin = is_admin(user.name)
 		result.append(

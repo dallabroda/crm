@@ -13,11 +13,58 @@ from crm.fcrm.doctype.crm_call_log.crm_call_log import parse_call_log
 @frappe.whitelist()
 def get_activities(name: str):
 	if frappe.db.exists("CRM Deal", name):
-		return get_deal_activities(name)
+		result = get_deal_activities(name)
+		label_automatic_entries(result[0], "CRM Deal", name)
+		return result
 	elif frappe.db.exists("CRM Lead", name):
-		return get_lead_activities(name)
+		result = get_lead_activities(name)
+		label_automatic_entries(result[0], "CRM Lead", name)
+		return result
 	else:
 		frappe.throw(_("Document not found"), frappe.DoesNotExistError)
+
+
+# Leads that arrive on their own (site form, ads, webhooks) are created by Guest or, from scheduled jobs,
+# by Administrator. The timeline shows where they came from instead (credtech#188).
+AUTOMATIC_OWNERS = ("Guest", "Administrator")
+# How close to an entry an activity must be to count as part of it
+AUTOMATIC_WINDOW_SECONDS = 120
+
+
+def automatic_entries(doctype: str, name: str) -> list[dict]:
+	"""[{label, on}] of the automatic entries of a card or lead, from the `crm_automatic_entries` hook
+	(dotted paths of functions (doctype, name) -> list)."""
+	entries = []
+	for method in frappe.get_hooks("crm_automatic_entries"):
+		entries += frappe.get_attr(method)(doctype, name) or []
+	return entries
+
+
+def label_automatic_entries(activities: list, doctype: str, name: str):
+	"""Activities of an automatic entry get `owner_name` = the entry's source ("Site: fale com a gente").
+	Guest never is a person, so its other activities say "Automatic entry"; Administrator only when the
+	activity happened with an entry (it can also be someone signed in as the administrator)."""
+	entries = automatic_entries(doctype, name)
+	# grouped versions ("+3 changes") carry their own owners
+	nested = [v for a in activities for v in (a.get("other_versions") or [])]
+	for activity in [*activities, *nested]:
+		owner = activity.get("owner")
+		if owner not in AUTOMATIC_OWNERS:
+			continue
+		when = frappe.utils.get_datetime(activity.get("creation"))
+		entry = next(
+			(
+				e
+				for e in entries
+				if abs((when - frappe.utils.get_datetime(e["on"])).total_seconds())
+				<= AUTOMATIC_WINDOW_SECONDS
+			),
+			None,
+		)
+		if entry:
+			activity["owner_name"] = entry["label"]
+		elif owner == "Guest":
+			activity["owner_name"] = entries[0]["label"] if entries else _("Automatic entry")
 
 
 def get_deal_activities(name: str):

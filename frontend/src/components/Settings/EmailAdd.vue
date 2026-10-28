@@ -56,7 +56,7 @@
           </div>
         </div>
         <div class="grid grid-cols-2 gap-4">
-          <template v-for="field in incomingOutgoingFields" :key="field.name">
+          <template v-for="field in switches" :key="field.name">
             <div
               v-if="field.condition ? field.condition(state) : true"
               class="flex flex-col gap-1"
@@ -110,7 +110,8 @@ import {
   popularProviderFields,
   services,
   validateInputs,
-  incomingOutgoingFields,
+  accountSwitches,
+  getSystemEmailAccounts,
 } from './emailConfig'
 import EmailProviderIcon from './EmailProviderIcon.vue'
 import PipelineSelect from '@/components/Pipelines/PipelineSelect.vue'
@@ -132,6 +133,12 @@ const state = reactive({
   create_lead_from_incoming_email: false,
   crm_pipeline: '',
 })
+
+const hasSystemAccount = ref(false)
+getSystemEmailAccounts().then((names) => {
+  hasSystemAccount.value = Boolean(names?.length)
+})
+const switches = computed(() => accountSwitches(hasSystemAccount.value))
 const { capture } = useTelemetry()
 const { completeStep } = useCrmOnboarding()
 
