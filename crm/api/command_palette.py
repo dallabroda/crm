@@ -11,7 +11,7 @@ OPEN_TASK_STATUSES = ["Done", "Canceled"]
 
 SEARCH_TYPES = {
 	"CRM Lead": ("Lead", "lead_name", ["lead_name", "organization", "email", "mobile_no"]),
-	"CRM Deal": ("Deal", "organization", ["organization", "email", "mobile_no"]),
+	"CRM Deal": ("Deal", "organization", ["organization", "second_organization", "email", "mobile_no"]),
 	"Contact": ("Contact", "full_name", ["full_name", "email_id", "mobile_no"]),
 	"CRM Organization": ("Organization", "organization_name", ["organization_name", "website"]),
 }

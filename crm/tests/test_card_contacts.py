@@ -105,3 +105,10 @@ class TestCardContacts(FrappeTestCase):
 	def test_one_organization_shows_it_whatever_the_choice(self):
 		card = self._card(contacts_from="Second organization")
 		self.assertEqual(self._names(card), [("organization", self.assignor, ["Ana"])])
+
+	def test_search_finds_the_card_by_its_second_organization(self):
+		from crm.api.command_palette import search
+
+		card = self._card(second_organization=self.debtor)
+		matches = search("Sacado Test")["matches"]
+		self.assertIn(card.name, [m["name"] for m in matches if m.get("doctype") == "CRM Deal"])
