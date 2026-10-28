@@ -424,10 +424,14 @@ const panelSections = computed(() =>
   ),
 )
 
+// Returns new objects: panelSections runs it inside a computed, and changing
+// sections.data there made the computed run again forever (the page froze)
 function getParsedSections(_sections) {
-  return _sections.map((section) => {
-    section.columns = section.columns.map((column) => {
-      column.fields = column.fields.map((field) => {
+  return _sections.map((section) => ({
+    ...section,
+    columns: (section.columns || []).map((column) => ({
+      ...column,
+      fields: (column.fields || []).map((field) => {
         if (field.fieldname === 'address') {
           return {
             ...field,
@@ -440,11 +444,9 @@ function getParsedSections(_sections) {
         } else {
           return field
         }
-      })
-      return column
-    })
-    return section
-  })
+      }),
+    })),
+  }))
 }
 
 const activeTab = ref('deals')
