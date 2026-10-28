@@ -1314,7 +1314,9 @@ onBeforeUnmount(stopMissingFields)
 
 async function saveMissingFields(values) {
   missingFields.value = null
-  if (['organization', 'second_organization', 'contact'].some((k) => k in values)) {
+  if (
+    ['organization', 'second_organization', 'contact'].some((k) => k in values)
+  ) {
     // fields of the linked records are saved on them, with the move (credtech#196)
     try {
       await call('crm.api.pipeline.move_card', {
