@@ -3,12 +3,12 @@
     <div class="flex px-2 justify-between">
       <div class="flex flex-col gap-1 w-9/12">
         <h2 class="flex gap-2 text-2xl-semibold leading-none h-5">
-          {{ __('Send Invites To') }}
+          {{ __('Invite users') }}
         </h2>
         <p class="text-p-base text-ink-gray-6">
           {{
             __(
-              'Invite users to access CRM. Specify their roles to control access and permissions.',
+              'Invite people by e-mail and choose what each one can do. Access to the company is only by invitation.',
             )
           }}
         </p>
@@ -58,32 +58,52 @@
       <template v-if="pendingInvitations.data?.length && !invitees.length">
         <div class="flex flex-col gap-4">
           <div class="flex items-center justify-between text-base-semibold">
-            <div>{{ __('Pending Invites') }}</div>
+            <div>{{ __('Invitations not accepted yet') }}</div>
           </div>
           <ul class="flex flex-col gap-1">
             <li
-              v-for="user in pendingInvitations.data"
-              :key="user.name"
-              class="flex items-center justify-between px-2 py-1 rounded-6 bg-surface-gray-2"
+              v-for="invite in pendingInvitations.data"
+              :key="invite.name"
+              class="flex items-center justify-between gap-3 px-3 py-2 rounded-6 bg-surface-gray-2"
             >
-              <div class="text-base">
-                <span class="text-ink-gray-8">
-                  {{ user.email }}
-                </span>
-                <span class="text-ink-gray-5">
-                  ({{ roleMap[user.role] }})
-                </span>
+              <div class="flex min-w-0 flex-col gap-0.5">
+                <div class="text-base">
+                  <span class="text-ink-gray-8">{{ invite.email }}</span>
+                  <span class="text-ink-gray-5">
+                    ({{ roleMap[invite.role] }})
+                  </span>
+                </div>
+                <div class="text-p-sm text-ink-gray-5">
+                  {{
+                    invite.invited_by_name
+                      ? __('Invited by {0} on {1}', [
+                          invite.invited_by_name,
+                          date(invite.sent_on),
+                        ])
+                      : __('Sent on {0}', [date(invite.sent_on)])
+                  }}
+                  ·
+                  <span v-if="invite.expired" class="text-ink-red-4">
+                    {{ __('Expired on {0}', [date(invite.valid_until)]) }}
+                  </span>
+                  <span v-else>
+                    {{ __('Valid until {0}', [date(invite.valid_until)]) }}
+                  </span>
+                </div>
               </div>
-              <div>
+              <div class="flex shrink-0 items-center gap-1">
                 <Button
-                  :tooltip="__('Delete Invitation')"
+                  :label="__('Resend')"
+                  icon-left="lucide-send"
+                  size="sm"
+                  :loading="resending === invite.name"
+                  @click="resend(invite)"
+                />
+                <Button
+                  :tooltip="__('Cancel invitation')"
                   icon="lucide-x"
                   variant="ghost"
-                  :loading="
-                    pendingInvitations.delete.loading &&
-                    pendingInvitations.delete.params.name === user.name
-                  "
-                  @click="pendingInvitations.delete.submit(user.name)"
+                  @click="toCancel = invite"
                 />
               </div>
             </li>
@@ -91,6 +111,31 @@
         </div>
       </template>
     </div>
+    <Dialog
+      :open="Boolean(toCancel)"
+      :title="__('Cancel invitation?')"
+      :actions="[
+        {
+          label: __('Cancel invitation'),
+          variant: 'solid',
+          theme: 'red',
+          loading: canceling,
+          onClick: cancelInvitation,
+        },
+      ]"
+      @update:open="(open) => !open && (toCancel = null)"
+    >
+      <template #default>
+        <p class="text-p-base text-ink-gray-7">
+          {{
+            __(
+              '{0} will no longer be able to use the invitation link. You can invite them again later.',
+              [toCancel?.email],
+            )
+          }}
+        </p>
+      </template>
+    </Dialog>
     <div class="flex items-center gap-3">
       <ErrorMessage :message="error" />
       <Button
@@ -103,17 +148,12 @@
   </div>
 </template>
 <script setup>
-import { validateEmail, convertArrayToString } from '@/utils'
+import { validateEmail, convertArrayToString, formatDate } from '@/utils'
 import { usersStore } from '@/stores/users'
 import { useTelemetry } from '@framework/ui/telemetry'
 import { useCrmOnboarding } from '@/composables/onboarding'
 import { activeSettingsPage } from '@/composables/settings'
-import {
-  toast,
-  createListResource,
-  createResource,
-  FormControl,
-} from 'frappe-ui'
+import { toast, call, createResource, Dialog, FormControl } from 'frappe-ui'
 import { ref, computed } from 'vue'
 
 const { completeStep } = useCrmOnboarding()
@@ -147,7 +187,10 @@ const inviteeExistMessage = computed(() => {
   if (!inviteesSet.size) return null
 
   if (!pendingInvitations.data?.length) return null
-  const existingEmails = pendingInvitations.data.map((user) => user.email)
+  // an expired invitation does not block a new one: inviting again replaces it
+  const existingEmails = pendingInvitations.data
+    .filter((invite) => !invite.expired)
+    .map((invite) => invite.email)
   const existingUsersSet = new Set(existingEmails)
 
   const existingInvitees = inviteesSet.intersection(existingUsersSet)
@@ -160,12 +203,15 @@ const inviteeExistMessage = computed(() => {
 
 const description = computed(() => {
   return {
-    'System Manager':
-      'Can manage all aspects of the CRM, including user management, customizations and settings.',
-    'Sales Manager':
-      'Can manage and invite new users, and create public & private views (reports).',
-    'Sales User':
-      'Can work with leads and deals and create private views (reports).',
+    'System Manager': __(
+      'Can manage everything in the CRM, including users, plan, customizations and settings.',
+    ),
+    'Sales Manager': __(
+      'Can invite and manage salespeople and create views (reports) for the whole team.',
+    ),
+    'Sales User': __(
+      'Works with the cards of their funnels and creates their own views (reports).',
+    ),
   }[role.value]
 })
 
@@ -208,14 +254,52 @@ const inviteByEmail = createResource({
   },
 })
 
-const pendingInvitations = createListResource({
-  type: 'list',
-  doctype: 'CRM Invitation',
-  filters: { status: 'Pending' },
-  fields: ['name', 'email', 'role'],
-  pageLength: 999,
+// Invitations not accepted yet, pending or expired, with dates and who invited
+const INVITATIONS = 'crm.fcrm.doctype.crm_invitation.crm_invitation.'
+const pendingInvitations = createResource({
+  url: INVITATIONS + 'get_invitations',
   auto: true,
 })
+
+const resending = ref(null)
+async function resend(invite) {
+  resending.value = invite.name
+  try {
+    await call(INVITATIONS + 'resend_invitation', { name: invite.name })
+    toast.success(__('Invitation sent again to {0}', [invite.email]))
+    pendingInvitations.reload()
+  } catch (e) {
+    error.value = e?.messages?.[0] || __('Something went wrong')
+    limitReached.value = e?.exc_type === 'UserLimitError'
+    toast.error(error.value)
+  } finally {
+    resending.value = null
+  }
+}
+
+const toCancel = ref(null)
+const canceling = ref(false)
+async function cancelInvitation() {
+  canceling.value = true
+  try {
+    await call('frappe.client.delete', {
+      doctype: 'CRM Invitation',
+      name: toCancel.value.name,
+    })
+    toast.success(__('Invitation canceled'))
+    toCancel.value = null
+    pendingInvitations.reload()
+  } catch (e) {
+    toast.error(e?.messages?.[0] || __('Something went wrong'))
+  } finally {
+    canceling.value = false
+  }
+}
+
+// "9 nov 2026" in Portuguese, "Nov 9, 2026" in English
+function date(value) {
+  return formatDate(value, 'MMM D, YYYY')
+}
 
 function updateInvitees(value) {
   const emails = value
