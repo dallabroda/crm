@@ -1,4 +1,26 @@
 import { validateEmail } from '../../utils'
+import { call } from 'frappe-ui'
+
+// The platform's own sending accounts (crm.api.email_accounts, credtech#191).
+// When there is one, system emails always go through it: company accounts are
+// never the default for sending, so that switch is not offered.
+let systemAccounts = null
+export function getSystemEmailAccounts() {
+  systemAccounts ||= call(
+    'crm.api.email_accounts.get_system_email_accounts',
+  ).catch((e) => {
+    console.error('[email] system accounts', e)
+    systemAccounts = null
+    return []
+  })
+  return systemAccounts
+}
+
+export function accountSwitches(hasSystemAccount) {
+  return incomingOutgoingFields.filter(
+    (f) => !(hasSystemAccount && f.name === 'default_outgoing'),
+  )
+}
 
 import LogoGmail from '../../../public/images/gmail.png'
 import LogoOutlook from '../../../public/images/outlook.png'

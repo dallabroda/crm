@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 import frappe
 
 from crm.api.doc import get_linked_docs_of_document, remove_linked_doc_reference
@@ -65,3 +67,107 @@ class TestDeleteLinkedDocs(FrappeTestCase):
 
 		frappe.set_user("Administrator")
 		self.assertTrue(frappe.db.exists("CRM Deal", deal.name))
+
+	def test_history_record_stays_and_only_loses_the_link(self):
+		# a record kept for history (here a note, standing in for the cred_hub lead log) is not offered for
+		# deletion and does not block deleting the card
+		org, deal, task = self._org_with_deal_and_task("Kept Test Org")
+		note = frappe.get_doc(
+			{
+				"doctype": "FCRM Note",
+				"title": "History",
+				"reference_doctype": "CRM Deal",
+				"reference_docname": deal.name,
+			}
+		).insert()
+		with patch("crm.api.doc.kept_doctypes", return_value={"FCRM Note"}):
+			offered = [d["reference_doctype"] for d in get_linked_docs_of_document("CRM Deal", deal.name)]
+			self.assertNotIn("FCRM Note", offered)
+			remove_linked_doc_reference(
+				self._linked_items(org), delete=True, doctype="CRM Organization", docname=org
+			)
+
+		self.assertFalse(frappe.db.exists("CRM Deal", deal.name))
+		self.assertFalse(frappe.db.exists("CRM Task", task.name))
+		kept = frappe.db.get_value("FCRM Note", note.name, ["reference_doctype", "reference_docname"])
+		self.assertEqual(tuple(kept), (None, None))
+
+	def test_lead_log_does_not_block_a_sales_manager(self):
+		"""Production bug (27/10): a card that came from a site lead has a Cred Hub Lead Event pointing to it;
+		"Delete all" on its organization failed for a Sales Manager, who cannot change those records."""
+		if not frappe.db.exists("DocType", "Cred Hub Lead Event"):
+			self.skipTest("cred_hub is not installed")
+		org, deal, _task = self._org_with_deal_and_task("Lead Log Test Org")
+		event = frappe.get_doc(
+			{
+				"doctype": "Cred Hub Lead Event",
+				"source": "site",
+				"status": "Created",
+				"card_doctype": "CRM Deal",
+				"card_name": deal.name,
+			}
+		).insert(ignore_permissions=True)
+		manager = "crm.manager@example.com"
+		self.assertNotIn("System Manager", frappe.get_roles(manager))
+
+		frappe.set_user(manager)
+		remove_linked_doc_reference(
+			self._linked_items(org), delete=True, doctype="CRM Organization", docname=org
+		)
+		frappe.delete_doc("CRM Organization", org)
+
+		frappe.set_user("Administrator")
+		self.assertFalse(frappe.db.exists("CRM Deal", deal.name))
+		self.assertFalse(frappe.db.exists("CRM Organization", org))
+		# the log stays for the lead sources screen, without the deleted card
+		self.assertEqual(frappe.db.get_value("Cred Hub Lead Event", event.name, "card_name"), None)
+
+	def test_deleting_the_card_itself_with_a_lead_log(self):
+		if not frappe.db.exists("DocType", "Cred Hub Lead Event"):
+			self.skipTest("cred_hub is not installed")
+		_org, deal, _task = self._org_with_deal_and_task("Card Log Test Org")
+		frappe.get_doc(
+			{
+				"doctype": "Cred Hub Lead Event",
+				"status": "Created",
+				"card_doctype": "CRM Deal",
+				"card_name": deal.name,
+			}
+		).insert(ignore_permissions=True)
+		frappe.set_user("crm.manager@example.com")
+		items = [
+			{"doctype": d["reference_doctype"], "docname": d["reference_docname"]}
+			for d in get_linked_docs_of_document("CRM Deal", deal.name)
+		]
+		self.assertNotIn("Cred Hub Lead Event", [i["doctype"] for i in items])
+		remove_linked_doc_reference(items, delete=True, doctype="CRM Deal", docname=deal.name)
+		frappe.delete_doc("CRM Deal", deal.name)
+		frappe.set_user("Administrator")
+		self.assertFalse(frappe.db.exists("CRM Deal", deal.name))
+
+	def test_notification_to_someone_else_does_not_block_the_delete(self):
+		"""A card assigned to a salesperson has a notification only that salesperson can see; a manager
+		deleting the card must not be blocked by it."""
+		_org, deal, _task = self._org_with_deal_and_task("Notified Card Test Org")
+		frappe.get_doc(
+			{
+				"doctype": "CRM Notification",
+				"from_user": "Administrator",
+				"to_user": "crm.user1@example.com",
+				"type": "Assignment",
+				"notification_type_doctype": "CRM Deal",
+				"notification_type_doc": deal.name,
+				"reference_doctype": "CRM Deal",
+				"reference_name": deal.name,
+			}
+		).insert(ignore_permissions=True)
+		frappe.set_user("crm.manager@example.com")
+		items = [
+			{"doctype": d["reference_doctype"], "docname": d["reference_docname"]}
+			for d in get_linked_docs_of_document("CRM Deal", deal.name)
+		]
+		remove_linked_doc_reference(items, delete=True, doctype="CRM Deal", docname=deal.name)
+		frappe.delete_doc("CRM Deal", deal.name)
+		frappe.set_user("Administrator")
+		self.assertFalse(frappe.db.exists("CRM Deal", deal.name))
+		self.assertFalse(frappe.db.exists("CRM Notification", {"reference_name": deal.name}))

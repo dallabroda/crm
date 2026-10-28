@@ -704,6 +704,46 @@ def set_activity_counts(rows, doctype):
 	return rows
 
 
+# Records that point to a card or lead but belong to the company's history (e.g. the log of where a lead
+# came from): deleting the card or lead keeps them and only clears the link. They are not offered for
+# deletion, and the user's permission on them does not matter: being allowed to delete the card or lead is
+# what counts. Apps add their doctypes with the `crm_keep_on_delete` hook.
+KEEP_ON_DELETE = ("Cred Hub Lead Event",)
+
+
+def kept_doctypes() -> set[str]:
+	return set(KEEP_ON_DELETE) | set(frappe.get_hooks("crm_keep_on_delete") or [])
+
+
+def unlink_kept_records(doc, method=None):
+	"""on_trash of cards and leads: clear the links that kept records hold to `doc`, so the delete is not
+	blocked by them (LinkExistsError) nor by the user's permission on them."""
+	for doctype in kept_doctypes():
+		if not frappe.db.exists("DocType", doctype):
+			continue
+		table = frappe.qb.DocType(doctype)
+		for df in frappe.get_meta(doctype).fields:
+			if df.fieldtype == "Link" and df.options == doc.doctype:
+				frappe.qb.update(table).set(table[df.fieldname], None).where(
+					table[df.fieldname] == doc.name
+				).run()
+			elif df.fieldtype == "Dynamic Link":
+				frappe.qb.update(table).set(table[df.fieldname], None).set(table[df.options], None).where(
+					(table[df.options] == doc.doctype) & (table[df.fieldname] == doc.name)
+				).run()
+	# Notifications only point to the card or lead (assignments, mentions). Each one is visible only to the
+	# person it was sent to, so someone else deleting the card could neither see nor delete them and the
+	# delete failed with LinkExistsError. They go away with the card.
+	notification = frappe.qb.DocType("CRM Notification")
+	frappe.qb.from_(notification).delete().where(
+		((notification.reference_doctype == doc.doctype) & (notification.reference_name == doc.name))
+		| (
+			(notification.notification_type_doctype == doc.doctype)
+			& (notification.notification_type_doc == doc.name)
+		)
+	).run()
+
+
 @frappe.whitelist()
 def get_linked_docs_of_document(doctype: str, docname: str):
 	try:
@@ -712,10 +752,12 @@ def get_linked_docs_of_document(doctype: str, docname: str):
 		return []
 
 	doc.check_permission("read")
+	kept = kept_doctypes()
 	return [
 		d
 		for d in get_linked_docs_data(doc)
-		if frappe.has_permission(d["reference_doctype"], "read", d["reference_docname"])
+		if d["reference_doctype"] not in kept
+		and frappe.has_permission(d["reference_doctype"], "read", d["reference_docname"])
 	]
 
 
@@ -859,7 +901,12 @@ def delete_with_dependents(doctype, docname, seen=None, depth=0):
 		return
 	seen.add((doctype, docname))
 	if depth < 3:
+		kept = kept_doctypes()
 		for dependent in get_linked_docs_data(frappe.get_doc(doctype, docname)):
+			# history records stay; the card's or lead's on_trash clears their link (and deletes its notifications,
+			# which the user may not be allowed to see)
+			if dependent["reference_doctype"] in kept or dependent["reference_doctype"] == "CRM Notification":
+				continue
 			delete_with_dependents(
 				dependent["reference_doctype"], dependent["reference_docname"], seen, depth + 1
 			)
@@ -880,8 +927,9 @@ def remove_linked_doc_reference(
 		items = frappe.parse_json(items)
 
 	failures = []
+	kept = kept_doctypes()
 	for item in items:
-		if not item.get("doctype") or not item.get("docname"):
+		if not item.get("doctype") or not item.get("docname") or item["doctype"] in kept:
 			continue
 
 		label = f"{_(item['doctype'])} {item['docname']}"
