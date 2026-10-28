@@ -73,7 +73,6 @@
           type="select"
           :options="[
             { label: __('All'), value: 'All' },
-            { label: __('Lead'), value: 'CRM Lead' },
             { label: __('Deal'), value: 'CRM Deal' },
           ]"
         />

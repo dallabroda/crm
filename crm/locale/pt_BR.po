@@ -122,10 +122,6 @@ msgstr ""
 msgid "<b>SHORTCUTS</b>"
 msgstr "<b>ATALHOS</b>"
 
-#: frontend/src/components/Settings/EmailTemplate/EditEmailTemplate.vue:96 frontend/src/components/Settings/EmailTemplate/NewEmailTemplate.vue:97
-msgid "<p>Dear {{ lead_name }},</p>\\n\\n<p>This is a reminder for the payment of {{ grand_total }}.</p>\\n\\n<p>Thanks,</p>\\n<p>Frappé</p>"
-msgstr ""
-
 #. Header text in the Frappe CRM Workspace
 #: crm/fcrm/workspace/frappe_crm/frappe_crm.json:3
 msgid "<span class=\"h5\"><b>PORTAL</b></span>"
@@ -2541,7 +2537,7 @@ msgstr "Valor do card"
 #. Label of a shortcut in the Frappe CRM Workspace
 #: crm/fcrm/workspace/frappe_crm/frappe_crm.json:86 frontend/src/pages/Deal.vue:564 frontend/src/pages/InvalidPage.vue:9 frontend/src/pages/MobileContact.vue:303 frontend/src/pages/MobileDeal.vue:396 frontend/src/pages/MobileOrganization.vue:338
 msgid "Deals"
-msgstr "Negócios"
+msgstr "Cards"
 
 #: frontend/src/components/Dashboard/AddChartModal.vue:93
 msgid "Deals by Ongoing & Won Stage"
@@ -2582,10 +2578,6 @@ msgstr "Cards por etapa"
 #: crm/api/dashboard.py:1064
 msgid "Deals by territory"
 msgstr "Cards por território"
-
-#: frontend/src/components/Settings/EmailTemplate/EditEmailTemplate.vue:110 frontend/src/components/Settings/EmailTemplate/NewEmailTemplate.vue:111
-msgid "Dear {{ lead_name }}, \\n\\nThis is a reminder for the payment of {{ grand_total }}. \\n\\nThanks, \\nFrappé"
-msgstr "Prezado(a) {{ lead_name }}, \\n\\nEste é um lembrete do pagamento de {{ grand_total }}. \\n\\nObrigado, \\nFrappé"
 
 #: frontend/src/components/Settings/Fields/FieldsPage.vue:148
 msgid "Decimal number"
@@ -4997,7 +4989,7 @@ msgstr "Pontuação do lead"
 #. Label of a shortcut in the Frappe CRM Workspace
 #: crm/fcrm/workspace/frappe_crm/frappe_crm.json:102 frontend/src/components/Settings/LeadSyncing/LeadSyncSources.vue:7
 msgid "Lead Sources"
-msgstr "Origens de leads"
+msgstr "Origens"
 
 #. Label of a shortcut in the Frappe CRM Workspace
 #: crm/fcrm/workspace/frappe_crm/frappe_crm.json:62
@@ -6562,13 +6554,7 @@ msgstr "Pausa até que um evento seja disparado para este registro."
 msgid "Payment Reminder"
 msgstr "Lembrete de pagamento"
 
-#: frontend/src/components/Settings/EmailTemplate/NewEmailTemplate.vue:70
-msgid "Payment Reminder from Frappé - (#{{ name }})"
-msgstr "Lembrete de pagamento da Frappé - (#{{ name }})"
 
-#: frontend/src/components/Settings/EmailTemplate/EditEmailTemplate.vue:69
-msgid "Payment reminder from Frappé - (#{{ name }})"
-msgstr "Lembrete de pagamento da Frappé - (#{{ name }})"
 
 #. Option for the 'Status' (Select) field in DocType 'CRM Invitation'
 #: crm/fcrm/doctype/crm_invitation/crm_invitation.json:54
@@ -11529,7 +11515,7 @@ msgstr "Crie no painel da API4Com um token que não expira e cole aqui. Ele não
 
 #: telephony/api4com
 msgid "Enable API4Com to record the calls of your API4Com account on the timeline of your deals"
-msgstr "Ligue a API4Com para registrar as ligações da sua conta API4Com na linha do tempo dos seus negócios"
+msgstr "Ligue a API4Com para registrar as ligações da sua conta API4Com na linha do tempo dos seus cards"
 
 #: telephony/api4com
 msgid "Extension"
@@ -11565,7 +11551,7 @@ msgstr "Cole o token da API da API4Com."
 
 #: telephony/api4com
 msgid "Record the calls of your API4Com account on the timeline of your deals"
-msgstr "Registre as ligações da sua conta API4Com na linha do tempo dos seus negócios"
+msgstr "Registre as ligações da sua conta API4Com na linha do tempo dos seus cards"
 
 #: telephony/api4com
 msgid "Registered at API4Com automatically when the token is saved. Only needed by hand if API4Com support asks for it."
@@ -11581,7 +11567,7 @@ msgstr "O endereço atual para de funcionar na hora e o novo é cadastrado na AP
 
 #: telephony/api4com
 msgid "Your company hires API4Com directly. Each call made or received at API4Com lands on the timeline of the deal of that number, in the name of the salesperson of the extension."
-msgstr "Sua empresa contrata a API4Com diretamente. Cada ligação feita ou recebida na API4Com aparece na linha do tempo do negócio daquele número, em nome do vendedor do ramal."
+msgstr "Sua empresa contrata a API4Com diretamente. Cada ligação feita ou recebida na API4Com aparece na linha do tempo do card daquele número, em nome do vendedor do ramal."
 
 #: frontend/src/components/Settings/LeadSyncing
 msgid "Cred Chat"
@@ -11749,3 +11735,15 @@ msgstr "Só dá para criar campos em cards, contatos e empresas."
 #: crm/fcrm/doctype/crm_pipeline/fields.py
 msgid "There is no room left for another field of this type in {0}."
 msgstr "Não há mais espaço para outro campo deste tipo em {0}."
+
+#: frontend/src/components/Settings/EmailTemplate/NewEmailTemplate.vue
+msgid "Payment reminder - card {{ name }}"
+msgstr "Lembrete de pagamento - card {{ name }}"
+
+#: frontend/src/components/Settings/EmailTemplate/NewEmailTemplate.vue
+msgid "<p>Hello, {{ lead_name }}!</p>\\n\\n<p>This is a reminder about the payment of {{ grand_total }}.</p>\\n\\n<p>Thank you,</p>\\n<p>Your team</p>"
+msgstr "<p>Olá, {{ lead_name }}!</p>\\n\\n<p>Este é um lembrete do pagamento de {{ grand_total }}.</p>\\n\\n<p>Obrigado,</p>\\n<p>Sua equipe</p>"
+
+#: frontend/src/components/Settings/EmailTemplate/NewEmailTemplate.vue
+msgid "Hello, {{ lead_name }}! \\n\\nThis is a reminder about the payment of {{ grand_total }}. \\n\\nThank you, \\nYour team"
+msgstr "Olá, {{ lead_name }}! \\n\\nEste é um lembrete do pagamento de {{ grand_total }}. \\n\\nObrigado, \\nSua equipe"
