@@ -243,9 +243,12 @@ def _direct_entry(doc) -> bool:
 	flow (converting a lead, a card with a new company, a CNPJ lookup) nor by an automatic entry."""
 	if frappe.flags.get("crm_automatic_entry"):
 		return False
-	cmd = frappe.local.form_dict.get("cmd") or ""
-	if cmd in ("frappe.client.insert", "frappe.client.save", "frappe.client.insert_many"):
-		return True
+	form = frappe.local.form_dict
+	if (form.get("cmd") or "") in ("frappe.client.insert", "frappe.client.save"):
+		# only when the request's own document is this record's doctype
+		sent = form.get("doc")
+		sent = frappe.parse_json(sent) if isinstance(sent, str) else sent
+		return isinstance(sent, dict) and sent.get("doctype") == doc.doctype
 	request = getattr(frappe.local, "request", None)
 	path = getattr(request, "path", "") or ""
 	return path.startswith((f"/api/resource/{doc.doctype}", f"/api/v2/document/{doc.doctype}"))

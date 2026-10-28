@@ -39,10 +39,12 @@ class TestGlobalForms(FrappeTestCase):
 	def setUp(self):
 		frappe.set_user("Administrator")
 		frappe.local.form_dict.pop("cmd", None)
+		frappe.local.form_dict.pop("doc", None)
 
 	def tearDown(self):
 		frappe.set_user("Administrator")
 		frappe.local.form_dict.pop("cmd", None)
+		frappe.local.form_dict.pop("doc", None)
 		frappe.db.rollback()
 
 	def _schema(self, doctype):
@@ -99,7 +101,7 @@ class TestGlobalForms(FrappeTestCase):
 		# created as part of another flow (lead conversion, card with a new company): not blocked
 		side = frappe.get_doc({"doctype": ORG, "organization_name": "Side Effect Test Org"}).insert()
 		# created from its own form or the REST API: the required field is asked
-		frappe.local.form_dict.cmd = "frappe.client.insert"
+		frappe.local.form_dict.update(cmd="frappe.client.insert", doc={"doctype": ORG})
 		with self.assertRaises(frappe.ValidationError):
 			frappe.get_doc({"doctype": ORG, "organization_name": "Direct Test Org"}).insert()
 		frappe.get_doc(
@@ -111,6 +113,10 @@ class TestGlobalForms(FrappeTestCase):
 			frappe.get_doc({"doctype": ORG, "organization_name": "Automatic Test Org"}).insert()
 		finally:
 			frappe.flags.crm_automatic_entry = False
+		frappe.local.form_dict.pop("cmd", None)
+		# a card insert that creates a new company on the way is not a direct entry of the company
+		frappe.local.form_dict.update(cmd="frappe.client.insert", doc={"doctype": "CRM Deal"})
+		frappe.get_doc({"doctype": ORG, "organization_name": "Via Card Test Org"}).insert()
 		frappe.local.form_dict.pop("cmd", None)
 		# a record saved before the rule is not blocked on other edits
 		side.industry = None
@@ -167,7 +173,7 @@ class TestGlobalForms(FrappeTestCase):
 		# read-only in the doctype, but filled from the contact's e-mails and phones
 		save_form_config("Contact", [{"fieldname": "email_id", "required": 1}])
 		self.assertTrue(get_form_schema("Contact")["configured"])
-		frappe.local.form_dict.cmd = "frappe.client.insert"
+		frappe.local.form_dict.update(cmd="frappe.client.insert", doc={"doctype": "Contact"})
 		with self.assertRaises(frappe.ValidationError):
 			frappe.get_doc({"doctype": "Contact", "first_name": "Sem Email Teste"}).insert()
 		frappe.get_doc(
