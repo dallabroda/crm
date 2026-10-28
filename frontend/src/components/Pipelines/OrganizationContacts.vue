@@ -71,7 +71,7 @@
       :open="Boolean(whatsappTo)"
       :deal="deal"
       :phone="whatsappTo.phone"
-      :name="whatsappTo.contact ? whatsappTo.name : ''"
+      :name="whatsappTo.contactName"
       @update:open="(v) => !v && (whatsappTo = null)"
       @sent="$emit('sent')"
     />
@@ -127,6 +127,8 @@ function rows(org) {
     list.push({
       key: 'registry',
       name: __('Receita record'),
+      // the company itself: SmartChat names the new contact after it
+      contactName: org.name,
       phone: org.registry_phone,
       email: org.registry_email,
     })
@@ -134,8 +136,8 @@ function rows(org) {
   for (let c of org.contacts || []) {
     list.push({
       key: c.name,
-      contact: true,
       name: c.full_name || c.name,
+      contactName: c.full_name || c.name,
       phone: c.mobile_no || c.phone,
       email: c.email_id,
     })
