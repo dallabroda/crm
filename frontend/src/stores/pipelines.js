@@ -123,6 +123,8 @@ export const pipelinesStore = defineStore('crm-pipelines', () => {
         typeof f === 'string' ? f : f.fieldname,
       ),
       catalog: (catalog?.fields || []).map((f) => f.fieldname),
+      // card fields that belong to the organization now (credtech#181)
+      moved: (catalog?.moved || []).map((f) => f.fieldname),
     }
   }
 

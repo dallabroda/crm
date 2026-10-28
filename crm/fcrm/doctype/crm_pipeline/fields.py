@@ -23,11 +23,10 @@ STANDARD_FIELDS = (
 	"expected_closure_date",
 	"next_step",
 	"source",
-	"website",
-	"annual_revenue",
-	"no_of_employees",
-	"industry",
 )
+# Owner decision 7 of 28/10/2026 (credtech#181): these belong to the organization, not to the card. The card
+# columns stay (old values, lead conversion), but the card form no longer offers them.
+MOVED_TO_ORGANIZATION = ("website", "annual_revenue", "no_of_employees", "industry")
 FIELD_TYPES = ("Data", "Int", "Float", "Currency", "Date", "Select", "Check", "Attach", "Link")
 LINK_TARGETS = ("Contact", "CRM Organization")
 NUMBER_TYPES = ("Int", "Float", "Currency", "Percent")

@@ -450,7 +450,11 @@ onMounted(async () => {
   loading.value = true
   try {
     let catalogData = await pipelineStore.apiCall('get_field_catalog')
-    catalog.value = catalogData?.fields || []
+    // fields that moved to the organization still come with the lead, so rules can test them
+    catalog.value = [
+      ...(catalogData?.fields || []),
+      ...(catalogData?.moved || []),
+    ]
     if (isNew.value) {
       addStage()
       return
