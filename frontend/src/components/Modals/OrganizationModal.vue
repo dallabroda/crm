@@ -35,6 +35,20 @@
           :data="organization.doc"
           doctype="CRM Organization"
         />
+        <div
+          v-if="formFields.length"
+          class="mt-4 rounded border border-outline-gray-2 p-3"
+          data-testid="form-required-fields"
+        >
+          <div class="mb-3 text-sm text-ink-gray-6">
+            {{ __('Required by the form') }}
+          </div>
+          <StageFields
+            :fields="formFields"
+            :values="organization.doc"
+            @change="(f, v) => (organization.doc[f] = v)"
+          />
+        </div>
         <ErrorMessage v-if="error" class="mt-8" :message="__(error)" />
       </div>
       <div class="px-4 pt-4 pb-7 sm:px-6">
@@ -55,6 +69,8 @@
 <script setup>
 import FieldLayout from '@/components/FieldLayout/FieldLayout.vue'
 import EditIcon from '@/components/Icons/EditIcon.vue'
+import StageFields from '@/components/Pipelines/StageFields.vue'
+import { emptyRequiredFields, requiredOutsideLayout } from '@/utils/pipelines'
 import { usersStore } from '@/stores/users'
 import { isMobileView } from '@/composables/settings'
 import { showQuickEntryModal, quickEntryProps } from '@/composables/modals'
@@ -62,7 +78,7 @@ import { useDocument } from '@/data/document'
 import { useDoctypeModal } from '@/composables/doctypeModal'
 import { useTelemetry } from '@framework/ui/telemetry'
 import { Dialog, call, createResource } from 'frappe-ui'
-import { ref, nextTick, onMounted } from 'vue'
+import { computed, ref, nextTick, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 
 const props = defineProps({
@@ -85,9 +101,28 @@ const error = ref(null)
 const { document: organization, triggerOnBeforeCreate } =
   useDocument('CRM Organization')
 
+// Required fields of the company's form that the quick entry layout does not
+// have (dynamic forms, credtech#181); the server asks for them too
+const formSchema = createResource({
+  url: 'crm.api.forms.get_form_schema',
+  cache: ['formSchema', 'CRM Organization'],
+  params: { doctype: 'CRM Organization' },
+  auto: true,
+})
+const formFields = computed(() =>
+  requiredOutsideLayout(formSchema.data?.fields, tabs.data),
+)
+
 async function createOrganization() {
-  loading.value = true
   error.value = null
+  let missing = emptyRequiredFields(formFields.value, organization.doc)
+  if (missing.length) {
+    error.value = __('Fill in: {0}', [
+      missing.map((f) => __(f.label)).join(', '),
+    ])
+    return
+  }
+  loading.value = true
 
   await triggerOnBeforeCreate?.()
 

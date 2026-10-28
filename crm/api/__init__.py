@@ -161,12 +161,18 @@ def invite_by_email(emails: str, role: str):
 		filters={
 			"email": ["in", email_list],
 			"role": ["in", ["System Manager", "Sales Manager", "Sales User"]],
+			# an expired invitation does not block a new one (it is replaced below)
+			"status": "Pending",
 		},
 		pluck="email",
 	)
 
 	to_invite = list(set(email_list) - set(existing_members) - set(existing_invites))
 
+	for name in frappe.db.get_all(
+		"CRM Invitation", filters={"email": ["in", to_invite or [""]], "status": "Expired"}, pluck="name"
+	):
+		frappe.delete_doc("CRM Invitation", name, ignore_permissions=True)
 	for email in to_invite:
 		frappe.get_doc(doctype="CRM Invitation", email=email, role=role).insert(ignore_permissions=True)
 

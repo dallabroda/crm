@@ -43,9 +43,13 @@
     </div>
     <p v-if="hidden" class="text-p-sm text-ink-gray-5">
       {{
-        hidden === 1
-          ? __('1 field of the funnel is hidden here.')
-          : __('{0} fields of the funnel are hidden here.', [hidden])
+        inFunnel
+          ? hidden === 1
+            ? __('1 field of the funnel is hidden here.')
+            : __('{0} fields of the funnel are hidden here.', [hidden])
+          : hidden === 1
+            ? __('1 field is hidden in this form.')
+            : __('{0} fields are hidden in this form.', [hidden])
       }}
     </p>
   </div>
@@ -59,6 +63,8 @@ import { computed } from 'vue'
 const props = defineProps({
   // crm.api.forms.get_form_schema().fields
   fields: { type: Array, default: () => [] },
+  // cards: the hidden fields are the funnel's; organizations and contacts: the form's
+  inFunnel: { type: Boolean, default: true },
 })
 
 // all stages: a field hidden only in some stages is shown, marked as varying

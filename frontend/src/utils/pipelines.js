@@ -156,3 +156,62 @@ export function withoutFields(sections, names) {
     })
     .filter(Boolean)
 }
+
+// Fieldnames placed in a side panel layout (sections) or a quick entry layout
+// (tabs with sections)
+export function layoutFieldnames(sectionsOrTabs) {
+  let names = new Set()
+  let addSection = (section) =>
+    (section?.columns || []).forEach((column) =>
+      (column.fields || []).forEach((field) =>
+        names.add(typeof field === 'string' ? field : field?.fieldname),
+      ),
+    )
+  for (let item of sectionsOrTabs || []) {
+    if (item?.sections) item.sections.forEach(addSection)
+    else addSection(item)
+  }
+  return names
+}
+
+// Side panel of organizations and contacts (dynamic forms, credtech#181).
+// Until the company saves the form, the layout stays and created fields get a
+// section of their own; once saved, the form decides which fields show and in
+// which order, and the layout keeps only what is not a form field.
+export function globalFormSections(sections, schema, labels) {
+  if (!schema?.fields) return sections || []
+  let fields = schema.fields.filter((f) => !f.locked)
+  if (!schema.configured) {
+    let inLayout = layoutFieldnames(sections)
+    let created = fields.filter(
+      (f) => f.is_created && !inLayout.has(f.fieldname),
+    )
+    let section = funnelSection(created, labels.created)
+    return section
+      ? [...(sections || []), { ...section, name: 'created_fields' }]
+      : sections || []
+  }
+  let section = funnelSection(fields, labels.form)
+  let others = withoutFields(
+    sections,
+    schema.fields.map((f) => f.fieldname),
+  )
+  return section ? [{ ...section, name: 'form_fields' }, ...others] : others
+}
+
+// Required fields of a form that the quick entry layout does not have, in the
+// shape StageFields takes (options of a list as text, one per line)
+export function requiredOutsideLayout(schemaFields, tabs) {
+  let inLayout = layoutFieldnames(tabs)
+  return (schemaFields || [])
+    .filter((f) => f.required && !f.locked && !inLayout.has(f.fieldname))
+    .map((f) => ({
+      fieldname: f.fieldname,
+      label: f.label,
+      fieldtype: f.fieldtype,
+      options: Array.isArray(f.options)
+        ? f.options.map((o) => o.value).join('\n')
+        : f.options || '',
+      required: 1,
+    }))
+}
