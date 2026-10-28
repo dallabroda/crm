@@ -1,7 +1,10 @@
 export class FCRMNote {
   onRender() {
-    if (this.doc.reference_doctype && this.doc.reference_docname) {
-      let label = this.doc.reference_doctype.replace('CRM ', '')
+    // only cards (and old leads) have a page to open; notes of an organization
+    // or a contact are written on its own page (credtech#214)
+    let pages = { 'CRM Deal': __('Card'), 'CRM Lead': __('Lead') }
+    if (pages[this.doc.reference_doctype] && this.doc.reference_docname) {
+      let label = pages[this.doc.reference_doctype]
 
       this.actions = [
         {
