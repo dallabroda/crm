@@ -95,10 +95,14 @@ def get_pipeline_config(pipeline: str) -> dict:
 			{"user": m.user, "full_name": full_names.get(m.user) or m.user, "role": m.role}
 			for m in members
 		],
-		"fields": [{"fieldname": f.fieldname, "position": f.position} for f in doc.fields],
+		"fields": [
+			{"fieldname": f.fieldname, "block": field_catalog.block_of(f), "position": f.position}
+			for f in doc.fields
+		],
 		"field_rules": [
 			{
 				"stage": r.stage,
+				"block": field_catalog.block_of(r),
 				"fieldname": r.fieldname,
 				"visible": r.visible,
 				"required": r.required,
@@ -116,9 +120,10 @@ def save_pipeline(doc: str | dict) -> dict:
 
 	- stages: saved in the order received (position = order); existing stages missing from the
 	  payload are deleted, which fails if a card is still in them.
-	- fields: fieldnames from the catalog, in order (a new pipeline starts with the standard ones).
-	- field_rules: {stage, fieldname, visible, required, read_only} for existing stages; any
-	  (field, stage) pair not sent keeps its rule, new pairs start visible, optional and editable.
+	- fields: fieldnames from the catalog, in order (a new pipeline starts with the standard ones); a field of
+	  the card's organization, second organization or contact goes as {"fieldname", "block"} (credtech#196).
+	- field_rules: {stage, block, fieldname, visible, required, read_only} for existing stages (block defaults
+	  to Card); any pair not sent keeps its rule, new pairs start visible, optional and editable.
 	"""
 	data = frappe._dict(json.loads(doc) if isinstance(doc, str) else doc)
 	if data.get("name"):
@@ -166,12 +171,25 @@ def save_pipeline(doc: str | dict) -> dict:
 		pipeline.append("members", {"user": frappe.session.user, "role": "Owner"})
 
 	if "fields" in data or creating:
-		fieldnames = (
-			[f if isinstance(f, str) else f.get("fieldname") for f in data.fields or []]
+		used = (
+			[
+				(field_catalog.CARD, f) if isinstance(f, str) else (f.get("block") or field_catalog.CARD, f.get("fieldname"))
+				for f in data.fields or []
+			]
 			if "fields" in data
-			else default_pipeline_fields()
+			else [(field_catalog.CARD, f) for f in default_pipeline_fields()]
 		)
-		pipeline.set("fields", [{"fieldname": f, "position": i} for i, f in enumerate(fieldnames, start=1)])
+		if "fields" in data and all(isinstance(f, str) for f in data.fields or []):
+			# plain fieldnames (as before the blocks) are the card's fields: the blocks' fields stay
+			used += [
+				(field_catalog.block_of(f), f.fieldname)
+				for f in sorted(pipeline.fields, key=lambda f: (f.position or 0, f.idx))
+				if field_catalog.block_of(f) != field_catalog.CARD
+			]
+		pipeline.set(
+			"fields",
+			[{"block": b, "fieldname": f, "position": i} for i, (b, f) in enumerate(used, start=1)],
+		)
 
 	pipeline.save(ignore_permissions=True)
 
@@ -197,18 +215,20 @@ def save_pipeline(doc: str | dict) -> dict:
 
 
 def _apply_rules(pipeline, stages: list[str], rules: list[dict]):
-	existing = {(r.stage, r.fieldname): r for r in pipeline.field_rules}
-	used = {f.fieldname for f in pipeline.fields}
+	existing = {(r.stage, field_catalog.block_of(r), r.fieldname): r for r in pipeline.field_rules}
+	used = {(field_catalog.block_of(f), f.fieldname) for f in pipeline.fields}
 	for rule in rules:
 		rule = frappe._dict(rule)
+		block = rule.block or field_catalog.CARD
 		if rule.stage not in stages:
 			frappe.throw(_("Rule for an unknown stage: {0}").format(frappe.bold(rule.stage)))
-		if rule.fieldname not in used:
+		if (block, rule.fieldname) not in used:
 			frappe.throw(_("Field {0} is not used in this pipeline.").format(frappe.bold(rule.fieldname)))
-		row = existing.get((rule.stage, rule.fieldname))
+		key = (rule.stage, block, rule.fieldname)
+		row = existing.get(key)
 		if not row:
-			row = pipeline.append("field_rules", {"stage": rule.stage, "fieldname": rule.fieldname})
-			existing[(rule.stage, rule.fieldname)] = row
+			row = pipeline.append("field_rules", {"stage": rule.stage, "block": block, "fieldname": rule.fieldname})
+			existing[key] = row
 		for key in ("visible", "required", "read_only"):
 			if key in rule:
 				row.set(key, frappe.utils.cint(rule[key]))
@@ -336,13 +356,63 @@ def set_pipeline_owner_role(user: str, enabled: bool) -> dict:
 
 @frappe.whitelist()
 def move_card(deal: str, stage: str, values: str | dict | None = None) -> dict:
-	"""Move a card to another stage of its pipeline, optionally filling fields at the same time."""
+	"""Move a card to another stage of its pipeline, optionally filling fields at the same time.
+
+	values: the card's fields ({fieldname: value}), or by block (credtech#196):
+	{"card": {...}, "organization": {...}, "second_organization": {...}, "contact": {...}}. Fields of the linked
+	records are only accepted when the target stage requires them and they are empty, and only on the records
+	linked to this card, so moving a card is never a way to edit any organization or contact."""
 	doc = frappe.get_doc("CRM Deal", deal)
 	doc.check_permission("write")
+	values = json.loads(values) if isinstance(values, str) else values or {}
+	by_block = values and set(values) <= set(VALUE_BLOCKS) and all(isinstance(v, dict) for v in values.values())
+	if by_block:
+		_set_linked_values(doc, stage, values)
+		values = values.get("card") or {}
 	_set_values(doc, values)
 	doc.status = stage
 	doc.save()
 	return doc.as_dict()
+
+
+VALUE_BLOCKS = {
+	"card": field_catalog.CARD,
+	"organization": field_catalog.ORGANIZATION,
+	"second_organization": field_catalog.SECOND_ORGANIZATION,
+	"contact": field_catalog.CONTACT,
+}
+
+
+def _set_linked_values(doc, stage: str, values: dict):
+	"""Fill what the target stage asks of the card's organization, second organization or contact. The person
+	moving the card may fill these even without permission to edit those records, but only these fields
+	(owner decision 6 of 28/10/2026)."""
+	missing = field_catalog.get_missing_fields(doc, stage)
+	for key, block in VALUE_BLOCKS.items():
+		given = values.get(key) or {}
+		if block == field_catalog.CARD or not given:
+			continue
+		asked = {m["fieldname"]: m for m in missing if m["block"] == block}
+		refused = [f for f in given if f not in asked]
+		if refused:
+			frappe.throw(
+				_("Field {0} cannot be set here.").format(frappe.bold(", ".join(refused))), frappe.PermissionError
+			)
+		record = frappe.get_doc(field_catalog.BLOCK_DOCTYPES[block], next(iter(asked.values()))["docname"])
+		for fieldname, value in given.items():
+			_set_record_value(record, fieldname, value)
+		record.flags.ignore_permissions = True
+		record.save()
+
+
+def _set_record_value(record, fieldname, value):
+	# a contact's primary e-mail and mobile come from its tables: set there, or saving would clear them
+	if record.doctype == "Contact" and fieldname == "email_id" and value:
+		record.add_email(value, is_primary=1)
+	elif record.doctype == "Contact" and fieldname == "mobile_no" and value:
+		record.add_phone(value, is_primary_mobile_no=1)
+	else:
+		record.set(fieldname, value)
 
 
 @frappe.whitelist()

@@ -13,6 +13,7 @@ class CRMPipelineFieldRule(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
+		block: DF.Literal["Card", "Organization", "Second organization", "Contact"]
 		fieldname: DF.Data
 		parent: DF.Data
 		parentfield: DF.Data

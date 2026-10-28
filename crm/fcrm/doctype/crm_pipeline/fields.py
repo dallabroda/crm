@@ -34,6 +34,35 @@ LINK_TARGETS = ("Contact", "CRM Organization")
 NUMBER_TYPES = ("Int", "Float", "Currency", "Percent")
 
 
+# Blocks of the card form (credtech#196): the card's own fields, or fields of the records linked to it. The
+# stage decides which of them show and are required; a block without a linked record is skipped.
+CARD, ORGANIZATION, SECOND_ORGANIZATION, CONTACT = "Card", "Organization", "Second organization", "Contact"
+BLOCKS = (CARD, ORGANIZATION, SECOND_ORGANIZATION, CONTACT)
+BLOCK_DOCTYPES = {
+	CARD: DEAL,
+	ORGANIZATION: "CRM Organization",
+	SECOND_ORGANIZATION: "CRM Organization",
+	CONTACT: "Contact",
+}
+
+
+def block_of(row) -> str:
+	return row.get("block") or CARD
+
+
+def block_record(doc, block: str) -> str | None:
+	"""The record a block of the card points at: the card, its organization, its second organization or its
+	primary contact."""
+	if block == CARD:
+		return doc.name
+	if block == ORGANIZATION:
+		return doc.get("organization")
+	if block == SECOND_ORGANIZATION:
+		return doc.get("second_organization")
+	primary = next((c.contact for c in doc.get("contacts") or [] if c.is_primary), None)
+	return primary or next((c.contact for c in doc.get("contacts") or []), None) or doc.get("contact")
+
+
 class MissingRequiredFieldsError(frappe.ValidationError):
 	pass
 
@@ -315,19 +344,21 @@ def setup_default_fields(pipeline: str):
 
 def sync_rules(pipeline_doc, stages: list[str]):
 	"""Keep exactly one rule per (used field, stage); new pairs start visible, optional, editable."""
-	used = [f.fieldname for f in pipeline_doc.fields]
-	existing = {(r.stage, r.fieldname): r for r in pipeline_doc.field_rules}
+	used = [(block_of(f), f.fieldname) for f in pipeline_doc.fields]
+	existing = {(r.stage, block_of(r), r.fieldname): r for r in pipeline_doc.field_rules}
 	rows = []
 	for stage in stages:
-		for fieldname in used:
-			rule = existing.get((stage, fieldname))
+		for block, fieldname in used:
+			rule = existing.get((stage, block, fieldname))
 			rows.append(
 				{
 					"stage": stage,
+					"block": block,
 					"fieldname": fieldname,
 					"visible": rule.visible if rule else 1,
 					"required": rule.required if rule else 0,
-					"read_only": rule.read_only if rule else 0,
+					# fields of the linked records are only shown or required on the card, never read only
+					"read_only": (rule.read_only if rule else 0) if block == CARD else 0,
 				}
 			)
 	pipeline_doc.set("field_rules", rows)
@@ -337,38 +368,72 @@ def validate_pipeline_fields(pipeline_doc):
 	"""New fields must come from the catalog. Fields already in the pipeline stay even if disabled
 	(values are kept); fields that no longer exist at all are dropped with their rules."""
 	before = pipeline_doc.get_doc_before_save()
-	already_used = {row.fieldname for row in before.fields} if before else set()
-	meta = frappe.get_meta(DEAL)
-	gone = {f for f in already_used if not meta.has_field(f)}
+	already_used = {(block_of(row), row.fieldname) for row in before.fields} if before else set()
+	gone = {(b, f) for b, f in already_used if not frappe.get_meta(BLOCK_DOCTYPES.get(b, DEAL)).has_field(f)}
 	if gone:
-		pipeline_doc.set("fields", [row for row in pipeline_doc.fields if row.fieldname not in gone])
-		pipeline_doc.set("field_rules", [r for r in pipeline_doc.field_rules if r.fieldname not in gone])
+		pipeline_doc.set("fields", [r for r in pipeline_doc.fields if (block_of(r), r.fieldname) not in gone])
+		pipeline_doc.set(
+			"field_rules", [r for r in pipeline_doc.field_rules if (block_of(r), r.fieldname) not in gone]
+		)
 
-	available = catalog_fieldnames() | (already_used - gone)
+	available = catalog_fieldnames() | {f for b, f in already_used - gone if b == CARD}
 	seen = set()
 	for row in pipeline_doc.fields:
+		block = block_of(row)
+		if block not in BLOCKS:
+			frappe.throw(_("Unknown block {0}.").format(frappe.bold(block)))
+		if block != CARD:
+			_validate_block_field(row, block)
+			if (block, row.fieldname) in seen:
+				frappe.throw(_("Field {0} was added twice.").format(frappe.bold(row.fieldname)))
+			seen.add((block, row.fieldname))
+			continue
 		if row.fieldname in LOCKED_FIELDS:
 			frappe.throw(
 				_("{0} is always shown and does not need to be added.").format(frappe.bold(row.fieldname))
 			)
 		if row.fieldname not in available:
 			frappe.throw(_("Field {0} is not in the field catalog.").format(frappe.bold(row.fieldname)))
-		if row.fieldname in seen:
+		if (CARD, row.fieldname) in seen:
 			frappe.throw(_("Field {0} was added twice.").format(frappe.bold(row.fieldname)))
-		seen.add(row.fieldname)
+		seen.add((CARD, row.fieldname))
 	for rule in pipeline_doc.field_rules:
 		if rule.required and not rule.visible:
 			frappe.throw(_("A required field must be visible ({0}).").format(frappe.bold(rule.fieldname)))
+		if rule.required and block_of(rule) != CARD:
+			from crm.fcrm.doctype.crm_pipeline.form_schema import can_require
+
+			doctype = BLOCK_DOCTYPES[block_of(rule)]
+			df = frappe.get_meta(doctype).get_field(rule.fieldname)
+			if df and not can_require(doctype, df):
+				frappe.throw(
+					_("{0} is filled in by the system and cannot be required.").format(frappe.bold(_(df.label)))
+				)
 
 
-def get_stage_rules(pipeline: str, stage: str) -> dict:
+def _validate_block_field(row, block: str):
+	"""A field of a linked record must be in that record's form and be one a person fills in."""
+	from crm.fcrm.doctype.crm_pipeline import form_schema
+
+	doctype = BLOCK_DOCTYPES[block]
+	field = next(
+		(f for f in form_schema.form_catalog(doctype) if f["fieldname"] == row.fieldname and not f["disabled"]),
+		None,
+	)
+	if not field or field["locked"]:
+		frappe.throw(_("Field {0} is not in the {1} form.").format(frappe.bold(row.fieldname), _(block)))
+
+
+def get_stage_rules(pipeline: str, stage: str, block: str = CARD) -> dict:
 	rules = frappe.get_all(
 		"CRM Pipeline Field Rule",
 		{"parenttype": "CRM Pipeline", "parent": pipeline, "stage": stage},
-		["fieldname", "visible", "required", "read_only"],
+		["block", "fieldname", "visible", "required", "read_only"],
 	)
 	return {
-		r.fieldname: {"visible": r.visible, "required": r.required, "read_only": r.read_only} for r in rules
+		r.fieldname: {"visible": r.visible, "required": r.required, "read_only": r.read_only}
+		for r in rules
+		if block_of(r) == block
 	}
 
 
@@ -381,19 +446,31 @@ def is_empty(df, value) -> bool:
 
 
 def get_missing_fields(doc, stage: str) -> list[dict]:
-	"""Required fields of `stage` that are empty on the card."""
+	"""Required fields of `stage` that are empty on the card and on the records linked to it (its
+	organization, second organization and primary contact; a block without a record is skipped)."""
 	missing = []
-	for fieldname, rule in get_stage_rules(doc.pipeline, stage).items():
-		df = doc.meta.get_field(fieldname)
-		if rule["required"] and df and is_empty(df, doc.get(fieldname)):
-			missing.append(
-				{
-					"fieldname": fieldname,
-					"label": _(df.label),
-					"fieldtype": df.fieldtype,
-					"options": df.options or "",
-				}
-			)
+	for block in BLOCKS:
+		rules = {f: r for f, r in get_stage_rules(doc.pipeline, stage, block).items() if r["required"]}
+		record = block_record(doc, block)
+		if not rules or not record:
+			continue
+		doctype = BLOCK_DOCTYPES[block]
+		meta = frappe.get_meta(doctype)
+		values = doc if block == CARD else frappe.db.get_value(doctype, record, list(rules), as_dict=True) or {}
+		for fieldname in rules:
+			df = meta.get_field(fieldname)
+			if df and is_empty(df, values.get(fieldname)):
+				missing.append(
+					{
+						"fieldname": fieldname,
+						"label": _(df.label),
+						"fieldtype": df.fieldtype,
+						"options": df.options or "",
+						"block": block,
+						"doctype": doctype,
+						"docname": record,
+					}
+				)
 	return missing
 
 

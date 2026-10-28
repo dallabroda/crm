@@ -6,6 +6,7 @@
  "engine": "InnoDB",
  "field_order": [
   "stage",
+  "block",
   "fieldname",
   "visible",
   "required",
@@ -19,6 +20,15 @@
    "label": "Stage",
    "options": "CRM Deal Status",
    "reqd": 1
+  },
+  {
+   "default": "Card",
+   "description": "Card fields, or fields of the card's organization, second organization or primary contact (credtech#196).",
+   "fieldname": "block",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Block",
+   "options": "Card\nOrganization\nSecond organization\nContact"
   },
   {
    "fieldname": "fieldname",
@@ -53,7 +63,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-10-24 22:00:00.000000",
+ "modified": "2026-10-28 22:00:00.000000",
  "modified_by": "Administrator",
  "module": "FCRM",
  "name": "CRM Pipeline Field Rule",
