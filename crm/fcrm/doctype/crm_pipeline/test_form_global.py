@@ -162,3 +162,18 @@ class TestGlobalForms(FrappeTestCase):
 		contact = get_fields("Contact")
 		self.assertEqual(contact["limit"], field_catalog.CREATED_FIELD_LIMIT)
 		self.assertIn(self.created, {f["fieldname"] for f in contact["fields"]})
+
+	def test_contact_email_and_phone_can_be_required(self):
+		# read-only in the doctype, but filled from the contact's e-mails and phones
+		save_form_config("Contact", [{"fieldname": "email_id", "required": 1}])
+		self.assertTrue(get_form_schema("Contact")["configured"])
+		frappe.local.form_dict.cmd = "frappe.client.insert"
+		with self.assertRaises(frappe.ValidationError):
+			frappe.get_doc({"doctype": "Contact", "first_name": "Sem Email Teste"}).insert()
+		frappe.get_doc(
+			{
+				"doctype": "Contact",
+				"first_name": "Com Email Teste",
+				"email_ids": [{"email_id": "com.email@example.test", "is_primary": 1}],
+			}
+		).insert()

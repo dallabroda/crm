@@ -37,7 +37,11 @@ def get_form_schema(doctype: str, pipeline: str | None = None, stage: str | None
 		rows = _global_rows(doctype)
 	meta = frappe.get_meta(doctype)
 	fields = [_field(doctype, meta, row) for row in rows]
-	return {"doctype": doctype, "pipeline": pipeline, "stage": stage, "fields": [f for f in fields if f]}
+	schema = {"doctype": doctype, "pipeline": pipeline, "stage": stage, "fields": [f for f in fields if f]}
+	if doctype != catalog.DEAL:
+		# until the company saves this form, its screens keep the side panel layout
+		schema["configured"] = frappe.db.exists(FORM_CONFIG, doctype) is not None
+	return schema
 
 
 def _locked_rows(doctype: str, meta) -> list[dict]:
@@ -110,6 +114,14 @@ NOT_IN_FORM = {
 	),
 }
 FORM_CONFIG = "CRM Form Config"
+# Read-only in the doctype but filled by the record from its tables (a contact's e-mails and phones), so the
+# person does fill them in: they can be required
+FILLED_FROM_TABLES = {"Contact": ("email_id", "phone", "mobile_no")}
+
+
+def can_require(doctype: str, df) -> bool:
+	"""Read-only fields are filled by the system: they can be shown, not required."""
+	return not df.read_only or df.fieldname in FILLED_FROM_TABLES.get(doctype, ())
 
 
 def form_catalog(doctype: str) -> list[dict]:
@@ -132,7 +144,7 @@ def form_catalog(doctype: str) -> list[dict]:
 			continue
 		info = catalog._field_info(df, not created)
 		info["locked"] = int(df.fieldname in locked)
-		info["can_require"] = int(not df.read_only)
+		info["can_require"] = int(can_require(doctype, df))
 		fields.append(info)
 	return fields
 
@@ -251,7 +263,12 @@ def validate_required(doc, method=None):
 	missing = []
 	for row in saved:
 		df = doc.meta.get_field(row.fieldname)
-		if not row.required or not df or df.read_only or not catalog.is_empty(df, doc.get(row.fieldname)):
+		if (
+			not row.required
+			or not df
+			or not can_require(doc.doctype, df)
+			or not catalog.is_empty(df, doc.get(row.fieldname))
+		):
 			continue
 		emptied = before is not None and not catalog.is_empty(df, before.get(row.fieldname))
 		if creating or emptied:
@@ -277,8 +294,7 @@ def _field(doctype: str, meta, row: dict) -> dict | None:
 			"locked": row["locked"],
 			"read_only_rule": row["read_only"],
 			"is_created": int(row["fieldname"].startswith(catalog.CREATED_PREFIX)),
-			# read-only fields are filled by the system: they can be shown, not required
-			"can_require": int(not df.read_only),
+			"can_require": int(can_require(doctype, df)),
 			"varies": row.get("varies") or {},
 		}
 	)
