@@ -143,6 +143,8 @@ import { computed, reactive, ref, watch } from 'vue'
 const show = defineModel({ type: Boolean, default: false })
 
 const props = defineProps({
+  // the form the field belongs to: CRM Deal, CRM Organization or Contact
+  doctype: { type: String, default: 'CRM Deal' },
   // a created field to edit; null = new field
   field: { type: Object, default: null },
   // funnels the new field can go to (the user manages them), with stages
@@ -201,9 +203,9 @@ const noRoomForType = computed(() => {
   if (!props.room || props.room[form.fieldtype] !== 0) return ''
   return ['Data', 'Select', 'Link'].includes(form.fieldtype)
     ? __(
-        'There is no room left for another text, list or link field in cards. Number, date and Yes/No fields take much less space and can still be created.',
+        'There is no room left for another text, list or link field in this form. Number, date and Yes/No fields take much less space and can still be created.',
       )
-    : __('There is no room left for another field of this type in cards.')
+    : __('There is no room left for another field of this type in this form.')
 })
 
 function togglePipeline(pipeline, checked) {
@@ -241,12 +243,14 @@ async function save() {
     let saved
     if (props.field) {
       saved = await call('crm.api.forms.update_field', {
+        doctype: props.doctype,
         fieldname: props.field.fieldname,
         label: form.label.trim(),
         options: form.fieldtype === 'Select' ? options : null,
       })
     } else {
       saved = await call('crm.api.forms.create_field', {
+        doctype: props.doctype,
         label: form.label.trim(),
         fieldtype: form.fieldtype,
         options,

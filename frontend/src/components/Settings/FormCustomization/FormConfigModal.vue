@@ -3,17 +3,21 @@
     <template #default>
       <div class="flex flex-col gap-3">
         <p class="text-p-base text-ink-gray-7">
-          {{ pipelineLabel }} · {{ stageLabel }}
+          {{ isCards ? `${pipelineLabel} · ${stageLabel}` : formLabel }}
         </p>
         <p class="text-p-sm text-ink-gray-5">
           {{
-            stage
+            !isCards
               ? __(
-                  'Visible, required and read only apply to this stage. The order belongs to the funnel: change it in All stages of the funnel.',
+                  'Drag to change the order. Hidden fields keep what was filled in; required fields are asked when someone creates the record.',
                 )
-              : __(
-                  'Drag to change the order. What you set here applies to every stage of the funnel.',
-                )
+              : stage
+                ? __(
+                    'Visible, required and read only apply to this stage. The order belongs to the funnel: change it in All stages of the funnel.',
+                  )
+                : __(
+                    'Drag to change the order. What you set here applies to every stage of the funnel.',
+                  )
           }}
         </p>
         <div
@@ -24,7 +28,9 @@
           <span class="flex-1">{{ __('Field') }}</span>
           <span class="w-20 text-center">{{ __('Visible') }}</span>
           <span class="w-20 text-center">{{ __('Required') }}</span>
-          <span class="w-20 text-center">{{ __('Read only') }}</span>
+          <span v-if="isCards" class="w-20 text-center">{{
+            __('Read only')
+          }}</span>
           <span class="w-7" />
         </div>
         <Draggable
@@ -66,7 +72,10 @@
                 </span>
               </div>
               <template v-if="row.locked">
-                <span class="w-64 shrink-0" />
+                <span
+                  class="shrink-0"
+                  :class="isCards ? 'w-64' : 'w-[10.5rem]'"
+                />
               </template>
               <template v-else>
                 <div class="flex w-20 justify-center">
@@ -82,11 +91,11 @@
                   <Checkbox
                     :aria-label="__('Required')"
                     :model-value="Boolean(row.required)"
-                    :disabled="!canManage"
+                    :disabled="!canManage || !row.can_require"
                     @update:model-value="(v) => setFlag(row, 'required', v)"
                   />
                 </div>
-                <div class="flex w-20 justify-center">
+                <div v-if="isCards" class="flex w-20 justify-center">
                   <Checkbox
                     :aria-label="__('Read only')"
                     :model-value="Boolean(row.read_only)"
@@ -97,7 +106,7 @@
               </template>
               <div class="w-7">
                 <Button
-                  v-if="!row.locked && !stage && canManage"
+                  v-if="isCards && !row.locked && !stage && canManage"
                   variant="ghost"
                   icon="lucide-x"
                   :tooltip="__('Remove from this funnel')"
@@ -108,7 +117,10 @@
             </div>
           </template>
         </Draggable>
-        <div v-if="!stage && canManage && freeFields.length" class="w-72">
+        <div
+          v-if="isCards && !stage && canManage && freeFields.length"
+          class="w-72"
+        >
           <FormControl
             type="select"
             :placeholder="__('Use another field')"
@@ -171,6 +183,9 @@ const show = defineModel({ type: Boolean, default: false })
 
 const props = defineProps({
   pipeline: { type: String, required: true },
+  // CRM Deal (per funnel and stage), CRM Organization or Contact (one form)
+  doctype: { type: String, default: 'CRM Deal' },
+  formLabel: { type: String, default: '' },
   pipelineLabel: { type: String, default: '' },
   // '' = all stages of the funnel (batch edit)
   stage: { type: String, default: '' },
@@ -183,6 +198,8 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['saved'])
+
+const isCards = computed(() => props.doctype === 'CRM Deal')
 
 const rows = ref([])
 const saving = ref(false)
@@ -227,7 +244,7 @@ function addField(fieldname) {
 async function save() {
   error.value = ''
   // fields that differ between stages become equal: say it before saving
-  let equalized = props.stage ? [] : equalizedRows(rows.value)
+  let equalized = props.stage || !isCards.value ? [] : equalizedRows(rows.value)
   if (equalized.length && !confirming.value) {
     confirming.value = equalized
     return
@@ -235,8 +252,8 @@ async function save() {
   saving.value = true
   try {
     let schema = await call('crm.api.forms.save_form_config', {
-      doctype: 'CRM Deal',
-      pipeline: props.pipeline,
+      doctype: props.doctype,
+      pipeline: props.pipeline || null,
       stage: props.stage || null,
       fields: configPayload(rows.value),
     })

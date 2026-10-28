@@ -11897,3 +11897,39 @@ msgstr "Prévia do formulário"
 #: frontend/src/components/Settings/Forms/FormsList.vue
 msgid "Lead capture forms"
 msgstr "Formulários de captura"
+
+#: frontend/src/components/Settings/FormCustomization/FieldDialog.vue
+msgid "There is no room left for another text, list or link field in this form. Number, date and Yes/No fields take much less space and can still be created."
+msgstr "Não há mais espaço para outro campo de texto, lista ou vínculo neste formulário. Campos de número, data e sim/não ocupam bem menos espaço e ainda podem ser criados."
+
+#: frontend/src/components/Settings/FormCustomization/FieldDialog.vue
+msgid "There is no room left for another field of this type in this form."
+msgstr "Não há mais espaço para outro campo deste tipo neste formulário."
+
+#: frontend/src/components/Settings/FormCustomization/FormConfigModal.vue
+msgid "Drag to change the order. Hidden fields keep what was filled in; required fields are asked when someone creates the record."
+msgstr "Arraste para mudar a ordem. Campos ocultos guardam o que já foi preenchido; os obrigatórios são pedidos quando alguém cria o registro."
+
+#: frontend/src/components/Settings/FormCustomization/FormCustomizationPage.vue
+msgid "One form for every organization of the company, including the Receita Federal data the CNPJ lookup fills in."
+msgstr "Um formulário para todas as organizações da empresa, inclusive os dados da Receita Federal que a consulta do CNPJ preenche."
+
+#: frontend/src/components/Settings/FormCustomization/FormCustomizationPage.vue
+msgid "One form for every contact of the company."
+msgstr "Um formulário para todos os contatos da empresa."
+
+#: frontend/src/components/Settings/FormCustomization/FormCustomizationPage.vue
+msgid "As the team sees an organization"
+msgstr "Como a equipe vê uma organização"
+
+#: frontend/src/components/Settings/FormCustomization/FormCustomizationPage.vue
+msgid "As the team sees a contact"
+msgstr "Como a equipe vê um contato"
+
+#: crm/fcrm/doctype/crm_pipeline/form_schema.py
+msgid "Field {0} is not in this form."
+msgstr "O campo {0} não faz parte deste formulário."
+
+#: crm/fcrm/doctype/crm_pipeline/form_schema.py
+msgid "{0} is filled in by the system and cannot be required."
+msgstr "{0} é preenchido pelo sistema e não pode ser obrigatório."
