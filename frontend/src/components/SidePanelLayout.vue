@@ -619,10 +619,13 @@ function parsedSection(section, editButtonAdded) {
   }
 
   let isContactSection = section.name == 'contacts_section'
+  // the funnel's section (credtech#179) is not in the layout: its pencil would
+  // edit something else, so the pencil goes to the next section
   section.showEditButton = !(
     isMobileView.value ||
     !isManager() ||
     isContactSection ||
+    section.notInLayout ||
     editButtonAdded
   )
 

@@ -11861,3 +11861,204 @@ msgstr "criar"
 
 msgid "Incoming contacts"
 msgstr "Contatos de entrada"
+
+#: frontend/src/pages/Deal.vue
+#: frontend/src/components/Modals/DealModal.vue
+msgid "Card fields"
+msgstr "Campos do card"
+
+#: crm/fcrm/doctype/crm_pipeline/form_schema.py
+msgid "Choose a pipeline."
+msgstr "Escolha um funil."
+
+#: crm/fcrm/doctype/crm_pipeline/fields.py
+msgid "Fields can only be created for cards, contacts and companies."
+msgstr "Só dá para criar campos em cards, contatos e empresas."
+
+#: crm/fcrm/doctype/crm_pipeline/fields.py
+msgid "There is no room left for another field of this type in {0}."
+msgstr "Não há mais espaço para outro campo deste tipo em {0}."
+
+#: frontend/src/components/Settings/FormCustomization/FieldDialog.vue
+msgid "Funnels where it shows up"
+msgstr "Funis onde aparece"
+
+#: frontend/src/components/Settings/FormCustomization/FieldDialog.vue
+msgid "All stages"
+msgstr "Todas as etapas"
+
+#: frontend/src/components/Settings/FormCustomization/FieldDialog.vue
+msgid "Only these stages:"
+msgstr "Só estas etapas:"
+
+#: frontend/src/components/Settings/FormCustomization/FieldDialog.vue
+msgid "Required in these stages"
+msgstr "Obrigatório nessas etapas"
+
+#: frontend/src/components/Settings/FormCustomization/FieldDialog.vue
+msgid "Without a funnel the field is created but no card shows it until a funnel uses it."
+msgstr "Sem funil, o campo é criado, mas nenhum card o mostra até um funil usá-lo."
+
+#: frontend/src/components/Settings/FormCustomization/FieldDialog.vue
+msgid "Choose at least one stage in each funnel."
+msgstr "Escolha pelo menos uma etapa em cada funil."
+
+#: frontend/src/components/Settings/FormCustomization/FormConfigModal.vue
+#: frontend/src/components/Settings/FormCustomization/FormCustomizationPage.vue
+msgid "Configure form"
+msgstr "Configurar formulário"
+
+#: frontend/src/components/Settings/FormCustomization/FormConfigModal.vue
+msgid "Visible, required and read only apply to this stage. The order belongs to the funnel: change it in All stages of the funnel."
+msgstr "Visível, obrigatório e só leitura valem para esta etapa. A ordem é do funil: mude-a em Todas as etapas do funil."
+
+#: frontend/src/components/Settings/FormCustomization/FormConfigModal.vue
+msgid "Drag to change the order. What you set here applies to every stage of the funnel."
+msgstr "Arraste para mudar a ordem. O que você marcar aqui vale para todas as etapas do funil."
+
+#: frontend/src/components/Settings/FormCustomization/FormConfigModal.vue
+#: frontend/src/components/Settings/FormCustomization/FormPreview.vue
+msgid "Always shown"
+msgstr "Sempre aparece"
+
+#: frontend/src/components/Settings/FormCustomization/FormConfigModal.vue
+msgid "Varies by stage: {0}"
+msgstr "Varia por etapa: {0}"
+
+#: frontend/src/components/Settings/FormCustomization/FormConfigModal.vue
+msgid "Remove from this funnel"
+msgstr "Tirar deste funil"
+
+#: frontend/src/components/Settings/FormCustomization/FormConfigModal.vue
+msgid "Use another field"
+msgstr "Usar outro campo"
+
+#: frontend/src/components/Settings/FormCustomization/FormConfigModal.vue
+msgid "These fields are different in each stage today and will be the same in every stage: {0}."
+msgstr "Estes campos hoje são diferentes em cada etapa e vão ficar iguais em todas: {0}."
+
+#: frontend/src/components/Settings/FormCustomization/FormConfigModal.vue
+msgid "Confirm and save"
+msgstr "Confirmar e salvar"
+
+#: frontend/src/components/Settings/FormCustomization/FormConfigModal.vue
+msgid "Could not save the form"
+msgstr "Não foi possível salvar o formulário"
+
+#: frontend/src/components/Settings/Settings.vue
+#: frontend/src/components/Settings/FormCustomization/FormCustomizationPage.vue
+msgid "Form customization"
+msgstr "Personalização de formulários"
+
+#: frontend/src/components/Settings/FormCustomization/FormCustomizationPage.vue
+msgid "Which fields each form shows, in which order and which are required. Hiding a field never deletes what was filled in."
+msgstr "Quais campos cada formulário mostra, em que ordem e quais são obrigatórios. Ocultar um campo nunca apaga o que já foi preenchido."
+
+#: frontend/src/components/Settings/FormCustomization/FormCustomizationPage.vue
+msgid "Created fields"
+msgstr "Campos criados"
+
+#: frontend/src/components/Settings/FormCustomization/FormCustomizationPage.vue
+msgid "You do not take part in any funnel yet."
+msgstr "Você ainda não participa de nenhum funil."
+
+#: frontend/src/components/Settings/FormCustomization/FormCustomizationPage.vue
+msgid "As the salesperson sees the card"
+msgstr "Como o vendedor vê o card"
+
+#: frontend/src/components/Settings/FormCustomization/FormCustomizationPage.vue
+msgid "No field was created yet."
+msgstr "Nenhum campo foi criado ainda."
+
+#: frontend/src/components/Settings/FormCustomization/FormCustomizationPage.vue
+msgid "All stages of the funnel"
+msgstr "Todas as etapas do funil"
+
+#: frontend/src/components/Settings/FormCustomization/FormCustomizationPage.vue
+msgid "Could not load the form"
+msgstr "Não foi possível carregar o formulário"
+
+#: frontend/src/components/Settings/FormCustomization/FormCustomizationPage.vue
+msgid "Form saved"
+msgstr "Formulário salvo"
+
+#: frontend/src/components/Settings/FormCustomization/FormPreview.vue
+msgid "Varies by stage"
+msgstr "Varia por etapa"
+
+#: frontend/src/components/Settings/FormCustomization/FormPreview.vue
+msgid "1 field of the funnel is hidden here."
+msgstr "1 campo do funil está oculto aqui."
+
+#: frontend/src/components/Settings/FormCustomization/FormPreview.vue
+msgid "{0} fields of the funnel are hidden here."
+msgstr "{0} campos do funil estão ocultos aqui."
+
+#: frontend/src/components/Settings/Pipelines/PipelineEditor.vue
+msgid "The fields of the cards of this funnel, their order and the rules of each stage are set in Settings › Form customization."
+msgstr "Os campos dos cards deste funil, a ordem e as regras de cada etapa ficam em Configurações › Personalização de formulários."
+
+#: crm/api/forms.py
+msgid "Contact and company forms can not be configured yet."
+msgstr "Os formulários de contatos e empresas ainda não podem ser configurados."
+
+#: crm/api/forms.py
+msgid "Field {0} appears more than once."
+msgstr "O campo {0} aparece mais de uma vez."
+
+#: crm/api/forms.py
+msgid "Stage {0} is not in this pipeline."
+msgstr "A etapa {0} não é deste funil."
+
+#: crm/api/forms.py
+msgid "Only card fields go into funnels."
+msgstr "Só campos de cards entram em funis."
+
+#: crm/api/forms.py
+msgid "Choose stages of the pipeline {0}."
+msgstr "Escolha etapas do funil {0}."
+
+#: frontend/src/components/Settings/FormCustomization/FormCustomizationPage.vue
+msgid "Form preview"
+msgstr "Prévia do formulário"
+
+#: frontend/src/components/Settings/Settings.vue
+#: frontend/src/components/Settings/Forms/FormsList.vue
+msgid "Lead capture forms"
+msgstr "Formulários de captura"
+
+#: frontend/src/components/Settings/FormCustomization/FieldDialog.vue
+msgid "There is no room left for another text, list or link field in this form. Number, date and Yes/No fields take much less space and can still be created."
+msgstr "Não há mais espaço para outro campo de texto, lista ou vínculo neste formulário. Campos de número, data e sim/não ocupam bem menos espaço e ainda podem ser criados."
+
+#: frontend/src/components/Settings/FormCustomization/FieldDialog.vue
+msgid "There is no room left for another field of this type in this form."
+msgstr "Não há mais espaço para outro campo deste tipo neste formulário."
+
+#: frontend/src/components/Settings/FormCustomization/FormConfigModal.vue
+msgid "Drag to change the order. Hidden fields keep what was filled in; required fields are asked when someone creates the record."
+msgstr "Arraste para mudar a ordem. Campos ocultos guardam o que já foi preenchido; os obrigatórios são pedidos quando alguém cria o registro."
+
+#: frontend/src/components/Settings/FormCustomization/FormCustomizationPage.vue
+msgid "One form for every organization of the company, including the Receita Federal data the CNPJ lookup fills in."
+msgstr "Um formulário para todas as organizações da empresa, inclusive os dados da Receita Federal que a consulta do CNPJ preenche."
+
+#: frontend/src/components/Settings/FormCustomization/FormCustomizationPage.vue
+msgid "One form for every contact of the company."
+msgstr "Um formulário para todos os contatos da empresa."
+
+#: frontend/src/components/Settings/FormCustomization/FormCustomizationPage.vue
+msgid "As the team sees an organization"
+msgstr "Como a equipe vê uma organização"
+
+#: frontend/src/components/Settings/FormCustomization/FormCustomizationPage.vue
+msgid "As the team sees a contact"
+msgstr "Como a equipe vê um contato"
+
+#: crm/fcrm/doctype/crm_pipeline/form_schema.py
+msgid "Field {0} is not in this form."
+msgstr "O campo {0} não faz parte deste formulário."
+
+#: crm/fcrm/doctype/crm_pipeline/form_schema.py
+msgid "{0} is filled in by the system and cannot be required."
+msgstr "{0} é preenchido pelo sistema e não pode ser obrigatório."

@@ -118,3 +118,41 @@ function applyRule(field, rules) {
     read_only: rule.read_only ? 1 : field.read_only,
   }
 }
+
+// Dynamic forms (credtech#178): the card form comes from the funnel schema
+// (crm.api.forms.get_form_schema), in the funnel order and with the stage
+// rules already applied. funnelSection builds the side panel section with the
+// visible fields (locked ones live in their own places); withoutFields takes
+// fieldnames out of the layout sections, so a field is not shown twice, and
+// drops sections left empty.
+export function funnelSection(schemaFields, label) {
+  let fields = (schemaFields || []).filter((f) => f.visible && !f.locked)
+  if (!fields.length) return null
+  return {
+    name: 'funnel_fields',
+    label,
+    opened: true,
+    notInLayout: true,
+    columns: [{ name: 'funnel_fields_column', fields }],
+  }
+}
+
+export function withoutFields(sections, names) {
+  let drop = new Set(names || [])
+  if (!drop.size) return sections || []
+  return (sections || [])
+    .map((section) => {
+      if (!section.columns) return section
+      let columns = section.columns.map((column) => ({
+        ...column,
+        fields: (column.fields || []).filter(
+          (field) =>
+            !drop.has(typeof field === 'string' ? field : field?.fieldname),
+        ),
+      }))
+      let hadFields = section.columns.some((c) => (c.fields || []).length)
+      let hasFields = columns.some((c) => c.fields.length)
+      return hadFields && !hasFields ? null : { ...section, columns }
+    })
+    .filter(Boolean)
+}
