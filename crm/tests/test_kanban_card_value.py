@@ -59,5 +59,5 @@ class TestDashboardLabels(FrappeTestCase):
 		finally:
 			frappe.local.lang = "en"
 			frappe.local.lang_full_dict = None
-		self.assertEqual(labels, ["Leads", "Cards", "Cards ganhos"])
+		self.assertEqual(labels, ["Contatos", "Cards", "Cards ganhos"])
 		self.assertEqual(suffix, " dias")
