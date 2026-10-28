@@ -16,6 +16,7 @@
       <MetaLeadsSource @changed="activity?.load()" />
       <WebhookSources @changed="activity?.load()" />
       <ChatConnection />
+      <EmailCompanySetting />
       <LeadActivity ref="activity" />
     </div>
   </div>
@@ -28,6 +29,7 @@
 import MetaLeadsSource from './MetaLeadsSource.vue'
 import WebhookSources from './WebhookSources.vue'
 import ChatConnection from './ChatConnection.vue'
+import EmailCompanySetting from './EmailCompanySetting.vue'
 import LeadActivity from './LeadActivity.vue'
 import { ref } from 'vue'
 

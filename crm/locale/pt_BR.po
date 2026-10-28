@@ -12293,3 +12293,21 @@ msgstr "WhatsApp enviado"
 
 msgid "Could not send the message"
 msgstr "Não foi possível enviar a mensagem"
+
+msgid "Find the company from the lead's e-mail"
+msgstr "Descobrir a empresa pelo e-mail do lead"
+
+msgid "With a company e-mail (not Gmail, Hotmail...), HubTech looks up who owns the domain at Registro.br and checks the CNPJ at the Receita. Sure match: the card gets the organization. Probable match: the card shows it for you to confirm."
+msgstr "Com e-mail de empresa (não Gmail, Hotmail...), o HubTech consulta o dono do domínio no Registro.br e confere o CNPJ na Receita. Certeza: o card ganha a organização. Provável: o card mostra para você confirmar."
+
+msgid "Could not save the setting"
+msgstr "Não foi possível salvar a configuração"
+
+msgid "Probable company"
+msgstr "Empresa provável"
+
+msgid "{0} (CNPJ {1}), from the e-mail domain {2}."
+msgstr "{0} (CNPJ {1}), pelo domínio do e-mail {2}."
+
+msgid "Dismiss"
+msgstr "Descartar"
