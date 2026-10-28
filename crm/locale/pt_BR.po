@@ -12311,3 +12311,27 @@ msgstr "{0} (CNPJ {1}), pelo domínio do e-mail {2}."
 
 msgid "Dismiss"
 msgstr "Descartar"
+
+msgid "Card"
+msgstr "Card"
+
+msgid "Fields of"
+msgstr "Campos de"
+
+msgid "No field of the {0} on the card yet. Use Configure form to choose them."
+msgstr "Nenhum campo de {0} no card ainda. Use Configurar formulário para escolher."
+
+msgid "These fields belong to the {0} linked to the card: what is filled in on the card is saved there. Required ones are asked when the card moves to the stage."
+msgstr "Estes campos ficam no cadastro de {0} ligado ao card: o que for preenchido no card é salvo lá. Os obrigatórios são pedidos quando o card entra na etapa."
+
+msgid "Unknown block {0}."
+msgstr "Bloco desconhecido: {0}."
+
+msgid "Field {0} is not in the {1} form."
+msgstr "O campo {0} não está no formulário de {1}."
+
+msgid "Could not move the card"
+msgstr "Não foi possível mover o card"
+
+msgid "Block"
+msgstr "Bloco"

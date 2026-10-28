@@ -311,6 +311,16 @@
             />
           </template>
         </SidePanelLayout>
+        <!-- fields of the organization, second organization and contact that
+             the stage shows, saved on those records (credtech#196) -->
+        <SidePanelLayout
+          v-for="b in cardBlocks.data || []"
+          :key="`${b.block}:${b.docname}`"
+          :sections="blockSections(b)"
+          :doctype="b.doctype"
+          :docname="b.docname"
+          @afterFieldChange="cardBlocks.reload()"
+        />
       </div>
     </Resizer>
   </div>
@@ -1047,6 +1057,35 @@ function reloadActivities() {
   activities.value?.all_activities?.reload()
 }
 
+// Blocks of the stage (credtech#196): the organization's, second
+// organization's and primary contact's fields the funnel shows on the card
+const cardBlocks = createResource({
+  url: 'crm.api.forms.get_card_blocks',
+  makeParams: () => ({ deal: props.dealId }),
+  auto: true,
+})
+watch(
+  () =>
+    [
+      doc.value?.status,
+      doc.value?.organization,
+      doc.value?.second_organization,
+      (dealContacts.data || []).map((c) => `${c.name}:${c.is_primary}`),
+    ].join('|'),
+  () => cardBlocks.reload(),
+)
+
+function blockSections(b) {
+  return [
+    {
+      name: `card_block_${b.block}`,
+      label: b.label,
+      opened: true,
+      columns: [{ name: `card_block_${b.block}_column`, fields: b.fields }],
+    },
+  ]
+}
+
 // the probable company from the e-mail was confirmed or dismissed (credtech#187)
 function onProbableCompany() {
   document.reload()
@@ -1273,8 +1312,27 @@ const stopMissingFields = onMissingRequiredFields(
 )
 onBeforeUnmount(stopMissingFields)
 
-function saveMissingFields(values) {
+async function saveMissingFields(values) {
   missingFields.value = null
+  if (
+    ['organization', 'second_organization', 'contact'].some((k) => k in values)
+  ) {
+    // fields of the linked records are saved on them, with the move (credtech#196)
+    try {
+      await call('crm.api.pipeline.move_card', {
+        deal: props.dealId,
+        stage: document.doc.status,
+        values,
+      })
+      document.reload()
+      reloadResources({ status: document.doc.status })
+      cardBlocks.reload()
+    } catch (e) {
+      toast.error(e?.messages?.[0] || __('Could not move the card'))
+      document.reload()
+    }
+    return
+  }
   Object.assign(document.doc, values)
   document.save.submit(null, {
     onSuccess: () => reloadResources({ status: document.doc.status }),

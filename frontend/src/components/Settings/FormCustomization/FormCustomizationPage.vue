@@ -81,6 +81,15 @@
               @update:model-value="(v) => (stage = v)"
             />
           </div>
+          <div v-if="isCards" class="w-56" data-testid="form-block">
+            <FormControl
+              type="select"
+              :label="__('Fields of')"
+              :options="blockOptions"
+              :model-value="block"
+              @update:model-value="(v) => (block = v)"
+            />
+          </div>
           <div class="flex flex-1 items-center justify-end gap-2">
             <Badge
               v-if="(pipeline || !isCards) && !canManage"
@@ -111,6 +120,17 @@
             <LoadingIndicator class="w-4" />
           </div>
           <ErrorMessage v-else-if="schemaError" :message="schemaError" />
+          <p
+            v-else-if="isBlock && !schema?.fields?.length"
+            class="text-p-base text-ink-gray-5"
+          >
+            {{
+              __(
+                'No field of the {0} on the card yet. Use Configure form to choose them.',
+                [blockLabel],
+              )
+            }}
+          </p>
           <FormPreview
             v-else
             :fields="schema?.fields || []"
@@ -130,8 +150,10 @@
     :pipeline-label="currentPipeline ? __(currentPipeline.pipeline_name) : ''"
     :stage="isCards ? stage : ''"
     :stage-label="stageLabel"
+    :block="isCards ? block : 'Card'"
+    :block-label="blockLabel"
     :fields="schema.fields"
-    :catalog="catalog.fields"
+    :catalog="isBlock ? blockCatalog.fields : catalog.fields"
     :can-manage="canManage"
     @saved="onConfigSaved"
   />
@@ -239,6 +261,24 @@ const previewHint = computed(() =>
 )
 
 const loading = ref(true)
+// cards: the card's own fields or those of its organization, second
+// organization or primary contact that the stage shows (credtech#196)
+const block = ref('Card')
+const isBlock = computed(() => isCards.value && block.value !== 'Card')
+const blockCatalog = ref({ fields: [] })
+const blockOptions = computed(() =>
+  (
+    schema.value?.blocks || [
+      { block: 'Card', label: __('Card') },
+      { block: 'Organization', label: __('Organization') },
+      { block: 'Second organization', label: __('Second organization') },
+      { block: 'Contact', label: __('Contact') },
+    ]
+  ).map((b) => ({ label: b.label, value: b.block })),
+)
+const blockLabel = computed(
+  () => blockOptions.value.find((o) => o.value === block.value)?.label || '',
+)
 const pipeline = ref('')
 // '' = all stages of the funnel
 const stage = ref('')
@@ -315,6 +355,7 @@ async function loadSchema() {
             doctype: doctype.value,
             pipeline: pipeline.value,
             stage: stage.value || null,
+            block: block.value,
           }
         : { doctype: doctype.value },
     )
@@ -333,8 +374,30 @@ watch(pipeline, () => {
   loadSchema()
 })
 watch(stage, loadSchema)
+watch(block, () => {
+  loadSchema()
+  loadBlockCatalog()
+})
+
+const BLOCK_DOCTYPES = {
+  Organization: 'CRM Organization',
+  'Second organization': 'CRM Organization',
+  Contact: 'Contact',
+}
+
+async function loadBlockCatalog() {
+  if (!isBlock.value) return
+  try {
+    blockCatalog.value = (await call('crm.api.forms.get_fields', {
+      doctype: BLOCK_DOCTYPES[block.value],
+    })) || { fields: [] }
+  } catch (e) {
+    toast.error(e?.messages?.[0] || __('Could not load the fields'))
+  }
+}
 watch(tab, () => {
   schema.value = null
+  block.value = 'Card'
   Promise.all([loadCatalog(), loadSchema()])
 })
 

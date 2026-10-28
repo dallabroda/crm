@@ -27,25 +27,44 @@ LOCKED_FIELDS = {
 RULE_FLAGS = ("visible", "required", "read_only")
 
 
-def get_form_schema(doctype: str, pipeline: str | None = None, stage: str | None = None) -> dict:
+def get_form_schema(
+	doctype: str, pipeline: str | None = None, stage: str | None = None, block: str | None = None
+) -> dict:
+	"""Cards also take a block (credtech#196): the card's own fields (default) or the fields of its organization,
+	second organization or primary contact that the funnel shows on the card, stage by stage."""
 	doctype = catalog._form_doctype(doctype)
+	block = block or catalog.CARD
 	if doctype == catalog.DEAL:
 		if not pipeline:
 			frappe.throw(_("Choose a pipeline."))
-		rows = _card_rows(pipeline, stage)
+		if block not in catalog.BLOCKS:
+			frappe.throw(_("Unknown block {0}.").format(frappe.bold(block)))
+		rows = _card_rows(pipeline, stage, block)
 	else:
 		rows = _global_rows(doctype)
-	meta = frappe.get_meta(doctype)
-	fields = [_field(doctype, meta, row) for row in rows]
+	fields_doctype = catalog.BLOCK_DOCTYPES[block] if doctype == catalog.DEAL else doctype
+	meta = frappe.get_meta(fields_doctype)
+	fields = [_field(fields_doctype, meta, row) for row in rows]
 	schema = {"doctype": doctype, "pipeline": pipeline, "stage": stage, "fields": [f for f in fields if f]}
 	if doctype == catalog.DEAL:
 		# the funnel may name the card's second organization (e.g. "Debtor", credtech#195)
 		from crm.api.card_contacts import second_organization_label
 
-		schema["second_organization_label"] = second_organization_label(pipeline)
+		label = second_organization_label(pipeline)
+		schema["second_organization_label"] = label
+		schema["block"] = block
+		schema["block_doctype"] = fields_doctype
+		schema["blocks"] = [
+			{
+				"block": b,
+				"doctype": catalog.BLOCK_DOCTYPES[b],
+				"label": label if b == catalog.SECOND_ORGANIZATION else _(b),
+			}
+			for b in catalog.BLOCKS
+		]
 		for field in schema["fields"]:
-			if field["fieldname"] == "second_organization":
-				field["label"] = schema["second_organization_label"]
+			if block == catalog.CARD and field["fieldname"] == "second_organization":
+				field["label"] = label
 	if doctype != catalog.DEAL:
 		# until the company saves this form, its screens keep the side panel layout
 		schema["configured"] = frappe.db.exists(FORM_CONFIG, doctype) is not None
@@ -69,18 +88,19 @@ def _locked_rows(doctype: str, meta) -> list[dict]:
 	return rows
 
 
-def _card_rows(pipeline: str, stage: str | None) -> list[dict]:
+def _card_rows(pipeline: str, stage: str | None, block: str = catalog.CARD) -> list[dict]:
 	doc = frappe.get_doc("CRM Pipeline", pipeline)
-	meta = frappe.get_meta(catalog.DEAL)
+	meta = frappe.get_meta(catalog.BLOCK_DOCTYPES[block])
 	if stage:
 		stages = [stage]
 	else:
 		stages = frappe.get_all(
 			"CRM Deal Status", {"pipeline": pipeline}, pluck="name", order_by="position asc, creation asc"
 		)
-	rules = {(r.stage, r.fieldname): r for r in doc.field_rules}
-	rows = _locked_rows(catalog.DEAL, meta)
-	for field in sorted(doc.fields, key=lambda f: (f.position or 0, f.idx)):
+	rules = {(r.stage, r.fieldname): r for r in doc.field_rules if catalog.block_of(r) == block}
+	rows = _locked_rows(catalog.DEAL, meta) if block == catalog.CARD else []
+	used = [f for f in doc.fields if catalog.block_of(f) == block]
+	for field in sorted(used, key=lambda f: (f.position or 0, f.idx)):
 		df = meta.get_field(field.fieldname)
 		# a created field that was disabled keeps its values but is no longer shown
 		if not df or (field.fieldname.startswith(catalog.CREATED_PREFIX) and df.hidden):

@@ -31,25 +31,34 @@ def _json(value):
 
 
 @frappe.whitelist()
-def get_form_schema(doctype: str, pipeline: str | None = None, stage: str | None = None) -> dict:
-	"""Fields of the form in order, each with visible, required, read only and locked for the context."""
+def get_form_schema(
+	doctype: str, pipeline: str | None = None, stage: str | None = None, block: str | None = None
+) -> dict:
+	"""Fields of the form in order, each with visible, required, read only and locked for the context. Cards
+	take a block: Card (default), Organization, Second organization or Contact (credtech#196)."""
 	if not frappe.has_permission(doctype, "read"):
 		frappe.throw(_("Not permitted"), frappe.PermissionError)
 	if doctype == catalog.DEAL and pipeline:
 		_assert_can_view(pipeline)
-	return form_schema.get_form_schema(doctype, pipeline, stage)
+	return form_schema.get_form_schema(doctype, pipeline, stage, block)
 
 
 @frappe.whitelist()
 def save_form_config(
-	doctype: str, fields: str | list, pipeline: str | None = None, stage: str | None = None
+	doctype: str,
+	fields: str | list,
+	pipeline: str | None = None,
+	stage: str | None = None,
+	block: str | None = None,
 ) -> dict:
 	"""Save the form of a context and answer with its new schema.
 
 	fields: [{fieldname, visible, required, read_only}] in the form's order. Locked fields are always
 	shown and are ignored here. Cards: the list and the order become the funnel's; the flags go to
 	`stage`, or to every stage when there is none. A flag left out or None keeps each stage's own value
-	(what the screen shows as "varies by stage").
+	(what the screen shows as "varies by stage"). `block` picks which part of the card form is saved (credtech#196):
+	the card's own fields (default) or those of its organization, second organization or contact; the other
+	blocks are kept as they are. Fields of linked records are never read only on the card.
 	"""
 	doctype = catalog._form_doctype(doctype)
 	if doctype != catalog.DEAL:
@@ -60,7 +69,10 @@ def save_form_config(
 		frappe.throw(_("Choose a pipeline."))
 	_assert_can_manage(pipeline)
 
-	locked = set(form_schema.LOCKED_FIELDS[catalog.DEAL])
+	block = block or catalog.CARD
+	if block not in catalog.BLOCKS:
+		frappe.throw(_("Unknown block {0}.").format(frappe.bold(block)))
+	locked = set(form_schema.LOCKED_FIELDS[catalog.DEAL]) if block == catalog.CARD else set()
 	rows = [frappe._dict(r) for r in _json(fields) or [] if r.get("fieldname") not in locked]
 	fieldnames = [r.fieldname for r in rows]
 	repeated = {f for f in fieldnames if fieldnames.count(f) > 1}
@@ -74,16 +86,54 @@ def save_form_config(
 	field_rules = []
 	for row in rows:
 		flags = {flag: frappe.utils.cint(row[flag]) for flag in RULE_FLAGS if row.get(flag) is not None}
+		if block != catalog.CARD:
+			flags.pop("read_only", None)
 		# required implies visible; a hidden field is neither required nor read only
 		if flags.get("required") or flags.get("read_only"):
 			flags["visible"] = 1
 		if flags.get("visible") == 0:
 			flags.update(required=0, read_only=0)
 		for name in [stage] if stage else stages:
-			field_rules.append({"stage": name, "fieldname": row.fieldname, **flags})
+			field_rules.append({"stage": name, "block": block, "fieldname": row.fieldname, **flags})
 
-	save_pipeline({"name": pipeline, "fields": fieldnames, "field_rules": field_rules})
-	return form_schema.get_form_schema(doctype, pipeline, stage)
+	# the other blocks keep their fields; the card's come first, then each block in order
+	current = frappe.get_doc("CRM Pipeline", pipeline).fields
+	used = []
+	for name in catalog.BLOCKS:
+		if name == block:
+			used += [{"block": block, "fieldname": f} for f in fieldnames]
+		else:
+			used += [
+				{"block": name, "fieldname": f.fieldname}
+				for f in sorted(current, key=lambda f: (f.position or 0, f.idx))
+				if catalog.block_of(f) == name
+			]
+	save_pipeline({"name": pipeline, "fields": used, "field_rules": field_rules})
+	return form_schema.get_form_schema(doctype, pipeline, stage, block)
+
+
+@frappe.whitelist()
+def get_card_blocks(deal: str) -> list[dict]:
+	"""Fields of the card's organization, second organization and primary contact that its current stage shows
+	(credtech#196), each block with the record it edits. Blocks without a record or without visible fields are
+	left out."""
+	doc = frappe.get_doc(catalog.DEAL, deal)
+	doc.check_permission("read")
+	if not doc.pipeline:
+		return []
+	blocks = []
+	for block in catalog.BLOCKS:
+		record = catalog.block_record(doc, block) if block != catalog.CARD else None
+		if not record:
+			continue
+		schema = form_schema.get_form_schema(catalog.DEAL, doc.pipeline, doc.status, block)
+		fields = [f for f in schema["fields"] if f.get("visible")]
+		if fields:
+			label = next(b["label"] for b in schema["blocks"] if b["block"] == block)
+			blocks.append(
+				{"block": block, "label": label, "doctype": schema["block_doctype"], "docname": record, "fields": fields}
+			)
+	return blocks
 
 
 @frappe.whitelist()
@@ -131,13 +181,16 @@ def create_field(
 
 def _put_in_pipeline(fieldname: str, pipeline: str, stages: list[str] | None, required: bool):
 	doc = frappe.get_doc("CRM Pipeline", pipeline)
-	used = [f.fieldname for f in sorted(doc.fields, key=lambda f: (f.position or 0, f.idx))]
+	used = [
+		{"block": catalog.block_of(f), "fieldname": f.fieldname}
+		for f in sorted(doc.fields, key=lambda f: (f.position or 0, f.idx))
+	]
 	all_stages = [s.name for s in _stages(pipeline)]
 	shown = set(stages or all_stages)
 	save_pipeline(
 		{
 			"name": pipeline,
-			"fields": [*used, fieldname],
+			"fields": [*used, {"block": catalog.CARD, "fieldname": fieldname}],
 			"field_rules": [
 				{
 					"stage": stage,
