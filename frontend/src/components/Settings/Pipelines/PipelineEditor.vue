@@ -197,102 +197,15 @@
         :user-name="userName"
       />
 
-      <!-- Fields and per-stage rules -->
-      <section class="flex flex-col gap-2">
-        <div class="flex items-center justify-between">
-          <h3 class="text-lg-semibold text-ink-gray-8">
-            {{ __('Fields and rules by stage') }}
-          </h3>
-          <div v-if="canManage && fieldOptions.length" class="w-64">
-            <FormControl
-              type="select"
-              :placeholder="__('Add field')"
-              :options="fieldOptions"
-              :model-value="null"
-              @update:model-value="addField"
-            />
-          </div>
-        </div>
-        <p class="text-p-sm text-ink-gray-5">
-          {{
-            __(
-              'For each stage: Visible, Required to enter the stage, Read only. Funnel, stage and owner are always visible.',
-            )
-          }}
-        </p>
-        <div v-if="form.fields.length" class="overflow-x-auto rounded-4 border">
-          <table class="w-full text-sm">
-            <thead>
-              <tr class="bg-surface-gray-2 text-ink-gray-6">
-                <th class="sticky left-0 bg-surface-gray-2 p-2 text-left">
-                  {{ __('Field') }}
-                </th>
-                <th
-                  v-for="stage in form.stages"
-                  :key="stage._key"
-                  class="min-w-28 p-2 text-center font-normal"
-                >
-                  {{ __(stage.deal_status) || __('New stage') }}
-                </th>
-                <th v-if="canManage" />
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                v-for="(field, index) in form.fields"
-                :key="field.fieldname"
-                class="border-t"
-                :data-field="field.fieldname"
-              >
-                <td
-                  class="sticky left-0 bg-surface-elevation-2 p-2 text-ink-gray-8"
-                >
-                  {{
-                    __(catalogField(field.fieldname)?.label || field.fieldname)
-                  }}
-                </td>
-                <td
-                  v-for="stage in form.stages"
-                  :key="stage._key"
-                  class="p-2 text-center"
-                >
-                  <div class="inline-flex gap-1">
-                    <RuleToggle
-                      v-for="flag in ruleFlags"
-                      :key="flag.key"
-                      :label="flag.short"
-                      :tooltip="flag.label"
-                      :active="Boolean(rule(field.fieldname, stage)[flag.key])"
-                      :disabled="
-                        !canManage ||
-                        (flag.key !== 'visible' &&
-                          !rule(field.fieldname, stage).visible)
-                      "
-                      @toggle="toggleRule(field.fieldname, stage, flag.key)"
-                    />
-                  </div>
-                </td>
-                <td v-if="canManage" class="p-2 text-right">
-                  <Button
-                    variant="ghost"
-                    icon="lucide-x"
-                    :tooltip="__('Remove field from funnel')"
-                    :aria-label="__('Remove field from funnel')"
-                    @click="removeField(index)"
-                  />
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <div v-else class="text-p-base text-ink-gray-5">
-          {{
-            __(
-              'No fields chosen: every field of the card is shown in every stage.',
-            )
-          }}
-        </div>
-      </section>
+      <!-- The card fields, their order and rules by stage moved to Form
+           customization (credtech#180) -->
+      <p class="text-p-sm text-ink-gray-5" data-testid="fields-moved">
+        {{
+          __(
+            'The fields of the cards of this funnel, their order and the rules of each stage are set in Settings › Form customization.',
+          )
+        }}
+      </p>
     </div>
   </div>
 </template>
@@ -300,12 +213,10 @@
 <script setup>
 import IndicatorIcon from '@/components/Icons/IndicatorIcon.vue'
 import UserAvatar from '@/components/UserAvatar.vue'
-import RuleToggle from './RuleToggle.vue'
 import PipelineDistribution from './PipelineDistribution.vue'
 import { pipelinesStore } from '@/stores/pipelines'
 import { getMeta } from '@/stores/meta'
 import { colors, parseColor } from '@/utils'
-import { LOCKED_FIELDS } from '@/utils/pipelines'
 import Draggable from 'vuedraggable'
 import {
   Badge,
@@ -346,11 +257,8 @@ const form = reactive({
   is_active: 1,
   stages: [],
   members: [],
-  fields: [],
   distribution: defaultDistribution(),
 })
-// { [fieldname]: { [stageKey]: { visible, required, read_only } } }
-const rules = reactive({})
 
 const canManage = computed(() =>
   isNew.value
@@ -370,11 +278,6 @@ const typeOptions = [
   { label: __('On Hold'), value: 'On Hold' },
   { label: __('Won'), value: 'Won' },
   { label: __('Lost'), value: 'Lost' },
-]
-const ruleFlags = [
-  { key: 'visible', short: 'V', label: __('Visible') },
-  { key: 'required', short: 'O', label: __('Required to enter the stage') },
-  { key: 'read_only', short: 'S', label: __('Read only') },
 ]
 
 function defaultDistribution() {
@@ -459,54 +362,6 @@ function addStage() {
   })
 }
 
-function catalogField(fieldname) {
-  return catalog.value.find((f) => f.fieldname === fieldname)
-}
-
-const fieldOptions = computed(() =>
-  catalog.value
-    .filter(
-      (f) =>
-        !f.disabled &&
-        !LOCKED_FIELDS.includes(f.fieldname) &&
-        !f.locked &&
-        !form.fields.some((x) => x.fieldname === f.fieldname),
-    )
-    .map((f) => ({ label: __(f.label), value: f.fieldname })),
-)
-
-function addField(fieldname) {
-  if (!fieldname || form.fields.some((f) => f.fieldname === fieldname)) return
-  form.fields.push({ fieldname })
-}
-
-function removeField(index) {
-  let [field] = form.fields.splice(index, 1)
-  delete rules[field.fieldname]
-}
-
-function stageKey(stage) {
-  return stage.name || stage._key
-}
-
-const DEFAULT_RULE = { visible: 1, required: 0, read_only: 0 }
-
-function rule(fieldname, stage) {
-  return rules[fieldname]?.[stageKey(stage)] || DEFAULT_RULE
-}
-
-function toggleRule(fieldname, stage, flag) {
-  rules[fieldname] ||= {}
-  let current = { ...rule(fieldname, stage) }
-  current[flag] = current[flag] ? 0 : 1
-  // a hidden field cannot be required or read-only in that stage
-  if (flag === 'visible' && !current.visible) {
-    current.required = 0
-    current.read_only = 0
-  }
-  rules[fieldname][stageKey(stage)] = current
-}
-
 function validate() {
   if (!form.pipeline_name?.trim()) return __('Give the funnel a name.')
   if (!form.stages.length) return __('A funnel needs at least one stage.')
@@ -528,9 +383,8 @@ function payload() {
       type: s.type,
       color: s.color,
     })),
+    // fields and rules are left out: Form customization saves them
     members: form.members.map((m) => ({ user: m.user, role: m.role })),
-    // in order; position = order (crm.api.pipeline.save_pipeline)
-    fields: form.fields.map((f) => f.fieldname),
     distribution: {
       ...form.distribution,
       // incomplete rules are dropped; members who left the funnel too
@@ -543,16 +397,6 @@ function payload() {
     },
   }
   if (form.name) doc.name = form.name
-  // Rules can only be sent for stages that already have a key on the server
-  doc.field_rules = []
-  form.stages.forEach((stage) => {
-    let key = stage.name
-    if (!key) return
-    for (let f of form.fields) {
-      let r = rule(f.fieldname, stage)
-      doc.field_rules.push({ stage: key, fieldname: f.fieldname, ...r })
-    }
-  })
   return doc
 }
 
@@ -561,15 +405,10 @@ async function save() {
   if (error.value) return
   saving.value = true
   try {
-    let hasNewStages = form.stages.some((s) => !s.name)
     let saved = await pipelineStore.apiCall('save_pipeline', { doc: payload() })
     // From here on the funnel and its new stages exist: a retry must update
     // them, never create them again
     adoptSavedKeys(saved)
-    if (hasNewStages && form.fields.length) {
-      // second step: rules of the stages created just now, now that they have keys
-      saved = await pipelineStore.apiCall('save_pipeline', { doc: payload() })
-    }
     toast.success(__('Funnel saved'))
     emit('saved', saved)
   } catch (e) {
@@ -581,19 +420,12 @@ async function save() {
 }
 
 // The server saves stages in the order sent, so the n-th saved stage is the
-// n-th stage of the form; new ones take their key and keep their rules.
+// n-th stage of the form; new ones take their key.
 function adoptSavedKeys(saved) {
   form.name = saved.name
   form.stages.forEach((stage, i) => {
     let key = saved.stages?.[i]?.name
-    if (stage.name || !key) return
-    for (let fieldname of Object.keys(rules)) {
-      if (rules[fieldname][stage._key]) {
-        rules[fieldname][key] = rules[fieldname][stage._key]
-        delete rules[fieldname][stage._key]
-      }
-    }
-    stage.name = key
+    if (!stage.name && key) stage.name = key
   })
 }
 
@@ -607,22 +439,6 @@ function fill(config) {
     user: m.user,
     role: m.role,
   }))
-  // fieldnames in order, or { fieldname, position } rows
-  form.fields = [...(config.fields || [])]
-    .map((f, i) =>
-      typeof f === 'string'
-        ? { fieldname: f, position: i + 1 }
-        : { fieldname: f.fieldname, position: f.position ?? i + 1 },
-    )
-    .sort((a, b) => a.position - b.position)
-  for (let r of config.field_rules || []) {
-    rules[r.fieldname] ||= {}
-    rules[r.fieldname][r.stage] = {
-      visible: r.visible,
-      required: r.required,
-      read_only: r.read_only,
-    }
-  }
   form.distribution = {
     ...defaultDistribution(),
     ...(config.distribution || {}),
