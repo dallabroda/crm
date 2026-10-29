@@ -217,3 +217,21 @@ def update_field(
 def disable_field(fieldname: str, doctype: str = catalog.DEAL) -> dict:
 	_assert_admin()
 	return catalog.disable_field(fieldname, doctype)
+
+
+@frappe.whitelist()
+def enable_field(fieldname: str, doctype: str = catalog.DEAL) -> dict:
+	_assert_admin()
+	return catalog.enable_field(fieldname, doctype)
+
+
+@frappe.whitelist()
+def field_usage(fieldname: str, doctype: str = catalog.DEAL) -> dict:
+	_assert_admin()
+	return catalog.field_usage(fieldname, doctype)
+
+
+@frappe.whitelist(methods=["POST"])
+def delete_field(fieldname: str, doctype: str = catalog.DEAL) -> dict:
+	_assert_admin()
+	return catalog.delete_field(fieldname, doctype)

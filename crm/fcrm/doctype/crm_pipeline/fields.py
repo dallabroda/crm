@@ -275,6 +275,96 @@ def disable_field(fieldname: str, doctype: str = DEAL) -> dict:
 	return _catalog_item(cf.fieldname, doctype)
 
 
+def enable_field(fieldname: str, doctype: str = DEAL) -> dict:
+	"""Show a disabled created field again (credtech#232)."""
+	doctype = _form_doctype(doctype)
+	cf = _created_custom_field(fieldname, doctype)
+	cf.hidden = 0
+	cf.save(ignore_permissions=True)
+	frappe.clear_cache(doctype=doctype)
+	return _catalog_item(cf.fieldname, doctype)
+
+
+def field_usage(fieldname: str, doctype: str = DEAL) -> dict:
+	"""How many records have a value in a created field: shown before deleting it."""
+	doctype = _form_doctype(doctype)
+	cf = _created_custom_field(fieldname, doctype)
+	return {"fieldname": cf.fieldname, "records": frappe.db.count(doctype, {cf.fieldname: ("is", "set")})}
+
+
+def delete_field(fieldname: str, doctype: str = DEAL) -> dict:
+	"""Delete a created field for good (owner, credtech#232): out of every form, stage rule and list view, then the
+	field and its column with all the values. Frappe keeps the column when a Custom Field is deleted, so it is
+	dropped here; that also frees the room it took in the row."""
+	doctype = _form_doctype(doctype)
+	cf = _created_custom_field(fieldname, doctype)
+	fieldname = cf.fieldname
+	blocks = [block for block, block_doctype in BLOCK_DOCTYPES.items() if block_doctype == doctype]
+	for child in ("CRM Pipeline Field", "CRM Pipeline Field Rule"):
+		frappe.db.delete(child, {"fieldname": fieldname, "block": ("in", blocks)})
+		if doctype == DEAL:
+			# rows saved before blocks existed (credtech#196) belong to the card
+			frappe.db.delete(child, {"fieldname": fieldname, "block": ("is", "not set")})
+	_drop_from_views(doctype, fieldname)
+	_drop_from_layouts(doctype, fieldname)
+	frappe.db.delete("Property Setter", {"doc_type": doctype, "field_name": fieldname})
+	frappe.db.delete("Custom Field", {"name": cf.name})
+	# ALTER TABLE commits on its own: the cleanup above is committed with it
+	if frappe.db.has_column(doctype, fieldname):
+		frappe.db.sql_ddl(f"ALTER TABLE `tab{doctype}` DROP COLUMN `{fieldname}`")
+	frappe.clear_cache(doctype=doctype)
+	return {"fieldname": fieldname, "deleted": 1}
+
+
+def _without_field(value, fieldname: str):
+	"""The value with every mention of the field removed: a list item equal to it or a dict pointing to it."""
+	if isinstance(value, list):
+		return [
+			_without_field(item, fieldname)
+			for item in value
+			if item != fieldname
+			and not (isinstance(item, dict) and fieldname in (item.get("fieldname"), item.get("key")))
+		]
+	if isinstance(value, dict):
+		return {key: _without_field(item, fieldname) for key, item in value.items()}
+	return value
+
+
+def _cleaned_json(raw, fieldname: str):
+	try:
+		parsed = frappe.parse_json(raw) if raw else None
+	except ValueError:
+		return raw
+	if parsed is None or fieldname not in frappe.as_json(parsed):
+		return raw
+	return frappe.as_json(_without_field(parsed, fieldname), indent=None)
+
+
+def _drop_from_views(doctype: str, fieldname: str):
+	for view in frappe.get_all("CRM View Settings", filters={"dt": doctype}, pluck="name"):
+		doc = frappe.get_doc("CRM View Settings", view)
+		changed = False
+		for attr in ("columns", "rows", "kanban_fields", "filters", "order_by"):
+			cleaned = _cleaned_json(doc.get(attr), fieldname)
+			if cleaned != doc.get(attr):
+				doc.set(attr, cleaned)
+				changed = True
+		if doc.get("group_by_field") == fieldname:
+			doc.group_by_field = None
+			changed = True
+		if changed:
+			doc.save(ignore_permissions=True)
+
+
+def _drop_from_layouts(doctype: str, fieldname: str):
+	for layout in frappe.get_all("CRM Fields Layout", filters={"dt": doctype}, pluck="name"):
+		doc = frappe.get_doc("CRM Fields Layout", layout)
+		cleaned = _cleaned_json(doc.layout, fieldname)
+		if cleaned != doc.layout:
+			doc.layout = cleaned
+			doc.save(ignore_permissions=True)
+
+
 def fieldname_base(label: str) -> str:
 	"""ch_ + the name without accents, lowercase, letters and digits joined by _ ("CPF/CNPJ" -> ch_cpf_cnpj).
 	frappe.scrub kept accents and symbols: "Renda (R$)" was refused and "Situação" made a column with accents."""
