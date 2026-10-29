@@ -43,7 +43,7 @@ class CRMCallLog(Document):
 			"Queued",
 			"Canceled",
 		]
-		telephony_medium: DF.Literal["", "Manual", "Twilio", "Exotel", "API4Com", "Nvoip", "Wavix"]
+		telephony_medium: DF.Literal["", "Manual", "Twilio", "Exotel", "API4Com", "Nvoip", "Wavix", "Telnyx"]
 		to: DF.Data
 		type: DF.Literal["Incoming", "Outgoing"]
 	# end: auto-generated types

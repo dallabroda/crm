@@ -1,0 +1,99 @@
+{
+ "actions": [],
+ "creation": "2026-10-30 00:30:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "enabled",
+  "section_break_telnyx",
+  "api_key",
+  "connection_id",
+  "column_break_telnyx",
+  "caller_number",
+  "public_key",
+  "webhook_secret"
+ ],
+ "fields": [
+  {
+   "default": "0",
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "label": "Enabled"
+  },
+  {
+   "depends_on": "enabled",
+   "fieldname": "section_break_telnyx",
+   "fieldtype": "Section Break",
+   "hide_border": 1
+  },
+  {
+   "depends_on": "enabled",
+   "description": "Telnyx portal > Account Settings > Keys & Credentials > API Keys",
+   "fieldname": "api_key",
+   "fieldtype": "Password",
+   "label": "API Key",
+   "mandatory_depends_on": "enabled"
+  },
+  {
+   "depends_on": "enabled",
+   "description": "ID of the Call Control Application the calls go through (Telnyx portal > Voice > Programmable Voice)",
+   "fieldname": "connection_id",
+   "fieldtype": "Data",
+   "label": "Call Control Application ID",
+   "mandatory_depends_on": "enabled"
+  },
+  {
+   "fieldname": "column_break_telnyx",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "enabled",
+   "description": "Your Telnyx number shown to the customer, in international format (+5548...)",
+   "fieldname": "caller_number",
+   "fieldtype": "Data",
+   "label": "Caller Number",
+   "mandatory_depends_on": "enabled"
+  },
+  {
+   "depends_on": "enabled",
+   "description": "Telnyx portal > Account Settings > Keys & Credentials > Public Key, used to check that each webhook comes from Telnyx",
+   "fieldname": "public_key",
+   "fieldtype": "Data",
+   "label": "Webhook Public Key",
+   "mandatory_depends_on": "enabled"
+  },
+  {
+   "fieldname": "webhook_secret",
+   "fieldtype": "Password",
+   "hidden": 1,
+   "label": "Webhook Secret"
+  }
+ ],
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-10-30 00:30:00.000000",
+ "modified_by": "Administrator",
+ "module": "FCRM",
+ "name": "CRM Telnyx Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "Sales Manager",
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

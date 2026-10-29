@@ -30,6 +30,22 @@ def wavix(**kwargs):
 	receive(get_operator("wavix"))
 
 
+# Telnyx signs its webhooks (Ed25519) on top of the secret in the URL. Besides the hangup that records the
+# call, the salesperson answering moves the call on to the customer and a saved recording is attached.
+@frappe.whitelist(allow_guest=True, methods=["POST"])  # nosemgrep: guest-whitelisted-method
+def telnyx(**kwargs):
+	from crm.integrations.voip import telnyx as adapter
+
+	operator = get_operator("telnyx")
+	settings = operator.get_settings()
+	authorize(frappe.request.args.get("key"), settings)
+	adapter.verify_signature(settings, frappe.request.headers, frappe.request.get_data())
+	payload = frappe.request.get_json(silent=True) or {}
+	adapter.on_answered(settings, payload)
+	adapter.on_recording_saved(settings, payload)
+	receive(operator)
+
+
 def receive(operator: Operator):
 	authorize(frappe.request.args.get("key"), operator.get_settings())
 

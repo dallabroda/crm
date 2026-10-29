@@ -72,3 +72,8 @@ class Operator:
 	def recording_auth(self, settings) -> tuple | None:
 		"""(user, secret) the recording proxy sends to the operator; None for a plain link."""
 		return None
+
+	def recording_location(self, settings, recording_url: str) -> str:
+		"""The link the recording proxy fetches. An operator whose links expire keeps a stable address
+		in the call log and turns it into a fresh link here (Telnyx)."""
+		return recording_url
