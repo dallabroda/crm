@@ -90,9 +90,12 @@ class TestAPI4ComWebhook(FrappeTestCase):
 		# registering the webhook at API4Com is covered (mocked) in test_api4com_settings
 		with patch("crm.fcrm.doctype.crm_api4com_settings.crm_api4com_settings.register_webhook"):
 			settings.save()
+		frappe.db.delete("CRM Telephony Extension", {"medium": "API4Com"})
 		if not frappe.db.exists("CRM Telephony Agent", "Administrator"):
 			frappe.get_doc({"doctype": "CRM Telephony Agent", "user": "Administrator"}).insert()
-		frappe.db.set_value("CRM Telephony Agent", "Administrator", "api4com_extension", "1000")
+		agent = frappe.get_doc("CRM Telephony Agent", "Administrator")
+		agent.set_extension("API4Com", "1000")
+		agent.save()
 		# the endpoint commits; keep everything inside the test transaction
 		self.commit = patch.object(frappe.db, "commit")
 		self.commit.start()

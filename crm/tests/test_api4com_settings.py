@@ -22,9 +22,7 @@ class TestAPI4ComSettings(FrappeTestCase):
 		# start from scratch whatever the site had (rolled back in tearDown)
 		frappe.db.set_single_value("CRM API4Com Settings", "enabled", 0)
 		delete_all_passwords_for("CRM API4Com Settings", "CRM API4Com Settings")
-		frappe.db.set_value(
-			"CRM Telephony Agent", {"api4com_extension": ("is", "set")}, "api4com_extension", None
-		)
+		frappe.db.delete("CRM Telephony Extension", {"medium": "API4Com"})
 		self.patch = patch.object(api4com_settings.requests, "patch", return_value=api4com_answers())
 		self.api4com = self.patch.start()
 
@@ -122,8 +120,9 @@ class TestAPI4ComSettings(FrappeTestCase):
 			api4com_settings.set_extension(SALES_USER, "2001")
 
 	def test_extension_per_user(self):
+		# the old per-API4Com method, kept for screens opened before credtech#268
 		self.assertEqual(api4com_settings.set_extension(SALES_USER, " 2001 ")["extension"], "2001")
-		self.assertEqual(frappe.db.get_value("CRM Telephony Agent", SALES_USER, "api4com_extension"), "2001")
+		self.assertEqual(extension_of(SALES_USER), "2001")
 		# the same user keeps it; another user can't take it
 		api4com_settings.set_extension(SALES_USER, "2001")
 		with self.assertRaises(frappe.ValidationError):
@@ -132,4 +131,8 @@ class TestAPI4ComSettings(FrappeTestCase):
 			with self.assertRaises(frappe.ValidationError):
 				api4com_settings.set_extension(SALES_USER, wrong)
 		api4com_settings.set_extension(SALES_USER, "")
-		self.assertIsNone(frappe.db.get_value("CRM Telephony Agent", SALES_USER, "api4com_extension"))
+		self.assertIsNone(extension_of(SALES_USER))
+
+
+def extension_of(user):
+	return frappe.db.get_value("CRM Telephony Extension", {"parent": user, "medium": "API4Com"}, "extension")
