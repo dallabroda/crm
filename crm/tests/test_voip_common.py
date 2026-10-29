@@ -1,3 +1,4 @@
+from datetime import timedelta
 from unittest.mock import MagicMock, patch
 
 import frappe
@@ -212,6 +213,29 @@ class TestPolling(VoipTestCase):
 		self.run_with(PollingOperator(calls=[{"id": "broken"}, common_call("poll-3")]))
 		self.assertTrue(frappe.db.exists("CRM Call Log", "poll-3"))
 		self.assertIsNotNone(frappe.db.get_default(CURSOR))
+
+	def test_failed_call_is_read_again_until_it_records(self):
+		start = now_datetime() - timedelta(hours=2)
+		# no "type": recording fails
+		operator = PollingOperator(calls=[{"id": "broken", "start_time": start}, common_call("poll-5")])
+		# a real rollback would also undo this test's setup (the operator enabled); the two runs below
+		# need it, and record_call commits each call anyway
+		with patch.object(frappe.db, "rollback"):
+			self.run_with(operator)
+		self.assertTrue(frappe.db.exists("CRM Call Log", "poll-5"))
+		self.assertEqual(get_datetime(frappe.db.get_default(CURSOR)), start)
+
+		operator.calls = [common_call("broken", start_time=start)]
+		self.run_with(operator)
+		self.assertLessEqual(operator.since[-1], start)
+		self.assertTrue(frappe.db.exists("CRM Call Log", "broken"))
+		self.assertGreater(get_datetime(frappe.db.get_default(CURSOR)), start)
+
+	def test_failed_call_is_given_up_after_a_day(self):
+		before = now_datetime()
+		self.run_with(PollingOperator(calls=[{"id": "broken", "start_time": before - timedelta(days=3)}]))
+		held = get_datetime(frappe.db.get_default(CURSOR))
+		self.assertAlmostEqual((before - held).total_seconds(), polling.MAX_RETRY.total_seconds(), delta=60)
 
 	def test_disabled_operator_is_not_polled(self):
 		frappe.db.set_single_value("CRM API4Com Settings", "enabled", 0)
