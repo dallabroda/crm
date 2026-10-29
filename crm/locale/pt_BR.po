@@ -12838,3 +12838,11 @@ msgstr "Usa outra telefonia? Peça a integração: a CredTech estuda a partir da
 #: credtech#259
 msgid "Request integration"
 msgstr "Solicitar integração"
+
+#: frontend/src/components/Telephony/TelephonyOffer.vue
+msgid "Integrated telephony: API4Com, Twilio, Exotel, Nvoip, Wavix, Telnyx and Zenvia."
+msgstr "Telefonias integradas: API4Com, Twilio, Exotel, Nvoip, Wavix, Telnyx e Zenvia."
+
+#: frontend/src/components/Modals/TelephonyRequestModal.vue
+msgid "E.g. Vonage"
+msgstr "Ex.: Vonage"

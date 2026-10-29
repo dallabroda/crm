@@ -1,7 +1,11 @@
 <template>
   <div class="flex flex-col items-center gap-2">
     <span class="text-center text-p-sm text-ink-gray-6">
-      {{ __('Integrated telephony: API4Com, Twilio and Exotel.') }}
+      {{
+        __(
+          'Integrated telephony: API4Com, Twilio, Exotel, Nvoip, Wavix, Telnyx and Zenvia.',
+        )
+      }}
     </span>
     <div class="flex flex-wrap items-center justify-center gap-2">
       <Button

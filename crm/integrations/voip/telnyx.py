@@ -150,6 +150,31 @@ def on_answered(settings, payload: dict):
 			title="Telnyx: could not call the customer",
 			message=f"HTTP {response.status_code}: {response.text[:500]}",
 		)
+		record_failed_transfer(settings, call, state)
+
+
+def record_failed_transfer(settings, call: dict, state: dict):
+	"""Telnyx refused to call the customer: the salesperson is not left on a silent line, and the attempt
+	stays on the deal as a failed call (no customer leg will ever send a hangup)."""
+	from crm.integrations.voip.webhook import record_call
+
+	_request(settings, "post", f"/calls/{call['call_control_id']}/actions/hangup", json={})
+	started = to_system_time(call.get("start_time"))
+	record_call(
+		{
+			"id": state["id"],
+			"type": "Outgoing",
+			"extension": state.get("extension"),
+			"number": state.get("number"),
+			"status": "Failed",
+			"start_time": started,
+			"end_time": started,
+			"duration": 0,
+			"recording_url": None,
+			"deal": state.get("deal"),
+		},
+		"Telnyx",
+	)
 
 
 def call_error(status: int) -> str:
@@ -215,11 +240,34 @@ def on_recording_saved(settings, payload: dict):
 	if not recording_id:
 		return
 	address = f"{API_URL}/recordings/{recording_id}"
-	if frappe.db.exists("CRM Call Log", state["id"]):
+	# the same lock record_call holds, so the hangup can't be saving the call log at this moment
+	lock = f"crm_voip:Telnyx:{state['id']}"[:64]
+	if not frappe.db.sql("SELECT GET_LOCK(%s, 30)", lock)[0][0]:
+		frappe.throw(_("Call {0} is being recorded").format(state["id"]))
+	try:
+		if frappe.db.exists("CRM Call Log", state["id"]):
+			frappe.db.set_value("CRM Call Log", state["id"], "recording_url", address)
+		else:
+			frappe.cache().set_value(RECORDING_CACHE_KEY.format(state["id"]), address, expires_in_sec=86400)
+		frappe.db.commit()
+	finally:
+		frappe.db.sql("SELECT RELEASE_LOCK(%s)", lock)
+
+
+def attach_waiting_recording(payload: dict):
+	"""After a hangup is recorded: a recording that arrived while it was being parsed is attached now."""
+	data = payload.get("data") or {}
+	state = decode_state((data.get("payload") or {}).get("client_state"))
+	if data.get("event_type") != "call.hangup" or not state or not state.get("id"):
+		return
+	key = RECORDING_CACHE_KEY.format(state["id"])
+	address = frappe.cache().get_value(key)
+	if not address or not frappe.db.exists("CRM Call Log", state["id"]):
+		return
+	if not frappe.db.get_value("CRM Call Log", state["id"], "recording_url"):
 		frappe.db.set_value("CRM Call Log", state["id"], "recording_url", address)
-	else:
-		frappe.cache().set_value(RECORDING_CACHE_KEY.format(state["id"]), address, expires_in_sec=86400)
-	frappe.db.commit()
+		frappe.db.commit()
+	frappe.cache().delete_value(key)
 
 
 def find_recording(settings, call_session_id: str | None) -> str | None:
@@ -254,12 +302,17 @@ def verify_signature(settings, headers, body: bytes):
 
 	signature = headers.get("telnyx-signature-ed25519")
 	timestamp = headers.get("telnyx-timestamp")
-	if not signature or not timestamp or abs(time.time() - cint(timestamp)) > SIGNATURE_TOLERANCE:
+	if (
+		not settings.public_key
+		or not signature
+		or not timestamp
+		or abs(time.time() - cint(timestamp)) > SIGNATURE_TOLERANCE
+	):
 		frappe.throw(_("Not permitted"), frappe.PermissionError)
 	try:
 		key = Ed25519PublicKey.from_public_bytes(base64.b64decode(settings.public_key))
 		key.verify(base64.b64decode(signature), timestamp.encode() + b"|" + body)
-	except (InvalidSignature, ValueError, binascii.Error):
+	except (InvalidSignature, ValueError, TypeError, binascii.Error):
 		frappe.throw(_("Not permitted"), frappe.PermissionError)
 
 

@@ -1,6 +1,7 @@
 """Nvoip adapter (credtech#269): token caching, click-to-call tracked by `CRM Nvoip Pending Call`,
 polling of outbound outcomes and inbound history. Not run against a real account."""
 
+from datetime import datetime
 from unittest.mock import MagicMock, patch
 
 import frappe
@@ -286,6 +287,8 @@ class TestNvoipHistory(FrappeTestCase):
 			("Incoming", "554833328530", "Completed", 17, "https://x/a.mp3"),
 		)
 		self.assertTrue(call["id"].startswith("nvoip-"))
+		# "12/01/2026" is 12 January, not 1 December
+		self.assertEqual(call["start_time"], datetime(2026, 1, 12, 14, 30, 34))
 
 	def test_a_dict_wrapped_listing_is_also_read(self):
 		row = {

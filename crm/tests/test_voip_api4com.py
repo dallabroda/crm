@@ -162,6 +162,24 @@ class TestAPI4ComWebhook(FrappeTestCase):
 			frappe.db.get_value("CRM Call Log", "repeat-1", "recording_url"), DOC_FIXTURE["recordUrl"]
 		)
 
+	def test_identical_delivery_writes_nothing(self):
+		# polling (Nvoip) reads recent calls again every 5 minutes: nothing new, nothing written
+		self.post(hangup(id="same-1"))
+		frappe.db.set_value(
+			"CRM Call Log", "same-1", "modified", "2026-01-01 00:00:00", update_modified=False
+		)
+
+		self.post(hangup(id="same-1"))
+		self.assertEqual(
+			str(frappe.db.get_value("CRM Call Log", "same-1", "modified")), "2026-01-01 00:00:00"
+		)
+
+		self.post(hangup(id="same-1", duration=9))
+		self.assertEqual(frappe.db.get_value("CRM Call Log", "same-1", "duration"), 9)
+		self.assertNotEqual(
+			str(frappe.db.get_value("CRM Call Log", "same-1", "modified")), "2026-01-01 00:00:00"
+		)
+
 	def test_unknown_number_only_stays_in_the_call_history(self):
 		"""Owner rule (credtech#47): a call never opens a deal"""
 		deals, leads = frappe.db.count("CRM Deal"), frappe.db.count("CRM Lead")

@@ -19,7 +19,7 @@ pending-call tracking above, and including them here too would record every call
 
 import hashlib
 import re
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 import frappe
 import requests
@@ -188,8 +188,16 @@ def history_row_id(row: dict) -> str:
 
 
 def parse_history_date(value: str | None):
+	"""Nvoip writes dates the Brazilian way ("12/01/2026 14:30:34" is 12 January). Read as is,
+	dateutil takes the first number as the month, so days 1 to 12 came out with day and month swapped."""
+	if not value:
+		return None
 	try:
-		return get_datetime(value) if value else None
+		return datetime.strptime(value.strip(), "%d/%m/%Y %H:%M:%S")
+	except ValueError:
+		pass
+	try:
+		return get_datetime(value)
 	except Exception:
 		return None
 
