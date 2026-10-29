@@ -46,6 +46,13 @@ def telnyx(**kwargs):
 	receive(operator)
 
 
+# Zenvia doesn't sign its webhooks: the secret in the URL authenticates them. The company pastes two
+# addresses in the Zenvia panel: "Chamada - Fim" and "DID - Fim de Chamada" (with tipo=did).
+@frappe.whitelist(allow_guest=True, methods=["POST"])  # nosemgrep: guest-whitelisted-method
+def zenvia(**kwargs):
+	receive(get_operator("zenvia"))
+
+
 def receive(operator: Operator):
 	authorize(frappe.request.args.get("key"), operator.get_settings())
 
