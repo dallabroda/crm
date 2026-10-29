@@ -4,8 +4,9 @@
 from crm.integrations.voip.api4com import API4Com
 from crm.integrations.voip.base import Operator
 from crm.integrations.voip.nvoip import Nvoip
+from crm.integrations.voip.wavix import Wavix
 
-OPERATORS: dict[str, Operator] = {operator.key: operator for operator in (API4Com(), Nvoip())}
+OPERATORS: dict[str, Operator] = {operator.key: operator for operator in (API4Com(), Nvoip(), Wavix())}
 
 
 def get_operator(key: str) -> Operator:

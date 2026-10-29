@@ -24,6 +24,12 @@ def api4com(**kwargs):
 	receive(get_operator("api4com"))
 
 
+# Wavix's post-call webhook carries no signature or account id of its own either
+@frappe.whitelist(allow_guest=True, methods=["POST"])  # nosemgrep: guest-whitelisted-method
+def wavix(**kwargs):
+	receive(get_operator("wavix"))
+
+
 def receive(operator: Operator):
 	authorize(frappe.request.args.get("key"), operator.get_settings())
 
