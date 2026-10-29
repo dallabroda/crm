@@ -73,7 +73,9 @@ def voice(**kwargs):
 
 	call_details = TwilioCallDetails(args, call_from=from_number)
 	try:
-		create_call_log(call_details)
+		# the deal id sent by the browser at click-to-call time (credtech#274); the number is only
+		# the fallback (credtech#47)
+		create_call_log(call_details, deal=args.get("DealId") or None)
 	except Exception:
 		frappe.db.rollback()
 		frappe.log_error(title="Error while creating Twilio call log")
@@ -109,14 +111,23 @@ def _call_failed_response():
 	return resp
 
 
-def create_call_log(call_details: TwilioCallDetails):
+def create_call_log(call_details: TwilioCallDetails, deal: str | None = None):
+	"""One call log per Twilio call id: a /voice webhook Twilio retries (its own infrastructure
+	failure, not a status change) updates the same row instead of failing on a duplicate name,
+	same as every other operator (credtech#268). Linking only happens the first time."""
 	details = call_details.to_dict()
+	is_new = not frappe.db.exists("CRM Call Log", details["id"])
+	call_log = frappe.new_doc("CRM Call Log") if is_new else frappe.get_doc("CRM Call Log", details["id"])
+	call_log.update({**details, "telephony_medium": "Twilio"})
 
-	call_log = frappe.get_doc({**details, "doctype": "CRM Call Log", "telephony_medium": "Twilio"})
-
-	# link call log with lead/deal
-	contact_number = details.get("from") if details.get("type") == "Incoming" else details.get("to")
-	link(contact_number, call_log)
+	if is_new:
+		# the deal from click-to-call comes first; the number is only the fallback (credtech#47, #274)
+		if deal and frappe.db.exists("CRM Deal", deal):
+			call_log.reference_doctype = "CRM Deal"
+			call_log.reference_docname = deal
+		else:
+			contact_number = details.get("from") if details.get("type") == "Incoming" else details.get("to")
+			link(contact_number, call_log)
 
 	call_log.save(ignore_permissions=True)
 	frappe.db.commit()
