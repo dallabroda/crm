@@ -50,6 +50,10 @@
               { label: __(''), value: '' },
               { label: __('Twilio'), value: 'Twilio' },
               { label: __('Exotel'), value: 'Exotel' },
+              ...Object.values(voipOperators).map((medium) => ({
+                label: medium,
+                value: medium,
+              })),
             ]"
             :placeholder="__('Select Medium')"
           />
@@ -252,7 +256,7 @@ import {
   createResource,
   toast,
 } from 'frappe-ui'
-import { useTelephony } from '@/composables/telephony'
+import { useTelephony, voipOperators } from '@/composables/telephony'
 import { useDocument } from '@/data/document'
 import { usersStore } from '@/stores/users'
 import { validatePhone } from '@/utils'

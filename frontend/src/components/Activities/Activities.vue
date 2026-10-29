@@ -6,6 +6,7 @@
     v-model:emailBox="emailBox"
     :title="title"
     :doc="doc"
+    :doctype="doctype"
     :whatsappBox="whatsappBox"
     :modalRef="modalRef"
   />

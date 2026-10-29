@@ -29,20 +29,29 @@ def _get_recording_credentials(telephony_medium: str) -> tuple | None:
 		s = frappe.get_single("CRM Exotel Settings")
 		token = s.get_password("api_token", raise_exception=False)
 		return (s.api_key, token) if s.api_key and token else None
-	elif telephony_medium == "API4Com":
-		# recordUrl is a plain link in their doc; whether it ever asks for the token is credtech#100
-		return None
+	from crm.integrations.voip.operators import get_operator_by_medium
+
+	# API4Com: recordUrl is a plain link in their doc; whether it ever asks for the token is credtech#100
+	operator = get_operator_by_medium(telephony_medium)
+	if operator:
+		return operator.recording_auth(operator.get_settings())
 	# manual or unrecognized medium: no provider auth to apply
 	return None
 
 
 @frappe.whitelist()
 def is_call_integration_enabled():
+	from crm.integrations.voip.api import callable_operators
+
+	# operators the CRM places calls through on the server (credtech#268), by key: {"api4com": "API4Com"}
+	voip = {operator.key: operator.medium for operator in callable_operators()}
 	return {
 		"integrations": {
 			"twilio": bool(frappe.db.get_single_value("CRM Twilio Settings", "enabled")),
 			"exotel": bool(frappe.db.get_single_value("CRM Exotel Settings", "enabled")),
+			**{key: True for key in voip},
 		},
+		"voip": voip,
 		"default_calling_medium": get_user_default_calling_medium(),
 	}
 

@@ -7,17 +7,14 @@ secret and registers its own webhook at API4Com, so the customer copies no URL. 
 are Password fields: they never come back to the screen.
 """
 
-import re
-
 import frappe
 import requests
 from frappe import _
 from frappe.model.document import Document
 
-API_URL = "https://api.api4com.com/api/v1"
+from crm.integrations.voip.api4com import API_URL, GATEWAY
+
 WEBHOOK_PATH = "/api/method/crm.integrations.voip.webhook.api4com"
-# Name of the integration created at API4Com for this CRM
-GATEWAY = "cred-hub"
 WEBHOOK_VERSION = "v1.4"
 
 
@@ -68,30 +65,6 @@ class CRMAPI4ComSettings(Document):
 		return webhook_url(self)
 
 
-@frappe.whitelist()
-def set_extension(user: str, extension: str | None = None) -> dict:
-	"""Extension of a user at API4Com (CRM Telephony Agent.api4com_extension); empty removes it.
-	It is how a call reaches the timeline of the right salesperson."""
-	frappe.has_permission("CRM API4Com Settings", "write", throw=True)
-	extension = (extension or "").strip() or None
-	if extension and not re.fullmatch(r"\d{1,6}", extension):
-		frappe.throw(_("An extension has 1 to 6 digits."))
-	owner = extension and frappe.db.get_value(
-		"CRM Telephony Agent", {"api4com_extension": extension, "user": ("!=", user)}, "user"
-	)
-	if owner:
-		frappe.throw(_("Extension {0} already belongs to {1}.").format(extension, owner))
-
-	if frappe.db.exists("CRM Telephony Agent", user):
-		agent = frappe.get_doc("CRM Telephony Agent", user)
-	else:
-		agent = frappe.new_doc("CRM Telephony Agent")
-		agent.user = user
-	agent.api4com_extension = extension
-	agent.save(ignore_permissions=True)
-	return {"user": user, "extension": extension}
-
-
 def new_secret():
 	return frappe.generate_hash(length=40)
 
@@ -133,3 +106,11 @@ def register_webhook(settings):
 			message=f"HTTP {response.status_code}: {response.text[:500]}",
 		)
 		frappe.throw(_("API4Com refused the webhook registration (HTTP {0}).").format(response.status_code))
+
+
+@frappe.whitelist()
+def set_extension(user: str, extension: str | None = None) -> dict:
+	"""Kept for screens opened before the per-operator extensions (credtech#268)."""
+	from crm.integrations.voip.api import set_extension as set_operator_extension
+
+	return set_operator_extension("api4com", user, extension)

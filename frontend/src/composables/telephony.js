@@ -4,6 +4,8 @@ import { computed, ref } from 'vue'
 const integrations = ref({})
 export const defaultCallingMedium = ref('')
 export const callEnabled = ref(false)
+// operators the server places calls through (credtech#268), by key: { api4com: 'API4Com' }
+export const voipOperators = ref({})
 
 createResource({
   url: 'crm.integrations.api.is_call_integration_enabled',
@@ -12,6 +14,7 @@ createResource({
   onSuccess: (data) => {
     integrations.value = data.integrations || {}
     defaultCallingMedium.value = data.default_calling_medium
+    voipOperators.value = data.voip || {}
     callEnabled.value = Object.values(integrations.value).some(Boolean)
   },
 })

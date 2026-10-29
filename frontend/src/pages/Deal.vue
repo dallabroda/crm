@@ -1038,7 +1038,7 @@ function triggerCall() {
     return
   }
 
-  makeCall(mobile_no)
+  makeCall(mobile_no, props.dealId)
 }
 
 // WhatsApp to the primary contact, through the company's SmartChat (credtech#211)

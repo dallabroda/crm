@@ -93,11 +93,16 @@ import { computed, h } from 'vue'
 const props = defineProps({
   title: { type: String, default: '' },
   doc: { type: Object, default: () => ({}) },
+  doctype: { type: String, default: '' },
   modalRef: { type: Object, default: () => ({}) },
   whatsappBox: { type: Object, default: () => ({}) },
 })
 
 const { makeCall } = globalStore()
+
+// the card a call is made from goes with it, so it lands on its timeline
+const dealName = () =>
+  props.doctype === 'CRM Deal' ? props.doc.name || null : null
 
 const activeTab = defineModel({ type: String })
 const showWhatsappTemplates = defineModel('showWhatsappTemplates', {
@@ -126,7 +131,7 @@ const defaultActions = computed(() => {
     {
       icon: h(PhoneIcon, { class: 'h-4 w-4' }),
       label: __('Make a Call'),
-      onClick: () => makeCall(props.doc.mobile_no),
+      onClick: () => makeCall(props.doc.mobile_no, dealName()),
       condition: () => callEnabled.value,
     },
     {
@@ -166,7 +171,7 @@ const callActions = computed(() => {
     {
       label: __('Make a Call'),
       icon: h(PhoneIcon, { class: 'h-4 w-4' }),
-      onClick: () => makeCall(props.doc.mobile_no),
+      onClick: () => makeCall(props.doc.mobile_no, dealName()),
       condition: () => callEnabled.value,
     },
   ]
