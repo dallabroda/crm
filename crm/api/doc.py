@@ -939,6 +939,13 @@ def remove_linked_doc_reference(
 
 		try:
 			if delete:
+				# The document being deleted may point to the item too: an organization created from a CNPJ points
+				# to its Receita address, which points back. Clear that first, or deleting the address fails with
+				# "Organização … está vinculado a Endereço …" (credtech#260).
+				if doctype and docname and frappe.db.exists(doctype, docname):
+					parent = frappe.get_doc(doctype, docname)
+					if clear_links_to(parent, item["doctype"], item["docname"]):
+						parent.save(ignore_permissions=True)
 				delete_with_dependents(item["doctype"], item["docname"])
 			elif remove_contact:
 				remove_contact_link(item["doctype"], item["docname"])

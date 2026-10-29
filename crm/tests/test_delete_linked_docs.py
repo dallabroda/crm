@@ -57,6 +57,33 @@ class TestDeleteLinkedDocs(FrappeTestCase):
 		frappe.delete_doc("CRM Organization", org)
 		self.assertFalse(frappe.db.exists("CRM Organization", org))
 
+	def test_delete_all_removes_an_address_the_organization_points_to(self):
+		"""Production bug (29/10, credtech#260): an organization created from a CNPJ points to its Receita address,
+		which links back to it; "Delete all" failed on the address."""
+		org = frappe.get_doc(
+			{"doctype": "CRM Organization", "organization_name": "Receita Test Org"}
+		).insert()
+		address = frappe.get_doc(
+			{
+				"doctype": "Address",
+				"address_title": "Receita Test Org (Receita)",
+				"address_type": "Office",
+				"address_line1": "Rua A, 1",
+				"city": "Florianópolis",
+				"country": "Brazil",
+				"links": [{"link_doctype": "CRM Organization", "link_name": org.name}],
+			}
+		).insert()
+		org.db_set("address", address.name)
+
+		remove_linked_doc_reference(
+			self._linked_items(org.name), delete=True, doctype="CRM Organization", docname=org.name
+		)
+
+		self.assertFalse(frappe.db.exists("Address", address.name))
+		frappe.delete_doc("CRM Organization", org.name)
+		self.assertFalse(frappe.db.exists("CRM Organization", org.name))
+
 	def test_failure_is_reported_instead_of_success(self):
 		org, deal, _task = self._org_with_deal_and_task("Denied Test Org")
 		items = self._linked_items(org)
