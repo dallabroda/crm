@@ -773,11 +773,12 @@ export function ConfirmDelete({
   isConfirmingDelete,
   onConfirmDelete,
   label = __('Delete'),
+  icon = 'lucide-trash-2',
 }) {
   return [
     {
       label,
-      icon: 'lucide-trash-2',
+      icon,
       // preventDefault keeps the menu open so the confirm row can replace this one
       onClick: (event) => {
         event.preventDefault()
@@ -787,7 +788,7 @@ export function ConfirmDelete({
     },
     {
       label: __('Confirm {0}', [label]),
-      icon: 'lucide-trash-2',
+      icon,
       theme: 'red',
       onClick: () => {
         onConfirmDelete()

@@ -193,7 +193,6 @@
           </span>
           <div class="w-8">
             <Dropdown
-              v-if="!field.disabled"
               :options="fieldActions(field)"
               align="end"
               @update:open="(open) => open && (confirmingDisable = null)"
@@ -202,6 +201,51 @@
             </Dropdown>
           </div>
         </div>
+      </div>
+    </template>
+  </Dialog>
+
+  <Dialog
+    :open="Boolean(deleting)"
+    :title="__('Delete field')"
+    @update:open="(open) => !open && (deleting = null)"
+  >
+    <template #default>
+      <div
+        v-if="deleting"
+        class="flex flex-col gap-3 text-p-base text-ink-gray-8"
+      >
+        <p>
+          {{
+            __(
+              'Delete the field {0}? It leaves every form, funnel rule and list.',
+              [__(deleting.field.label)],
+            )
+          }}
+        </p>
+        <p v-if="deleting.records" class="font-medium text-ink-red-4">
+          {{
+            __(
+              '{0} records have a value in this field. The values will be deleted and this cannot be undone.',
+              [deleting.records],
+            )
+          }}
+        </p>
+        <p v-else class="text-ink-gray-6">
+          {{ __('No record has a value in this field.') }}
+        </p>
+      </div>
+    </template>
+    <template #actions>
+      <div class="flex justify-end gap-2">
+        <Button :label="__('Cancel')" @click="deleting = null" />
+        <Button
+          :label="__('Delete')"
+          theme="red"
+          variant="solid"
+          :loading="deleteLoading"
+          @click="confirmDelete"
+        />
       </div>
     </template>
   </Dialog>
@@ -450,7 +494,67 @@ async function disable(field) {
 // confirm state per row, reset whenever a row's menu opens)
 const confirmingDisable = ref(null)
 
+const deleting = ref(null)
+const deleteLoading = ref(false)
+
+// Deleting removes the column and its values (credtech#232): the dialog says how many records have a value first
+async function askDelete(field) {
+  try {
+    let usage = await call('crm.api.forms.field_usage', {
+      fieldname: field.fieldname,
+      doctype: doctype.value,
+    })
+    deleting.value = { field, records: usage.records }
+  } catch (e) {
+    toast.error(e?.messages?.[0] || __('Could not delete the field'))
+  }
+}
+
+async function confirmDelete() {
+  deleteLoading.value = true
+  try {
+    await call('crm.api.forms.delete_field', {
+      fieldname: deleting.value.field.fieldname,
+      doctype: doctype.value,
+    })
+    toast.success(__('Field deleted'))
+    deleting.value = null
+    await refresh()
+  } catch (e) {
+    toast.error(e?.messages?.[0] || __('Could not delete the field'))
+  } finally {
+    deleteLoading.value = false
+  }
+}
+
+async function enable(field) {
+  try {
+    await call('crm.api.forms.enable_field', {
+      fieldname: field.fieldname,
+      doctype: doctype.value,
+    })
+    toast.success(__('Field enabled'))
+    await refresh()
+  } catch (e) {
+    toast.error(e?.messages?.[0] || __('Could not enable the field'))
+  }
+}
+
 function fieldActions(field) {
+  let remove = {
+    label: __('Delete'),
+    icon: 'lucide-trash-2',
+    onClick: () => {
+      showCreated.value = false
+      askDelete(field)
+    },
+  }
+  if (field.disabled) {
+    return [
+      { label: __('Enable'), icon: 'lucide-eye', onClick: () => enable(field) },
+      remove,
+    ]
+  }
   let isConfirming = {
     get value() {
       return confirmingDisable.value === field.fieldname
@@ -472,7 +576,9 @@ function fieldActions(field) {
       isConfirmingDelete: isConfirming,
       onConfirmDelete: () => disable(field),
       label: __('Disable'),
+      icon: 'lucide-eye-off',
     }),
+    remove,
   ]
 }
 
