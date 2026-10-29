@@ -24,6 +24,12 @@ def api4com(**kwargs):
 	receive(get_operator("api4com"))
 
 
+# Wavix's post-call webhook carries no signature or account id of its own either
+@frappe.whitelist(allow_guest=True, methods=["POST"])  # nosemgrep: guest-whitelisted-method
+def wavix(**kwargs):
+	receive(get_operator("wavix"))
+
+
 # Telnyx signs its webhooks (Ed25519) on top of the secret in the URL. Besides the hangup that records the
 # call, the salesperson answering moves the call on to the customer and a saved recording is attached.
 @frappe.whitelist(allow_guest=True, methods=["POST"])  # nosemgrep: guest-whitelisted-method

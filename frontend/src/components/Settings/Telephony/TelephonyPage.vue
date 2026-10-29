@@ -19,6 +19,10 @@
     v-else-if="step === 'nvoip-settings'"
     @updateStep="updateStep"
   />
+  <WavixSettings
+    v-else-if="step === 'wavix-settings'"
+    @updateStep="updateStep"
+  />
   <TelnyxSettings
     v-else-if="step === 'telnyx-settings'"
     @updateStep="updateStep"
@@ -30,6 +34,7 @@ import ExotelSettings from './ExotelSettings.vue'
 import TwilioSettings from './TwilioSettings.vue'
 import API4ComSettings from './API4ComSettings.vue'
 import NvoipSettings from './NvoipSettings.vue'
+import WavixSettings from './WavixSettings.vue'
 import TelnyxSettings from './TelnyxSettings.vue'
 import { ref } from 'vue'
 

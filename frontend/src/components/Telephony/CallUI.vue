@@ -106,7 +106,7 @@ function makeCallUsing() {
   }
 
   if (callMedium.value === 'Twilio') {
-    twilio.value.makeOutgoingCall(mobileNumber.value)
+    twilio.value.makeOutgoingCall(mobileNumber.value, deal.value)
   }
 
   if (callMedium.value === 'Exotel') {

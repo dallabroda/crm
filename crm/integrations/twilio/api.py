@@ -55,17 +55,14 @@ def generate_access_token():
 @frappe.whitelist(allow_guest=True)  # nosemgrep: guest-whitelisted-method
 def voice(**kwargs):
 	"""This is a webhook called by twilio to get instructions when the voice call request comes to twilio server."""
-
-	def _get_caller_number(caller):
-		identity = caller.replace("client:", "").strip()
-		user = Twilio.emailid_from_identity(identity)
-		return frappe.db.get_value("CRM Telephony Agent", user, "twilio_number")
-
 	args = frappe._dict(kwargs)
 	twilio = validate_twilio_request(args, require_application_sid=True)
 
+	# the salesperson who placed the call, from the browser SDK's own identity (credtech#274)
+	user = Twilio.emailid_from_identity(args.Caller.replace("client:", "").strip())
+
 	# Generate TwiML instructions to make a call
-	from_number = _get_caller_number(args.Caller)
+	from_number = frappe.db.get_value("CRM Telephony Agent", user, "twilio_number")
 	if not from_number:
 		resp = VoiceResponse()
 		resp.say(_("Your account is not configured with a phone number. Please contact your administrator."))
@@ -73,7 +70,10 @@ def voice(**kwargs):
 
 	call_details = TwilioCallDetails(args, call_from=from_number)
 	try:
-		create_call_log(call_details)
+		# the deal id sent by the browser at click-to-call time (credtech#274), only if the caller
+		# can read it (a browser could send any id): the phone number is otherwise the fallback,
+		# same as an invalid one (credtech#47)
+		create_call_log(call_details, deal=_readable_deal(args.get("DealId"), user))
 	except Exception:
 		frappe.db.rollback()
 		frappe.log_error(title="Error while creating Twilio call log")
@@ -103,20 +103,41 @@ def twilio_incoming_call_handler(**kwargs):
 	return Response(resp.to_xml(), mimetype="text/xml")
 
 
+def _readable_deal(deal: str | None, user: str) -> str | None:
+	"""`deal`, only if `user` may read it. A browser sends `DealId` on its own say, so this is what
+	actually enforces credtech#47's rule, not just a hint the server happens to trust."""
+	if (
+		deal
+		and frappe.db.exists("CRM Deal", deal)
+		and frappe.has_permission("CRM Deal", "read", deal, user=user)
+	):
+		return deal
+	return None
+
+
 def _call_failed_response():
 	resp = VoiceResponse()
 	resp.say(_("We're unable to connect your call right now. Please try again later."))
 	return resp
 
 
-def create_call_log(call_details: TwilioCallDetails):
+def create_call_log(call_details: TwilioCallDetails, deal: str | None = None):
+	"""One call log per Twilio call id: a /voice webhook Twilio retries (its own infrastructure
+	failure, not a status change) updates the same row instead of failing on a duplicate name,
+	same as every other operator (credtech#268). Linking only happens the first time."""
 	details = call_details.to_dict()
+	is_new = not frappe.db.exists("CRM Call Log", details["id"])
+	call_log = frappe.new_doc("CRM Call Log") if is_new else frappe.get_doc("CRM Call Log", details["id"])
+	call_log.update({**details, "telephony_medium": "Twilio"})
 
-	call_log = frappe.get_doc({**details, "doctype": "CRM Call Log", "telephony_medium": "Twilio"})
-
-	# link call log with lead/deal
-	contact_number = details.get("from") if details.get("type") == "Incoming" else details.get("to")
-	link(contact_number, call_log)
+	if is_new:
+		# the deal from click-to-call comes first; the number is only the fallback (credtech#47, #274)
+		if deal and frappe.db.exists("CRM Deal", deal):
+			call_log.reference_doctype = "CRM Deal"
+			call_log.reference_docname = deal
+		else:
+			contact_number = details.get("from") if details.get("type") == "Incoming" else details.get("to")
+			link(contact_number, call_log)
 
 	call_log.save(ignore_permissions=True)
 	frappe.db.commit()
