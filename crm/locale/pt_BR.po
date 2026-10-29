@@ -12450,3 +12450,51 @@ msgstr "Operadora de telefonia, como no registro de ligações (ex.: API4Com)"
 #: crm/fcrm/doctype/crm_telephony_agent/crm_telephony_agent.json
 msgid "Extension of this user at each telephony operator (one per operator)"
 msgstr "Ramal deste usuário em cada operadora de telefonia (um por operadora)"
+
+#: frontend/src/components/Settings/Telephony/WavixSettings.vue
+msgid "Wavix Settings"
+msgstr "Configurações da Wavix"
+
+#: frontend/src/components/Settings/Telephony/WavixSettings.vue
+msgid "Wavix API key"
+msgstr "Chave de API da Wavix"
+
+#: frontend/src/components/Settings/Telephony/WavixSettings.vue
+msgid "Create a key in the Wavix panel and paste it here. It is never shown again."
+msgstr "Crie uma chave no painel da Wavix e cole aqui. Ela não aparece de novo."
+
+#: frontend/src/components/Settings/Telephony/WavixSettings.vue
+msgid "Registered at Wavix automatically when the key is saved. Only needed by hand if Wavix support asks for it."
+msgstr "Cadastrado na Wavix automaticamente ao salvar a chave. Só é preciso à mão se o suporte da Wavix pedir."
+
+#: frontend/src/components/Settings/Telephony/WavixSettings.vue
+msgid "The current address stops working at once and the new one is registered at Wavix."
+msgstr "O endereço atual deixa de funcionar na hora e o novo é cadastrado na Wavix."
+
+#: frontend/src/components/Settings/Telephony/WavixSettings.vue
+msgid "Wavix Integration Disabled"
+msgstr "Integração com a Wavix desligada"
+
+#: frontend/src/components/Settings/Telephony/WavixSettings.vue
+msgid "Enable Wavix to record the calls of your Wavix account on the timeline of your deals"
+msgstr "Ligue a Wavix para registrar as ligações da sua conta Wavix na linha do tempo dos seus negócios"
+
+#: frontend/src/components/Settings/Telephony/WavixSettings.vue
+msgid "Wavix settings saved"
+msgstr "Configurações da Wavix salvas"
+
+#: frontend/src/components/Settings/Telephony/WavixSettings.vue
+msgid "New secret generated and registered at Wavix"
+msgstr "Novo segredo gerado e cadastrado na Wavix"
+
+#: frontend/src/components/Settings/Telephony/WavixSettings.vue
+msgid "Your company hires Wavix directly. Each call lands on the timeline of the deal of that number. Calling from a card is not ready yet: it needs the Wavix Embeddable browser widget, still pending confirmation with a real account."
+msgstr "Sua empresa contrata a Wavix direto. Cada ligação entra na linha do tempo do negócio desse número. Ligar a partir de um card ainda não está pronto: depende do widget da Wavix pelo navegador (Wavix Embeddable), que ainda falta confirmar com uma conta real."
+
+#: frontend/src/components/Settings/Telephony/TelephonySettings.vue
+msgid "Wavix"
+msgstr "Wavix"
+
+#: frontend/src/components/Settings/Telephony/TelephonySettings.vue
+msgid "Record the calls of your Wavix account on the timeline of your deals"
+msgstr "Registrar as ligações da sua conta Wavix na linha do tempo dos seus negócios"
