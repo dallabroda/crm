@@ -18,7 +18,7 @@
         :key="note.name"
         class="group flex h-48 cursor-pointer flex-col justify-between gap-2 rounded-5 bg-surface-gray-1 px-4 py-3 hover:bg-surface-gray-2"
         :data-note="note.name"
-        @click="showNote(note)"
+        @click="(e) => !e.target.closest('a') && showNote(note)"
       >
         <div class="flex items-center justify-between gap-2">
           <div class="truncate text-lg-medium text-ink-gray-8">
@@ -48,7 +48,7 @@
         </div>
         <div
           class="flex-1 overflow-hidden text-p-sm text-ink-gray-7"
-          v-html="sanitizeHTML(note.content)"
+          v-html="sanitizeHTML(note.content, { ADD_ATTR: ['target'] })"
         />
         <div class="flex items-center justify-between gap-2 text-sm">
           <span class="truncate text-ink-gray-8">
