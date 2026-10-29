@@ -242,6 +242,34 @@
           @click="emit('updateStep', 'api4com-settings')"
         />
       </div>
+
+      <div
+        v-if="isManager()"
+        class="h-px border-t mx-2 border-outline-elevation-2"
+      />
+
+      <!-- No webhook: calls are read every few minutes (credtech#269) -->
+      <div
+        v-if="isManager()"
+        class="flex items-center justify-between py-3 px-2"
+      >
+        <div class="flex flex-col gap-1">
+          <span class="text-base-medium text-ink-gray-8">
+            {{ __('Nvoip') }}
+          </span>
+          <span class="text-p-sm text-ink-gray-6">
+            {{
+              __(
+                'Record the calls of your Nvoip account on the timeline of your deals',
+              )
+            }}
+          </span>
+        </div>
+        <Button
+          :label="__('Configure')"
+          @click="emit('updateStep', 'nvoip-settings')"
+        />
+      </div>
     </div>
     <ErrorMessage
       :message="isNewDoc ? insertResource.error : telephonyAgent.save?.error"
