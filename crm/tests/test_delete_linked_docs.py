@@ -84,6 +84,40 @@ class TestDeleteLinkedDocs(FrappeTestCase):
 		frappe.delete_doc("CRM Organization", org.name)
 		self.assertFalse(frappe.db.exists("CRM Organization", org.name))
 
+	def test_organization_is_left_alone_without_permission_to_delete_it(self):
+		# doctype/docname come from the request: without delete permission on the organization, its link to
+		# the address stays and the failure is reported
+		org = frappe.get_doc(
+			{"doctype": "CRM Organization", "organization_name": "Receita Denied Org"}
+		).insert()
+		address = frappe.get_doc(
+			{
+				"doctype": "Address",
+				"address_title": "Receita Denied Org (Receita)",
+				"address_type": "Office",
+				"address_line1": "Rua B, 2",
+				"city": "Florianópolis",
+				"country": "Brazil",
+				"links": [{"link_doctype": "CRM Organization", "link_name": org.name}],
+			}
+		).insert()
+		org.db_set("address", address.name)
+		real = frappe.has_permission
+
+		def allowed(doctype=None, ptype="read", doc=None, *args, **kwargs):
+			return doctype != "CRM Organization" and real(doctype, ptype, doc, *args, **kwargs)
+
+		with (
+			patch("crm.api.doc.frappe.has_permission", side_effect=allowed),
+			self.assertRaises(frappe.ValidationError),
+		):
+			remove_linked_doc_reference(
+				self._linked_items(org.name), delete=True, doctype="CRM Organization", docname=org.name
+			)
+
+		self.assertEqual(frappe.db.get_value("CRM Organization", org.name, "address"), address.name)
+		self.assertTrue(frappe.db.exists("Address", address.name))
+
 	def test_failure_is_reported_instead_of_success(self):
 		org, deal, _task = self._org_with_deal_and_task("Denied Test Org")
 		items = self._linked_items(org)
