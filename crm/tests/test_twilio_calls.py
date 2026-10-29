@@ -89,6 +89,8 @@ class TestTwilioClickToCall(FrappeTestCase):
 
 	def test_click_to_call_lands_on_its_deal(self):
 		deal = make_deal("+1 415 555 0132")  # the number plays no part: the deal id wins
+		# the caller (SALES_USER) must be able to read the deal, or the permission check falls back
+		frappe.db.set_value("CRM Deal", deal, "deal_owner", SALES_USER)
 		self.post(outgoing_call(CallSid="click-1", DealId=deal))
 
 		log = frappe.get_doc("CRM Call Log", "click-1")
@@ -100,6 +102,25 @@ class TestTwilioClickToCall(FrappeTestCase):
 		self.post(outgoing_call(CallSid="click-2", To="+554833328530", DealId="does-not-exist"))
 
 		log = frappe.get_doc("CRM Call Log", "click-2")
+		self.assertIsNone(log.reference_docname)
+		self.assertTrue(log.has_link("CRM Deal", deal))
+
+	def test_a_deal_the_caller_cannot_read_falls_back_to_the_number_instead(self):
+		"""DealId comes from the browser, on its own say: the server must check it, not just trust it
+		(credtech#274 review) — otherwise a salesperson could land a call, and its recording, on a
+		deal they have no access to."""
+		deal = make_deal("+55 48 3332-8530")
+		real_has_permission = frappe.has_permission
+
+		def deny_deal_read(doctype=None, ptype="read", doc=None, *args, **kwargs):
+			if doctype == "CRM Deal":
+				return False
+			return real_has_permission(doctype, ptype, doc, *args, **kwargs)
+
+		with patch("crm.integrations.twilio.api.frappe.has_permission", side_effect=deny_deal_read):
+			self.post(outgoing_call(CallSid="click-3", To="+554833328530", DealId=deal))
+
+		log = frappe.get_doc("CRM Call Log", "click-3")
 		self.assertIsNone(log.reference_docname)
 		self.assertTrue(log.has_link("CRM Deal", deal))
 
