@@ -212,7 +212,7 @@ const canSend = computed(() => {
   if (inbox.value.can_reply) return Boolean(text.value.trim())
   return Boolean(
     template.value &&
-    template.value.variables.every((v) => (variables[v] || '').trim()),
+      template.value.variables.every((v) => (variables[v] || '').trim()),
   )
 })
 
