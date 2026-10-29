@@ -11,38 +11,72 @@ from frappe import _
 from frappe.integrations.utils import create_request_log
 
 from crm.integrations.api import get_contact_by_phone_number
-from crm.integrations.voip import api4com as api4com_adapter
+from crm.integrations.voip.base import Operator
+from crm.integrations.voip.operators import get_operator
 
-# <site>/api/method/crm.integrations.voip.webhook.api4com?key=<webhook secret of the company>
+# <site>/api/method/crm.integrations.voip.webhook.<operator>?key=<webhook secret of the company>
+# One route per operator (credtech#47); each one only names its adapter.
 
 
 # API4Com doesn't sign its webhook: the secret in the URL is what authenticates it
 @frappe.whitelist(allow_guest=True, methods=["POST"])  # nosemgrep: guest-whitelisted-method
 def api4com(**kwargs):
-	settings = frappe.get_single("CRM API4Com Settings")
+	receive(get_operator("api4com"))
+
+
+# Wavix's post-call webhook carries no signature or account id of its own either
+@frappe.whitelist(allow_guest=True, methods=["POST"])  # nosemgrep: guest-whitelisted-method
+def wavix(**kwargs):
+	receive(get_operator("wavix"))
+
+
+# Telnyx signs its webhooks (Ed25519) on top of the secret in the URL. Besides the hangup that records the
+# call, the salesperson answering moves the call on to the customer and a saved recording is attached.
+@frappe.whitelist(allow_guest=True, methods=["POST"])  # nosemgrep: guest-whitelisted-method
+def telnyx(**kwargs):
+	from crm.integrations.voip import telnyx as adapter
+
+	operator = get_operator("telnyx")
+	settings = operator.get_settings()
 	authorize(frappe.request.args.get("key"), settings)
+	adapter.verify_signature(settings, frappe.request.headers, frappe.request.get_data())
+	payload = frappe.request.get_json(silent=True) or {}
+	adapter.on_answered(settings, payload)
+	adapter.on_recording_saved(settings, payload)
+	receive(operator)
+
+
+# Zenvia doesn't sign its webhooks: the secret in the URL authenticates them. The company pastes two
+# addresses in the Zenvia panel: "Chamada - Fim" and "DID - Fim de Chamada" (with tipo=did).
+@frappe.whitelist(allow_guest=True, methods=["POST"])  # nosemgrep: guest-whitelisted-method
+def zenvia(**kwargs):
+	receive(get_operator("zenvia"))
+
+
+def receive(operator: Operator):
+	authorize(frappe.request.args.get("key"), operator.get_settings())
 
 	payload = frappe.request.get_json(silent=True) or {}
-	if payload.get("eventType") != "channel-hangup" or not payload.get("id"):
+	if not operator.is_call_event(payload):
 		return
 
 	# only the body is logged: the query string carries the secret
 	request_log = create_request_log(
 		payload,
-		request_description="API4Com Call",
-		service_name="API4Com",
+		request_description=f"{operator.medium} Call",
+		service_name=operator.medium,
 		request_headers=frappe.request.headers,
 		is_remote_request=1,
 	)
 	frappe.db.commit()  # the log survives a failed recording's rollback
 	try:
-		record_call(api4com_adapter.parse_hangup(payload), "API4Com")
+		record_call(operator.parse_webhook(payload), operator.medium)
 		request_log.status = "Completed"
 	except Exception:
 		frappe.db.rollback()
 		request_log.status = "Failed"
 		request_log.error = frappe.get_traceback()
-		frappe.log_error(title="API4Com: error while recording a call")
+		frappe.log_error(title=f"{operator.medium}: error while recording a call")
 	finally:
 		request_log.save(ignore_permissions=True)
 		frappe.db.commit()
@@ -92,9 +126,14 @@ def record_call(call: dict, medium: str):
 
 
 def agent_of_extension(extension: str, medium: str) -> str | None:
-	if not extension or medium != "API4Com":
+	"""The user with this extension at the operator (CRM Telephony Agent is named by user)."""
+	if not extension:
 		return None
-	return frappe.db.get_value("CRM Telephony Agent", {"api4com_extension": extension}, "user")
+	return frappe.db.get_value(
+		"CRM Telephony Extension",
+		{"parenttype": "CRM Telephony Agent", "medium": medium, "extension": extension},
+		"parent",
+	)
 
 
 def link_to_deals(call_log, call: dict):

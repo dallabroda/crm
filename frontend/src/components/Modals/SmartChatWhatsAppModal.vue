@@ -99,7 +99,7 @@
           <Button
             v-if="sent"
             :label="__('Open in SmartChat')"
-            :link="sent.conversation_url"
+            :href="sent.conversation_url"
           />
           <Button
             :label="sent ? __('Close') : __('Cancel')"
@@ -132,9 +132,11 @@ import { computed, reactive, ref, watch } from 'vue'
 
 // WhatsApp from the card goes out through the company's SmartChat; the
 // seller picks the inbox (credtech#211). Inside the 24-hour window, or on a
-// QR Code number, free text; otherwise an approved template.
+// QR Code number, free text; otherwise an approved template. Also from the
+// contact page, with `contact` instead of `deal` (credtech#258).
 const props = defineProps({
-  deal: { type: String, required: true },
+  deal: { type: String, default: '' },
+  contact: { type: String, default: '' },
   phone: { type: String, required: true },
   name: { type: String, default: '' },
 })
@@ -143,7 +145,11 @@ const open = defineModel('open', { type: Boolean, default: false })
 
 const options = createResource({
   url: 'cred_hub.whatsapp_send.get_whatsapp_options',
-  makeParams: () => ({ deal: props.deal, phone: props.phone }),
+  makeParams: () => ({
+    deal: props.deal || undefined,
+    contact: props.contact || undefined,
+    phone: props.phone,
+  }),
   onSuccess: (data) => {
     inboxId.value = data?.inboxes?.[0]?.id || null
   },
@@ -206,7 +212,7 @@ const canSend = computed(() => {
   if (inbox.value.can_reply) return Boolean(text.value.trim())
   return Boolean(
     template.value &&
-    template.value.variables.every((v) => (variables[v] || '').trim()),
+      template.value.variables.every((v) => (variables[v] || '').trim()),
   )
 })
 
@@ -215,7 +221,8 @@ async function send() {
   sendError.value = ''
   try {
     let params = {
-      deal: props.deal,
+      deal: props.deal || undefined,
+      contact: props.contact || undefined,
       phone: props.phone,
       name: props.name,
       inbox_id: inbox.value.id,

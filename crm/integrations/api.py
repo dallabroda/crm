@@ -29,20 +29,29 @@ def _get_recording_credentials(telephony_medium: str) -> tuple | None:
 		s = frappe.get_single("CRM Exotel Settings")
 		token = s.get_password("api_token", raise_exception=False)
 		return (s.api_key, token) if s.api_key and token else None
-	elif telephony_medium == "API4Com":
-		# recordUrl is a plain link in their doc; whether it ever asks for the token is credtech#100
-		return None
+	from crm.integrations.voip.operators import get_operator_by_medium
+
+	# API4Com: recordUrl is a plain link in their doc; whether it ever asks for the token is credtech#100
+	operator = get_operator_by_medium(telephony_medium)
+	if operator:
+		return operator.recording_auth(operator.get_settings())
 	# manual or unrecognized medium: no provider auth to apply
 	return None
 
 
 @frappe.whitelist()
 def is_call_integration_enabled():
+	from crm.integrations.voip.api import callable_operators
+
+	# operators the CRM places calls through on the server (credtech#268), by key: {"api4com": "API4Com"}
+	voip = {operator.key: operator.medium for operator in callable_operators()}
 	return {
 		"integrations": {
 			"twilio": bool(frappe.db.get_single_value("CRM Twilio Settings", "enabled")),
 			"exotel": bool(frappe.db.get_single_value("CRM Exotel Settings", "enabled")),
+			**{key: True for key in voip},
 		},
+		"voip": voip,
 		"default_calling_medium": get_user_default_calling_medium(),
 	}
 
@@ -255,6 +264,16 @@ def _fetch_recording(url: str, auth, headers: dict):
 	frappe.throw(_("Too many redirects while fetching recording"), frappe.ValidationError)
 
 
+def _recording_location(log) -> str:
+	"""The link to fetch: an operator whose links expire turns its stored address into a fresh one."""
+	from crm.integrations.voip.operators import get_operator_by_medium
+
+	operator = get_operator_by_medium(log.telephony_medium)
+	if not operator:
+		return log.recording_url
+	return operator.recording_location(operator.get_settings(), log.recording_url)
+
+
 @frappe.whitelist()
 def get_recording_url(call_log_name: str):
 	"""Proxy a call recording (authenticating with the provider) so it plays in the browser.
@@ -273,6 +292,7 @@ def get_recording_url(call_log_name: str):
 		frappe.throw(_("Recording URL not found"), frappe.DoesNotExistError)
 
 	auth = _get_recording_credentials(log.telephony_medium)
+	recording_url = _recording_location(log)
 	# forward the browser's Range header so the provider (Twilio/Exotel CDN) can return
 	# just the requested bytes; falls back to the full file if it doesn't support ranges
 	req_headers = {}
@@ -283,7 +303,7 @@ def get_recording_url(call_log_name: str):
 	# stream instead of buffering the whole file: the provider's Content-Length reaches
 	# the browser immediately so the <audio> element can show the duration right away,
 	# rather than waiting for the entire recording to download server-side first
-	upstream = _fetch_recording(log.recording_url, auth, req_headers)
+	upstream = _fetch_recording(recording_url, auth, req_headers)
 	upstream.raise_for_status()
 
 	def _stream():

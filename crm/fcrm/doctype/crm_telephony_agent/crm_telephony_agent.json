@@ -16,9 +16,9 @@
   "call_receiving_device",
   "column_break_aydj",
   "exotel_number",
-  "api4com_extension",
   "section_break_phlq",
-  "phone_nos"
+  "phone_nos",
+  "extensions"
  ],
  "fields": [
   {
@@ -86,7 +86,7 @@
    "fieldname": "default_medium",
    "fieldtype": "Select",
    "label": "Default Medium",
-   "options": "\nTwilio\nExotel\nAPI4Com"
+   "options": "\nTwilio\nExotel\nAPI4Com\nNvoip\nTelnyx\nZenvia"
   },
   {
    "default": "Computer",
@@ -96,16 +96,16 @@
    "options": "Computer\nPhone"
   },
   {
-   "description": "Extension of this user at API4Com",
-   "fieldname": "api4com_extension",
-   "fieldtype": "Data",
-   "label": "API4Com Extension",
-   "unique": 1
+   "description": "Extension of this user at each telephony operator (one per operator)",
+   "fieldname": "extensions",
+   "fieldtype": "Table",
+   "label": "Extensions",
+   "options": "CRM Telephony Extension"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-10-27 00:00:00.000000",
+ "modified": "2026-10-30 01:30:00.000000",
  "modified_by": "Administrator",
  "module": "FCRM",
  "name": "CRM Telephony Agent",

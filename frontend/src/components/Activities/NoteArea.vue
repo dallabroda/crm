@@ -50,7 +50,7 @@
     <div
       v-if="note.content"
       class="prose-f prose-sm text-p-sm max-w-none text-ink-gray-5 flex-1 overflow-hidden prose-headings:my-1 prose-headings:text-p-sm prose-headings:font-medium prose-headings:text-ink-gray-7 [&>*:first-child]:mt-0"
-      v-html="sanitizeHTML(note.content)"
+      v-html="sanitizeHTML(note.content, { ADD_ATTR: ['target'] })"
     />
     <!-- eslint-enable vue/no-v-html -->
     <div class="mt-1 flex items-center justify-between gap-2">

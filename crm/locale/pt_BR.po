@@ -12383,6 +12383,398 @@ msgstr "Campo reativado"
 msgid "Could not enable the field"
 msgstr "Não foi possível reativar o campo"
 
+#: crm/integrations/voip/api.py
+msgid "Unknown telephony operator: {0}"
+msgstr "Operadora de telefonia desconhecida: {0}"
+
+#: crm/fcrm/doctype/crm_telephony_agent/crm_telephony_agent.py
+msgid "{0} already has an extension for this user."
+msgstr "Este usuário já tem um ramal na {0}."
+
+#: crm/integrations/voip/api.py
+msgid "No phone number to call."
+msgstr "Não há telefone para ligar."
+
+#: crm/integrations/voip/api.py
+msgid "Choose the telephony to call with in the telephony settings."
+msgstr "Escolha a telefonia para ligar nas configurações de telefonia."
+
+#: crm/integrations/voip/api.py
+msgid "You have no {0} extension. Ask a manager to set it in the telephony settings."
+msgstr "Você não tem ramal na {0}. Peça a um gestor para cadastrá-lo nas configurações de telefonia."
+
+#: crm/integrations/voip/api4com.py
+msgid "Your API4Com plan or account does not allow this call."
+msgstr "Seu plano ou conta da API4Com não permite esta ligação."
+
+#: crm/integrations/voip/api4com.py
+msgid "Your extension was not found at API4Com. Check it in the telephony settings."
+msgstr "Seu ramal não foi encontrado na API4Com. Confira nas configurações de telefonia."
+
+#: crm/integrations/voip/api4com.py
+msgid "API4Com did not accept the number {0}."
+msgstr "A API4Com não aceitou o número {0}."
+
+#: crm/integrations/voip/api4com.py
+msgid "Your API4Com webphone is offline. Open it and try again."
+msgstr "Seu webphone da API4Com está desconectado. Abra-o e tente de novo."
+
+#: crm/integrations/voip/api4com.py
+msgid "Too many calls in a minute. Wait a moment and try again."
+msgstr "Muitas ligações em um minuto. Aguarde um pouco e tente de novo."
+
+#: crm/integrations/voip/api4com.py
+msgid "API4Com refused the call (HTTP {0})."
+msgstr "A API4Com recusou a ligação (HTTP {0})."
+
+#: frontend/src/components/Telephony/CallUI.vue
+msgid "Calling {0}: answer on your {1} extension first"
+msgstr "Ligando para {0}: atenda primeiro no seu ramal da {1}"
+
+#: frontend/src/components/Telephony/CallUI.vue
+msgid "Could not make the call"
+msgstr "Não foi possível fazer a ligação"
+
+#: crm/fcrm/doctype/crm_telephony_extension/crm_telephony_extension.json
+msgid "CRM Telephony Extension"
+msgstr "Ramal de telefonia"
+
+#: crm/fcrm/doctype/crm_telephony_extension/crm_telephony_extension.json
+msgid "Telephony Operator"
+msgstr "Operadora"
+
+#: crm/fcrm/doctype/crm_telephony_extension/crm_telephony_extension.json
+msgid "Telephony operator, as in the call log (e.g. API4Com)"
+msgstr "Operadora de telefonia, como no registro de ligações (ex.: API4Com)"
+
+#: crm/fcrm/doctype/crm_telephony_agent/crm_telephony_agent.json
+msgid "Extension of this user at each telephony operator (one per operator)"
+msgstr "Ramal deste usuário em cada operadora de telefonia (um por operadora)"
+
+#: frontend/src/components/Settings/Telephony/NvoipSettings.vue
+msgid "Nvoip Settings"
+msgstr "Configurações da Nvoip"
+
+#: frontend/src/components/Settings/Telephony/NvoipSettings.vue
+msgid "Nvoip numbersip"
+msgstr "Numbersip da Nvoip"
+
+#: frontend/src/components/Settings/Telephony/NvoipSettings.vue
+msgid "Nvoip user-token"
+msgstr "User-token da Nvoip"
+
+#: frontend/src/components/Settings/Telephony/NvoipSettings.vue
+msgid "Nvoip Integration Disabled"
+msgstr "Integração com a Nvoip desligada"
+
+#: frontend/src/components/Settings/Telephony/TelephonySettings.vue
+msgid "Nvoip"
+msgstr "Nvoip"
+
+#: frontend/src/components/Settings/Telephony/NvoipSettings.vue
+msgid "Your company hires Nvoip directly. Calls made from a card and incoming calls land on the timeline of the deal of that number, in the name of the salesperson of the extension. Nvoip has no call webhook: calls are read every few minutes."
+msgstr "Sua empresa contrata a Nvoip direto. Ligações feitas a partir de um card e ligações recebidas entram na linha do tempo do negócio desse número, em nome do vendedor do ramal. A Nvoip não tem aviso de ligação: as ligações são lidas a cada poucos minutos."
+
+#: frontend/src/components/Settings/Telephony/NvoipSettings.vue
+msgid "Both are in the Nvoip panel, under API. The user-token is not the same as the access_token Nvoip generates from it."
+msgstr "Os dois ficam no painel da Nvoip, em API. O user-token não é o mesmo que o access_token que a Nvoip gera a partir dele."
+
+#: frontend/src/components/Settings/Telephony/NvoipSettings.vue
+msgid "Enable Nvoip to record the calls of your Nvoip account on the timeline of your deals"
+msgstr "Ligue a Nvoip para registrar as ligações da sua conta Nvoip na linha do tempo dos seus negócios"
+
+#: frontend/src/components/Settings/Telephony/NvoipSettings.vue
+msgid "Nvoip settings saved"
+msgstr "Configurações da Nvoip salvas"
+
+#: frontend/src/components/Settings/Telephony/NvoipSettings.vue
+msgid "The Nvoip extension (numbersip of that user, or sub-account id) of each salesperson, so each call goes in their name."
+msgstr "O ramal na Nvoip (numbersip ou id da subconta) de cada vendedor, para cada ligação entrar em nome de quem a fez ou atendeu."
+
+#: frontend/src/components/Settings/Telephony/TelephonySettings.vue
+msgid "Record the calls of your Nvoip account on the timeline of your deals"
+msgstr "Registrar as ligações da sua conta Nvoip na linha do tempo dos seus negócios"
+
+#: frontend/src/components/Settings/Telephony/WavixSettings.vue
+msgid "Wavix Settings"
+msgstr "Configurações da Wavix"
+
+#: frontend/src/components/Settings/Telephony/WavixSettings.vue
+msgid "Wavix API key"
+msgstr "Chave de API da Wavix"
+
+#: frontend/src/components/Settings/Telephony/WavixSettings.vue
+msgid "Create a key in the Wavix panel and paste it here. It is never shown again."
+msgstr "Crie uma chave no painel da Wavix e cole aqui. Ela não aparece de novo."
+
+#: frontend/src/components/Settings/Telephony/WavixSettings.vue
+msgid "Registered at Wavix automatically when the key is saved. Only needed by hand if Wavix support asks for it."
+msgstr "Cadastrado na Wavix automaticamente ao salvar a chave. Só é preciso à mão se o suporte da Wavix pedir."
+
+#: frontend/src/components/Settings/Telephony/WavixSettings.vue
+msgid "The current address stops working at once and the new one is registered at Wavix."
+msgstr "O endereço atual deixa de funcionar na hora e o novo é cadastrado na Wavix."
+
+#: frontend/src/components/Settings/Telephony/WavixSettings.vue
+msgid "Wavix Integration Disabled"
+msgstr "Integração com a Wavix desligada"
+
+#: frontend/src/components/Settings/Telephony/WavixSettings.vue
+msgid "Enable Wavix to record the calls of your Wavix account on the timeline of your deals"
+msgstr "Ligue a Wavix para registrar as ligações da sua conta Wavix na linha do tempo dos seus negócios"
+
+#: frontend/src/components/Settings/Telephony/WavixSettings.vue
+msgid "Wavix settings saved"
+msgstr "Configurações da Wavix salvas"
+
+#: frontend/src/components/Settings/Telephony/WavixSettings.vue
+msgid "New secret generated and registered at Wavix"
+msgstr "Novo segredo gerado e cadastrado na Wavix"
+
+#: frontend/src/components/Settings/Telephony/WavixSettings.vue
+msgid "Your company hires Wavix directly. Each call lands on the timeline of the deal of that number. Calling from a card is not ready yet: it needs the Wavix Embeddable browser widget, still pending confirmation with a real account."
+msgstr "Sua empresa contrata a Wavix direto. Cada ligação entra na linha do tempo do negócio desse número. Ligar a partir de um card ainda não está pronto: depende do widget da Wavix pelo navegador (Wavix Embeddable), que ainda falta confirmar com uma conta real."
+
+#: frontend/src/components/Settings/Telephony/TelephonySettings.vue
+msgid "Wavix"
+msgstr "Wavix"
+
+#: frontend/src/components/Settings/Telephony/TelephonySettings.vue
+msgid "Record the calls of your Wavix account on the timeline of your deals"
+msgstr "Registrar as ligações da sua conta Wavix na linha do tempo dos seus negócios"
+
+#: crm/integrations/voip/telnyx.py
+msgid "Use the salesperson's phone in international format (+5548999990000) or a SIP address (sip:name@domain)."
+msgstr "Use o telefone do vendedor no formato internacional (+5548999990000) ou um endereço SIP (sip:nome@dominio)."
+
+#: crm/integrations/voip/telnyx.py
+msgid "Telnyx refused the API key. Check it in the telephony settings."
+msgstr "A Telnyx recusou a chave da API. Confira nas configurações de telefonia."
+
+#: crm/integrations/voip/telnyx.py
+msgid "Your Telnyx account does not allow this call (balance, verification or outbound profile)."
+msgstr "Sua conta Telnyx não permite esta ligação (saldo, verificação ou perfil de saída)."
+
+#: crm/integrations/voip/telnyx.py
+msgid "The Telnyx Call Control Application was not found. Check its ID in the telephony settings."
+msgstr "A Call Control Application da Telnyx não foi encontrada. Confira o ID nas configurações de telefonia."
+
+#: crm/integrations/voip/telnyx.py
+msgid "Telnyx did not accept the numbers of this call. Check your extension and the caller number."
+msgstr "A Telnyx não aceitou os números desta ligação. Confira o seu ramal e o número exibido ao cliente."
+
+#: crm/integrations/voip/telnyx.py
+msgid "Telnyx refused the call (HTTP {0})."
+msgstr "A Telnyx recusou a ligação (HTTP {0})."
+
+#: crm/integrations/voip/telnyx.py
+msgid "Telnyx did not return the recording (HTTP {0})."
+msgstr "A Telnyx não devolveu a gravação (HTTP {0})."
+
+#: crm/integrations/voip/telnyx.py
+msgid "Telnyx did not return the recording."
+msgstr "A Telnyx não devolveu a gravação."
+
+#: crm/integrations/voip/telnyx.py
+msgid "Could not reach Telnyx. Please try again in a few minutes."
+msgstr "Não foi possível falar com a Telnyx. Tente de novo em alguns minutos."
+
+#: crm/fcrm/doctype/crm_telnyx_settings/crm_telnyx_settings.py
+msgid "Paste the Telnyx API key."
+msgstr "Cole a chave da API da Telnyx."
+
+#: crm/fcrm/doctype/crm_telnyx_settings/crm_telnyx_settings.py
+msgid "Enter the ID of the Telnyx Call Control Application."
+msgstr "Informe o ID da Call Control Application da Telnyx."
+
+#: crm/fcrm/doctype/crm_telnyx_settings/crm_telnyx_settings.py
+msgid "Enter the caller number in international format, e.g. +5548999990000."
+msgstr "Informe o número exibido ao cliente no formato internacional, por exemplo +5548999990000."
+
+#: crm/fcrm/doctype/crm_telnyx_settings/crm_telnyx_settings.py
+msgid "Paste the Telnyx public key as shown in the portal (Keys & Credentials > Public Key)."
+msgstr "Cole a chave pública da Telnyx como aparece no portal (Keys & Credentials > Public Key)."
+
+#: crm/fcrm/doctype/crm_telnyx_settings/crm_telnyx_settings.py
+msgid "Telnyx refused the API key. Check that it was copied whole."
+msgstr "A Telnyx recusou a chave da API. Confira se ela foi copiada inteira."
+
+#: crm/fcrm/doctype/crm_telnyx_settings/crm_telnyx_settings.py
+msgid "Telnyx did not find a Call Control Application with this ID."
+msgstr "A Telnyx não encontrou uma Call Control Application com este ID."
+
+#: crm/fcrm/doctype/crm_telnyx_settings/crm_telnyx_settings.py
+msgid "Telnyx refused the settings (HTTP {0})."
+msgstr "A Telnyx recusou as configurações (HTTP {0})."
+
+#: crm/fcrm/doctype/crm_telnyx_settings/crm_telnyx_settings.json
+msgid "CRM Telnyx Settings"
+msgstr "Configurações da Telnyx"
+
+#: crm/fcrm/doctype/crm_telnyx_settings/crm_telnyx_settings.json
+msgid "Call Control Application ID"
+msgstr "ID da Call Control Application"
+
+#: crm/fcrm/doctype/crm_telnyx_settings/crm_telnyx_settings.json
+msgid "Caller Number"
+msgstr "Número exibido ao cliente"
+
+#: crm/fcrm/doctype/crm_telnyx_settings/crm_telnyx_settings.json
+msgid "Webhook Public Key"
+msgstr "Chave pública do webhook"
+
+#: frontend/src/components/Settings/Telephony/TelnyxSettings.vue
+msgid "Telnyx Settings"
+msgstr "Configurações da Telnyx"
+
+#: frontend/src/components/Settings/Telephony/TelnyxSettings.vue
+msgid "Your company hires Telnyx directly. A call made from a card rings the salesperson first, then the customer, and lands on the timeline of that deal with its recording. Calls go through your Call Control Application; your numbers keep their own routing for incoming calls."
+msgstr "Sua empresa contrata a Telnyx direto. Uma ligação feita a partir de um card chama primeiro o vendedor, depois o cliente, e entra na linha do tempo desse negócio com a gravação. As ligações passam pela sua Call Control Application; seus números continuam com o próprio roteamento para as ligações recebidas."
+
+#: frontend/src/components/Settings/Telephony/TelnyxSettings.vue
+msgid "Telnyx API key"
+msgstr "Chave da API da Telnyx"
+
+#: frontend/src/components/Settings/Telephony/TelnyxSettings.vue
+msgid "Number shown to the customer"
+msgstr "Número exibido ao cliente"
+
+#: frontend/src/components/Settings/Telephony/TelnyxSettings.vue
+msgid "Webhook public key"
+msgstr "Chave pública do webhook"
+
+#: frontend/src/components/Settings/Telephony/TelnyxSettings.vue
+msgid "In the Telnyx portal: API key and public key under Account Settings > Keys & Credentials; the application ID under Voice > Programmable Voice. The application needs an outbound voice profile that allows calls to your customers."
+msgstr "No portal da Telnyx: chave da API e chave pública em Account Settings > Keys & Credentials; o ID da aplicação em Voice > Programmable Voice. A aplicação precisa de um perfil de saída (outbound voice profile) que permita ligar para os seus clientes."
+
+#: frontend/src/components/Settings/Telephony/TelnyxSettings.vue
+msgid "The phone of each salesperson in international format (+5548999990000) or their SIP address (sip:name@domain): Telnyx rings it first, then the customer."
+msgstr "O telefone de cada vendedor no formato internacional (+5548999990000) ou o endereço SIP dele (sip:nome@dominio): a Telnyx chama esse número primeiro e depois o cliente."
+
+#: frontend/src/components/Settings/Telephony/TelnyxSettings.vue
+msgid "Telnyx Integration Disabled"
+msgstr "Integração com a Telnyx desligada"
+
+#: frontend/src/components/Settings/Telephony/TelnyxSettings.vue
+msgid "Enable Telnyx to call your customers from a card and record the calls on the timeline of your deals"
+msgstr "Ligue a Telnyx para ligar para os seus clientes a partir de um card e registrar as ligações na linha do tempo dos seus negócios"
+
+#: frontend/src/components/Settings/Telephony/TelnyxSettings.vue
+msgid "Telnyx settings saved"
+msgstr "Configurações da Telnyx salvas"
+
+#: frontend/src/components/Settings/Telephony/TelephonySettings.vue
+msgid "Telnyx"
+msgstr "Telnyx"
+
+#: frontend/src/components/Settings/Telephony/TelephonySettings.vue
+msgid "Call your customers from a card through Telnyx and record the calls on your deals"
+msgstr "Ligar para os seus clientes a partir de um card pela Telnyx e registrar as ligações nos seus negócios"
+
+#: crm/integrations/voip/zenvia.py
+msgid "Use the salesperson's Zenvia extension (2 to 6 digits) or their phone in international format (+5548999990000)."
+msgstr "Use o ramal do vendedor na Zenvia (2 a 6 dígitos) ou o telefone dele no formato internacional (+5548999990000)."
+
+#: crm/integrations/voip/zenvia.py
+msgid "Zenvia refused the access token. Check it in the telephony settings."
+msgstr "A Zenvia recusou o access token. Confira nas configurações de telefonia."
+
+#: crm/integrations/voip/zenvia.py
+msgid "Zenvia refused the call: {0}"
+msgstr "A Zenvia recusou a ligação: {0}"
+
+#: crm/integrations/voip/zenvia.py
+msgid "Zenvia refused the call (HTTP {0})."
+msgstr "A Zenvia recusou a ligação (HTTP {0})."
+
+#: crm/integrations/voip/zenvia.py
+msgid "Zenvia refused the access token. Check that it was copied whole."
+msgstr "A Zenvia recusou o access token. Confira se ele foi copiado inteiro."
+
+#: crm/integrations/voip/zenvia.py
+msgid "Zenvia refused the settings (HTTP {0})."
+msgstr "A Zenvia recusou as configurações (HTTP {0})."
+
+#: crm/integrations/voip/zenvia.py
+msgid "Could not reach Zenvia. Please try again in a few minutes."
+msgstr "Não foi possível falar com a Zenvia. Tente de novo em alguns minutos."
+
+#: crm/fcrm/doctype/crm_zenvia_settings/crm_zenvia_settings.py
+msgid "Paste the Zenvia access token."
+msgstr "Cole o access token da Zenvia."
+
+#: crm/fcrm/doctype/crm_zenvia_settings/crm_zenvia_settings.json
+msgid "CRM Zenvia Settings"
+msgstr "Configurações da Zenvia"
+
+#: frontend/src/components/Settings/Telephony/ZenviaSettings.vue
+msgid "Zenvia Settings"
+msgstr "Configurações da Zenvia"
+
+#: frontend/src/components/Settings/Telephony/ZenviaSettings.vue
+msgid "Your company hires Zenvia directly. A call made from a card rings the salesperson first, then the customer, and lands on the timeline of that deal with its recording. Calls made from a Zenvia extension and calls received on your numbers land on the deals of that number."
+msgstr "Sua empresa contrata a Zenvia direto. Uma ligação feita a partir de um card chama primeiro o vendedor, depois o cliente, e entra na linha do tempo desse negócio com a gravação. Ligações feitas de um ramal da Zenvia e ligações recebidas nos seus números entram nos negócios desse número."
+
+#: frontend/src/components/Settings/Telephony/ZenviaSettings.vue
+msgid "Zenvia access token"
+msgstr "Access token da Zenvia"
+
+#: frontend/src/components/Settings/Telephony/ZenviaSettings.vue
+msgid "Number shown to the customer (optional)"
+msgstr "Número exibido ao cliente (opcional)"
+
+#: frontend/src/components/Settings/Telephony/ZenviaSettings.vue
+msgid "The access token is in the Zenvia voice panel, under Minha Conta."
+msgstr "O access token fica no painel de voz da Zenvia, em Minha Conta."
+
+#: frontend/src/components/Settings/Telephony/ZenviaSettings.vue
+msgid "Call webhooks"
+msgstr "Avisos de ligação (webhooks)"
+
+#: frontend/src/components/Settings/Telephony/ZenviaSettings.vue
+msgid "Paste each address in the Zenvia voice panel, under Desenvolvedores > Configurações da API. Zenvia may take up to 20 minutes to start sending."
+msgstr "Cole cada endereço no painel de voz da Zenvia, em Desenvolvedores > Configurações da API. A Zenvia pode levar até 20 minutos para começar a enviar."
+
+#: frontend/src/components/Settings/Telephony/ZenviaSettings.vue
+msgid "Chamada - Fim"
+msgstr "Chamada - Fim"
+
+#: frontend/src/components/Settings/Telephony/ZenviaSettings.vue
+msgid "DID - Fim de Chamada"
+msgstr "DID - Fim de Chamada"
+
+#: frontend/src/components/Settings/Telephony/ZenviaSettings.vue
+msgid "The current addresses stop working at once; paste the new ones in the Zenvia panel."
+msgstr "Os endereços atuais param de funcionar na hora; cole os novos no painel da Zenvia."
+
+#: frontend/src/components/Settings/Telephony/ZenviaSettings.vue
+msgid "New secret generated: paste the new addresses in the Zenvia panel"
+msgstr "Novo segredo gerado: cole os novos endereços no painel da Zenvia"
+
+#: frontend/src/components/Settings/Telephony/ZenviaSettings.vue
+msgid "The Zenvia extension (2 to 6 digits) or the phone in international format (+5548999990000) of each salesperson: Zenvia rings it first, then the customer."
+msgstr "O ramal na Zenvia (2 a 6 dígitos) ou o telefone no formato internacional (+5548999990000) de cada vendedor: a Zenvia chama esse número primeiro e depois o cliente."
+
+#: frontend/src/components/Settings/Telephony/ZenviaSettings.vue
+msgid "Zenvia Integration Disabled"
+msgstr "Integração com a Zenvia desligada"
+
+#: frontend/src/components/Settings/Telephony/ZenviaSettings.vue
+msgid "Enable Zenvia to call your customers from a card and record the calls on the timeline of your deals"
+msgstr "Ligue a Zenvia para ligar para os seus clientes a partir de um card e registrar as ligações na linha do tempo dos seus negócios"
+
+#: frontend/src/components/Settings/Telephony/ZenviaSettings.vue
+msgid "Zenvia settings saved"
+msgstr "Configurações da Zenvia salvas"
+
+#: frontend/src/components/Settings/Telephony/TelephonySettings.vue
+msgid "Zenvia"
+msgstr "Zenvia"
+
+#: frontend/src/components/Settings/Telephony/TelephonySettings.vue
+msgid "Call your customers from a card through Zenvia and record the calls on your deals"
+msgstr "Ligar para os seus clientes a partir de um card pela Zenvia e registrar as ligações nos seus negócios"
+
 #: credtech#259
 msgid "Calls made through the integrated telephony are logged here, along with calls you log by hand on a lead or deal."
 msgstr "As ligações feitas pela telefonia integrada ficam registradas aqui, junto com as que você registra manualmente em um card."
