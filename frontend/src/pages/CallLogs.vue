@@ -55,12 +55,14 @@
     :title="__('No call logs yet')"
     :description="
       __(
-        'Calls made through Twilio or Exotel are logged here, along with calls you log by hand on a lead or deal.',
+        'Calls made through the integrated telephony are logged here, along with calls you log by hand on a lead or deal.',
       )
     "
     :filtered="!!Object.keys(callLogs.params?.filters || {}).length"
     @create="createCallLog()"
-  />
+  >
+    <TelephonyOffer class="mt-4" />
+  </EmptyState>
   <CallLogDetailModal
     v-model="showCallLogDetailModal"
     v-model:callLog="callLog"
@@ -75,6 +77,7 @@ import LayoutHeader from '@/components/LayoutHeader.vue'
 import ViewControls from '@/components/ViewControls.vue'
 import CallLogsListView from '@/components/ListViews/CallLogsListView.vue'
 import EmptyState from '@/components/ListViews/EmptyState.vue'
+import TelephonyOffer from '@/components/Telephony/TelephonyOffer.vue'
 import CallLogDetailModal from '@/components/Modals/CallLogDetailModal.vue'
 import { useDoctypeModal } from '@/composables/doctypeModal'
 import { getCallLogDetail } from '@/utils/callLog'

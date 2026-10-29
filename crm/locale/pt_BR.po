@@ -12382,3 +12382,67 @@ msgstr "Campo reativado"
 #: frontend/src/components/Settings/FormCustomization/FormCustomizationPage.vue
 msgid "Could not enable the field"
 msgstr "Não foi possível reativar o campo"
+
+#: credtech#259
+msgid "Calls made through the integrated telephony are logged here, along with calls you log by hand on a lead or deal."
+msgstr "As ligações feitas pela telefonia integrada ficam registradas aqui, junto com as que você registra manualmente em um card."
+
+#: credtech#259
+msgid "Integrated telephony: API4Com, Twilio and Exotel."
+msgstr "Telefonias integradas: API4Com, Twilio e Exotel."
+
+#: credtech#259
+msgid "Set up telephony"
+msgstr "Configurar telefonia"
+
+#: credtech#259
+msgid "Request another telephony"
+msgstr "Solicitar outra telefonia"
+
+#: credtech#259
+msgid "Request another telephony integration"
+msgstr "Solicitar integração com outra telefonia"
+
+#: credtech#259
+msgid "Tell us which telephony company you use. CredTech studies the integration from the API documentation and gets back to you."
+msgstr "Conte qual empresa de telefonia você usa. A CredTech estuda a integração a partir da documentação da API e retorna para você."
+
+#: credtech#259
+msgid "Telephony company"
+msgstr "Empresa de telefonia"
+
+#: credtech#259
+msgid "E.g. Zenvia"
+msgstr "Ex.: Zenvia"
+
+#: credtech#259
+msgid "API documentation link (optional)"
+msgstr "Link da documentação da API (opcional)"
+
+#: credtech#259
+msgid "How do you use it? (optional)"
+msgstr "Como vocês usam? (opcional)"
+
+#: credtech#259
+msgid "E.g. click to call from the deal and keep the recording"
+msgstr "Ex.: ligar pelo card e guardar a gravação"
+
+#: credtech#259
+msgid "Send request"
+msgstr "Enviar pedido"
+
+#: credtech#259
+msgid "Request sent. The CredTech team will get back to you."
+msgstr "Pedido enviado. A equipe da CredTech vai retornar para você."
+
+#: credtech#259
+msgid "Another telephony company"
+msgstr "Outra empresa de telefonia"
+
+#: credtech#259
+msgid "Use another telephony? Ask for the integration: CredTech studies it from the API documentation."
+msgstr "Usa outra telefonia? Peça a integração: a CredTech estuda a partir da documentação da API."
+
+#: credtech#259
+msgid "Request integration"
+msgstr "Solicitar integração"
