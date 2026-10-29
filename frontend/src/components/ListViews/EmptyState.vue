@@ -39,6 +39,7 @@
           :href="docsLink"
         />
       </div>
+      <slot />
     </div>
   </div>
 </template>

@@ -354,6 +354,26 @@
           @click="emit('updateStep', 'zenvia-settings')"
         />
       </div>
+      <div class="h-px border-t mx-2 border-outline-elevation-2" />
+      <div class="flex items-center justify-between py-3 px-2">
+        <div class="flex flex-col gap-1">
+          <span class="text-base-medium text-ink-gray-8">
+            {{ __('Another telephony company') }}
+          </span>
+          <span class="text-p-sm text-ink-gray-6">
+            {{
+              __(
+                'Use another telephony? Ask for the integration: CredTech studies it from the API documentation.',
+              )
+            }}
+          </span>
+        </div>
+        <Button
+          :label="__('Request integration')"
+          @click="showTelephonyRequest = true"
+        />
+      </div>
+      <TelephonyRequestModal v-model="showTelephonyRequest" />
     </div>
     <ErrorMessage
       :message="isNewDoc ? insertResource.error : telephonyAgent.save?.error"
@@ -368,6 +388,7 @@ import {
   createResource,
   toast,
 } from 'frappe-ui'
+import TelephonyRequestModal from '@/components/Modals/TelephonyRequestModal.vue'
 import { useTelephony, voipOperators } from '@/composables/telephony'
 import { useDocument } from '@/data/document'
 import { usersStore } from '@/stores/users'
@@ -377,6 +398,9 @@ import { ref, computed } from 'vue'
 const { isEnabled } = useTelephony()
 
 const emit = defineEmits(['updateStep'])
+
+// credtech#259: ask CredTech for another telephony integration
+const showTelephonyRequest = ref(false)
 
 const { getUser, isManager } = usersStore()
 
