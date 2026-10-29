@@ -5,10 +5,12 @@ and the call lands on the timeline of the deal(s) it belongs to (credtech#47).
 """
 
 import hmac
+from decimal import Decimal
 
 import frappe
 from frappe import _
 from frappe.integrations.utils import create_request_log
+from frappe.utils import cstr, flt
 
 from crm.integrations.api import get_contact_by_phone_number
 from crm.integrations.voip.base import Operator
@@ -44,6 +46,7 @@ def telnyx(**kwargs):
 	adapter.on_answered(settings, payload)
 	adapter.on_recording_saved(settings, payload)
 	receive(operator)
+	adapter.attach_waiting_recording(payload)
 
 
 # Zenvia doesn't sign its webhooks: the secret in the URL authenticates them. The company pastes two
@@ -97,6 +100,7 @@ def record_call(call: dict, medium: str):
 	try:
 		is_new = not frappe.db.exists("CRM Call Log", call["id"])
 		call_log = frappe.new_doc("CRM Call Log") if is_new else frappe.get_doc("CRM Call Log", call["id"])
+		before = None if is_new else {field: comparable(call_log.get(field)) for field in RECORDED_FIELDS}
 		outgoing = call["type"] == "Outgoing"
 		call_log.update(
 			{
@@ -117,12 +121,41 @@ def record_call(call: dict, medium: str):
 		agent = agent_of_extension(call["extension"], medium)
 		if agent:
 			call_log.set("caller" if outgoing else "receiver", agent)
+		# Polling reads recent calls again on every run: the same call with nothing new writes nothing
+		# (no new "modified", no hooks)
+		if before is not None and before == {
+			field: comparable(call_log.get(field)) for field in RECORDED_FIELDS
+		}:
+			return
 		if is_new:
 			link_to_deals(call_log, call)
 		call_log.save(ignore_permissions=True)
 		frappe.db.commit()
 	finally:
 		frappe.db.sql("SELECT RELEASE_LOCK(%s)", lock)
+
+
+RECORDED_FIELDS = (
+	"type",
+	"from",
+	"to",
+	"status",
+	"start_time",
+	"end_time",
+	"duration",
+	"recording_url",
+	"telephony_medium",
+	"medium",
+	"caller",
+	"receiver",
+)
+
+
+def comparable(value):
+	"""Same value whether it came from the operator or back from the database (17 and 17.0, datetimes)."""
+	if isinstance(value, bool | int | float | Decimal):
+		return flt(value)
+	return cstr(value)
 
 
 def agent_of_extension(extension: str, medium: str) -> str | None:

@@ -284,6 +284,35 @@ class TestTelnyxWebhook(FrappeTestCase):
 		)
 		frappe.cache().delete_value(telnyx.RECORDING_CACHE_KEY.format("telnyx-early"))
 
+	def test_missing_public_key_is_refused_not_a_server_error(self):
+		frappe.db.set_single_value("CRM Telnyx Settings", "public_key", "")
+		with self.assertRaises(frappe.PermissionError):
+			self.post(event("call.hangup", state(), hangup_cause="normal_clearing"))
+
+	def test_refused_transfer_hangs_up_and_records_a_failed_call(self):
+		deal = make_deal("+55 48 98888-7777")
+		with patch("crm.integrations.voip.telnyx.requests.request", return_value=response(422)) as call:
+			self.post(event("call.answered", state(leg="agent", deal=deal)))
+
+		urls = [c.args[1] for c in call.call_args_list]
+		self.assertTrue(urls[0].endswith("/actions/transfer"))
+		self.assertTrue(urls[1].endswith("/actions/hangup"))
+		log = frappe.get_doc("CRM Call Log", "telnyx-abc123")
+		self.assertEqual((log.status, log.reference_docname), ("Failed", deal))
+
+	def test_recording_that_arrived_during_the_hangup_is_attached(self):
+		self.post(event("call.hangup", state(call_id="telnyx-race"), hangup_cause="normal_clearing"))
+		key = telnyx.RECORDING_CACHE_KEY.format("telnyx-race")
+		frappe.cache().set_value(key, "https://api.telnyx.com/v2/recordings/rec-9")
+
+		telnyx.attach_waiting_recording(event("call.hangup", state(call_id="telnyx-race")))
+
+		self.assertEqual(
+			frappe.db.get_value("CRM Call Log", "telnyx-race", "recording_url"),
+			"https://api.telnyx.com/v2/recordings/rec-9",
+		)
+		self.assertIsNone(frappe.cache().get_value(key))
+
 	def test_recording_plays_from_a_fresh_link(self):
 		self.post(event("call.hangup", state(), hangup_cause="normal_clearing"))
 		frappe.db.set_value(

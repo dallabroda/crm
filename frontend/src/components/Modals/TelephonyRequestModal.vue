@@ -16,7 +16,7 @@
         <FormControl
           v-model="provider"
           :label="__('Telephony company')"
-          :placeholder="__('E.g. Zenvia')"
+          :placeholder="__('E.g. Vonage')"
           :maxlength="140"
           required
         />

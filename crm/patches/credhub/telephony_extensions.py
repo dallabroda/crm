@@ -12,6 +12,9 @@ def execute():
 		as_dict=True,
 	)
 	for row in rows:
+		extension = row.api4com_extension.strip()
+		if not extension:
+			continue
 		if frappe.db.exists(
 			"CRM Telephony Extension",
 			{"parenttype": "CRM Telephony Agent", "parent": row.name, "medium": "API4Com"},
@@ -26,6 +29,6 @@ def execute():
 				"parentfield": "extensions",
 				"idx": 1,
 				"medium": "API4Com",
-				"extension": row.api4com_extension.strip(),
+				"extension": extension,
 			}
 		).db_insert()
