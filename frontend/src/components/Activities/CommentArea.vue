@@ -48,7 +48,10 @@
       </template>
       <template v-else>
         <!-- eslint-disable-next-line vue/no-v-html -->
-        <div class="prose-f" v-html="sanitizeHTML(activity.content)" />
+        <div
+          class="prose-f"
+          v-html="sanitizeHTML(activity.content, { ADD_ATTR: ['target'] })"
+        />
         <div
           v-if="activity.attachments?.length"
           class="mt-2 flex flex-wrap gap-2"

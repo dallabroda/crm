@@ -86,7 +86,17 @@
                     v-if="contact.doc.company_name"
                     class="flex items-center gap-1.5 text-base text-ink-gray-8"
                   >
-                    {{ contact.doc.company_name }}
+                    <router-link
+                      v-if="getOrganization(contact.doc.company_name)"
+                      :to="{
+                        name: 'Organization',
+                        params: { organizationId: contact.doc.company_name },
+                      }"
+                      class="truncate hover:underline"
+                    >
+                      {{ contact.doc.company_name }}
+                    </router-link>
+                    <template v-else>{{ contact.doc.company_name }}</template>
                   </div>
                   <ErrorMessage :message="__(error)" />
                 </div>
@@ -98,6 +108,13 @@
                   size="sm"
                   :iconLeft="PhoneIcon"
                   @click="callEnabled && makeCall(contact.doc.mobile_no)"
+                />
+                <Button
+                  v-if="contact.doc.mobile_no"
+                  :label="__('WhatsApp')"
+                  size="sm"
+                  :iconLeft="WhatsAppIcon"
+                  @click="showWhatsApp = true"
                 />
                 <Button
                   v-if="canDelete"
@@ -152,6 +169,7 @@
 
         <RecordNotes
           v-if="tab.value === 'notes' && docName"
+          :key="notesKey"
           :doctype="'Contact'"
           :docname="docName"
           @count="(n) => (notesCount = n)"
@@ -182,6 +200,14 @@
     v-model="showDealModal"
     :defaults="dealDefaults"
   />
+  <SmartChatWhatsAppModal
+    v-if="showWhatsApp"
+    v-model:open="showWhatsApp"
+    :contact="contact.doc.name"
+    :phone="contact.doc.mobile_no"
+    :name="contact.doc.full_name"
+    @sent="notesKey++"
+  />
 </template>
 
 <script setup>
@@ -193,6 +219,8 @@ import Icon from '@/components/Icon.vue'
 import SidePanelLayout from '@/components/SidePanelLayout.vue'
 import LayoutHeader from '@/components/LayoutHeader.vue'
 import PhoneIcon from '@/components/Icons/PhoneIcon.vue'
+import WhatsAppIcon from '@/components/Icons/WhatsAppIcon.vue'
+import SmartChatWhatsAppModal from '@/components/Modals/SmartChatWhatsAppModal.vue'
 import CameraIcon from '@/components/Icons/CameraIcon.vue'
 import DealsIcon from '@/components/Icons/DealsIcon.vue'
 import DealsListView from '@/components/ListViews/DealsListView.vue'
@@ -304,6 +332,10 @@ usePageMeta(() => {
 })
 const showDeleteLinkedDocModal = ref(false)
 const showDealModal = ref(false)
+// WhatsApp through the company's SmartChat, as on the card (credtech#258); the
+// sent message is kept as a note, so the notes tab is reloaded
+const showWhatsApp = ref(false)
+const notesKey = ref(0)
 const dealDefaults = ref({})
 
 // company_name is free text, so only pick an existing organization; otherwise the deal creates one
@@ -399,7 +431,19 @@ const parsedSections = computed(() => {
         field.label = fieldLabelMap[field.fieldname] || field.label
         field.placeholder =
           fieldPlaceholderMap[field.fieldname] || field.placeholder
-        return transformField(field, { showAddressModal })
+        const transformed = transformField(field, { showAddressModal })
+        if (field.fieldname !== 'company_name') return transformed
+        // company_name is free text: it opens the organization only when one
+        // has that name (credtech#258)
+        return {
+          ...transformed,
+          canLink: (name) => Boolean(getOrganization(name)),
+          link: (name) =>
+            router.push({
+              name: 'Organization',
+              params: { organizationId: name },
+            }),
+        }
       }),
     })),
   }))

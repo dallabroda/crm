@@ -377,9 +377,10 @@
                       <div class="ml-1">
                         <ArrowUpRightIcon
                           v-if="
-                            field.fieldtype === 'Link' &&
                             field.link &&
-                            doc[field.fieldname]
+                            doc[field.fieldname] &&
+                            (field.fieldtype === 'Link' ||
+                              field.canLink?.(doc[field.fieldname]))
                           "
                           class="relative -left-[13px] h-4 w-4 shrink-0 cursor-pointer text-ink-gray-5 hover:text-ink-gray-8"
                           @click.stop="field.link(doc[field.fieldname])"
