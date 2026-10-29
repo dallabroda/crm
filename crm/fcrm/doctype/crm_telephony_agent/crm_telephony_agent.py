@@ -19,7 +19,7 @@ class CRMTelephonyAgent(Document):
 		from crm.fcrm.doctype.crm_telephony_phone.crm_telephony_phone import CRMTelephonyPhone
 
 		call_receiving_device: DF.Literal["Computer", "Phone"]
-		default_medium: DF.Literal["", "Twilio", "Exotel", "API4Com"]
+		default_medium: DF.Literal["", "Twilio", "Exotel", "API4Com", "Nvoip"]
 		exotel_number: DF.Data | None
 		extensions: DF.Table[CRMTelephonyExtension]
 		mobile_no: DF.Data | None
