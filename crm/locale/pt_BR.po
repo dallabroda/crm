@@ -12622,3 +12622,107 @@ msgstr "Telnyx"
 #: frontend/src/components/Settings/Telephony/TelephonySettings.vue
 msgid "Call your customers from a card through Telnyx and record the calls on your deals"
 msgstr "Ligar para os seus clientes a partir de um card pela Telnyx e registrar as ligações nos seus negócios"
+
+#: crm/integrations/voip/zenvia.py
+msgid "Use the salesperson's Zenvia extension (2 to 6 digits) or their phone in international format (+5548999990000)."
+msgstr "Use o ramal do vendedor na Zenvia (2 a 6 dígitos) ou o telefone dele no formato internacional (+5548999990000)."
+
+#: crm/integrations/voip/zenvia.py
+msgid "Zenvia refused the access token. Check it in the telephony settings."
+msgstr "A Zenvia recusou o access token. Confira nas configurações de telefonia."
+
+#: crm/integrations/voip/zenvia.py
+msgid "Zenvia refused the call: {0}"
+msgstr "A Zenvia recusou a ligação: {0}"
+
+#: crm/integrations/voip/zenvia.py
+msgid "Zenvia refused the call (HTTP {0})."
+msgstr "A Zenvia recusou a ligação (HTTP {0})."
+
+#: crm/integrations/voip/zenvia.py
+msgid "Zenvia refused the access token. Check that it was copied whole."
+msgstr "A Zenvia recusou o access token. Confira se ele foi copiado inteiro."
+
+#: crm/integrations/voip/zenvia.py
+msgid "Zenvia refused the settings (HTTP {0})."
+msgstr "A Zenvia recusou as configurações (HTTP {0})."
+
+#: crm/integrations/voip/zenvia.py
+msgid "Could not reach Zenvia. Please try again in a few minutes."
+msgstr "Não foi possível falar com a Zenvia. Tente de novo em alguns minutos."
+
+#: crm/fcrm/doctype/crm_zenvia_settings/crm_zenvia_settings.py
+msgid "Paste the Zenvia access token."
+msgstr "Cole o access token da Zenvia."
+
+#: crm/fcrm/doctype/crm_zenvia_settings/crm_zenvia_settings.json
+msgid "CRM Zenvia Settings"
+msgstr "Configurações da Zenvia"
+
+#: frontend/src/components/Settings/Telephony/ZenviaSettings.vue
+msgid "Zenvia Settings"
+msgstr "Configurações da Zenvia"
+
+#: frontend/src/components/Settings/Telephony/ZenviaSettings.vue
+msgid "Your company hires Zenvia directly. A call made from a card rings the salesperson first, then the customer, and lands on the timeline of that deal with its recording. Calls made from a Zenvia extension and calls received on your numbers land on the deals of that number."
+msgstr "Sua empresa contrata a Zenvia direto. Uma ligação feita a partir de um card chama primeiro o vendedor, depois o cliente, e entra na linha do tempo desse negócio com a gravação. Ligações feitas de um ramal da Zenvia e ligações recebidas nos seus números entram nos negócios desse número."
+
+#: frontend/src/components/Settings/Telephony/ZenviaSettings.vue
+msgid "Zenvia access token"
+msgstr "Access token da Zenvia"
+
+#: frontend/src/components/Settings/Telephony/ZenviaSettings.vue
+msgid "Number shown to the customer (optional)"
+msgstr "Número exibido ao cliente (opcional)"
+
+#: frontend/src/components/Settings/Telephony/ZenviaSettings.vue
+msgid "The access token is in the Zenvia voice panel, under Minha Conta."
+msgstr "O access token fica no painel de voz da Zenvia, em Minha Conta."
+
+#: frontend/src/components/Settings/Telephony/ZenviaSettings.vue
+msgid "Call webhooks"
+msgstr "Avisos de ligação (webhooks)"
+
+#: frontend/src/components/Settings/Telephony/ZenviaSettings.vue
+msgid "Paste each address in the Zenvia voice panel, under Desenvolvedores > Configurações da API. Zenvia may take up to 20 minutes to start sending."
+msgstr "Cole cada endereço no painel de voz da Zenvia, em Desenvolvedores > Configurações da API. A Zenvia pode levar até 20 minutos para começar a enviar."
+
+#: frontend/src/components/Settings/Telephony/ZenviaSettings.vue
+msgid "Chamada - Fim"
+msgstr "Chamada - Fim"
+
+#: frontend/src/components/Settings/Telephony/ZenviaSettings.vue
+msgid "DID - Fim de Chamada"
+msgstr "DID - Fim de Chamada"
+
+#: frontend/src/components/Settings/Telephony/ZenviaSettings.vue
+msgid "The current addresses stop working at once; paste the new ones in the Zenvia panel."
+msgstr "Os endereços atuais param de funcionar na hora; cole os novos no painel da Zenvia."
+
+#: frontend/src/components/Settings/Telephony/ZenviaSettings.vue
+msgid "New secret generated: paste the new addresses in the Zenvia panel"
+msgstr "Novo segredo gerado: cole os novos endereços no painel da Zenvia"
+
+#: frontend/src/components/Settings/Telephony/ZenviaSettings.vue
+msgid "The Zenvia extension (2 to 6 digits) or the phone in international format (+5548999990000) of each salesperson: Zenvia rings it first, then the customer."
+msgstr "O ramal na Zenvia (2 a 6 dígitos) ou o telefone no formato internacional (+5548999990000) de cada vendedor: a Zenvia chama esse número primeiro e depois o cliente."
+
+#: frontend/src/components/Settings/Telephony/ZenviaSettings.vue
+msgid "Zenvia Integration Disabled"
+msgstr "Integração com a Zenvia desligada"
+
+#: frontend/src/components/Settings/Telephony/ZenviaSettings.vue
+msgid "Enable Zenvia to call your customers from a card and record the calls on the timeline of your deals"
+msgstr "Ligue a Zenvia para ligar para os seus clientes a partir de um card e registrar as ligações na linha do tempo dos seus negócios"
+
+#: frontend/src/components/Settings/Telephony/ZenviaSettings.vue
+msgid "Zenvia settings saved"
+msgstr "Configurações da Zenvia salvas"
+
+#: frontend/src/components/Settings/Telephony/TelephonySettings.vue
+msgid "Zenvia"
+msgstr "Zenvia"
+
+#: frontend/src/components/Settings/Telephony/TelephonySettings.vue
+msgid "Call your customers from a card through Zenvia and record the calls on your deals"
+msgstr "Ligar para os seus clientes a partir de um card pela Zenvia e registrar as ligações nos seus negócios"
