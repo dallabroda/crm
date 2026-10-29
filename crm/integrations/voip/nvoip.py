@@ -90,9 +90,20 @@ def call_error(status: int) -> str:
 
 def poll_pending_calls(settings) -> list[dict]:
 	"""GET /calls?callId=... for every click-to-call still waiting: still talking is read again
-	next run, a terminal state is recorded and the wait is over either way."""
+	next run, a terminal state is recorded and the wait is over either way.
+
+	The pending row is deleted only once `CRM Call Log` already has the call — never in the same
+	pass that first returns it for recording. `poll()` commits as soon as the first call in this
+	batch records successfully, which would otherwise also commit every pending row deleted here
+	so far, even ones whose own `record_call` hasn't run yet; if that one then raised, its row
+	was already gone and the call could never be read again (credtech#269, review of crm#71)."""
 	calls = []
 	for call_id in frappe.get_all("CRM Nvoip Pending Call", pluck="name"):
+		if frappe.db.exists("CRM Call Log", call_id):
+			# recorded by a previous run: safe to stop tracking it now, with no API call needed
+			frappe.delete_doc("CRM Nvoip Pending Call", call_id, ignore_permissions=True)
+			continue
+
 		row = frappe.get_doc("CRM Nvoip Pending Call", call_id)
 		response = _request(settings, "get", "/calls", params={"callId": call_id})
 		if response.status_code >= 400:
@@ -119,7 +130,6 @@ def poll_pending_calls(settings) -> list[dict]:
 				"deal": row.deal,
 			}
 		)
-		frappe.delete_doc("CRM Nvoip Pending Call", call_id, ignore_permissions=True)
 	return calls
 
 

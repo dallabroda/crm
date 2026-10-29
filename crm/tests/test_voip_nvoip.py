@@ -157,7 +157,10 @@ class TestNvoipClickToCall(FrappeTestCase):
 		self.assertEqual(calls, [])
 		self.assertTrue(frappe.db.exists("CRM Nvoip Pending Call", "talk-1"))
 
-	def test_finished_call_is_recorded_and_removed_from_pending(self):
+	def test_finished_call_is_returned_but_the_pending_row_waits_for_confirmation(self):
+		"""review of crm#71: the row is not deleted here. `poll()` (polling.py) records the call
+		separately, and its commit would otherwise also commit this deletion even if a different
+		call in the same batch then fails to record — losing it for good."""
 		deal = make_deal("+1 415 555 0132")
 		frappe.get_doc(
 			{
@@ -181,7 +184,35 @@ class TestNvoipClickToCall(FrappeTestCase):
 			(call["id"], call["type"], call["status"], call["duration"], call["deal"], call["recording_url"]),
 			("fin-1", "Outgoing", "Completed", 42, deal, "https://x/a.mp3"),
 		)
-		self.assertFalse(frappe.db.exists("CRM Nvoip Pending Call", "fin-1"))
+		self.assertTrue(frappe.db.exists("CRM Nvoip Pending Call", "fin-1"))
+
+	def test_pending_row_is_dropped_once_the_call_log_confirms_it_was_recorded(self):
+		frappe.get_doc(
+			{
+				"doctype": "CRM Nvoip Pending Call",
+				"call_id": "fin-2",
+				"extension": "1000",
+				"number": "+14155550132",
+			}
+		).insert()
+		frappe.get_doc(
+			{
+				"doctype": "CRM Call Log",
+				"id": "fin-2",
+				"type": "Outgoing",
+				"status": "Completed",
+				"from": "1000",
+				"to": "+14155550132",
+				"telephony_medium": "Nvoip",
+			}
+		).insert()
+
+		with patch.object(nvoip.requests, "request", side_effect=AssertionError) as request:
+			calls = nvoip.poll_pending_calls(nvoip_settings())
+
+		self.assertEqual(calls, [])
+		self.assertFalse(frappe.db.exists("CRM Nvoip Pending Call", "fin-2"))
+		request.assert_not_called()  # already recorded: no need to ask Nvoip again
 
 	def test_pending_call_that_keeps_failing_is_given_up_after_a_day(self):
 		frappe.get_doc(

@@ -373,15 +373,17 @@ function handleDisconnectedIncomingCall() {
   counterUp.value.stop()
 }
 
-async function makeOutgoingCall(number) {
+async function makeOutgoingCall(number, dealName = null) {
   phoneNumber.value = number
 
   if (device) {
     log.value = `Attempting to call ${number} ...`
 
     try {
+      // the card the call is made from (credtech#274): Twilio sends it back as a plain POST
+      // parameter to the /voice webhook, which uses it ahead of the phone number (credtech#47)
       _call = await device.connect({
-        params: { To: number },
+        params: { To: number, DealId: dealName || '' },
       })
 
       showCallPopup.value = true
