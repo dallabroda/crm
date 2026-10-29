@@ -264,6 +264,16 @@ def _fetch_recording(url: str, auth, headers: dict):
 	frappe.throw(_("Too many redirects while fetching recording"), frappe.ValidationError)
 
 
+def _recording_location(log) -> str:
+	"""The link to fetch: an operator whose links expire turns its stored address into a fresh one."""
+	from crm.integrations.voip.operators import get_operator_by_medium
+
+	operator = get_operator_by_medium(log.telephony_medium)
+	if not operator:
+		return log.recording_url
+	return operator.recording_location(operator.get_settings(), log.recording_url)
+
+
 @frappe.whitelist()
 def get_recording_url(call_log_name: str):
 	"""Proxy a call recording (authenticating with the provider) so it plays in the browser.
@@ -282,6 +292,7 @@ def get_recording_url(call_log_name: str):
 		frappe.throw(_("Recording URL not found"), frappe.DoesNotExistError)
 
 	auth = _get_recording_credentials(log.telephony_medium)
+	recording_url = _recording_location(log)
 	# forward the browser's Range header so the provider (Twilio/Exotel CDN) can return
 	# just the requested bytes; falls back to the full file if it doesn't support ranges
 	req_headers = {}
@@ -292,7 +303,7 @@ def get_recording_url(call_log_name: str):
 	# stream instead of buffering the whole file: the provider's Content-Length reaches
 	# the browser immediately so the <audio> element can show the duration right away,
 	# rather than waiting for the entire recording to download server-side first
-	upstream = _fetch_recording(log.recording_url, auth, req_headers)
+	upstream = _fetch_recording(recording_url, auth, req_headers)
 	upstream.raise_for_status()
 
 	def _stream():

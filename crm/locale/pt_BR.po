@@ -12494,3 +12494,131 @@ msgstr "O ramal na Nvoip (numbersip ou id da subconta) de cada vendedor, para ca
 #: frontend/src/components/Settings/Telephony/TelephonySettings.vue
 msgid "Record the calls of your Nvoip account on the timeline of your deals"
 msgstr "Registrar as ligações da sua conta Nvoip na linha do tempo dos seus negócios"
+
+#: crm/integrations/voip/telnyx.py
+msgid "Use the salesperson's phone in international format (+5548999990000) or a SIP address (sip:name@domain)."
+msgstr "Use o telefone do vendedor no formato internacional (+5548999990000) ou um endereço SIP (sip:nome@dominio)."
+
+#: crm/integrations/voip/telnyx.py
+msgid "Telnyx refused the API key. Check it in the telephony settings."
+msgstr "A Telnyx recusou a chave da API. Confira nas configurações de telefonia."
+
+#: crm/integrations/voip/telnyx.py
+msgid "Your Telnyx account does not allow this call (balance, verification or outbound profile)."
+msgstr "Sua conta Telnyx não permite esta ligação (saldo, verificação ou perfil de saída)."
+
+#: crm/integrations/voip/telnyx.py
+msgid "The Telnyx Call Control Application was not found. Check its ID in the telephony settings."
+msgstr "A Call Control Application da Telnyx não foi encontrada. Confira o ID nas configurações de telefonia."
+
+#: crm/integrations/voip/telnyx.py
+msgid "Telnyx did not accept the numbers of this call. Check your extension and the caller number."
+msgstr "A Telnyx não aceitou os números desta ligação. Confira o seu ramal e o número exibido ao cliente."
+
+#: crm/integrations/voip/telnyx.py
+msgid "Telnyx refused the call (HTTP {0})."
+msgstr "A Telnyx recusou a ligação (HTTP {0})."
+
+#: crm/integrations/voip/telnyx.py
+msgid "Telnyx did not return the recording (HTTP {0})."
+msgstr "A Telnyx não devolveu a gravação (HTTP {0})."
+
+#: crm/integrations/voip/telnyx.py
+msgid "Telnyx did not return the recording."
+msgstr "A Telnyx não devolveu a gravação."
+
+#: crm/integrations/voip/telnyx.py
+msgid "Could not reach Telnyx. Please try again in a few minutes."
+msgstr "Não foi possível falar com a Telnyx. Tente de novo em alguns minutos."
+
+#: crm/fcrm/doctype/crm_telnyx_settings/crm_telnyx_settings.py
+msgid "Paste the Telnyx API key."
+msgstr "Cole a chave da API da Telnyx."
+
+#: crm/fcrm/doctype/crm_telnyx_settings/crm_telnyx_settings.py
+msgid "Enter the ID of the Telnyx Call Control Application."
+msgstr "Informe o ID da Call Control Application da Telnyx."
+
+#: crm/fcrm/doctype/crm_telnyx_settings/crm_telnyx_settings.py
+msgid "Enter the caller number in international format, e.g. +5548999990000."
+msgstr "Informe o número exibido ao cliente no formato internacional, por exemplo +5548999990000."
+
+#: crm/fcrm/doctype/crm_telnyx_settings/crm_telnyx_settings.py
+msgid "Paste the Telnyx public key as shown in the portal (Keys & Credentials > Public Key)."
+msgstr "Cole a chave pública da Telnyx como aparece no portal (Keys & Credentials > Public Key)."
+
+#: crm/fcrm/doctype/crm_telnyx_settings/crm_telnyx_settings.py
+msgid "Telnyx refused the API key. Check that it was copied whole."
+msgstr "A Telnyx recusou a chave da API. Confira se ela foi copiada inteira."
+
+#: crm/fcrm/doctype/crm_telnyx_settings/crm_telnyx_settings.py
+msgid "Telnyx did not find a Call Control Application with this ID."
+msgstr "A Telnyx não encontrou uma Call Control Application com este ID."
+
+#: crm/fcrm/doctype/crm_telnyx_settings/crm_telnyx_settings.py
+msgid "Telnyx refused the settings (HTTP {0})."
+msgstr "A Telnyx recusou as configurações (HTTP {0})."
+
+#: crm/fcrm/doctype/crm_telnyx_settings/crm_telnyx_settings.json
+msgid "CRM Telnyx Settings"
+msgstr "Configurações da Telnyx"
+
+#: crm/fcrm/doctype/crm_telnyx_settings/crm_telnyx_settings.json
+msgid "Call Control Application ID"
+msgstr "ID da Call Control Application"
+
+#: crm/fcrm/doctype/crm_telnyx_settings/crm_telnyx_settings.json
+msgid "Caller Number"
+msgstr "Número exibido ao cliente"
+
+#: crm/fcrm/doctype/crm_telnyx_settings/crm_telnyx_settings.json
+msgid "Webhook Public Key"
+msgstr "Chave pública do webhook"
+
+#: frontend/src/components/Settings/Telephony/TelnyxSettings.vue
+msgid "Telnyx Settings"
+msgstr "Configurações da Telnyx"
+
+#: frontend/src/components/Settings/Telephony/TelnyxSettings.vue
+msgid "Your company hires Telnyx directly. A call made from a card rings the salesperson first, then the customer, and lands on the timeline of that deal with its recording. Calls go through your Call Control Application; your numbers keep their own routing for incoming calls."
+msgstr "Sua empresa contrata a Telnyx direto. Uma ligação feita a partir de um card chama primeiro o vendedor, depois o cliente, e entra na linha do tempo desse negócio com a gravação. As ligações passam pela sua Call Control Application; seus números continuam com o próprio roteamento para as ligações recebidas."
+
+#: frontend/src/components/Settings/Telephony/TelnyxSettings.vue
+msgid "Telnyx API key"
+msgstr "Chave da API da Telnyx"
+
+#: frontend/src/components/Settings/Telephony/TelnyxSettings.vue
+msgid "Number shown to the customer"
+msgstr "Número exibido ao cliente"
+
+#: frontend/src/components/Settings/Telephony/TelnyxSettings.vue
+msgid "Webhook public key"
+msgstr "Chave pública do webhook"
+
+#: frontend/src/components/Settings/Telephony/TelnyxSettings.vue
+msgid "In the Telnyx portal: API key and public key under Account Settings > Keys & Credentials; the application ID under Voice > Programmable Voice. The application needs an outbound voice profile that allows calls to your customers."
+msgstr "No portal da Telnyx: chave da API e chave pública em Account Settings > Keys & Credentials; o ID da aplicação em Voice > Programmable Voice. A aplicação precisa de um perfil de saída (outbound voice profile) que permita ligar para os seus clientes."
+
+#: frontend/src/components/Settings/Telephony/TelnyxSettings.vue
+msgid "The phone of each salesperson in international format (+5548999990000) or their SIP address (sip:name@domain): Telnyx rings it first, then the customer."
+msgstr "O telefone de cada vendedor no formato internacional (+5548999990000) ou o endereço SIP dele (sip:nome@dominio): a Telnyx chama esse número primeiro e depois o cliente."
+
+#: frontend/src/components/Settings/Telephony/TelnyxSettings.vue
+msgid "Telnyx Integration Disabled"
+msgstr "Integração com a Telnyx desligada"
+
+#: frontend/src/components/Settings/Telephony/TelnyxSettings.vue
+msgid "Enable Telnyx to call your customers from a card and record the calls on the timeline of your deals"
+msgstr "Ligue a Telnyx para ligar para os seus clientes a partir de um card e registrar as ligações na linha do tempo dos seus negócios"
+
+#: frontend/src/components/Settings/Telephony/TelnyxSettings.vue
+msgid "Telnyx settings saved"
+msgstr "Configurações da Telnyx salvas"
+
+#: frontend/src/components/Settings/Telephony/TelephonySettings.vue
+msgid "Telnyx"
+msgstr "Telnyx"
+
+#: frontend/src/components/Settings/Telephony/TelephonySettings.vue
+msgid "Call your customers from a card through Telnyx and record the calls on your deals"
+msgstr "Ligar para os seus clientes a partir de um card pela Telnyx e registrar as ligações nos seus negócios"

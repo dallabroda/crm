@@ -270,6 +270,34 @@
           @click="emit('updateStep', 'nvoip-settings')"
         />
       </div>
+
+      <div
+        v-if="isManager()"
+        class="h-px border-t mx-2 border-outline-elevation-2"
+      />
+
+      <!-- Click-to-call through a Call Control Application (credtech#270) -->
+      <div
+        v-if="isManager()"
+        class="flex items-center justify-between py-3 px-2"
+      >
+        <div class="flex flex-col gap-1">
+          <span class="text-base-medium text-ink-gray-8">
+            {{ __('Telnyx') }}
+          </span>
+          <span class="text-p-sm text-ink-gray-6">
+            {{
+              __(
+                'Call your customers from a card through Telnyx and record the calls on your deals',
+              )
+            }}
+          </span>
+        </div>
+        <Button
+          :label="__('Configure')"
+          @click="emit('updateStep', 'telnyx-settings')"
+        />
+      </div>
     </div>
     <ErrorMessage
       :message="isNewDoc ? insertResource.error : telephonyAgent.save?.error"
