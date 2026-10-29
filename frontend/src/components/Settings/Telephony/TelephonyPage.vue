@@ -15,6 +15,10 @@
     v-else-if="step === 'api4com-settings'"
     @updateStep="updateStep"
   />
+  <NvoipSettings
+    v-else-if="step === 'nvoip-settings'"
+    @updateStep="updateStep"
+  />
   <WavixSettings
     v-else-if="step === 'wavix-settings'"
     @updateStep="updateStep"
@@ -25,6 +29,7 @@ import TelephonySettings from './TelephonySettings.vue'
 import ExotelSettings from './ExotelSettings.vue'
 import TwilioSettings from './TwilioSettings.vue'
 import API4ComSettings from './API4ComSettings.vue'
+import NvoipSettings from './NvoipSettings.vue'
 import WavixSettings from './WavixSettings.vue'
 import { ref } from 'vue'
 

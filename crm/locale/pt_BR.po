@@ -12451,6 +12451,50 @@ msgstr "Operadora de telefonia, como no registro de ligações (ex.: API4Com)"
 msgid "Extension of this user at each telephony operator (one per operator)"
 msgstr "Ramal deste usuário em cada operadora de telefonia (um por operadora)"
 
+#: frontend/src/components/Settings/Telephony/NvoipSettings.vue
+msgid "Nvoip Settings"
+msgstr "Configurações da Nvoip"
+
+#: frontend/src/components/Settings/Telephony/NvoipSettings.vue
+msgid "Nvoip numbersip"
+msgstr "Numbersip da Nvoip"
+
+#: frontend/src/components/Settings/Telephony/NvoipSettings.vue
+msgid "Nvoip user-token"
+msgstr "User-token da Nvoip"
+
+#: frontend/src/components/Settings/Telephony/NvoipSettings.vue
+msgid "Nvoip Integration Disabled"
+msgstr "Integração com a Nvoip desligada"
+
+#: frontend/src/components/Settings/Telephony/TelephonySettings.vue
+msgid "Nvoip"
+msgstr "Nvoip"
+
+#: frontend/src/components/Settings/Telephony/NvoipSettings.vue
+msgid "Your company hires Nvoip directly. Calls made from a card and incoming calls land on the timeline of the deal of that number, in the name of the salesperson of the extension. Nvoip has no call webhook: calls are read every few minutes."
+msgstr "Sua empresa contrata a Nvoip direto. Ligações feitas a partir de um card e ligações recebidas entram na linha do tempo do negócio desse número, em nome do vendedor do ramal. A Nvoip não tem aviso de ligação: as ligações são lidas a cada poucos minutos."
+
+#: frontend/src/components/Settings/Telephony/NvoipSettings.vue
+msgid "Both are in the Nvoip panel, under API. The user-token is not the same as the access_token Nvoip generates from it."
+msgstr "Os dois ficam no painel da Nvoip, em API. O user-token não é o mesmo que o access_token que a Nvoip gera a partir dele."
+
+#: frontend/src/components/Settings/Telephony/NvoipSettings.vue
+msgid "Enable Nvoip to record the calls of your Nvoip account on the timeline of your deals"
+msgstr "Ligue a Nvoip para registrar as ligações da sua conta Nvoip na linha do tempo dos seus negócios"
+
+#: frontend/src/components/Settings/Telephony/NvoipSettings.vue
+msgid "Nvoip settings saved"
+msgstr "Configurações da Nvoip salvas"
+
+#: frontend/src/components/Settings/Telephony/NvoipSettings.vue
+msgid "The Nvoip extension (numbersip of that user, or sub-account id) of each salesperson, so each call goes in their name."
+msgstr "O ramal na Nvoip (numbersip ou id da subconta) de cada vendedor, para cada ligação entrar em nome de quem a fez ou atendeu."
+
+#: frontend/src/components/Settings/Telephony/TelephonySettings.vue
+msgid "Record the calls of your Nvoip account on the timeline of your deals"
+msgstr "Registrar as ligações da sua conta Nvoip na linha do tempo dos seus negócios"
+
 #: frontend/src/components/Settings/Telephony/WavixSettings.vue
 msgid "Wavix Settings"
 msgstr "Configurações da Wavix"
