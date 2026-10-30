@@ -5,6 +5,7 @@ from unittest.mock import patch
 
 import frappe
 from frappe.utils.password import set_encrypted_password
+from twilio.request_validator import RequestValidator
 from werkzeug.test import EnvironBuilder
 from werkzeug.wrappers import Request
 
@@ -16,6 +17,13 @@ from crm.tests.test_voip_api4com import make_deal
 SALES_USER = "crm.user1@example.com"
 ACCOUNT_SID = "AC00000000000000000000000000000001"
 APPLICATION_SID = "AP00000000000000000000000000000001"
+AUTH_TOKEN = "token-for-tests"
+VOICE_PATH = "/api/method/crm.integrations.twilio.api.voice"
+
+
+def sign(url, payload, token=AUTH_TOKEN):
+	"""X-Twilio-Signature as Twilio computes it."""
+	return RequestValidator(token).compute_signature(url, payload)
 
 
 def outgoing_call(**overrides):
@@ -49,7 +57,7 @@ class TestTwilioClickToCall(FrappeTestCase):
 			},
 		)
 		set_encrypted_password("CRM Twilio Settings", "CRM Twilio Settings", "secret-for-tests", "api_secret")
-		set_encrypted_password("CRM Twilio Settings", "CRM Twilio Settings", "token-for-tests", "auth_token")
+		set_encrypted_password("CRM Twilio Settings", "CRM Twilio Settings", AUTH_TOKEN, "auth_token")
 
 		if not frappe.db.exists("CRM Telephony Agent", SALES_USER):
 			frappe.get_doc({"doctype": "CRM Telephony Agent", "user": SALES_USER}).insert()
@@ -65,14 +73,43 @@ class TestTwilioClickToCall(FrappeTestCase):
 		frappe.set_user("Administrator")
 		frappe.db.rollback()
 
-	def post(self, payload):
+	def post(self, payload, signature=None, headers=None):
+		if signature is None:
+			signature = sign(f"http://localhost{VOICE_PATH}", payload)
 		builder = EnvironBuilder(
 			method="POST",
-			path="/api/method/crm.integrations.twilio.api.voice",
+			path=VOICE_PATH,
 			data=payload,
+			headers={
+				**({"X-Twilio-Signature": signature} if signature else {}),
+				**(headers or {}),
+			},
 		)
 		frappe.local.request = Request(builder.get_environ())
 		return twilio_api.voice(**payload)
+
+	def test_request_without_signature_is_refused(self):
+		# the AccountSid and ApplicationSid are right, but anyone can read those
+		with self.assertRaises(frappe.PermissionError):
+			self.post(outgoing_call(), signature="")
+
+	def test_request_signed_with_another_token_is_refused(self):
+		payload = outgoing_call()
+		with self.assertRaises(frappe.PermissionError):
+			self.post(payload, signature=sign(f"http://localhost{VOICE_PATH}", payload, token="someone-else"))
+
+	def test_signature_over_other_fields_is_refused(self):
+		payload = outgoing_call()
+		forged = outgoing_call(To="+5511999990000")
+		with self.assertRaises(frappe.PermissionError):
+			self.post(forged, signature=sign(f"http://localhost{VOICE_PATH}", payload))
+
+	def test_signature_of_the_public_url_behind_the_proxy_is_accepted(self):
+		# Twilio signs https://<public host>/...; the request reaches the app as http on the inner host
+		payload = outgoing_call()
+		signature = sign(f"https://hub.example.com{VOICE_PATH}", payload)
+		response = self.post(payload, signature=signature, headers={"X-Forwarded-Host": "hub.example.com"})
+		self.assertEqual(response.status_code, 200)
 
 	def test_wrong_account_is_refused(self):
 		with self.assertRaises(frappe.PermissionError):
