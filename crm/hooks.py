@@ -146,6 +146,9 @@ permission_query_conditions = {
 	"CRM Deal Status": "crm.permissions.pipeline.get_stage_permission_query_conditions",
 	"CRM Notification": "crm.fcrm.doctype.crm_notification.crm_notification.get_permission_query_conditions",
 	"CRM Enrichment Run": "crm.domain_enrichment.doctype.crm_enrichment_run.crm_enrichment_run.get_permission_query_conditions",
+	# notes and tasks follow the card or lead they belong to (credtech#288)
+	"FCRM Note": "crm.permissions.reference.get_note_permission_query_conditions",
+	"CRM Task": "crm.permissions.reference.get_task_permission_query_conditions",
 }
 
 has_permission = {
@@ -155,6 +158,8 @@ has_permission = {
 	"CRM Deal Status": "crm.permissions.pipeline.has_stage_permission",
 	"CRM Notification": "crm.fcrm.doctype.crm_notification.crm_notification.has_permission",
 	"CRM Enrichment Run": "crm.domain_enrichment.doctype.crm_enrichment_run.crm_enrichment_run.has_permission",
+	"FCRM Note": "crm.permissions.reference.has_note_permission",
+	"CRM Task": "crm.permissions.reference.has_task_permission",
 }
 
 # Automation Engine

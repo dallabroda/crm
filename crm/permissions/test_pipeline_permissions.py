@@ -191,6 +191,68 @@ class TestPipelinePermissions(FrappeTestCase):
 		members = {m.user for m in frappe.get_doc("CRM Pipeline", self.pipeline).members}
 		self.assertTrue({OWNER, REP1, REP2, OUTSIDER} <= members)
 
+	# Notes and tasks follow their card (credtech#288) --------------------------
+
+	def attach(self, doctype, card, **values):
+		doc = frappe.get_doc(
+			{
+				"doctype": doctype,
+				"title": "t",
+				"reference_doctype": "CRM Deal",
+				"reference_docname": card,
+				**values,
+			}
+		).insert(ignore_permissions=True)
+		self.addCleanup(frappe.delete_doc, doctype, doc.name, force=True, ignore_permissions=True)
+		return doc
+
+	def visible(self, doctype, user):
+		frappe.set_user(user)
+		names = set(
+			frappe.get_list(
+				doctype, {"reference_docname": ("in", [self.card_rep1, self.card_rep2])}, pluck="name"
+			)
+		)
+		frappe.set_user("Administrator")
+		return names
+
+	def test_notes_of_cards_the_user_cannot_see_stay_hidden(self):
+		mine = self.attach("FCRM Note", self.card_rep1)
+		other = self.attach("FCRM Note", self.card_rep2)
+		self.assertEqual(self.visible("FCRM Note", REP1), {mine.name})
+		self.assertEqual(self.visible("FCRM Note", OWNER), {mine.name, other.name})
+		self.assertEqual(self.visible("FCRM Note", OUTSIDER), set())
+		for ptype in ("read", "write", "delete"):
+			self.assertFalse(frappe.has_permission("FCRM Note", ptype, doc=other.name, user=REP1))
+			self.assertTrue(frappe.has_permission("FCRM Note", ptype, doc=mine.name, user=REP1))
+
+	def test_note_cannot_be_added_to_a_card_the_user_cannot_see(self):
+		frappe.set_user(REP1)
+		note = frappe.get_doc(
+			{
+				"doctype": "FCRM Note",
+				"title": "t",
+				"reference_doctype": "CRM Deal",
+				"reference_docname": self.card_rep2,
+			}
+		)
+		with self.assertRaises(frappe.PermissionError):
+			note.insert()
+
+	def test_tasks_follow_the_card_but_the_assignee_still_sees_theirs(self):
+		mine = self.attach("CRM Task", self.card_rep1)
+		other = self.attach("CRM Task", self.card_rep2)
+		assigned = self.attach("CRM Task", self.card_rep2, assigned_to=REP1)
+		self.assertEqual(self.visible("CRM Task", REP1), {mine.name, assigned.name})
+		self.assertEqual(self.visible("CRM Task", OUTSIDER), set())
+		self.assertFalse(frappe.has_permission("CRM Task", "delete", doc=other.name, user=REP1))
+		self.assertTrue(frappe.has_permission("CRM Task", "write", doc=assigned.name, user=REP1))
+
+	def test_notes_without_a_card_keep_the_role_permissions(self):
+		loose = frappe.get_doc({"doctype": "FCRM Note", "title": "loose"}).insert(ignore_permissions=True)
+		self.addCleanup(frappe.delete_doc, "FCRM Note", loose.name, force=True, ignore_permissions=True)
+		self.assertTrue(frappe.has_permission("FCRM Note", "read", doc=loose.name, user=OUTSIDER))
+
 
 def make_user(email, roles):
 	if frappe.db.exists("User", email):
