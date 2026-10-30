@@ -2,6 +2,8 @@ import json
 
 import frappe
 from frappe import _
+from frappe.utils.password import get_decrypted_password
+from twilio.request_validator import RequestValidator
 from twilio.twiml.voice_response import VoiceResponse
 from werkzeug.wrappers import Response
 
@@ -15,6 +17,10 @@ def validate_twilio_request(args, require_application_sid: bool = False):
 	if not twilio:
 		frappe.throw(_("Twilio configuration is missing"), frappe.PermissionError)
 
+	# The AccountSid is not a secret: only the signature proves the request came from Twilio (credtech#286)
+	if not signed_by_twilio():
+		frappe.throw(_("Invalid Twilio signature"), frappe.PermissionError)
+
 	account_sid = frappe.utils.cstr(args.get("AccountSid"))
 	if not account_sid or account_sid != frappe.utils.cstr(twilio.account_sid):
 		frappe.throw(_("Invalid Twilio account"), frappe.PermissionError)
@@ -25,6 +31,27 @@ def validate_twilio_request(args, require_application_sid: bool = False):
 			frappe.throw(_("Invalid Twilio application"), frappe.PermissionError)
 
 	return twilio
+
+
+def signed_by_twilio() -> bool:
+	"""X-Twilio-Signature is an HMAC-SHA1, with the account's Auth Token, of the URL Twilio called plus the
+	POST fields. Without the header or the token, nothing is trusted."""
+	signature = frappe.get_request_header("X-Twilio-Signature")
+	token = get_decrypted_password("CRM Twilio Settings", "CRM Twilio Settings", "auth_token", raise_exception=False)
+	if not signature or not token:
+		return False
+	request = frappe.request
+	params = request.form.to_dict() if request.method == "POST" else {}
+	validator = RequestValidator(token)
+	return any(validator.validate(url, params, signature) for url in called_urls(request))
+
+
+def called_urls(request) -> set[str]:
+	"""The URL as Twilio called it. Behind the proxy the request arrives as http, sometimes with the inner
+	host, so the public forms are tried too (same path and query string)."""
+	path = request.full_path.rstrip("?")
+	host = request.headers.get("X-Forwarded-Host") or request.host
+	return {request.url, f"https://{host}{path}", frappe.utils.get_url().rstrip("/") + path}
 
 
 @frappe.whitelist()
