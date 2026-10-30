@@ -144,6 +144,16 @@
                 type="number"
                 :label="__('Minimum DirectD Score Tolerated (0 = do not reject by score)')"
               />
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                <Checkbox
+                  v-model="settingsDoc.directd_fgts_enabled"
+                  :label="__('Check FGTS regularity (R$ 0,36 / CNPJ)')"
+                />
+                <Checkbox
+                  v-model="settingsDoc.directd_sintegra_enabled"
+                  :label="__('Check Sintegra/CCC — state registration (R$ 1,80 / CNPJ)')"
+                />
+              </div>
             </div>
           </div>
 
@@ -200,6 +210,11 @@
                 v-model="settingsDoc.block_on_protest"
                 :label="__('Reject immediately if notary protests exist (CENPROT)')"
               />
+              <Checkbox
+                v-if="settingsDoc.directd_fgts_enabled"
+                v-model="settingsDoc.block_on_fgts_irregular"
+                :label="__('Reject immediately if FGTS is irregular')"
+              />
             </div>
           </div>
 
@@ -231,6 +246,32 @@
                 :label="__('Serasa Access Token (your contract)')"
                 autocomplete="off"
               />
+            </div>
+            <div v-if="settingsDoc.directd_enabled" class="pt-4 mt-4 border-t border-outline-gray-2 space-y-3">
+              <p class="text-p-sm text-ink-gray-6">
+                {{ __('These 3 run on the CredTech DirectD account (your DirectD token above) and are resold with a fixed margin.') }}
+              </p>
+              <div class="flex items-center justify-between">
+                <Checkbox
+                  v-model="settingsDoc.boavista_risco_enabled"
+                  :label="__('Boa Vista - Risco Positivo PJ')"
+                />
+                <Badge label="custo R$14,03 · cliente R$18,00" theme="amber" variant="subtle" />
+              </div>
+              <div class="flex items-center justify-between">
+                <Checkbox
+                  v-model="settingsDoc.dossie_quod_enabled"
+                  :label="__('Dossiê QUOD - Completo')"
+                />
+                <Badge label="custo R$6,99 · cliente R$10,00" theme="amber" variant="subtle" />
+              </div>
+              <div class="flex items-center justify-between">
+                <Checkbox
+                  v-model="settingsDoc.scr_bacen_enabled"
+                  :label="__('SCR Analítico - Resumo BACEN')"
+                />
+                <Badge label="custo R$3,90 · cliente R$6,00" theme="amber" variant="subtle" />
+              </div>
             </div>
           </div>
           <!-- Assertiva Localize (enriquecimento de contatos) e CENPROT (funil de cobrança) são
@@ -271,6 +312,8 @@ const settingsDoc = ref({
   directd_enabled: false,
   directd_token: '',
   min_directd_score: 0,
+  directd_fgts_enabled: false,
+  directd_sintegra_enabled: false,
   auto_trigger_stage: '',
   check_second_organization: true,
   max_lawsuits_defendant: 0,
@@ -279,9 +322,13 @@ const settingsDoc = ref({
   max_pgfn_debt: 0,
   block_on_cndt: true,
   block_on_protest: true,
+  block_on_fgts_irregular: true,
   serasa_enabled: false,
   serasa_endpoint_url: '',
   serasa_token: '',
+  boavista_risco_enabled: false,
+  dossie_quod_enabled: false,
+  scr_bacen_enabled: false,
 })
 
 const testCnpj = ref({ escavador: '', infosimples: '' })
