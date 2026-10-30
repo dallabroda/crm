@@ -117,6 +117,36 @@
             </div>
           </div>
 
+          <!-- 2b. DirectD (Score QUOD + Protestos Nacional + Processos Judiciais) -->
+          <div class="p-5 bg-surface-white rounded-lg border border-outline-gray-2 space-y-4">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="text-lg-semibold text-ink-gray-9">
+                  {{ __('DirectD — Score, National Protests & Lawsuits') }}
+                </span>
+                <Badge label="R$ 1,98 a R$ 2,95 / consulta" theme="blue" variant="subtle" />
+              </div>
+              <Switch v-model="settingsDoc.directd_enabled" />
+            </div>
+            <p class="text-p-sm text-ink-gray-6">
+              {{ __('One token covers 3 products: QUOD credit Score (PF/PJ), Protestos Nacional - IEPTB (all of Brazil, unlike the SP-only CENPROT above) and Processos Judiciais - Simplificada.') }}
+            </p>
+            <div v-if="settingsDoc.directd_enabled" class="space-y-3 pt-2">
+              <FormControl
+                v-model="settingsDoc.directd_token"
+                type="password"
+                :label="__('DirectD Token')"
+                :placeholder="__('Enter the DirectD API token')"
+                autocomplete="off"
+              />
+              <FormControl
+                v-model.number="settingsDoc.min_directd_score"
+                type="number"
+                :label="__('Minimum DirectD Score Tolerated (0 = do not reject by score)')"
+              />
+            </div>
+          </div>
+
           <!-- 3. Funnel Automation Triggers -->
           <div class="p-5 bg-surface-white rounded-lg border border-outline-gray-2 space-y-4">
             <span class="text-lg-semibold text-ink-gray-9">
@@ -238,6 +268,9 @@ const settingsDoc = ref({
   escavador_token: '',
   infosimples_enabled: false,
   infosimples_token: '',
+  directd_enabled: false,
+  directd_token: '',
+  min_directd_score: 0,
   auto_trigger_stage: '',
   check_second_organization: true,
   max_lawsuits_defendant: 0,
