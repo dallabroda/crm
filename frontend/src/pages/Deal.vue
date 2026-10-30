@@ -22,6 +22,11 @@
         :website="doc.website"
         @done="onEnriched"
       />
+      <ProtestActions
+        :deal="dealId"
+        :pipeline="doc.pipeline"
+        @done="onEnriched"
+      />
       <AssignTo
         v-model="assignees.data"
         doctype="CRM Deal"
@@ -447,6 +452,7 @@ import SmartChatWhatsAppModal from '@/components/Modals/SmartChatWhatsAppModal.v
 import SLASection from '@/components/SLASection.vue'
 import CustomActions from '@/components/CustomActions.vue'
 import EnrichFromWebsite from '@/components/EnrichFromWebsite.vue'
+import ProtestActions from '@/components/ProtestActions.vue'
 import {
   openWebsite,
   setupCustomizations,
