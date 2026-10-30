@@ -91,6 +91,11 @@
                   'Also look up the phones and e-mails of each partner (one more paid query per partner)',
                 )
               "
+              :description="
+                __(
+                  'Off until you turn it on: each query is paid by your company to Assertiva.',
+                )
+              "
             />
             <div>
               <Button
@@ -124,6 +129,32 @@
             <Switch v-model="cenprotEnabled" />
           </div>
           <template v-if="settings.doc.cenprot_enabled">
+            <!-- IEPTB only answers registered IPs: the client registers ours in their contract -->
+            <div
+              class="flex flex-col gap-2 rounded-lg border border-outline-amber-2 bg-surface-amber-1 p-3"
+            >
+              <span class="text-p-sm text-ink-gray-8">
+                {{
+                  __(
+                    'Before the first title, register this HubTech server IP in your IEPTB contract (CENPROT only answers registered IPs):',
+                  )
+                }}
+              </span>
+              <div class="flex items-center gap-2">
+                <TextInput
+                  class="w-48"
+                  :model-value="serverIp"
+                  readonly
+                  @focus="$event.target.select()"
+                />
+                <Button
+                  :label="__('Copy')"
+                  icon-left="lucide-copy"
+                  :disabled="!serverIp"
+                  @click="copyIp"
+                />
+              </div>
+            </div>
             <div class="grid grid-cols-2 gap-4">
               <FormControl
                 v-model="settings.doc.cenprot_environment"
@@ -271,6 +302,25 @@
                 :label="
                   __('Send to the registry when a card enters the send stage')
                 "
+                :description="
+                  __(
+                    'Off until you turn it on: the registry charges fees for each protest. Without it, titles go only by the Send to protest button of the card.',
+                  )
+                "
+              />
+              <FormControl
+                v-model="settings.doc.auto_withdraw_on_stage"
+                type="checkbox"
+                :label="
+                  __(
+                    'Withdraw or cancel the protest when a card enters the agreement stage',
+                  )
+                "
+                :description="
+                  __(
+                    'Off until you turn it on: withdrawal and cancellation may have registry fees.',
+                  )
+                "
               />
               <div class="grid grid-cols-2 gap-4">
                 <FormControl
@@ -314,8 +364,8 @@
 <script setup>
 import { useDocument } from '@/data/document'
 import { pipelinesStore } from '@/stores/pipelines'
-import { FormControl, Switch, call, toast } from 'frappe-ui'
-import { computed, ref } from 'vue'
+import { FormControl, Switch, TextInput, call, toast } from 'frappe-ui'
+import { computed, ref, watch } from 'vue'
 
 // Assertiva Localize and CENPROT (credtech#290), served by the cred_hub app.
 // Admins only: the page holds the passwords of the company's contracts.
@@ -326,6 +376,25 @@ pipelineStore.ensureLoaded()
 
 const saveError = ref('')
 const testing = ref('')
+const serverIp = ref('')
+
+watch(
+  () => settings.doc?.cenprot_enabled,
+  async (enabled) => {
+    if (!enabled || serverIp.value) return
+    try {
+      serverIp.value = (await call('cred_hub.integrations.protest.server_ip')).ip
+    } catch {
+      serverIp.value = ''
+    }
+  },
+  { immediate: true },
+)
+
+async function copyIp() {
+  await navigator.clipboard.writeText(serverIp.value)
+  toast.success(__('Copied'))
+}
 
 const FIELDS = [
   'assertiva_enabled',
@@ -354,6 +423,7 @@ const FIELDS = [
   'default_endorsement',
   'titles_accepted',
   'auto_send_on_stage',
+  'auto_withdraw_on_stage',
   'stage_send',
   'stage_at_registry',
   'stage_notified',

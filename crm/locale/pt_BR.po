@@ -13055,3 +13055,18 @@ msgstr "O título deste card vai agora para a CENPROT, em nome do credor das con
 
 msgid "Could not reach CENPROT."
 msgstr "Não foi possível falar com a CENPROT."
+
+msgid "Off until you turn it on: each query is paid by your company to Assertiva."
+msgstr "Desligado até você ligar: cada consulta é paga pela sua empresa à Assertiva."
+
+msgid "Before the first title, register this HubTech server IP in your IEPTB contract (CENPROT only answers registered IPs):"
+msgstr "Antes do primeiro título, cadastre este IP do servidor do HubTech no seu contrato com o IEPTB (a CENPROT só responde IPs cadastrados):"
+
+msgid "Off until you turn it on: the registry charges fees for each protest. Without it, titles go only by the Send to protest button of the card."
+msgstr "Desligado até você ligar: o cartório cobra custas de cada protesto. Sem isso, o título só vai pelo botão Enviar a protesto do card."
+
+msgid "Withdraw or cancel the protest when a card enters the agreement stage"
+msgstr "Retirar ou cancelar o protesto quando o card entra na etapa de acordo"
+
+msgid "Off until you turn it on: withdrawal and cancellation may have registry fees."
+msgstr "Desligado até você ligar: retirada e cancelamento podem ter custas do cartório."
