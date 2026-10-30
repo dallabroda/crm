@@ -74,8 +74,10 @@ import InviteUserPage from '@/components/Settings/InviteUserPage.vue'
 import UsersAndPlan from '@/components/Settings/UsersAndPlan/UsersAndPlan.vue'
 import { plan, loadPlan } from '@/components/Settings/UsersAndPlan/planApi'
 import ApiKeysPage from '@/components/Settings/ApiKeys/ApiKeysPage.vue'
+import BureausSettings from '@/components/Settings/Bureaus/BureausSettings.vue'
 import { apiKeys, loadApiKeys } from '@/components/Settings/ApiKeys/apiKeysApi'
 import LucideKeyRound from '~icons/lucide/key-round'
+import LucideSearchCheck from '~icons/lucide/search-check'
 import ProfilePage from '@/components/Settings/Profile/ProfilePage.vue'
 import PreferencesSettings from '@/components/Settings/PreferencesSettings.vue'
 import WhatsAppSettings from '@/components/Settings/WhatsAppSettings.vue'
@@ -290,6 +292,13 @@ const tabs = computed(() => {
           icon: LucideKeyRound,
           component: markRaw(ApiKeysPage),
           // admins only, with the cred_hub app (credtech#175)
+          condition: () => isAdmin() && apiKeys.enabled,
+        },
+        {
+          label: __('Bureaus'),
+          icon: LucideSearchCheck,
+          component: markRaw(BureausSettings),
+          // Assertiva Localize and CENPROT (credtech#290): admins only, with the cred_hub app
           condition: () => isAdmin() && apiKeys.enabled,
         },
       ],

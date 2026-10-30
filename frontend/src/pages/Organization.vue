@@ -18,6 +18,11 @@
         :website="organization.doc?.website"
         @done="onEnriched"
       />
+      <LocalizeContacts
+        :organization="props.organizationId"
+        :cnpj="organization.doc?.cnpj"
+        @done="onLocalized"
+      />
       <Button
         v-if="activeTab === 'deals'"
         :label="__('New Deal')"
@@ -249,6 +254,7 @@ import DealModal from '@/components/Modals/DealModal.vue'
 import Link from '@/components/Controls/Link.vue'
 import CustomActions from '@/components/CustomActions.vue'
 import EnrichFromWebsite from '@/components/EnrichFromWebsite.vue'
+import LocalizeContacts from '@/components/LocalizeContacts.vue'
 import { useDocument } from '@/data/document'
 import { getSettings } from '@/stores/settings'
 import { globalStore } from '@/stores/global'
@@ -315,6 +321,12 @@ const canDelete = computed(() => permissions.data?.permissions?.delete || false)
 function onEnriched() {
   organization.reload?.()
   sections.reload()
+}
+
+// Assertiva Localize created or updated the partners (credtech#290)
+function onLocalized() {
+  onEnriched()
+  contacts.reload()
 }
 
 onMounted(async () => {

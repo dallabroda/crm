@@ -12850,3 +12850,208 @@ msgstr "Ex.: Vonage"
 #: crm/integrations/twilio/api.py
 msgid "Invalid Twilio signature"
 msgstr "Assinatura da Twilio inválida"
+
+# Bureaus: Assertiva Localize e CENPROT, telas do cred_hub (credtech#290)
+msgid "Bureaus"
+msgstr "Bureaus"
+
+msgid "Contracts of your company with each bureau: every query is paid by your company to the bureau, and every query is kept in the history (LGPD)."
+msgstr "Contratos da sua empresa com cada bureau: toda consulta é paga pela sua empresa ao bureau e fica no histórico (LGPD)."
+
+msgid "The Find contacts button of the organization brings each partner as a contact, with CPF, phones (WhatsApp first) and e-mails."
+msgstr "O botão Buscar contatos da organização traz cada sócio como contato, com CPF, telefones (WhatsApp primeiro) e e-mails."
+
+msgid "LGPD purpose of the queries"
+msgstr "Finalidade LGPD das consultas"
+
+msgid "Reuse a query for (days)"
+msgstr "Reaproveitar a consulta por (dias)"
+
+msgid "Within this period the saved result is used at no cost, unless someone asks for a new paid query."
+msgstr "Nesse prazo vale o resultado salvo, sem custo, a não ser que alguém peça uma nova consulta paga."
+
+msgid "Also look up the phones and e-mails of each partner (one more paid query per partner)"
+msgstr "Buscar também telefones e e-mails de cada sócio (uma consulta paga a mais por sócio)"
+
+msgid "Test connection"
+msgstr "Testar conexão"
+
+msgid "CENPROT (protest at the registry)"
+msgstr "CENPROT (protesto em cartório)"
+
+msgid "Sends overdue titles of the collection pipeline to protest and follows them at the registry every day. Your company's own IEPTB contract; the server IP must be registered at IEPTB."
+msgstr "Envia a protesto os títulos vencidos do funil de cobrança e acompanha no cartório todo dia. Contrato da sua empresa com o IEPTB; o IP do servidor precisa estar cadastrado no IEPTB."
+
+msgid "Environment"
+msgstr "Ambiente"
+
+msgid "CENPROT username"
+msgstr "Usuário da CENPROT"
+
+msgid "CENPROT password"
+msgstr "Senha da CENPROT"
+
+msgid "Presenter code (optional)"
+msgstr "Código do apresentante (opcional)"
+
+msgid "Bearer code (optional)"
+msgstr "Código do portador (opcional)"
+
+msgid "Bearer name"
+msgstr "Nome do portador"
+
+msgid "Creditor (who protests)"
+msgstr "Credor (quem protesta)"
+
+msgid "Street"
+msgstr "Rua"
+
+msgid "Complement"
+msgstr "Complemento"
+
+msgid "Neighborhood"
+msgstr "Bairro"
+
+msgid "ZIP code (CEP)"
+msgstr "CEP"
+
+msgid "City"
+msgstr "Cidade"
+
+msgid "State (UF)"
+msgstr "UF"
+
+msgid "Title defaults"
+msgstr "Padrões do título"
+
+msgid "Default title type"
+msgstr "Espécie padrão do título"
+
+msgid "Endorsement"
+msgstr "Endosso"
+
+msgid "Titles accepted by the debtor"
+msgstr "Títulos com aceite do devedor"
+
+msgid "Collection pipeline: {0}"
+msgstr "Funil de cobrança: {0}"
+
+msgid "When the registry status changes, the card moves to the stage chosen below and the owner gets a notification."
+msgstr "Quando o status no cartório muda, o card vai para a etapa escolhida abaixo e o responsável recebe uma notificação."
+
+msgid "Send to the registry when a card enters the send stage"
+msgstr "Enviar ao cartório quando o card entra na etapa de envio"
+
+msgid "The collection pipeline, with its stages, is created when you save."
+msgstr "O funil de cobrança, com as etapas, é criado quando você salvar."
+
+msgid "Credit protection and collection"
+msgstr "Proteção ao crédito e cobrança"
+
+msgid "Identity confirmation and fraud prevention"
+msgstr "Confirmação de identidade e prevenção a fraude"
+
+msgid "Homologation (tests)"
+msgstr "Homologação (testes)"
+
+msgid "Production"
+msgstr "Produção"
+
+msgid "No endorsement"
+msgstr "Sem endosso"
+
+msgid "Mandate endorsement"
+msgstr "Endosso-mandato"
+
+msgid "Transfer endorsement"
+msgstr "Endosso translativo"
+
+msgid "Blank endorsement"
+msgstr "Endosso em branco"
+
+msgid "Send to the registry stage"
+msgstr "Etapa de envio ao cartório"
+
+msgid "At the registry stage"
+msgstr "Etapa no cartório"
+
+msgid "Notified by the registry stage"
+msgstr "Etapa intimado pelo cartório"
+
+msgid "Protested stage"
+msgstr "Etapa protestado"
+
+msgid "Paid at the registry stage"
+msgstr "Etapa pago no cartório"
+
+msgid "Agreement or withdrawn stage"
+msgstr "Etapa de acordo ou retirada"
+
+msgid "Bureau settings saved"
+msgstr "Configurações dos bureaus salvas"
+
+msgid "Add the CNPJ to find contacts"
+msgstr "Preencha o CNPJ para buscar contatos"
+
+msgid "Find contacts"
+msgstr "Buscar contatos"
+
+msgid "Finding contacts…"
+msgstr "Buscando contatos…"
+
+msgid "Partners with phones (WhatsApp) and e-mails, from Assertiva Localize"
+msgstr "Sócios com telefones (WhatsApp) e e-mails, pela Assertiva Localize"
+
+msgid "Plus one paid query per partner, for their phones and e-mails."
+msgstr "Mais uma consulta paga por sócio, para os telefones e e-mails de cada um."
+
+msgid "This CNPJ was queried on {0}. The saved result is used at no cost; a new query is paid to Assertiva."
+msgstr "Este CNPJ foi consultado em {0}. O resultado salvo é usado sem custo; uma nova consulta é paga à Assertiva."
+
+msgid "New paid query"
+msgstr "Nova consulta paga"
+
+msgid "Use saved result"
+msgstr "Usar resultado salvo"
+
+msgid "Assertiva Localize looks up the partners of this CNPJ. It is a paid query of your Assertiva contract."
+msgstr "A Assertiva Localize busca os sócios deste CNPJ. É uma consulta paga do seu contrato com a Assertiva."
+
+msgid "Contacts found"
+msgstr "Contatos encontrados"
+
+msgid "Could not find the contacts."
+msgstr "Não foi possível buscar os contatos."
+
+msgid "Withdraw or cancel the protest"
+msgstr "Retirar ou cancelar o protesto"
+
+msgid "CENPROT receives the request at once: removal before the registry, withdrawal before the protest, or cancellation of the protest. The registry may charge fees."
+msgstr "A CENPROT recebe o pedido na hora: remoção antes do cartório, desistência antes do protesto ou cancelamento do protesto. O cartório pode cobrar custas."
+
+msgid "Commercial agreement"
+msgstr "Acordo comercial"
+
+msgid "Ask the registry"
+msgstr "Pedir ao cartório"
+
+msgid "Protest: {0}"
+msgstr "Protesto: {0}"
+
+msgid "Protest"
+msgstr "Protesto"
+
+msgid "Send to protest again"
+msgstr "Enviar a protesto de novo"
+
+msgid "Send to protest"
+msgstr "Enviar a protesto"
+
+msgid "Update registry status"
+msgstr "Atualizar status no cartório"
+
+msgid "The title of this card goes to CENPROT now, in the name of the creditor of the settings, against the organization of the card. Registry fees may apply."
+msgstr "O título deste card vai agora para a CENPROT, em nome do credor das configurações, contra a organização do card. Pode haver custas do cartório."
+
+msgid "Could not reach CENPROT."
+msgstr "Não foi possível falar com a CENPROT."
