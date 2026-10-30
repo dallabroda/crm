@@ -3,10 +3,9 @@ first, the phone number (Brazilian or international) is only the fallback (credt
 
 from unittest.mock import patch
 
-from twilio.request_validator import RequestValidator
-
 import frappe
 from frappe.utils.password import set_encrypted_password
+from twilio.request_validator import RequestValidator
 from werkzeug.test import EnvironBuilder
 from werkzeug.wrappers import Request
 

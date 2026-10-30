@@ -37,7 +37,9 @@ def signed_by_twilio() -> bool:
 	"""X-Twilio-Signature is an HMAC-SHA1, with the account's Auth Token, of the URL Twilio called plus the
 	POST fields. Without the header or the token, nothing is trusted."""
 	signature = frappe.get_request_header("X-Twilio-Signature")
-	token = get_decrypted_password("CRM Twilio Settings", "CRM Twilio Settings", "auth_token", raise_exception=False)
+	token = get_decrypted_password(
+		"CRM Twilio Settings", "CRM Twilio Settings", "auth_token", raise_exception=False
+	)
 	if not signature or not token:
 		return False
 	request = frappe.request
