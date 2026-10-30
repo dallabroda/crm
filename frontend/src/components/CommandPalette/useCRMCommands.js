@@ -84,7 +84,6 @@ const SETTINGS_SECTIONS = [
     pages: [
       ['SLA Policies', 'timer'],
       ['Accounts', 'at-sign'],
-      ['ERPNext', 'blocks'],
       ['Lead Syncing', 'refresh-cw'],
     ],
   },
@@ -326,7 +325,7 @@ function settingsCommands(tracked, isManager, whatsappInstalled) {
         group: 'Account',
         icon: 'settings',
         keywords:
-          'configure preferences profile users brand telephony erpnext automations',
+          'configure preferences profile users brand telephony automations',
         children: () =>
           settingsChildren(tracked, isManager(), whatsappInstalled),
       },
