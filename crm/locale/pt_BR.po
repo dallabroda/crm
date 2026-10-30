@@ -12846,3 +12846,7 @@ msgstr "Telefonias integradas: API4Com, Twilio, Exotel, Nvoip, Wavix, Telnyx e Z
 #: frontend/src/components/Modals/TelephonyRequestModal.vue
 msgid "E.g. Vonage"
 msgstr "Ex.: Vonage"
+
+#: crm/integrations/twilio/api.py
+msgid "Invalid Twilio signature"
+msgstr "Assinatura da Twilio inválida"
