@@ -196,8 +196,12 @@
           :docname="docName"
           @count="(n) => (notesCount = n)"
         />
+        <OrganizationCreditDossie
+          v-if="tab.value === 'credit' && docName"
+          :organization-id="docName"
+        />
         <EmptyState
-          v-if="tab.value !== 'notes' && !rows.length"
+          v-if="tab.value !== 'notes' && tab.value !== 'credit' && !rows.length"
           :icon="tab.iconLeft"
           :name="__(tab.label)"
           :description="
@@ -236,7 +240,9 @@
 
 <script setup>
 import RecordNotes from '@/components/RecordNotes.vue'
+import OrganizationCreditDossie from '@/components/CreditCheck/OrganizationCreditDossie.vue'
 import NoteIcon from '@/components/Icons/NoteIcon.vue'
+import MoneyIcon from '@/components/Icons/MoneyIcon.vue'
 import ErrorPage from '@/components/ErrorPage.vue'
 import Resizer from '@/components/Resizer.vue'
 import SidePanelLayout from '@/components/SidePanelLayout.vue'
@@ -489,6 +495,12 @@ const tabs = [
     label: 'Notes',
     iconLeft: NoteIcon,
     count: computed(() => notesCount.value),
+  },
+  // credit/legal pre-screening dossier for this organization (credtech#302)
+  {
+    value: 'credit',
+    label: 'Credit Analysis',
+    iconLeft: MoneyIcon,
   },
 ]
 const notesCount = ref(0)

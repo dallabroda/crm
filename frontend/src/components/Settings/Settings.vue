@@ -75,6 +75,7 @@ import UsersAndPlan from '@/components/Settings/UsersAndPlan/UsersAndPlan.vue'
 import { plan, loadPlan } from '@/components/Settings/UsersAndPlan/planApi'
 import ApiKeysPage from '@/components/Settings/ApiKeys/ApiKeysPage.vue'
 import BureausSettings from '@/components/Settings/Bureaus/BureausSettings.vue'
+import CreditBureausSettings from '@/components/Settings/CreditBureaus/CreditBureausSettings.vue'
 import { apiKeys, loadApiKeys } from '@/components/Settings/ApiKeys/apiKeysApi'
 import LucideKeyRound from '~icons/lucide/key-round'
 import LucideSearchCheck from '~icons/lucide/search-check'
@@ -300,6 +301,12 @@ const tabs = computed(() => {
           component: markRaw(BureausSettings),
           // Assertiva Localize and CENPROT (credtech#290): admins only, with the cred_hub app
           condition: () => isAdmin() && apiKeys.enabled,
+        },
+        {
+          label: __('Credit & Legal Bureaus'),
+          icon: ShieldCheck,
+          component: markRaw(CreditBureausSettings),
+          condition: () => isManager(),
         },
       ],
     },
