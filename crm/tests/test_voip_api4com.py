@@ -90,9 +90,12 @@ class TestAPI4ComWebhook(FrappeTestCase):
 		# registering the webhook at API4Com is covered (mocked) in test_api4com_settings
 		with patch("crm.fcrm.doctype.crm_api4com_settings.crm_api4com_settings.register_webhook"):
 			settings.save()
+		frappe.db.delete("CRM Telephony Extension", {"medium": "API4Com"})
 		if not frappe.db.exists("CRM Telephony Agent", "Administrator"):
 			frappe.get_doc({"doctype": "CRM Telephony Agent", "user": "Administrator"}).insert()
-		frappe.db.set_value("CRM Telephony Agent", "Administrator", "api4com_extension", "1000")
+		agent = frappe.get_doc("CRM Telephony Agent", "Administrator")
+		agent.set_extension("API4Com", "1000")
+		agent.save()
 		# the endpoint commits; keep everything inside the test transaction
 		self.commit = patch.object(frappe.db, "commit")
 		self.commit.start()
@@ -157,6 +160,24 @@ class TestAPI4ComWebhook(FrappeTestCase):
 		self.assertEqual(frappe.db.get_value("CRM Call Log", "repeat-1", "reference_docname"), deal)
 		self.assertEqual(
 			frappe.db.get_value("CRM Call Log", "repeat-1", "recording_url"), DOC_FIXTURE["recordUrl"]
+		)
+
+	def test_identical_delivery_writes_nothing(self):
+		# polling (Nvoip) reads recent calls again every 5 minutes: nothing new, nothing written
+		self.post(hangup(id="same-1"))
+		frappe.db.set_value(
+			"CRM Call Log", "same-1", "modified", "2026-01-01 00:00:00", update_modified=False
+		)
+
+		self.post(hangup(id="same-1"))
+		self.assertEqual(
+			str(frappe.db.get_value("CRM Call Log", "same-1", "modified")), "2026-01-01 00:00:00"
+		)
+
+		self.post(hangup(id="same-1", duration=9))
+		self.assertEqual(frappe.db.get_value("CRM Call Log", "same-1", "duration"), 9)
+		self.assertNotEqual(
+			str(frappe.db.get_value("CRM Call Log", "same-1", "modified")), "2026-01-01 00:00:00"
 		)
 
 	def test_unknown_number_only_stays_in_the_call_history(self):

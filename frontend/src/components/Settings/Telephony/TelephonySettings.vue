@@ -50,6 +50,10 @@
               { label: __(''), value: '' },
               { label: __('Twilio'), value: 'Twilio' },
               { label: __('Exotel'), value: 'Exotel' },
+              ...Object.values(voipOperators).map((medium) => ({
+                label: medium,
+                value: medium,
+              })),
             ]"
             :placeholder="__('Select Medium')"
           />
@@ -238,6 +242,138 @@
           @click="emit('updateStep', 'api4com-settings')"
         />
       </div>
+
+      <div
+        v-if="isManager()"
+        class="h-px border-t mx-2 border-outline-elevation-2"
+      />
+
+      <!-- No webhook: calls are read every few minutes (credtech#269) -->
+      <div
+        v-if="isManager()"
+        class="flex items-center justify-between py-3 px-2"
+      >
+        <div class="flex flex-col gap-1">
+          <span class="text-base-medium text-ink-gray-8">
+            {{ __('Nvoip') }}
+          </span>
+          <span class="text-p-sm text-ink-gray-6">
+            {{
+              __(
+                'Record the calls of your Nvoip account on the timeline of your deals',
+              )
+            }}
+          </span>
+        </div>
+        <Button
+          :label="__('Configure')"
+          @click="emit('updateStep', 'nvoip-settings')"
+        />
+      </div>
+
+      <div
+        v-if="isManager()"
+        class="h-px border-t mx-2 border-outline-elevation-2"
+      />
+
+      <!-- Call logging only, same as API4Com; no click-to-call yet (credtech#271) -->
+      <div
+        v-if="isManager()"
+        class="flex items-center justify-between py-3 px-2"
+      >
+        <div class="flex flex-col gap-1">
+          <span class="text-base-medium text-ink-gray-8">
+            {{ __('Wavix') }}
+          </span>
+          <span class="text-p-sm text-ink-gray-6">
+            {{
+              __(
+                'Record the calls of your Wavix account on the timeline of your deals',
+              )
+            }}
+          </span>
+        </div>
+        <Button
+          :label="__('Configure')"
+          @click="emit('updateStep', 'wavix-settings')"
+        />
+      </div>
+
+      <div
+        v-if="isManager()"
+        class="h-px border-t mx-2 border-outline-elevation-2"
+      />
+
+      <!-- Click-to-call through a Call Control Application (credtech#270) -->
+      <div
+        v-if="isManager()"
+        class="flex items-center justify-between py-3 px-2"
+      >
+        <div class="flex flex-col gap-1">
+          <span class="text-base-medium text-ink-gray-8">
+            {{ __('Telnyx') }}
+          </span>
+          <span class="text-p-sm text-ink-gray-6">
+            {{
+              __(
+                'Call your customers from a card through Telnyx and record the calls on your deals',
+              )
+            }}
+          </span>
+        </div>
+        <Button
+          :label="__('Configure')"
+          @click="emit('updateStep', 'telnyx-settings')"
+        />
+      </div>
+
+      <div
+        v-if="isManager()"
+        class="h-px border-t mx-2 border-outline-elevation-2"
+      />
+
+      <!-- Zenvia Voz, former TotalVoice (credtech#272) -->
+      <div
+        v-if="isManager()"
+        class="flex items-center justify-between py-3 px-2"
+      >
+        <div class="flex flex-col gap-1">
+          <span class="text-base-medium text-ink-gray-8">
+            {{ __('Zenvia') }}
+          </span>
+          <span class="text-p-sm text-ink-gray-6">
+            {{
+              __(
+                'Call your customers from a card through Zenvia and record the calls on your deals',
+              )
+            }}
+          </span>
+        </div>
+        <Button
+          :label="__('Configure')"
+          @click="emit('updateStep', 'zenvia-settings')"
+        />
+      </div>
+      <div class="h-px border-t mx-2 border-outline-elevation-2" />
+      <div class="flex items-center justify-between py-3 px-2">
+        <div class="flex flex-col gap-1">
+          <span class="text-base-medium text-ink-gray-8">
+            {{ __('Another telephony company') }}
+          </span>
+          <span class="text-p-sm text-ink-gray-6">
+            {{
+              __(
+                'Use another telephony? Ask for the integration: CredTech studies it from the API documentation.',
+              )
+            }}
+          </span>
+        </div>
+        <Button
+          :label="__('Request integration')"
+          @click="showTelephonyRequest = true"
+        />
+      </div>
+      <TelephonyRequestModal v-model="showTelephonyRequest" />
     </div>
     <ErrorMessage
       :message="isNewDoc ? insertResource.error : telephonyAgent.save?.error"
@@ -252,7 +388,8 @@ import {
   createResource,
   toast,
 } from 'frappe-ui'
-import { useTelephony } from '@/composables/telephony'
+import TelephonyRequestModal from '@/components/Modals/TelephonyRequestModal.vue'
+import { useTelephony, voipOperators } from '@/composables/telephony'
 import { useDocument } from '@/data/document'
 import { usersStore } from '@/stores/users'
 import { validatePhone } from '@/utils'
@@ -261,6 +398,9 @@ import { ref, computed } from 'vue'
 const { isEnabled } = useTelephony()
 
 const emit = defineEmits(['updateStep'])
+
+// credtech#259: ask CredTech for another telephony integration
+const showTelephonyRequest = ref(false)
 
 const { getUser, isManager } = usersStore()
 

@@ -11,8 +11,9 @@ export const globalStore = defineStore('crm-global', () => {
     callMethod = value
   }
 
-  function makeCall(number) {
-    callMethod(number)
+  // deal: the card the call is made from, so the call lands on its timeline
+  function makeCall(number, deal = null) {
+    callMethod(number, deal)
   }
 
   return {
