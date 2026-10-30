@@ -54,16 +54,23 @@
                 v-model="settingsDoc.escavador_token"
                 type="password"
                 :label="__('Escavador Bearer Token')"
-                placeholder="Insira o token de API do Escavador"
+                :placeholder="__('Enter the Escavador API token')"
                 autocomplete="off"
               />
               <div class="flex items-center gap-2">
+                <FormControl
+                  v-model="testCnpj.escavador"
+                  type="text"
+                  class="w-48"
+                  :placeholder="__('CNPJ to test with')"
+                />
                 <Button
                   variant="subtle"
                   :loading="testingEscavador"
+                  :disabled="!testCnpj.escavador"
                   @click="testProvider('escavador', settingsDoc.escavador_token)"
                 >
-                  {{ __('Test Connection') }}
+                  {{ __('Test Connection (real paid query)') }}
                 </Button>
               </div>
             </div>
@@ -88,16 +95,23 @@
                 v-model="settingsDoc.infosimples_token"
                 type="password"
                 :label="__('Infosimples API Token')"
-                placeholder="Insira o token de API da Infosimples"
+                :placeholder="__('Enter the Infosimples API token')"
                 autocomplete="off"
               />
               <div class="flex items-center gap-2">
+                <FormControl
+                  v-model="testCnpj.infosimples"
+                  type="text"
+                  class="w-48"
+                  :placeholder="__('CNPJ to test with')"
+                />
                 <Button
                   variant="subtle"
                   :loading="testingInfosimples"
+                  :disabled="!testCnpj.infosimples"
                   @click="testProvider('infosimples', settingsDoc.infosimples_token)"
                 >
-                  {{ __('Test Connection') }}
+                  {{ __('Test Connection (real paid query)') }}
                 </Button>
               </div>
             </div>
@@ -159,28 +173,39 @@
             </div>
           </div>
 
-          <!-- 5. Bureaus Finais (Sob Demanda) -->
+          <!-- 5. Bureau Final (Sob Demanda) -->
           <div class="p-5 bg-surface-white rounded-lg border border-outline-gray-2 space-y-4">
             <div class="flex items-center justify-between">
               <span class="text-lg-semibold text-ink-gray-9">
-                {{ __('High-Value Bureaus (On-Demand)') }}
+                {{ __('Final Bureau (On-Demand)') }}
               </span>
               <Badge label="R$ 25 a R$ 40 / Consulta" theme="amber" variant="subtle" />
             </div>
             <p class="text-p-sm text-ink-gray-6">
-              {{ __('Activated strictly on demand for leads approved in the pre-filter.') }}
+              {{ __('Activated strictly on demand for leads approved in the pre-filter. Uses your own Serasa contract — CredTech never pays for this query.') }}
             </p>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-              <Checkbox
-                v-model="settingsDoc.serasa_enabled"
-                :label="__('Enable Serasa Experian (Relato PJ)')"
+            <Checkbox
+              v-model="settingsDoc.serasa_enabled"
+              :label="__('Enable Serasa Experian (Relato PJ)')"
+            />
+            <div v-if="settingsDoc.serasa_enabled" class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+              <FormControl
+                v-model="settingsDoc.serasa_endpoint_url"
+                type="text"
+                :label="__('Serasa Relato PJ Endpoint (your contract)')"
+                placeholder="https://..."
               />
-              <Checkbox
-                v-model="settingsDoc.assertiva_enabled"
-                :label="__('Enable Assertiva Localize')"
+              <FormControl
+                v-model="settingsDoc.serasa_token"
+                type="password"
+                :label="__('Serasa Access Token (your contract)')"
+                autocomplete="off"
               />
             </div>
           </div>
+          <!-- Assertiva Localize (enriquecimento de contatos) e CENPROT (funil de cobrança) são
+          features separadas do épico #290 (módulos 1 e 2) — não fazem parte do pré-filtro de
+          crédito e ganham tela própria quando forem implementadas. -->
         </div>
       </div>
     </template>
@@ -222,8 +247,13 @@ const settingsDoc = ref({
   block_on_cndt: true,
   block_on_protest: true,
   serasa_enabled: false,
-  assertiva_enabled: false,
+  serasa_endpoint_url: '',
+  serasa_token: '',
 })
+
+const testCnpj = ref({ escavador: '', infosimples: '' })
+
+const TEST_COST = { escavador: '0,50', infosimples: '0,70' }
 
 const isDirty = computed(() => {
   if (!originalDoc.value) return false
@@ -278,13 +308,23 @@ async function testProvider(provider, token) {
     toast.error(__('Please enter a token first.'))
     return
   }
+  const cnpj = testCnpj.value[provider]
+  if (!cnpj) {
+    toast.error(__('Enter a CNPJ to run the test query against.'))
+    return
+  }
+  const confirmed = window.confirm(
+    __('This runs a real query against {0} and costs about R$ {1}. Continue?').replace('{0}', provider).replace('{1}', TEST_COST[provider])
+  )
+  if (!confirmed) return
+
   if (provider === 'escavador') testingEscavador.value = true
   if (provider === 'infosimples') testingInfosimples.value = true
 
   try {
     const res = await createResource({
       url: 'cred_hub.credit_check.api.test_provider_connection',
-      params: { provider, token },
+      params: { provider, token, cnpj, confirm_cost: true },
     }).submit()
     if (res?.ok) {
       toast.success(res.message || __('Connection successful!'))
