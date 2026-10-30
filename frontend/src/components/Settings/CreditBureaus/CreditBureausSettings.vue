@@ -35,6 +35,35 @@
         </div>
 
         <div v-if="settingsDoc.enabled" class="space-y-6">
+          <!-- 0. CGU CEIS/CNEP (Etapa 0, grátis) -->
+          <div class="p-5 bg-surface-white rounded-lg border border-outline-gray-2 space-y-4">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="text-lg-semibold text-ink-gray-9">
+                  {{ __('Step 0 — CEIS/CNEP Sanctions (Portal da Transparência / CGU)') }}
+                </span>
+                <Badge label="Grátis" theme="green" variant="subtle" />
+              </div>
+              <Switch v-model="settingsDoc.cgu_enabled" />
+            </div>
+            <p class="text-p-sm text-ink-gray-6">
+              {{ __('Runs first, for free. If the company is already sanctioned and rejection is on, the paid providers below are skipped entirely — no cost spent.') }}
+            </p>
+            <div v-if="settingsDoc.cgu_enabled" class="space-y-3 pt-2">
+              <FormControl
+                v-model="settingsDoc.cgu_api_key"
+                type="password"
+                :label="__('Portal da Transparência API Key')"
+                :placeholder="__('Free key from portaldatransparencia.gov.br/api-de-dados')"
+                autocomplete="off"
+              />
+              <Checkbox
+                v-model="settingsDoc.block_on_ceis_cnep"
+                :label="__('Reject immediately if listed in CEIS/CNEP')"
+              />
+            </div>
+          </div>
+
           <!-- 1. Escavador API (v2) -->
           <div class="p-5 bg-surface-white rounded-lg border border-outline-gray-2 space-y-4">
             <div class="flex items-center justify-between">
@@ -305,6 +334,9 @@ const originalDoc = ref(null)
 
 const settingsDoc = ref({
   enabled: false,
+  cgu_enabled: false,
+  cgu_api_key: '',
+  block_on_ceis_cnep: true,
   escavador_enabled: false,
   escavador_token: '',
   infosimples_enabled: false,
