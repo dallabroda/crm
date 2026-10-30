@@ -47,16 +47,9 @@
               <Switch v-model="settingsDoc.cgu_enabled" />
             </div>
             <p class="text-p-sm text-ink-gray-6">
-              {{ __('Runs first, for free. If the company is already sanctioned and rejection is on, the paid providers below are skipped entirely — no cost spent.') }}
+              {{ __('Runs first, for free (CredTech credential, nothing to configure here). If the company is already sanctioned and rejection is on, the paid providers below are skipped entirely — no cost spent.') }}
             </p>
-            <div v-if="settingsDoc.cgu_enabled" class="space-y-3 pt-2">
-              <FormControl
-                v-model="settingsDoc.cgu_api_key"
-                type="password"
-                :label="__('Portal da Transparência API Key')"
-                :placeholder="__('Free key from portaldatransparencia.gov.br/api-de-dados')"
-                autocomplete="off"
-              />
+            <div v-if="settingsDoc.cgu_enabled" class="pt-2">
               <Checkbox
                 v-model="settingsDoc.block_on_ceis_cnep"
                 :label="__('Reject immediately if listed in CEIS/CNEP')"
@@ -105,69 +98,37 @@
             </div>
           </div>
 
-          <!-- 2. Infosimples API (v2) -->
+          <!-- 2. Infosimples API (v2) — conta da CredTech, cobrado via créditos -->
           <div class="p-5 bg-surface-white rounded-lg border border-outline-gray-2 space-y-4">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
                 <span class="text-lg-semibold text-ink-gray-9">
                   {{ __('Infosimples API (v2) — Fiscal & Protests') }}
                 </span>
-                <Badge label="~R$ 0,70 / CNPJ" theme="blue" variant="subtle" />
+                <Badge label="~R$ 0,96 / CNPJ (custo + 20%)" theme="blue" variant="subtle" />
               </div>
               <Switch v-model="settingsDoc.infosimples_enabled" />
             </div>
             <p class="text-p-sm text-ink-gray-6">
-              {{ __('Queries PGFN Active Debt of the Union, CND Federal (Receita/PGFN), CNDT (Labor Court TST) and CENPROT.') }}
+              {{ __('Queries PGFN Active Debt of the Union, CND Federal (Receita/PGFN), CNDT (Labor Court TST) and CENPROT. CredTech credential, nothing to configure — billed from your credit balance.') }}
             </p>
-            <div v-if="settingsDoc.infosimples_enabled" class="space-y-3 pt-2">
-              <FormControl
-                v-model="settingsDoc.infosimples_token"
-                type="password"
-                :label="__('Infosimples API Token')"
-                :placeholder="__('Enter the Infosimples API token')"
-                autocomplete="off"
-              />
-              <div class="flex items-center gap-2">
-                <FormControl
-                  v-model="testCnpj.infosimples"
-                  type="text"
-                  class="w-48"
-                  :placeholder="__('CNPJ to test with')"
-                />
-                <Button
-                  variant="subtle"
-                  :loading="testingInfosimples"
-                  :disabled="!testCnpj.infosimples"
-                  @click="testProvider('infosimples', settingsDoc.infosimples_token)"
-                >
-                  {{ __('Test Connection (real paid query)') }}
-                </Button>
-              </div>
-            </div>
           </div>
 
-          <!-- 2b. DirectD (Score QUOD + Protestos Nacional + Processos Judiciais) -->
+          <!-- 2b. DirectD (Score QUOD + Protestos Nacional + Processos Judiciais) — conta da CredTech -->
           <div class="p-5 bg-surface-white rounded-lg border border-outline-gray-2 space-y-4">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
                 <span class="text-lg-semibold text-ink-gray-9">
                   {{ __('DirectD — Score, National Protests & Lawsuits') }}
                 </span>
-                <Badge label="R$ 1,98 a R$ 2,95 / consulta" theme="blue" variant="subtle" />
+                <Badge label="R$ 1,80 a R$ 3,54 / consulta (custo + 20%)" theme="blue" variant="subtle" />
               </div>
               <Switch v-model="settingsDoc.directd_enabled" />
             </div>
             <p class="text-p-sm text-ink-gray-6">
-              {{ __('One token covers 3 products: QUOD credit Score (PF/PJ), Protestos Nacional - IEPTB (all of Brazil, unlike the SP-only CENPROT above) and Processos Judiciais - Simplificada.') }}
+              {{ __('3 products: QUOD credit Score (PF/PJ), Protestos Nacional - IEPTB (all of Brazil, unlike the SP-only CENPROT above) and Processos Judiciais - Simplificada. CredTech credential, nothing to configure — billed from your credit balance.') }}
             </p>
             <div v-if="settingsDoc.directd_enabled" class="space-y-3 pt-2">
-              <FormControl
-                v-model="settingsDoc.directd_token"
-                type="password"
-                :label="__('DirectD Token')"
-                :placeholder="__('Enter the DirectD API token')"
-                autocomplete="off"
-              />
               <FormControl
                 v-model.number="settingsDoc.min_directd_score"
                 type="number"
@@ -176,11 +137,11 @@
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
                 <Checkbox
                   v-model="settingsDoc.directd_fgts_enabled"
-                  :label="__('Check FGTS regularity (R$ 0,36 / CNPJ)')"
+                  :label="__('Check FGTS regularity (~R$ 0,43 / CNPJ, custo + 20%)')"
                 />
                 <Checkbox
                   v-model="settingsDoc.directd_sintegra_enabled"
-                  :label="__('Check Sintegra/CCC — state registration (R$ 1,80 / CNPJ)')"
+                  :label="__('Check Sintegra/CCC — state registration (~R$ 2,16 / CNPJ, custo + 20%)')"
                 />
               </div>
             </div>
@@ -276,9 +237,9 @@
                 autocomplete="off"
               />
             </div>
-            <div v-if="settingsDoc.directd_enabled" class="pt-4 mt-4 border-t border-outline-gray-2 space-y-3">
+            <div class="pt-4 mt-4 border-t border-outline-gray-2 space-y-3">
               <p class="text-p-sm text-ink-gray-6">
-                {{ __('These 3 run on the CredTech DirectD account (your DirectD token above) and are resold with a fixed margin.') }}
+                {{ __('These 3 run on the CredTech DirectD account and are billed from your credit balance at a fixed price, independent of the automatic DirectD toggle above.') }}
               </p>
               <div class="flex items-center justify-between">
                 <Checkbox
@@ -329,20 +290,16 @@ import SettingsLayoutBase from '@/components/Layouts/SettingsLayoutBase.vue'
 const loading = ref(true)
 const saving = ref(false)
 const testingEscavador = ref(false)
-const testingInfosimples = ref(false)
 const originalDoc = ref(null)
 
 const settingsDoc = ref({
   enabled: false,
   cgu_enabled: false,
-  cgu_api_key: '',
   block_on_ceis_cnep: true,
   escavador_enabled: false,
   escavador_token: '',
   infosimples_enabled: false,
-  infosimples_token: '',
   directd_enabled: false,
-  directd_token: '',
   min_directd_score: 0,
   directd_fgts_enabled: false,
   directd_sintegra_enabled: false,
@@ -363,9 +320,9 @@ const settingsDoc = ref({
   scr_bacen_enabled: false,
 })
 
-const testCnpj = ref({ escavador: '', infosimples: '' })
+const testCnpj = ref({ escavador: '' })
 
-const TEST_COST = { escavador: '0,50', infosimples: '0,70' }
+const TEST_COST = { escavador: '0,50' }
 
 const isDirty = computed(() => {
   if (!originalDoc.value) return false
@@ -430,8 +387,7 @@ async function testProvider(provider, token) {
   )
   if (!confirmed) return
 
-  if (provider === 'escavador') testingEscavador.value = true
-  if (provider === 'infosimples') testingInfosimples.value = true
+  testingEscavador.value = true
 
   try {
     const res = await createResource({
@@ -445,7 +401,6 @@ async function testProvider(provider, token) {
     toast.error(err.messages?.[0] || __('Connection failed.'))
   } finally {
     testingEscavador.value = false
-    testingInfosimples.value = false
   }
 }
 
