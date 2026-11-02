@@ -141,6 +141,63 @@
       </div>
     </template>
 
+    <!-- Partners (credtech#316): full CPF, and the operator picks who to query; nobody comes ticked -->
+    <div
+      v-if="partners.data && partners.data.length"
+      class="p-5 bg-surface-white rounded-lg border border-outline-gray-2 space-y-3"
+    >
+      <span class="text-lg-semibold text-ink-gray-9">{{ __('Partners') }}</span>
+      <p class="text-p-sm text-ink-gray-6">
+        {{
+          __(
+            'Tick the partners to include in the next query. Every partner query is paid on your provider account. The Receita shows only a masked CPF: use "Find contacts" (Assertiva) or type the CPF.',
+          )
+        }}
+      </p>
+      <div
+        v-for="partner in partners.data"
+        :key="partner.contact"
+        class="flex items-center justify-between p-3 border border-outline-gray-2 rounded gap-3"
+      >
+        <div class="flex items-center gap-3 min-w-0">
+          <input
+            type="checkbox"
+            class="size-4"
+            :checked="selected.includes(partner.contact)"
+            :disabled="!partner.has_cpf"
+            @change="togglePartner(partner.contact)"
+          />
+          <div class="min-w-0">
+            <div class="text-base-medium truncate">{{ partner.name }}</div>
+            <div class="text-p-sm text-ink-gray-5">
+              {{ partner.designation }}
+              <span v-if="partner.share != null"> · {{ partner.share }}%</span>
+            </div>
+          </div>
+        </div>
+        <div v-if="partner.has_cpf" class="text-p-sm text-ink-gray-7">
+          {{ partner.cpf }}
+        </div>
+        <div v-else class="flex items-center gap-2">
+          <FormControl
+            v-model="cpfDraft[partner.contact]"
+            type="text"
+            class="w-40"
+            :placeholder="__('Full CPF')"
+          />
+          <Button
+            variant="outline"
+            size="sm"
+            :loading="savingCpf === partner.contact"
+            :disabled="!cpfDraft[partner.contact]"
+            @click="saveCpf(partner)"
+          >
+            {{ __('Save CPF') }}
+          </Button>
+        </div>
+      </div>
+    </div>
+
     <!-- Final bureaus (on demand), with the client's own keys (credtech#316) -->
     <div
       v-if="options.data && options.data.bureaus.length"
@@ -187,24 +244,98 @@
               {{ __('Credential missing in the Credit settings.') }}
             </div>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            :loading="requesting === bureau.key"
-            :disabled="!options.data.can_request || !bureau.configured"
-            @click="askPremiumBureau(bureau)"
-          >
-            {{ __('Request') }}
-          </Button>
+          <div class="flex items-center gap-2">
+            <Button
+              v-if="bureau.partner_ok && selectedPartners.length"
+              variant="outline"
+              size="sm"
+              :loading="requesting === bureau.key + ':partners'"
+              :disabled="!options.data.can_request || !bureau.configured"
+              @click="askPremiumBureau(bureau, selectedPartners)"
+            >
+              {{ __('Request for {0} partner(s)', [selectedPartners.length]) }}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              :loading="requesting === bureau.key"
+              :disabled="!options.data.can_request || !bureau.configured"
+              @click="askPremiumBureau(bureau)"
+            >
+              {{ __('Request') }}
+            </Button>
+          </div>
         </div>
       </div>
     </div>
+
+    <!-- Queries already made, for the company and the partners (credtech#316) -->
+    <div
+      v-if="results.data && results.data.length"
+      class="p-5 bg-surface-white rounded-lg border border-outline-gray-2 space-y-3"
+    >
+      <span class="text-lg-semibold text-ink-gray-9">{{
+        __('Queries made')
+      }}</span>
+      <div
+        v-for="row in results.data"
+        :key="row.name"
+        class="flex items-center justify-between p-3 border border-outline-gray-2 rounded gap-3"
+      >
+        <div class="min-w-0">
+          <div class="text-base-medium">{{ row.bureau_label }}</div>
+          <div class="text-p-sm text-ink-gray-6 truncate">
+            {{ row.subject_name || __('Company') }} · {{ row.document }}
+          </div>
+          <div class="text-p-sm text-ink-gray-5">
+            {{ row.requested_on }} · {{ row.requested_by }}
+          </div>
+          <div
+            v-if="row.warning_acknowledged"
+            class="text-p-sm text-ink-amber-3"
+          >
+            {{
+              __('Queried with the pre-filter alert: {0}', [
+                verdictText(row.pre_filter_verdict),
+              ])
+            }}
+          </div>
+        </div>
+        <Button variant="outline" size="sm" @click="openResult(row)">
+          {{ __('View return') }}
+        </Button>
+      </div>
+    </div>
+
+    <Dialog v-model:open="showResult" :title="resultTitle" :size="'4xl'">
+      <template #default>
+        <p class="text-p-sm text-ink-gray-6 mb-2">
+          {{
+            __(
+              'Complete return, exactly as the provider sent it. Nothing is left out.',
+            )
+          }}
+        </p>
+        <pre
+          class="text-p-xs bg-surface-gray-2 rounded p-3 overflow-auto max-h-[60vh] whitespace-pre-wrap"
+          >{{ resultText }}</pre
+        >
+      </template>
+    </Dialog>
   </div>
 </template>
 
 <script setup>
-import { Badge, Button, createResource, call, toast } from 'frappe-ui'
-import { computed, ref, watch } from 'vue'
+import {
+  Badge,
+  Button,
+  Dialog,
+  FormControl,
+  createResource,
+  call,
+  toast,
+} from 'frappe-ui'
+import { computed, reactive, ref, watch } from 'vue'
 import { createDialog } from '@/utils/dialogs'
 
 const props = defineProps({
@@ -214,6 +345,12 @@ const props = defineProps({
 const checking = ref(false)
 const generatingPdf = ref(false)
 const requesting = ref('')
+const selected = ref([])
+const cpfDraft = reactive({})
+const savingCpf = ref('')
+const showResult = ref(false)
+const resultTitle = ref('')
+const resultText = ref('')
 
 const org = createResource({
   url: 'frappe.client.get_value',
@@ -249,6 +386,63 @@ const options = createResource({
   params: { organization_name: props.organizationId },
   auto: true,
 })
+
+// Partners of the company (Contacts) and the queries already made (credtech#316)
+const partners = createResource({
+  url: 'cred_hub.credit_check.api.get_partners',
+  params: { organization_name: props.organizationId },
+  auto: true,
+})
+
+const results = createResource({
+  url: 'cred_hub.credit_check.api.get_bureau_results',
+  params: { organization_name: props.organizationId },
+  auto: true,
+})
+
+// Nobody comes ticked: the operator chooses, and only partners with a valid CPF can be chosen
+const selectedPartners = computed(() =>
+  (partners.data || []).filter(
+    (partner) => partner.has_cpf && selected.value.includes(partner.contact),
+  ),
+)
+
+function togglePartner(contact) {
+  selected.value = selected.value.includes(contact)
+    ? selected.value.filter((name) => name !== contact)
+    : [...selected.value, contact]
+}
+
+async function saveCpf(partner) {
+  savingCpf.value = partner.contact
+  try {
+    await call('cred_hub.credit_check.api.save_partner_cpf', {
+      organization_name: props.organizationId,
+      contact_name: partner.contact,
+      cpf: cpfDraft[partner.contact],
+    })
+    delete cpfDraft[partner.contact]
+    partners.reload()
+    toast.success(__('CPF saved.'))
+  } catch (err) {
+    toast.error(err?.messages?.[0] || __('Could not save the CPF.'))
+  } finally {
+    savingCpf.value = ''
+  }
+}
+
+async function openResult(row) {
+  try {
+    const res = await call('cred_hub.credit_check.api.get_bureau_result', {
+      query_name: row.name,
+    })
+    resultTitle.value = `${res.bureau_label} · ${res.document}`
+    resultText.value = JSON.stringify(res.raw, null, 2)
+    showResult.value = true
+  } catch (err) {
+    toast.error(err?.messages?.[0] || __('Could not open the return.'))
+  }
+}
 
 function verdictText(v) {
   if (!v || v === 'Not Checked') return __('Not Checked')
@@ -320,9 +514,10 @@ async function generatePdf() {
 
 // Transparency (credtech#316): every paid query shows who bills it and the list price; a pre-filter
 // other than Pre-Approved does not block, it shows the result and the reason and asks to confirm.
-function askPremiumBureau(bureau) {
+function askPremiumBureau(bureau, partnerList = []) {
   const data = options.data
   const needsAck = Boolean(data?.needs_acknowledgement)
+  const count = partnerList.length || 1
   let message = bureau.price_reference
     ? __(
         'This query is paid and billed by {0} on your account (list price {1}). CredTech charges nothing.',
@@ -332,6 +527,20 @@ function askPremiumBureau(bureau) {
         'This query is paid and billed by {0} on your account, as per your contract. CredTech charges nothing.',
         [bureau.provider],
       )
+  if (partnerList.length) {
+    message +=
+      ' ' +
+      __('Partners: {0}. {1} queries', [
+        partnerList.map((partner) => partner.name).join(', '),
+        count,
+      ]) +
+      (bureau.price_reference
+        ? ' ' +
+          __('(about {0} in total at list price).', [
+            formatMoney(bureau.price_reference * count),
+          ])
+        : '.')
+  }
   if (needsAck) {
     message +=
       ' ' +
@@ -357,31 +566,53 @@ function askPremiumBureau(bureau) {
         theme: needsAck ? 'red' : 'gray',
         onClick: ({ close }) => {
           close()
-          requestPremiumBureau(bureau.key, needsAck)
+          requestPremiumBureau(
+            bureau.key,
+            needsAck,
+            partnerList.map((partner) => partner.contact),
+          )
         },
       },
     ],
   })
 }
 
-async function requestPremiumBureau(bureau, acknowledged) {
-  requesting.value = bureau
-  try {
-    await call('cred_hub.credit_check.api.request_bureau_final', {
-      organization_name: props.organizationId,
-      bureau,
-      confirm_cost: 1,
-      acknowledged_warning: acknowledged ? 1 : 0,
-    })
-    toast.success(__('Query requested.'))
-    report.reload()
-    options.reload()
-  } catch (err) {
-    toast.error(
-      err?.messages?.[0] || err?.message || __('Could not request the query.'),
-    )
-  } finally {
-    requesting.value = ''
+// One call per target: the company (no contact) or each ticked partner, one after the other so a
+// failure on one never hides the others
+async function requestPremiumBureau(bureau, acknowledged, contacts = []) {
+  requesting.value = contacts.length ? bureau + ':partners' : bureau
+  const targets = contacts.length ? contacts : [null]
+  let done = 0
+  const failures = []
+  for (const contact of targets) {
+    try {
+      await call('cred_hub.credit_check.api.request_bureau_final', {
+        organization_name: props.organizationId,
+        bureau,
+        confirm_cost: 1,
+        acknowledged_warning: acknowledged ? 1 : 0,
+        contact_name: contact,
+      })
+      done += 1
+    } catch (err) {
+      failures.push(
+        err?.messages?.[0] ||
+          err?.message ||
+          __('Could not request the query.'),
+      )
+    }
   }
+  if (done) {
+    toast.success(
+      targets.length > 1
+        ? __('{0} of {1} queries requested.', [done, targets.length])
+        : __('Query requested.'),
+    )
+  }
+  failures.forEach((message) => toast.error(message))
+  report.reload()
+  options.reload()
+  results.reload()
+  requesting.value = ''
 }
 </script>
