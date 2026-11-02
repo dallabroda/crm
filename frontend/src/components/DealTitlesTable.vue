@@ -26,6 +26,15 @@
       />
     </div>
 
+    <!-- Todos os títulos pagos: o sistema avisa, quem encerra o card é o operador (credtech#315) -->
+    <div
+      v-if="allPaid && deal.outcome === 'In progress'"
+      class="flex items-center justify-between gap-3 rounded border border-outline-green-2 bg-surface-green-1 p-3 text-sm text-ink-green-3"
+    >
+      <span>{{ __('Every title of this card is paid.') }}</span>
+      <Button variant="subtle" theme="green" :label="__('Mark card as Won')" @click="emit('setOutcome', 'Won')" />
+    </div>
+
     <!-- Hidden file input for uploading attachments -->
     <input
       ref="fileInputRef"
@@ -44,7 +53,7 @@
             <th class="py-2.5 px-3">{{ __('Nosso Nº') }}</th>
             <th class="py-2.5 px-3">{{ __('Vencimento') }}</th>
             <th class="py-2.5 px-3 text-right">{{ __('Valor Original') }}</th>
-            <th class="py-2.5 px-3 text-right">{{ __('Atualizado') }}</th>
+            <th class="py-2.5 px-3 text-right">{{ __('Balance') }}</th>
             <th class="py-2.5 px-3 min-w-[200px]">{{ __('Título cartório') }}</th>
             <th class="py-2.5 px-3 min-w-[140px]">{{ __('Anexos') }}</th>
             <th class="py-2.5 px-3">{{ __('Status cartório') }}</th>
@@ -86,8 +95,18 @@
             </td>
 
             <!-- Valor Atualizado -->
-            <td class="py-3 px-3 text-right font-semibold text-ink-gray-9">
-              {{ formatMoney(title.updated_amount || title.original_amount) }}
+            <td class="py-3 px-3 text-right">
+              <div class="font-semibold text-ink-gray-9">{{ formatMoney(balanceOf(title)) }}</div>
+              <div v-if="Number(title.paid_amount)" class="text-[11px] text-ink-green-3">
+                {{ __('Paid {0}', [formatMoney(title.paid_amount)]) }}
+              </div>
+              <Badge
+                v-if="negotiationOf(title)"
+                class="mt-1"
+                :label="negotiationOf(title).label"
+                :theme="negotiationOf(title).theme"
+                variant="subtle"
+              />
             </td>
 
             <!-- Título cartório (Dropdown obrigatório) -->
@@ -232,6 +251,16 @@
                     </Button>
                   </Tooltip>
 
+                  <!-- Pagamentos, promessa e acordo do título -->
+                  <Button
+                    size="sm"
+                    variant="subtle"
+                    iconLeft="lucide-handshake"
+                    @click="openNegotiation(title)"
+                  >
+                    {{ __('Negotiate') }}
+                  </Button>
+
                   <!-- Botão Enviar / Protestar -->
                   <Button
                     size="sm"
@@ -240,6 +269,7 @@
                     :loading="loadingProtest === title.name"
                     :disabled="
                       loadingProtest === title.name ||
+                      balanceOf(title) <= 0 ||
                       !title.species ||
                       (requiresAttachment(title.species) && !title.attachment) ||
                       !SENDABLE.includes(statusOf(title))
@@ -445,6 +475,13 @@
       </template>
     </Dialog>
 
+    <TitleNegotiation
+      v-model:open="showNegotiation"
+      :deal="deal"
+      :title-name="negotiationTitle"
+      @reload="emit('reload', $event)"
+    />
+
     <!-- Modal de Adicionar Título -->
     <Dialog v-model:open="showAddModal" :title="__('Adicionar Título de Cobrança')" size="lg">
       <template #default>
@@ -529,12 +566,13 @@ import { Badge, Button, Dialog, FormControl, Tooltip, call, toast } from 'frappe
 import { createDialog } from '@/utils/dialogs'
 import Icon from '@/components/Icon.vue'
 import LocalizeContacts from '@/components/LocalizeContacts.vue'
+import TitleNegotiation from '@/components/TitleNegotiation.vue'
 
 const props = defineProps({
   deal: { type: Object, required: true },
 })
 
-const emit = defineEmits(['reload', 'sendWhatsapp'])
+const emit = defineEmits(['reload', 'sendWhatsapp', 'setOutcome'])
 
 const API = 'cred_hub.integrations.protest.'
 const showAddModal = ref(false)
@@ -568,9 +606,44 @@ const titles = computed(() => {
   return props.deal.titles || []
 })
 
+// O que ainda se deve no título: o valor atualizado; quitado fica com 0 (não volta ao valor original)
+function balanceOf(title) {
+  const updated = Number(title.updated_amount || 0)
+  return updated || Number(title.paid_amount || 0) ? updated : Number(title.original_amount || 0)
+}
+
 const totalAmount = computed(() => {
-  return titles.value.reduce((sum, t) => sum + Number(t.updated_amount || t.original_amount || 0), 0)
+  return titles.value.reduce((sum, t) => sum + balanceOf(t), 0)
 })
+
+const allPaid = computed(() => titles.value.length > 0 && titles.value.every((t) => balanceOf(t) <= 0.005))
+
+// Pagamentos, promessa e acordo (credtech#315)
+const showNegotiation = ref(false)
+const negotiationTitle = ref('')
+
+function openNegotiation(title) {
+  negotiationTitle.value = title.name
+  showNegotiation.value = true
+}
+
+// Situação da negociação do título, para o selo da tabela
+function negotiationOf(title) {
+  if (balanceOf(title) <= 0.005) return { label: __('Paid'), theme: 'green' }
+  const today = new Date().toLocaleDateString('sv-SE')
+  const open = (props.deal.installments || []).filter((i) => i.title === title.name && !i.paid_on)
+  if (open.length) {
+    return open.some((i) => i.due_date < today)
+      ? { label: __('Agreement broken'), theme: 'red' }
+      : { label: __('Agreement'), theme: 'blue' }
+  }
+  if (title.promise_date) {
+    return title.promise_date < today
+      ? { label: __('Promise broken'), theme: 'red' }
+      : { label: __('Promise {0}', [title.promise_date.split('-').reverse().slice(0, 2).join('/')]), theme: 'orange' }
+  }
+  return null
+}
 
 // Opções completas de espécies de cartório (CENPROT)
 const speciesOptions = [
