@@ -17,8 +17,8 @@
       </template>
     </SettingsPageHeader>
 
-    <!-- Fields -->
-    <div class="flex flex-1 flex-col overflow-y-auto">
+    <!-- Fields: Figma "Configurações · Ações da página inicial" (881:2) table -->
+    <div class="ct-home-actions flex flex-1 flex-col overflow-y-auto">
       <Grid
         v-model="document.doc.dropdown_items"
         doctype="CRM Dropdown Item"
@@ -56,3 +56,31 @@ function updateSettings() {
   })
 }
 </script>
+
+<style scoped>
+/* Figma "Tabela": 8px radius and soft border, 40px gray header with 12/500
+   labels, 56px white rows split only by horizontal lines */
+.ct-home-actions :deep(.rounded-4.border) {
+  border-radius: var(--ct-radius-md);
+  border-color: var(--ct-border-soft);
+}
+.ct-home-actions :deep(.grid-header) {
+  height: 40px;
+  border-bottom: 1px solid var(--ct-border-soft);
+  background: var(--ct-bg-soft);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ct-text-secondary);
+}
+.ct-home-actions :deep(.border-r) {
+  border-right-color: transparent;
+}
+.ct-home-actions :deep(.grid-row) {
+  padding-block: 9px;
+  border-color: var(--ct-border-soft);
+}
+.ct-home-actions :deep(.grid-row input),
+.ct-home-actions :deep(.grid-row .text-sm) {
+  font-size: 14px;
+}
+</style>

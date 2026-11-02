@@ -1,0 +1,16 @@
+/* Figma "Campo" in the settings panels: 48px fields (sized by `ct-field-48`
+   in pages/Settings.vue) are white with the #dcdde2 border, not gray.
+   Imported by the panels that use the class. */
+.settings-page .ct-field-48 input:not([type='checkbox']):not([type='radio']),
+.settings-page .ct-field-48 select,
+.settings-page .ct-field-48 textarea {
+  background-color: var(--ct-bg-page);
+  border-color: var(--ct-border);
+}
+.settings-page
+  .ct-field-48
+  input:not([type='checkbox']):not([type='radio']):focus,
+.settings-page .ct-field-48 select:focus,
+.settings-page .ct-field-48 textarea:focus {
+  border-color: var(--ct-border-strong);
+}

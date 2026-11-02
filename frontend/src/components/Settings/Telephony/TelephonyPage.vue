@@ -33,6 +33,7 @@
   />
 </template>
 <script setup>
+import '../fieldOutline.css'
 import TelephonySettings from './TelephonySettings.vue'
 import ExotelSettings from './ExotelSettings.vue'
 import TwilioSettings from './TwilioSettings.vue'

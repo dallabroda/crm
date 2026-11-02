@@ -1,42 +1,55 @@
 <template>
-  <div class="flex flex-col h-full gap-4">
+  <!-- Figma "Configurações · Contas · Configurar e-mail" (1336:21663) -->
+  <div class="flex flex-col h-full gap-6">
     <SettingsPageHeader :title="__('Setup Email')">
       <template #description>
         {{ __('Choose the email service provider you want to configure.') }}
       </template>
     </SettingsPageHeader>
     <!-- email service provider selection -->
-    <div class="flex flex-wrap items-center">
-      <div
+    <!-- "Provedores": one bordered tile per provider, blue when selected -->
+    <div class="grid grid-cols-[repeat(auto-fill,minmax(130px,1fr))] gap-3">
+      <button
         v-for="s in services"
         :key="s.name"
-        class="flex flex-col items-center gap-1 mt-4 w-[70px]"
+        type="button"
+        class="flex flex-col items-center gap-2 rounded-lg border bg-surface-base px-2 py-3 hover:bg-surface-gray-1"
+        :class="
+          selectedService?.name === s?.name
+            ? 'border-[var(--ct-accent)]'
+            : 'border-[var(--ct-border)]'
+        "
         @click="handleSelect(s)"
       >
-        <EmailProviderIcon
-          :label="s.name"
-          :logo="s.icon"
-          :selected="selectedService?.name === s?.name"
-        />
-      </div>
+        <span
+          class="flex size-10 items-center justify-center rounded-full bg-[var(--ct-bg-soft)]"
+        >
+          <img :src="s.icon" class="size-5" />
+        </span>
+        <span class="text-base font-medium text-ink-gray-9">{{ s.name }}</span>
+      </button>
     </div>
     <div v-if="selectedService" class="flex flex-col gap-4">
       <!-- email service provider info -->
       <div
-        class="flex items-center gap-2 p-2 rounded-5 ring-1 ring-outline-gray-3 text-ink-gray-6"
+        class="flex items-center gap-2 rounded-lg bg-[var(--ct-bg-soft)] px-3.5 py-2.5 text-ink-gray-9"
       >
-        <CircleAlert class="w-5 h-6 w-min-5 w-max-5 min-h-5 max-w-5" />
-        <div class="text-xs text-wrap">
+        <CircleAlert class="size-4 shrink-0" />
+        <div class="text-base text-wrap">
           {{ selectedService.info }}
-          <a :href="selectedService.link" target="_blank" class="underline">
+          <a
+            :href="selectedService.link"
+            target="_blank"
+            class="text-[color:var(--ct-text-accent)] underline"
+          >
             {{ __('here') }}
           </a>
           .
         </div>
       </div>
       <!-- service provider fields -->
-      <div class="flex flex-col gap-4">
-        <div class="grid grid-cols-1 gap-4">
+      <div class="flex flex-col gap-6">
+        <div class="ct-field-48 grid grid-cols-2 gap-4">
           <div
             v-for="field in fields"
             :key="field.name"
@@ -55,7 +68,7 @@
           <template v-for="field in switches" :key="field.name">
             <div
               v-if="field.condition ? field.condition(state) : true"
-              class="flex flex-col gap-1"
+              class="flex flex-col gap-0.5"
             >
               <FormControl
                 v-model="state[field.name]"
@@ -63,22 +76,31 @@
                 :name="field.name"
                 :type="field.type"
               />
-              <p class="text-ink-gray-4 text-p-sm">{{ field.description }}</p>
+              <p class="pl-6 text-p-xs text-ink-gray-6">
+                {{ field.description }}
+              </p>
             </div>
           </template>
         </div>
-        <PipelineSelect
+        <div
           v-if="state.create_lead_from_incoming_email"
-          v-model="state.crm_pipeline"
-          :description="
-            __('Cards created from emails of this account go to this funnel.')
-          "
-        />
+          class="ct-field-48 grid grid-cols-2 gap-4"
+        >
+          <PipelineSelect
+            v-model="state.crm_pipeline"
+            :description="
+              __('Cards created from emails of this account go to this funnel.')
+            "
+          />
+        </div>
         <ErrorMessage class="ml-1" :message="error" />
       </div>
     </div>
     <!-- action button -->
-    <div v-if="selectedService" class="flex justify-between mt-auto">
+    <div
+      v-if="selectedService"
+      class="mt-auto flex justify-between border-t border-outline-gray-2 pt-6"
+    >
       <Button
         :label="__('Back')"
         variant="outline"
@@ -96,6 +118,7 @@
 </template>
 
 <script setup>
+import './fieldOutline.css'
 import SettingsPageHeader from '@/components/Settings/SettingsPageHeader.vue'
 import { computed, reactive, ref } from 'vue'
 import { createResource, toast } from 'frappe-ui'
@@ -110,7 +133,6 @@ import {
   accountSwitches,
   getSystemEmailAccounts,
 } from './emailConfig'
-import EmailProviderIcon from './EmailProviderIcon.vue'
 import PipelineSelect from '@/components/Pipelines/PipelineSelect.vue'
 
 const emit = defineEmits(['update:step'])

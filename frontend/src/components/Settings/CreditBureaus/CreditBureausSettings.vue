@@ -24,39 +24,44 @@
       </div>
       <div
         v-else-if="settingsDoc"
-        class="space-y-6 pb-12 max-w-4xl text-ink-gray-8"
+        class="ct-credit space-y-6 pb-12 text-ink-gray-8"
       >
         <!-- Who pays (credtech#316): every paid query uses the client's own provider account -->
+        <!-- Figma "Configurações · Políticas de Crédito & Compliance"
+             (1336:20568): "Aviso de custos" gray box with the info icon -->
         <div
-          class="p-4 rounded-lg border border-outline-gray-2 bg-surface-gray-1 text-p-sm text-ink-gray-7"
+          class="flex gap-2.5 rounded-lg bg-[var(--ct-bg-soft)] px-4 py-3 text-p-base text-ink-gray-6"
         >
-          {{
-            __(
-              "Every paid query uses your own account with each provider: the provider bills you directly and CredTech charges nothing. Prices shown are the providers' list prices, for reference only; your contract may differ.",
-            )
-          }}
+          <span class="lucide-info mt-0.5 size-4 shrink-0" aria-hidden="true" />
+          <span>
+            {{
+              __(
+                "Every paid query uses your own account with each provider: the provider bills you directly and CredTech charges nothing. Prices shown are the providers' list prices, for reference only; your contract may differ.",
+              )
+            }}
+          </span>
         </div>
 
         <!-- Credit PJ funnel template (credtech#316) -->
         <div
-          class="p-5 bg-surface-white rounded-lg border border-outline-gray-2 space-y-3"
+          class="space-y-3 rounded-lg border border-[var(--ct-border)] bg-surface-white px-5 py-4"
         >
           <span class="text-lg-semibold text-ink-gray-9">{{
             __('Credit PJ funnel')
           }}</span>
-          <p class="text-p-sm text-ink-gray-6">
+          <p class="text-p-xs text-ink-gray-6">
             {{
               __(
                 'A ready funnel to prospect and analyze credit for companies. It is only a starting point: you edit stages, fields and rules like in any funnel. Nothing is required by stage and it costs nothing.',
               )
             }}
           </p>
-          <p v-if="template.data" class="text-p-sm text-ink-gray-7">
+          <p v-if="template.data" class="text-base font-medium text-ink-gray-9">
             {{ template.data.stages.join(' → ') }}
           </p>
           <div
             v-if="template.data?.installed"
-            class="text-p-sm text-ink-green-3"
+            class="text-base text-[color:var(--ct-success)]"
           >
             {{
               __('Installed: {0}. Edit its stages in the funnel settings.', [
@@ -76,13 +81,13 @@
 
         <!-- Credit policy the AI follows (credtech#316): methodology text + parameters, versioned -->
         <div
-          class="p-5 bg-surface-white rounded-lg border border-outline-gray-2 space-y-3"
+          class="space-y-3 rounded-lg border border-[var(--ct-border)] bg-surface-white px-5 py-4"
         >
           <div class="flex items-center justify-between">
             <span class="text-lg-semibold text-ink-gray-9">{{
               __('Credit policy (AI opinion)')
             }}</span>
-            <span v-if="policyDoc" class="text-p-sm text-ink-gray-5">
+            <span v-if="policyDoc" class="text-xs text-ink-gray-6">
               {{
                 policyDoc.version
                   ? __('Version {0}', [policyDoc.version])
@@ -90,7 +95,7 @@
               }}
             </span>
           </div>
-          <p class="text-p-sm text-ink-gray-6">
+          <p class="text-p-xs text-ink-gray-6">
             {{
               __(
                 'The AI writes the credit opinion following this methodology. The parameters become automatic alerts in the opinion; they never reject on their own (0 = no limit). Each save creates a new version, and every opinion keeps the version it used.',
@@ -140,7 +145,7 @@
               v-model="settingsDoc.allow_paid_extra_opinions"
               :label="__('Allow paid extra opinions')"
             />
-            <p class="text-p-sm text-ink-gray-5">
+            <p class="pl-6 text-p-xs text-ink-gray-6">
               {{
                 __(
                   'Each company has 30 AI opinions per month included. With this on, from the 31st on each opinion costs R$ 3,00 from the credit wallet, confirmed before it runs. Off, the opinion stops until the next month. Save the settings to apply.',
@@ -152,12 +157,12 @@
 
         <!-- Minimum package of the credit dossier (credtech#316): the queries every dossier needs -->
         <div
-          class="p-5 bg-surface-white rounded-lg border border-outline-gray-2 space-y-3"
+          class="space-y-3 rounded-lg border border-[var(--ct-border)] bg-surface-white px-5 py-4"
         >
           <span class="text-lg-semibold text-ink-gray-9">{{
             __('Minimum package of the dossier')
           }}</span>
-          <p class="text-p-sm text-ink-gray-6">
+          <p class="text-p-xs text-ink-gray-6">
             {{
               __(
                 'The queries every credit dossier needs. The "Generate dossier" button shows what is missing and its list price, makes the missing queries with your keys after confirmation and then creates PDF 1 and the AI opinion. Only a query of this package that is missing or failed lowers the AI recommendation.',
@@ -165,7 +170,9 @@
             }}
           </p>
           <template v-if="packageDoc">
-            <div class="text-p-sm text-ink-gray-5">{{ __('Company') }}</div>
+            <div class="text-base font-semibold text-ink-gray-9">
+              {{ __('Company') }}
+            </div>
             <div
               v-for="opt in packageOptions('company')"
               :key="opt.item"
@@ -183,7 +190,7 @@
                 }}
               </span>
             </div>
-            <div class="text-p-sm text-ink-gray-5 pt-2">
+            <div class="pt-2 text-base font-semibold text-ink-gray-9">
               {{ __('Each partner with a full CPF') }}
             </div>
             <div
@@ -213,7 +220,7 @@
                 )
               "
             />
-            <div class="text-p-sm text-ink-gray-7">{{ packageCostText }}</div>
+            <div class="text-base text-ink-gray-9">{{ packageCostText }}</div>
             <Button
               variant="solid"
               :loading="savingPackage"
@@ -226,13 +233,13 @@
 
         <!-- Master Enable Switch -->
         <div
-          class="flex items-center justify-between p-4 bg-surface-gray-2 rounded-lg border border-outline-gray-2"
+          class="flex items-center justify-between gap-4 rounded-lg bg-[var(--ct-bg-soft)] px-5 py-4"
         >
-          <div class="flex flex-col gap-0.5">
-            <span class="text-base-medium font-semibold text-ink-gray-9">
+          <div class="flex flex-col gap-1">
+            <span class="text-lg font-semibold leading-6 text-ink-gray-9">
               {{ __('Enable risk & compliance analysis') }}
             </span>
-            <span class="text-p-sm text-ink-gray-6">
+            <span class="text-base text-ink-gray-6">
               {{
                 __(
                   'Automatic check of lawsuits, federal tax debt, labor debt and notary protests.',
@@ -246,7 +253,7 @@
         <div v-if="settingsDoc.enabled" class="space-y-6">
           <!-- 0. CGU CEIS/CNEP (step 0, free) -->
           <div
-            class="p-5 bg-surface-white rounded-lg border border-outline-gray-2 space-y-4"
+            class="space-y-3 rounded-lg border border-[var(--ct-border)] bg-surface-white px-5 py-4"
           >
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
@@ -257,7 +264,7 @@
               </div>
               <Switch v-model="settingsDoc.cgu_enabled" />
             </div>
-            <p class="text-p-sm text-ink-gray-6">
+            <p class="text-p-xs text-ink-gray-6">
               {{
                 __(
                   'Initial check of public sanctions (Portal da Transparência). If the company is sanctioned and the block is on, the analysis is rejected right away.',
@@ -274,7 +281,7 @@
 
           <!-- 1. Escavador -->
           <div
-            class="p-5 bg-surface-white rounded-lg border border-outline-gray-2 space-y-4"
+            class="space-y-3 rounded-lg border border-[var(--ct-border)] bg-surface-white px-5 py-4"
           >
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
@@ -285,14 +292,14 @@
               </div>
               <Switch v-model="settingsDoc.escavador_enabled" />
             </div>
-            <p class="text-p-sm text-ink-gray-6">
+            <p class="text-p-xs text-ink-gray-6">
               {{
                 __(
                   'Searches state, federal, labor and higher courts (STJ/STF) across Brazil by CNPJ.',
                 )
               }}
             </p>
-            <p v-if="prices" class="text-p-sm text-ink-gray-5">
+            <p v-if="prices" class="text-p-xs text-ink-gray-6">
               {{
                 __(
                   'List price: about {0} per check, billed by Escavador on your account.',
@@ -325,7 +332,7 @@
 
           <!-- 2. Infosimples -->
           <div
-            class="p-5 bg-surface-white rounded-lg border border-outline-gray-2 space-y-4"
+            class="space-y-3 rounded-lg border border-[var(--ct-border)] bg-surface-white px-5 py-4"
           >
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
@@ -336,14 +343,14 @@
               </div>
               <Switch v-model="settingsDoc.infosimples_enabled" />
             </div>
-            <p class="text-p-sm text-ink-gray-6">
+            <p class="text-p-xs text-ink-gray-6">
               {{
                 __(
                   'Federal tax debt (PGFN), Federal CND, labor CNDT and São Paulo notary protests.',
                 )
               }}
             </p>
-            <p v-if="prices" class="text-p-sm text-ink-gray-5">
+            <p v-if="prices" class="text-p-xs text-ink-gray-6">
               {{
                 __(
                   'List price: about {0} per check (4 queries), billed by Infosimples on your account.',
@@ -376,7 +383,7 @@
 
           <!-- 3. DirectD (QUOD score, nationwide protests, lawsuits) -->
           <div
-            class="p-5 bg-surface-white rounded-lg border border-outline-gray-2 space-y-4"
+            class="space-y-3 rounded-lg border border-[var(--ct-border)] bg-surface-white px-5 py-4"
           >
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
@@ -391,14 +398,14 @@
               </div>
               <Switch v-model="settingsDoc.directd_enabled" />
             </div>
-            <p class="text-p-sm text-ink-gray-6">
+            <p class="text-p-xs text-ink-gray-6">
               {{
                 __(
                   'QUOD credit score, nationwide notary protests (IEPTB) and lawsuits.',
                 )
               }}
             </p>
-            <p v-if="prices" class="text-p-sm text-ink-gray-5">
+            <p v-if="prices" class="text-p-xs text-ink-gray-6">
               {{
                 __(
                   'List price per check: score {0}, protests {1}, lawsuits {2}; FGTS {3} and Sintegra {4} when turned on. Billed by DirectD on your account.',
@@ -455,12 +462,12 @@
 
           <!-- 4. Funnel automation trigger -->
           <div
-            class="p-5 bg-surface-white rounded-lg border border-outline-gray-2 space-y-4"
+            class="space-y-3 rounded-lg border border-[var(--ct-border)] bg-surface-white px-5 py-4"
           >
             <span class="text-lg-semibold text-ink-gray-9">
               {{ __('Funnel automation trigger') }}
             </span>
-            <p class="text-p-sm text-ink-gray-6">
+            <p class="text-p-xs text-ink-gray-6">
               {{
                 __(
                   'Run the check automatically when a card moves to this stage. Each automatic check runs paid queries on your provider accounts.',
@@ -487,12 +494,12 @@
 
           <!-- 5. Risk tolerance and blocks -->
           <div
-            class="p-5 bg-surface-white rounded-lg border border-outline-gray-2 space-y-4"
+            class="space-y-3 rounded-lg border border-[var(--ct-border)] bg-surface-white px-5 py-4"
           >
             <span class="text-lg-semibold text-ink-gray-9">
               {{ __('Risk criteria and blocks') }}
             </span>
-            <p class="text-p-sm text-ink-gray-6">
+            <p class="text-p-xs text-ink-gray-6">
               {{
                 __(
                   'Nothing rejects on its own: the system warns and the operator decides. Turn a block on, or set a limit above 0, only if your policy rejects on it.',
@@ -538,7 +545,7 @@
 
           <!-- 6. Final bureaus (on demand) -->
           <div
-            class="p-5 bg-surface-white rounded-lg border border-outline-gray-2 space-y-4"
+            class="space-y-3 rounded-lg border border-[var(--ct-border)] bg-surface-white px-5 py-4"
           >
             <div class="flex items-center justify-between">
               <span class="text-lg-semibold text-ink-gray-9">
@@ -546,7 +553,7 @@
               </span>
               <Badge :label="__('On demand')" theme="amber" variant="subtle" />
             </div>
-            <p class="text-p-sm text-ink-gray-6">
+            <p class="text-p-xs text-ink-gray-6">
               {{
                 __(
                   'Requested by the operator on the organization. There is no pre-approval lock: before each query the operator sees the pre-filter result, the reason and the cost, and confirms.',
@@ -613,7 +620,7 @@
               </div>
             </div>
             <div class="pt-4 mt-4 border-t border-outline-gray-2 space-y-3">
-              <p class="text-p-sm text-ink-gray-6">
+              <p class="text-p-xs text-ink-gray-6">
                 {{ __('Through DirectD, with the DirectD token above:') }}
               </p>
               <div
@@ -1023,3 +1030,28 @@ onMounted(() => {
   loadPackage()
 })
 </script>
+
+<style scoped>
+/* Figma "Campo": 48px fields, labels 14/500 gray */
+.ct-credit :deep(input:not([type='checkbox']):not([type='radio'])),
+.ct-credit :deep(select) {
+  height: 48px;
+  background-color: var(--ct-bg-page);
+  border-color: var(--ct-border);
+  font-size: 16px;
+  padding-inline: 14px;
+  border-radius: 6px;
+}
+.ct-credit :deep(textarea) {
+  background-color: var(--ct-bg-page);
+  border-color: var(--ct-border);
+  font-size: 16px;
+  padding: 12px 14px;
+  border-radius: 6px;
+}
+.ct-credit :deep(label.block) {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink-gray-6);
+}
+</style>

@@ -9,7 +9,9 @@
         }}
       </template>
     </SettingsPageHeader>
-    <div class="flex flex-1 flex-col gap-8 overflow-y-auto">
+    <!-- Figma "Configurações · Origens" (882:2): one bordered card per
+         source (8px radius, 20px padding), 24px apart -->
+    <div class="ct-sources flex flex-1 flex-col gap-6 overflow-y-auto">
       <MetaLeadsSource @changed="activity?.load()" />
       <WebhookSources @changed="activity?.load()" />
       <ChatConnection />
@@ -33,3 +35,19 @@ import { ref } from 'vue'
 
 const activity = ref(null)
 </script>
+
+<style scoped>
+.ct-sources > :deep(.rounded-lg.border) {
+  border-radius: var(--ct-radius-md);
+  border-color: var(--ct-border);
+  padding: 20px;
+}
+/* card titles 14/500, descriptions 14 gray */
+.ct-sources > :deep(.rounded-lg.border .text-base-semibold) {
+  font-weight: 500;
+}
+.ct-sources > :deep(.rounded-lg.border .text-p-sm) {
+  font-size: 14px;
+  line-height: 20px;
+}
+</style>

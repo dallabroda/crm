@@ -93,8 +93,9 @@
           }}
         </li>
       </ol>
-      <div class="flex items-end gap-3">
-        <div class="w-40">
+      <!-- Figma "Conexão": 48px fields and an outline Conectar -->
+      <div class="ct-field-48 flex items-end gap-3">
+        <div class="w-44">
           <FormControl
             v-model="accountId"
             type="number"
@@ -110,7 +111,7 @@
           />
         </div>
         <Button
-          variant="solid"
+          variant="outline"
           :label="__('Connect')"
           :disabled="!accountId || !accessToken.trim()"
           :loading="busy"
@@ -122,6 +123,7 @@
 </template>
 
 <script setup>
+import '../fieldOutline.css'
 import WhatsAppIcon from '@/components/Icons/WhatsAppIcon.vue'
 import { chat, loadChat, welcomeApi } from './welcomeApi'
 import { Button, FormControl, toast } from 'frappe-ui'

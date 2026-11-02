@@ -28,20 +28,21 @@
     </SettingsPageHeader>
 
     <div v-if="telephonyAgent.doc" class="flex-1 flex flex-col overflow-y-auto">
-      <div class="flex items-center justify-between gap-8 py-3 pl-2 pr-1">
+      <div class="flex items-center justify-between gap-6 py-3">
         <div class="flex flex-col">
-          <div class="text-p-base-medium text-ink-gray-7 truncate">
+          <div class="truncate text-base font-medium leading-5 text-ink-gray-9">
             {{ __('Default Medium') }}
           </div>
-          <div class="text-p-sm text-ink-gray-5">
+          <div class="text-base leading-5 text-ink-gray-6">
             {{ __('Default calling medium for logged-in user') }}
           </div>
         </div>
         <div class="flex items-center gap-1">
           <FormControl
             v-model="telephonyAgent.doc.default_medium"
+            variant="outline"
             type="select"
-            class="w-44 p-1"
+            class="w-44"
             :options="[
               { label: __(''), value: '' },
               { label: __('Twilio'), value: 'Twilio' },
@@ -63,24 +64,25 @@
       </div>
       <div
         v-if="isEnabled('twilio')"
-        class="h-px border-t mx-2 border-outline-elevation-2"
+        class="h-px border-t border-outline-gray-2"
       />
       <div
         v-if="isEnabled('twilio')"
-        class="flex items-center justify-between gap-8 py-3 pl-2 pr-1"
+        class="flex items-center justify-between gap-6 py-3"
       >
         <div class="flex flex-col">
-          <div class="text-p-base-medium text-ink-gray-7 truncate">
+          <div class="truncate text-base font-medium leading-5 text-ink-gray-9">
             {{ __('Twilio Number') }}
           </div>
-          <div class="text-p-sm text-ink-gray-5">
+          <div class="text-base leading-5 text-ink-gray-6">
             {{ __('Set the Twilio number to be used for outgoing calls.') }}
           </div>
         </div>
         <div>
           <FormControl
             v-model="telephonyAgent.doc.twilio_number"
-            class="flex-1 truncate w-44 p-1"
+            variant="outline"
+            class="flex-1 truncate w-44"
             :placeholder="__('Enter Twilio Number')"
             :error="
               Boolean(telephonyAgent.doc.twilio_number) &&
@@ -94,24 +96,25 @@
       </div>
       <div
         v-if="isEnabled('exotel')"
-        class="h-px border-t mx-2 border-outline-elevation-2"
+        class="h-px border-t border-outline-gray-2"
       />
       <div
         v-if="isEnabled('exotel')"
-        class="flex items-center justify-between gap-8 py-3 pl-2 pr-1"
+        class="flex items-center justify-between gap-6 py-3"
       >
         <div class="flex flex-col">
-          <div class="text-p-base-medium text-ink-gray-7 truncate">
+          <div class="truncate text-base font-medium leading-5 text-ink-gray-9">
             {{ __('Exotel Number') }}
           </div>
-          <div class="text-p-sm text-ink-gray-5">
+          <div class="text-base leading-5 text-ink-gray-6">
             {{ __('Set the Exotel number to be used for outgoing calls.') }}
           </div>
         </div>
         <div>
           <FormControl
             v-model="telephonyAgent.doc.exotel_number"
-            class="flex-1 truncate w-44 p-1"
+            variant="outline"
+            class="flex-1 truncate w-44"
             :placeholder="__('Enter Exotel Number')"
             :error="
               Boolean(telephonyAgent.doc.exotel_number) &&
@@ -125,13 +128,13 @@
       </div>
       <div
         v-if="isEnabled('exotel')"
-        class="flex items-center justify-between gap-8 py-3 pl-2 pr-1"
+        class="flex items-center justify-between gap-6 py-3"
       >
         <div class="flex flex-col">
-          <div class="text-p-base-medium text-ink-gray-7 truncate">
+          <div class="truncate text-base font-medium leading-5 text-ink-gray-9">
             {{ __('Personal Mobile Number') }}
           </div>
-          <div class="text-p-sm text-ink-gray-5">
+          <div class="text-base leading-5 text-ink-gray-6">
             {{
               __(
                 'Enter your personal mobile number used by Exotel to make calls',
@@ -142,7 +145,8 @@
         <div>
           <FormControl
             v-model="telephonyAgent.doc.mobile_no"
-            class="flex-1 truncate w-44 p-1"
+            variant="outline"
+            class="flex-1 truncate w-44"
             :placeholder="__('Enter Personal Mobile Number')"
             :error="
               Boolean(telephonyAgent.doc.mobile_no) &&
@@ -157,26 +161,27 @@
 
       <div
         v-if="isManager()"
-        class="flex items-center justify-between text-lg-semibold text-ink-gray-8 mt-4 py-3 px-2"
+        class="mt-4 flex items-center justify-between py-3 text-lg font-medium leading-6 text-ink-gray-9"
       >
         {{ __('Integrations') }}
       </div>
 
       <div
         v-if="isManager()"
-        class="flex items-center justify-between py-3 px-2"
+        class="flex items-center justify-between gap-6 py-3"
       >
         <div class="flex flex-col gap-1">
-          <span class="text-base-medium text-ink-gray-8">
+          <span class="text-base font-medium leading-5 text-ink-gray-9">
             {{ __('Twilio') }}
           </span>
-          <span class="text-p-sm text-ink-gray-6">
+          <span class="text-base leading-5 text-ink-gray-6">
             {{
               __('Configure your Twilio telephony integration settings here')
             }}
           </span>
         </div>
         <Button
+          variant="outline"
           :label="
             isEnabled('twilio') ? __('Update Configuration') : __('Configure')
           "
@@ -184,26 +189,24 @@
         />
       </div>
 
-      <div
-        v-if="isManager()"
-        class="h-px border-t mx-2 border-outline-elevation-2"
-      />
+      <div v-if="isManager()" class="h-px border-t border-outline-gray-2" />
 
       <div
         v-if="isManager()"
-        class="flex items-center justify-between py-3 px-2"
+        class="flex items-center justify-between gap-6 py-3"
       >
         <div class="flex flex-col gap-1">
-          <span class="text-base-medium text-ink-gray-8">
+          <span class="text-base font-medium leading-5 text-ink-gray-9">
             {{ __('Exotel') }}
           </span>
-          <span class="text-p-sm text-ink-gray-6">
+          <span class="text-base leading-5 text-ink-gray-6">
             {{
               __('Configure your Exotel telephony integration settings here')
             }}
           </span>
         </div>
         <Button
+          variant="outline"
           :label="
             isEnabled('exotel') ? __('Update Configuration') : __('Configure')
           "
@@ -211,21 +214,18 @@
         />
       </div>
 
-      <div
-        v-if="isManager()"
-        class="h-px border-t mx-2 border-outline-elevation-2"
-      />
+      <div v-if="isManager()" class="h-px border-t border-outline-gray-2" />
 
       <!-- Call logging only: calls made at API4Com land on the deal timeline (credtech#98) -->
       <div
         v-if="isManager()"
-        class="flex items-center justify-between py-3 px-2"
+        class="flex items-center justify-between gap-6 py-3"
       >
         <div class="flex flex-col gap-1">
-          <span class="text-base-medium text-ink-gray-8">
+          <span class="text-base font-medium leading-5 text-ink-gray-9">
             {{ __('API4Com') }}
           </span>
-          <span class="text-p-sm text-ink-gray-6">
+          <span class="text-base leading-5 text-ink-gray-6">
             {{
               __(
                 'Record the calls of your API4Com account on the timeline of your deals',
@@ -234,26 +234,24 @@
           </span>
         </div>
         <Button
+          variant="outline"
           :label="__('Configure')"
           @click="emit('updateStep', 'api4com-settings')"
         />
       </div>
 
-      <div
-        v-if="isManager()"
-        class="h-px border-t mx-2 border-outline-elevation-2"
-      />
+      <div v-if="isManager()" class="h-px border-t border-outline-gray-2" />
 
       <!-- No webhook: calls are read every few minutes (credtech#269) -->
       <div
         v-if="isManager()"
-        class="flex items-center justify-between py-3 px-2"
+        class="flex items-center justify-between gap-6 py-3"
       >
         <div class="flex flex-col gap-1">
-          <span class="text-base-medium text-ink-gray-8">
+          <span class="text-base font-medium leading-5 text-ink-gray-9">
             {{ __('Nvoip') }}
           </span>
-          <span class="text-p-sm text-ink-gray-6">
+          <span class="text-base leading-5 text-ink-gray-6">
             {{
               __(
                 'Record the calls of your Nvoip account on the timeline of your deals',
@@ -262,26 +260,24 @@
           </span>
         </div>
         <Button
+          variant="outline"
           :label="__('Configure')"
           @click="emit('updateStep', 'nvoip-settings')"
         />
       </div>
 
-      <div
-        v-if="isManager()"
-        class="h-px border-t mx-2 border-outline-elevation-2"
-      />
+      <div v-if="isManager()" class="h-px border-t border-outline-gray-2" />
 
       <!-- Call logging only, same as API4Com; no click-to-call yet (credtech#271) -->
       <div
         v-if="isManager()"
-        class="flex items-center justify-between py-3 px-2"
+        class="flex items-center justify-between gap-6 py-3"
       >
         <div class="flex flex-col gap-1">
-          <span class="text-base-medium text-ink-gray-8">
+          <span class="text-base font-medium leading-5 text-ink-gray-9">
             {{ __('Wavix') }}
           </span>
-          <span class="text-p-sm text-ink-gray-6">
+          <span class="text-base leading-5 text-ink-gray-6">
             {{
               __(
                 'Record the calls of your Wavix account on the timeline of your deals',
@@ -290,26 +286,24 @@
           </span>
         </div>
         <Button
+          variant="outline"
           :label="__('Configure')"
           @click="emit('updateStep', 'wavix-settings')"
         />
       </div>
 
-      <div
-        v-if="isManager()"
-        class="h-px border-t mx-2 border-outline-elevation-2"
-      />
+      <div v-if="isManager()" class="h-px border-t border-outline-gray-2" />
 
       <!-- Click-to-call through a Call Control Application (credtech#270) -->
       <div
         v-if="isManager()"
-        class="flex items-center justify-between py-3 px-2"
+        class="flex items-center justify-between gap-6 py-3"
       >
         <div class="flex flex-col gap-1">
-          <span class="text-base-medium text-ink-gray-8">
+          <span class="text-base font-medium leading-5 text-ink-gray-9">
             {{ __('Telnyx') }}
           </span>
-          <span class="text-p-sm text-ink-gray-6">
+          <span class="text-base leading-5 text-ink-gray-6">
             {{
               __(
                 'Call your customers from a card through Telnyx and record the calls on your deals',
@@ -318,26 +312,24 @@
           </span>
         </div>
         <Button
+          variant="outline"
           :label="__('Configure')"
           @click="emit('updateStep', 'telnyx-settings')"
         />
       </div>
 
-      <div
-        v-if="isManager()"
-        class="h-px border-t mx-2 border-outline-elevation-2"
-      />
+      <div v-if="isManager()" class="h-px border-t border-outline-gray-2" />
 
       <!-- Zenvia Voz, former TotalVoice (credtech#272) -->
       <div
         v-if="isManager()"
-        class="flex items-center justify-between py-3 px-2"
+        class="flex items-center justify-between gap-6 py-3"
       >
         <div class="flex flex-col gap-1">
-          <span class="text-base-medium text-ink-gray-8">
+          <span class="text-base font-medium leading-5 text-ink-gray-9">
             {{ __('Zenvia') }}
           </span>
-          <span class="text-p-sm text-ink-gray-6">
+          <span class="text-base leading-5 text-ink-gray-6">
             {{
               __(
                 'Call your customers from a card through Zenvia and record the calls on your deals',
@@ -346,17 +338,18 @@
           </span>
         </div>
         <Button
+          variant="outline"
           :label="__('Configure')"
           @click="emit('updateStep', 'zenvia-settings')"
         />
       </div>
-      <div class="h-px border-t mx-2 border-outline-elevation-2" />
-      <div class="flex items-center justify-between py-3 px-2">
+      <div class="h-px border-t border-outline-gray-2" />
+      <div class="flex items-center justify-between gap-6 py-3">
         <div class="flex flex-col gap-1">
-          <span class="text-base-medium text-ink-gray-8">
+          <span class="text-base font-medium leading-5 text-ink-gray-9">
             {{ __('Another telephony company') }}
           </span>
-          <span class="text-p-sm text-ink-gray-6">
+          <span class="text-base leading-5 text-ink-gray-6">
             {{
               __(
                 'Use another telephony? Ask for the integration: CredTech studies it from the API documentation.',
@@ -365,6 +358,7 @@
           </span>
         </div>
         <Button
+          variant="outline"
           :label="__('Request integration')"
           @click="showTelephonyRequest = true"
         />

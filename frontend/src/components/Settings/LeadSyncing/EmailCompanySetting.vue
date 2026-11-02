@@ -1,11 +1,14 @@
 <template>
-  <section class="flex flex-col gap-3" data-testid="email-company-setting">
+  <section
+    class="flex flex-col gap-3 rounded-lg border border-outline-gray-2 p-4"
+    data-testid="email-company-setting"
+  >
     <div class="flex items-start justify-between gap-4">
       <div class="flex flex-col gap-1">
-        <h3 class="text-lg-semibold text-ink-gray-8">
+        <h3 class="text-base-semibold text-ink-gray-9">
           {{ __("Find the company from the lead's e-mail") }}
         </h3>
-        <p class="text-p-base text-ink-gray-6">
+        <p class="text-p-sm text-ink-gray-6">
           {{
             __(
               'With a company e-mail (not Gmail, Hotmail...), HubTech looks up who owns the domain at Registro.br and checks the CNPJ at the Receita. Sure match: the card gets the organization. Probable match: the card shows it for you to confirm.',

@@ -1,5 +1,6 @@
 <template>
   <Select
+    variant="outline"
     :model-value="availability.myStatus"
     :options="options"
     :placeholder="__('Set status')"
