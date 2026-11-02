@@ -161,6 +161,119 @@
       </div>
     </div>
 
+    <!-- Credit opinion by AI, PDF 2 (credtech#316): a recommendation; the analyst decides -->
+    <div
+      v-if="hasQueries"
+      class="p-5 bg-surface-white rounded-lg border border-outline-gray-2 space-y-3"
+    >
+      <div class="flex items-center justify-between">
+        <span class="text-lg-semibold text-ink-gray-9">{{
+          __('Credit opinion (AI)')
+        }}</span>
+        <span v-if="opinionStatus.data" class="text-p-sm text-ink-gray-5">
+          {{
+            __('{0} of {1} opinions used this month', [
+              opinionStatus.data.used,
+              opinionStatus.data.included,
+            ])
+          }}
+        </span>
+      </div>
+      <p class="text-p-sm text-ink-gray-6">
+        {{
+          __(
+            'The AI reads every query return, the card and the partners, follows the company credit policy and writes a recommendation (approve, approve with reservations or reject) with the risks and strengths, each citing the field and value it came from. It is only a recommendation: the analyst decides.',
+          )
+        }}
+      </p>
+      <div
+        v-if="opinionStatus.data && !opinionStatus.data.configured"
+        class="text-p-sm text-ink-amber-3"
+      >
+        {{ __('The credit opinion AI is not configured on this site yet.') }}
+      </div>
+      <div
+        v-else-if="
+          opinionStatus.data?.next_is_extra &&
+          !opinionStatus.data?.extra_allowed
+        "
+        class="text-p-sm text-ink-amber-3"
+      >
+        {{
+          __(
+            'The opinions included this month are used up. An admin can allow paid extra opinions (R$ {0} each) in the Credit settings.',
+            [formatPrice(opinionStatus.data.extra_price)],
+          )
+        }}
+      </div>
+      <div class="flex items-center gap-2">
+        <Button
+          variant="solid"
+          :loading="requestingOpinion"
+          :disabled="!canRequestOpinion"
+          @click="askOpinion"
+        >
+          {{ __('Generate opinion (AI)') }}
+        </Button>
+        <span
+          v-if="
+            opinionStatus.data?.next_is_extra &&
+            opinionStatus.data?.extra_allowed
+          "
+          class="text-p-sm text-ink-gray-5"
+        >
+          {{
+            __('Extra opinion: R$ {0} from the credit wallet.', [
+              formatPrice(opinionStatus.data.extra_price),
+            ])
+          }}
+        </span>
+      </div>
+      <div v-if="opinions.data && opinions.data.length" class="space-y-2 pt-2">
+        <div
+          v-for="item in opinions.data"
+          :key="item.name"
+          class="p-3 border border-outline-gray-2 rounded space-y-1"
+        >
+          <div class="flex items-center gap-2 flex-wrap">
+            <Badge
+              v-if="item.status === 'Done'"
+              :theme="resultTheme(item.result)"
+              variant="subtle"
+              :label="resultLabel(item.result)"
+            />
+            <Badge
+              v-else-if="item.status === 'Queued'"
+              theme="blue"
+              variant="subtle"
+              :label="__('Generating…')"
+            />
+            <Badge v-else theme="red" variant="subtle" :label="__('Failed')" />
+            <span class="text-p-sm text-ink-gray-5">
+              {{ formatDate(item.requested_on) }} · {{ item.requested_by }}
+            </span>
+            <span v-if="item.is_extra" class="text-p-sm text-ink-gray-5">
+              · {{ __('extra') }}
+            </span>
+            <a
+              v-if="item.pdf_url"
+              :href="item.pdf_url"
+              target="_blank"
+              class="text-p-sm text-ink-blue-3 underline"
+            >
+              {{ __('Open PDF') }}
+            </a>
+          </div>
+          <div v-if="item.status === 'Done'" class="text-p-sm text-ink-gray-7">
+            {{ item.summary }}
+          </div>
+          <div v-if="item.status === 'Failed'" class="text-p-sm text-ink-red-3">
+            {{ item.error }}
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Partners (credtech#316): full CPF, and the operator picks who to query; nobody comes ticked -->
     <div
       v-if="partners.data && partners.data.length"
@@ -355,7 +468,7 @@ import {
   call,
   toast,
 } from 'frappe-ui'
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, reactive, ref, watch } from 'vue'
 import { createDialog } from '@/utils/dialogs'
 
 const props = defineProps({
@@ -532,6 +645,124 @@ const queryCount = computed(
 )
 const hasQueries = computed(() => queryCount.value > 0)
 const canGenerate = computed(() => Boolean(options.data?.can_request))
+
+// AI opinion (PDF 2): counter for the month, list, and polling while one is being generated
+const opinionStatus = createResource({
+  url: 'cred_hub.credit_check.api.get_credit_opinion_status',
+  params: { organization_name: props.organizationId },
+  auto: true,
+})
+const opinions = createResource({
+  url: 'cred_hub.credit_check.api.list_credit_opinions',
+  params: { organization_name: props.organizationId },
+  auto: true,
+})
+const requestingOpinion = ref(false)
+let pollTimer = null
+let pollRounds = 0
+
+const canRequestOpinion = computed(() => {
+  const data = opinionStatus.data
+  if (!data || !data.configured || !hasQueries.value) return false
+  return !data.next_is_extra || data.extra_allowed
+})
+
+// Own texts, not bare "Approve"/"Reject": those words already have other global translations
+function resultLabel(result) {
+  if (result === 'Approve') return __('Recommendation: approve')
+  if (result === 'Reject') return __('Recommendation: reject')
+  return __('Recommendation: approve with reservations')
+}
+
+function resultTheme(result) {
+  if (result === 'Approve') return 'green'
+  if (result === 'Reject') return 'red'
+  return 'amber'
+}
+
+function formatPrice(value) {
+  return Number(value || 0)
+    .toFixed(2)
+    .replace('.', ',')
+}
+
+function stopPolling() {
+  if (pollTimer) clearInterval(pollTimer)
+  pollTimer = null
+}
+
+function startPolling() {
+  stopPolling()
+  pollRounds = 0
+  pollTimer = setInterval(async () => {
+    pollRounds += 1
+    await opinions.reload()
+    const pending = (opinions.data || []).some(
+      (item) => item.status === 'Queued',
+    )
+    if (!pending || pollRounds > 60) {
+      stopPolling()
+      opinionStatus.reload()
+    }
+  }, 5000)
+}
+
+onBeforeUnmount(stopPolling)
+
+watch(
+  () => opinions.data,
+  (rows) => {
+    if (!pollTimer && (rows || []).some((item) => item.status === 'Queued'))
+      startPolling()
+  },
+)
+
+function askOpinion() {
+  const data = opinionStatus.data
+  if (!data) return
+  if (!data.next_is_extra) {
+    requestOpinion(false)
+    return
+  }
+  createDialog({
+    title: __('Extra credit opinion'),
+    message: __(
+      'The opinions included this month are used up. This one costs R$ {0} from the credit wallet (current balance R$ {1}).',
+      [formatPrice(data.extra_price), formatPrice(data.balance)],
+    ),
+    size: 'md',
+    actions: [
+      { label: __('Cancel'), onClick: ({ close }) => close() },
+      {
+        label: __('Confirm paid opinion'),
+        variant: 'solid',
+        onClick: ({ close }) => {
+          close()
+          requestOpinion(true)
+        },
+      },
+    ],
+  })
+}
+
+async function requestOpinion(confirmExtra) {
+  requestingOpinion.value = true
+  try {
+    await call('cred_hub.credit_check.api.request_credit_opinion', {
+      organization_name: props.organizationId,
+      deal_name: props.dealId || null,
+      confirm_extra_cost: confirmExtra ? 1 : 0,
+    })
+    toast.success(__('Generating the opinion. It takes about a minute.'))
+    await opinions.reload()
+    opinionStatus.reload()
+    startPolling()
+  } catch (err) {
+    toast.error(err?.messages?.[0] || __('Could not request the opinion.'))
+  } finally {
+    requestingOpinion.value = false
+  }
+}
 
 function formatDate(value) {
   return value ? String(value).slice(0, 16) : ''
