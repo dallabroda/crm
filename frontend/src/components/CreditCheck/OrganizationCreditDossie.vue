@@ -186,16 +186,6 @@
           )
         }}
       </div>
-      <div
-        v-else-if="pkg.data.missing.length && !pkg.data.can_run_queries"
-        class="text-p-sm text-ink-amber-3"
-      >
-        {{
-          __(
-            'Only managers can run paid queries. Ask a manager to generate the dossier.',
-          )
-        }}
-      </div>
       <div v-if="opinionNote" class="text-p-sm text-ink-amber-3">
         {{ opinionNote }}
       </div>
@@ -773,8 +763,7 @@ const pkgRunning = computed(() =>
 
 const canGeneratePackage = computed(() => {
   const data = pkg.data
-  if (!data || pkgRunning.value || data.unavailable.length) return false
-  return !data.missing.length || data.can_run_queries
+  return Boolean(data && !pkgRunning.value && !data.unavailable.length)
 })
 
 function packageEntryText(entry) {
