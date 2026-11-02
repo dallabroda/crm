@@ -1,5 +1,7 @@
 <template>
-  <div class="relative flex justify-between gap-3 border-t px-4 py-2.5">
+  <div
+    class="relative flex justify-between gap-3 border-t border-[var(--ct-border-soft)] px-4 py-2.5"
+  >
     <div
       v-if="showEmailBox || showCommentBox"
       class="group absolute inset-x-0 -top-1 z-10 flex h-2 cursor-row-resize touch-none items-center"

@@ -8,6 +8,7 @@ from frappe.model.document import Document
 from frappe.utils import flt, nowdate
 
 from crm.api.exchange_rate import get_exchange_rate
+from crm.fcrm.doctype.crm_deal_title.crm_deal_title import balance_of
 from crm.fcrm.doctype.crm_pipeline.crm_pipeline import get_first_stage
 from crm.fcrm.doctype.crm_pipeline.fields import validate_deal as validate_stage_fields
 from crm.fcrm.doctype.crm_service_level_agreement.utils import get_sla
@@ -119,7 +120,7 @@ class CRMDeal(Document):
 		self.validate_lost_reason()
 		self.update_exchange_rate()
 		if getattr(self, "titles", None):
-			self.deal_value = sum(flt(t.updated_amount or t.original_amount) for t in self.titles)
+			self.deal_value = sum(balance_of(t) for t in self.titles)
 			self.annual_budget = self.deal_value
 		if self.organization and (self.is_new() or self.has_value_changed("organization")):
 			self.copy_enrichment_from_organization()

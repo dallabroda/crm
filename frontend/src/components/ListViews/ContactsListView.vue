@@ -17,7 +17,7 @@
     @update:selections="(selections) => emit('selectionsChanged', selections)"
   >
     <ListHeader
-      class="mx-3 sm:mx-5"
+      class="!rounded-[var(--ct-radius-md)] mx-3 sm:mx-6"
       @columnWidthUpdated="emit('columnWidthUpdated')"
     >
       <ListHeaderItem
@@ -41,7 +41,7 @@
     </ListHeader>
     <ListRows
       v-slot="{ idx, column, item, row }"
-      class="mx-3 sm:mx-5"
+      class="mx-3 sm:mx-6"
       :rows="rows"
       doctype="Contact"
     >
@@ -158,7 +158,7 @@
   <ListFooter
     v-if="pageLengthCount"
     v-model="pageLengthCount"
-    class="border-t px-3 py-2 sm:px-5"
+    class="border-t border-surface-gray-3 px-3 py-3 sm:px-6"
     :options="{
       rowCount: options.rowCount,
       totalCount: options.totalCount,

@@ -7,7 +7,7 @@
     @update:selected-option="(e) => setSort(e)"
   >
     <template #trigger="{ open, setOpen }">
-      <Button :label="__('Sort')" @click="setOpen(!open)">
+      <Button variant="outline" :label="__('Sort')" @click="setOpen(!open)">
         <template v-if="hideLabel" #icon>
           <SortIcon class="h-4" />
         </template>
@@ -21,6 +21,7 @@
     <template #trigger="{ open }">
       <Button
         v-if="sortValues.size > 1"
+        variant="outline"
         :label="__('Sort')"
         :icon="hideLabel && SortIcon"
         :iconLeft="!hideLabel && SortIcon"
@@ -36,7 +37,8 @@
       <div v-else class="flex items-center justify-center">
         <Button
           v-if="sortValues.size"
-          class="rounded-r-none border-r"
+          variant="outline"
+          class="rounded-r-none"
           :icon="
             Array.from(sortValues)[0].direction == 'asc'
               ? AscendingIcon
@@ -51,6 +53,7 @@
           "
         />
         <Button
+          variant="outline"
           :label="getSortLabel()"
           class="shrink-0 [&_svg]:text-ink-gray-5"
           :iconLeft="!hideLabel && !sortValues?.size && SortIcon"
@@ -58,7 +61,7 @@
             sortValues?.size &&
             (open ? 'lucide-chevron-up' : 'lucide-chevron-down')
           "
-          :class="sortValues.size ? 'rounded-l-none' : ''"
+          :class="sortValues.size ? '-ml-px rounded-l-none' : ''"
         />
       </div>
     </template>

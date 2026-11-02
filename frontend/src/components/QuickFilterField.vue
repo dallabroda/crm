@@ -11,6 +11,7 @@
     v-model="filter.value"
     class="form-control cursor-pointer [&_select]:cursor-pointer"
     type="select"
+    variant="outline"
     :options="filter.options"
     :placeholder="filter.label"
     side="bottom"
@@ -18,6 +19,7 @@
   />
   <Link
     v-else-if="filter.fieldtype === 'Link'"
+    variant="outline"
     :value="filter.value"
     :doctype="filter.options"
     :placeholder="filter.label"

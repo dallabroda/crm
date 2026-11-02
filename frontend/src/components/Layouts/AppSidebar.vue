@@ -5,78 +5,110 @@
 
        It also paints the sidebar surface: Sidebar's own `bg-surface-sidebar` is
        transparent in dark mode, and nothing behind it sets a background, so the
-       column falls through to the white page canvas. The token cannot be
-       overridden on the Sidebar element itself — `bg-surface-sidebar` is emitted
-       after `bg-surface-gray-1` in the utilities layer and would win. -->
-  <div class="relative flex h-full bg-surface-gray-1">
+       column falls through to the white page canvas. -->
+  <div class="relative flex h-full bg-surface-base">
+    <!-- Figma "Barra lateral · HubTech" (1073:13444): 256px expanded,
+         72px icon rail when collapsed. -->
     <Sidebar
       v-model:collapsed="isSidebarCollapsed"
       :collapsible="!mobile"
-      :width="mobile ? '260px' : undefined"
-      class="border-r border-outline-gray-1"
+      :width="mobile ? '260px' : '256px'"
+      collapsedWidth="72px"
+      class="ct-sidebar border-r border-[var(--ct-border-soft)] !bg-surface-base"
     >
-      <div class="flex h-full flex-col p-2">
-        <UserDropdown :isCollapsed="isCollapsed" />
-
-        <!-- overflow-y-auto forces overflow-x to clip too, which would slice the
-             active row's shadow. Widen the scroll box to the sidebar edges and
-             pad the content back in so the shadow has room. -->
-        <div class="-mx-2 mt-2 flex flex-1 flex-col gap-1 overflow-y-auto px-2">
-          <SidebarItem
-            id="notifications-btn"
-            :label="__('Notifications')"
-            :route="mobile ? { name: 'Notifications' } : undefined"
-            :active="mobile && activeItem === 'Notifications'"
-            @click="onNotificationsClick"
+      <div
+        class="flex h-full flex-col pb-3 transition-[padding] duration-300 ease-in-out"
+        :class="isCollapsed ? 'px-[18px]' : 'px-3'"
+      >
+        <!-- Header: company logo + name, collapse button -->
+        <div
+          class="flex h-[47px] shrink-0 items-center gap-2.5 border-b border-surface-gray-3"
+          :class="isCollapsed ? 'justify-center border-transparent' : 'pl-1.5'"
+        >
+          <BrandLogo
+            v-model="brand"
+            class="size-7 shrink-0 overflow-hidden rounded-[7px]"
+          />
+          <span
+            v-if="!isCollapsed"
+            class="min-w-0 flex-1 truncate text-sm font-medium text-ink-gray-9"
           >
-            <template #prefix>
-              <span class="relative grid size-4 place-items-center">
-                <NotificationsIcon class="size-4 text-ink-gray-7" />
-                <span
-                  v-if="isCollapsed && unreadNotificationsCount"
-                  class="absolute -right-1 -top-1 size-1.5 rounded-full bg-surface-gray-9 ring-1 ring-[var(--surface-gray-1)]"
-                />
-              </span>
-            </template>
-            <!-- Not in #suffix: that slot sits outside the button, so a click on
-                 the count would not toggle the panel. -->
-            <span class="flex-1 truncate text-sm leading-tighter">
-              {{ __('Notifications') }}
-            </span>
-            <Badge
-              v-if="unreadNotificationsCount"
-              class="mr-2"
-              :label="unreadNotificationsCount"
-              variant="subtle"
-            />
-          </SidebarItem>
+            {{ brand.name || 'HubTech CRM' }}
+          </span>
+          <button
+            v-if="!mobile && !isCollapsed"
+            type="button"
+            class="ct-sidebar-toggle"
+            :aria-label="__('Collapse')"
+            @click="isSidebarCollapsed = true"
+          >
+            <ChevronLeftIcon class="size-4" />
+          </button>
+        </div>
 
+        <!-- Search opens the command palette; collapsed, the slot holds the expand button -->
+        <div class="flex h-12 shrink-0 items-center justify-center pb-1 pt-3">
+          <Tooltip v-if="isCollapsed" :text="__('Expand')" side="right">
+            <button
+              type="button"
+              class="ct-sidebar-toggle"
+              :aria-label="__('Expand')"
+              @click="isSidebarCollapsed = false"
+            >
+              <ChevronRightIcon class="size-4" />
+            </button>
+          </Tooltip>
+          <button
+            v-else
+            type="button"
+            class="flex h-8 w-full items-center gap-2 rounded-[var(--ct-radius-md)] bg-[var(--ct-bg-soft)] px-2.5 text-left text-sm text-ink-gray-4 transition-colors hover:bg-[var(--ct-action-light-hover)]"
+            @click="openCommandPalette()"
+          >
+            <SearchIcon class="size-4 shrink-0" />
+            <span class="truncate">{{ __('Search...') }}</span>
+          </button>
+        </div>
+
+        <!-- overflow-y-auto forces overflow-x to clip too; widen the scroll box
+             to the sidebar edges and pad the content back in. -->
+        <div
+          class="flex flex-1 flex-col overflow-y-auto"
+          :class="isCollapsed ? '-mx-[18px] px-[18px]' : '-mx-3 px-3'"
+        >
           <CollapsibleSection
             v-for="section in allViews"
             :key="section.name"
             :label="section.name"
-            :hideLabel="section.hideLabel"
             :opened="section.opened"
           >
-            <template #header="{ opened, hide, toggle }">
-              <div v-if="!hide" class="relative">
-                <SidebarLabel
-                  divider
-                  class="mb-1 mt-4 select-none"
-                  :class="!isCollapsed && 'cursor-pointer'"
+            <template #header="{ opened, toggle }">
+              <div class="group relative">
+                <!-- collapsed rail: a short line separates the groups -->
+                <div
+                  v-if="isCollapsed"
+                  class="flex h-[34px] items-center justify-center"
+                  aria-hidden="true"
+                >
+                  <span class="h-px w-7 bg-surface-gray-3" />
+                </div>
+                <button
+                  v-else
+                  type="button"
+                  class="flex h-[34px] w-full select-none items-end gap-1 pb-1 pl-2.5 pt-3 text-left"
+                  :aria-expanded="opened"
                   @click="toggle()"
                 >
-                  <span class="flex items-center gap-1.5">
-                    <span
-                      class="lucide-chevron-right -ml-0.5 size-4 shrink-0 text-ink-gray-9 transition-transform duration-300 ease-in-out"
-                      :class="{ 'rotate-90': opened }"
-                      aria-hidden="true"
-                    />
-                    <span class="truncate">{{
-                      __(section.label || section.name)
-                    }}</span>
+                  <span
+                    class="truncate text-xs font-medium uppercase leading-[18px] tracking-[0.1em] text-ink-gray-4"
+                  >
+                    {{ __(section.label || section.name) }}
                   </span>
-                </SidebarLabel>
+                  <span
+                    class="lucide-chevron-down mb-px size-3.5 shrink-0 text-ink-gray-4 opacity-0 transition duration-200 group-hover:opacity-100"
+                    :class="{ '-rotate-90 opacity-100': !opened }"
+                    aria-hidden="true"
+                  />
+                </button>
                 <!-- Admins and Pipeline Owners: one click opens the editor of a new funnel -->
                 <Tooltip
                   v-if="section.name === 'Deals' && showNewPipeline"
@@ -85,7 +117,7 @@
                 >
                   <button
                     type="button"
-                    class="absolute bottom-1.5 right-1 grid size-6 place-items-center rounded text-ink-gray-6 hover:bg-surface-gray-3 hover:text-ink-gray-8"
+                    class="absolute bottom-0.5 right-1 grid size-6 place-items-center rounded-[var(--ct-radius-sm)] text-ink-gray-6 hover:bg-[var(--ct-bg-soft)] hover:text-ink-gray-9"
                     :aria-label="__('New funnel')"
                     @click="openNewPipeline"
                   >
@@ -94,41 +126,67 @@
                 </Tooltip>
               </div>
             </template>
-            <!-- Funnels sit inside the "Funnels" header: indented, with a guide line -->
-            <nav
-              class="flex flex-col gap-1"
-              :class="
-                section.nested &&
-                !isCollapsed &&
-                'ml-2.5 border-l border-outline-gray-2 pl-1.5'
-              "
-            >
-              <SidebarItem
-                v-for="link in section.views"
-                :key="link.key"
-                :route="link.to"
-                :label="__(link.label)"
-                :active="activeItem === link.key"
-                @click="selectItem($event, link.key)"
-              >
-                <template #prefix>
-                  <Icon :icon="link.icon" class="size-4 text-ink-gray-7" />
-                </template>
-                <Tooltip
-                  :text="__(link.label)"
-                  side="right"
-                  :hoverDelay="1500"
-                  :disabled="isCollapsed"
+            <nav class="flex flex-col gap-1">
+              <template v-for="link in section.views" :key="link.key">
+                <SidebarItem
+                  v-if="link.key === 'Notifications'"
+                  id="notifications-btn"
+                  :class="itemClass"
+                  :label="__('Notifications')"
+                  :route="mobile ? { name: 'Notifications' } : undefined"
+                  :active="mobile && activeItem === 'Notifications'"
+                  @click="onNotificationsClick"
                 >
-                  <span class="truncate text-sm">{{ __(link.label) }}</span>
-                </Tooltip>
-              </SidebarItem>
+                  <template #prefix>
+                    <span class="relative grid size-4 place-items-center">
+                      <BellIcon class="size-4" />
+                      <span
+                        v-if="isCollapsed && unreadNotificationsCount"
+                        class="absolute -right-1 -top-[3px] size-2 rounded-full bg-[var(--ct-counter-alert)]"
+                      />
+                    </span>
+                  </template>
+                  <!-- Not in #suffix: that slot sits outside the button, so a
+                       click on the count would not toggle the panel. -->
+                  <span class="ml-0.5 flex-1 truncate text-sm">
+                    {{ __('Notifications') }}
+                  </span>
+                  <span
+                    v-if="unreadNotificationsCount"
+                    class="mr-2.5 grid h-5 min-w-5 place-items-center rounded-full bg-[var(--ct-counter-alert)] px-1.5 text-xs font-semibold text-white"
+                  >
+                    {{ unreadNotificationsCount }}
+                  </span>
+                </SidebarItem>
+                <SidebarItem
+                  v-else
+                  :class="itemClass"
+                  :route="link.to"
+                  :label="__(link.label)"
+                  :active="activeItem === link.key"
+                  @click="selectItem($event, link.key)"
+                >
+                  <template #prefix>
+                    <Icon :icon="link.icon" class="size-4" />
+                  </template>
+                  <Tooltip
+                    :text="__(link.label)"
+                    side="right"
+                    :hoverDelay="1500"
+                    :disabled="isCollapsed"
+                  >
+                    <span class="ml-0.5 truncate text-sm">{{
+                      __(link.label)
+                    }}</span>
+                  </Tooltip>
+                </SidebarItem>
+              </template>
             </nav>
           </CollapsibleSection>
         </div>
 
-        <div v-if="!mobile" class="mt-auto flex flex-col gap-1 pt-2">
-          <div class="mb-1 flex flex-col gap-2">
+        <div class="mt-auto flex shrink-0 flex-col gap-1 pt-2">
+          <div v-if="!mobile" class="mb-1 flex flex-col gap-2">
             <SignupBanner
               v-if="isDemoSite"
               :isSidebarCollapsed="isCollapsed"
@@ -145,8 +203,9 @@
             />
           </div>
           <SidebarItem
-            v-if="isManager() && isDemoDataCreated"
+            v-if="!mobile && isManager() && isDemoDataCreated"
             :label="__('Clear Demo Data')"
+            :class="itemClass"
             class="!text-ink-red-5 hover:!bg-surface-red-2"
             @click="() => clearDemoData()"
           >
@@ -154,17 +213,15 @@
               <BrushCleaningIcon class="size-4" />
             </template>
           </SidebarItem>
-          <SidebarItem
-            :label="isCollapsed ? __('Expand') : __('Collapse')"
-            @click="isSidebarCollapsed = !isSidebarCollapsed"
+          <!-- Footer: the signed-in user opens the account menu -->
+          <div
+            class="border-t pt-3"
+            :class="
+              isCollapsed ? 'border-transparent' : 'border-surface-gray-3'
+            "
           >
-            <template #prefix>
-              <CollapseSidebar
-                class="size-4 text-ink-gray-7 duration-300 ease-in-out"
-                :class="{ '[transform:rotateY(180deg)]': isCollapsed }"
-              />
-            </template>
-          </SidebarItem>
+            <UserDropdown :isCollapsed="isCollapsed" />
+          </div>
         </div>
       </div>
     </Sidebar>
@@ -193,6 +250,19 @@
 
 <script setup>
 import BrushCleaningIcon from '~icons/lucide/brush-cleaning'
+import BellIcon from '~icons/lucide/bell'
+import BuildingIcon from '~icons/lucide/building'
+import ChevronLeftIcon from '~icons/lucide/chevron-left'
+import ChevronRightIcon from '~icons/lucide/chevron-right'
+import CircleCheckIcon from '~icons/lucide/circle-check'
+import ContactIcon from '~icons/lucide/contact'
+import FileTextIcon from '~icons/lucide/file-text'
+import HandshakeIcon from '~icons/lucide/handshake'
+import LayoutDashboardIcon from '~icons/lucide/layout-dashboard'
+import PhoneLucideIcon from '~icons/lucide/phone'
+import ReceiptIcon from '~icons/lucide/receipt'
+import SearchIcon from '~icons/lucide/search'
+import BrandLogo from '@/components/BrandLogo.vue'
 import CRMLogo from '@/components/Icons/CRMLogo.vue'
 import InviteIcon from '@/components/Icons/InviteIcon.vue'
 import EmailIcon from '@/components/Icons/EmailIcon.vue'
@@ -208,8 +278,6 @@ import NoteIcon from '@/components/Icons/NoteIcon.vue'
 import OrganizationsIcon from '@/components/Icons/OrganizationsIcon.vue'
 import PhoneIcon from '@/components/Icons/PhoneIcon.vue'
 import TaskIcon from '@/components/Icons/TaskIcon.vue'
-import CollapseSidebar from '@/components/Icons/CollapseSidebar.vue'
-import NotificationsIcon from '@/components/Icons/NotificationsIcon.vue'
 import Notifications from '@/components/Notifications.vue'
 import { viewsStore } from '@/stores/views'
 import { pipelinesStore } from '@/stores/pipelines'
@@ -227,7 +295,9 @@ import {
   newPipelineRequested,
 } from '@/composables/settings'
 import { useBroadcast } from '@/composables/useBroadcast.js'
-import { call, Sidebar, SidebarItem, SidebarLabel, Tooltip } from 'frappe-ui'
+import { openCommandPalette } from '@/composables/useCommandPalette'
+import { getSettings } from '@/stores/settings'
+import { call, Sidebar, SidebarItem, Tooltip } from 'frappe-ui'
 import { SignupBanner } from '@framework/ui/components/SignupBanner'
 import { TrialBanner } from '@framework/ui/components/TrialBanner'
 import {
@@ -264,6 +334,24 @@ const isSidebarCollapsed = useStorage('isSidebarCollapsed', false)
 // even when the stored rail state says otherwise.
 const isCollapsed = computed(() => isSidebarCollapsed.value && !props.mobile)
 
+const { brand } = getSettings()
+
+// Figma "Item da barra lateral": 36px row, 10px inner padding, hover and
+// active on #f5f5f7, active text #2a2b30 Medium. Icons follow the text color.
+const itemClass =
+  '!h-9 text-ink-gray-6 hover:!bg-[var(--ct-bg-soft)] data-[state=active]:!bg-[var(--ct-bg-soft)] data-[state=active]:!text-ink-gray-7 data-[state=active]:font-medium [&>a]:!pl-2.5 [&>button]:!pl-2.5'
+
+// Figma uses Lucide line icons in the menu; the routes keep their own icons
+// everywhere else (command palette, mobile tabs).
+const ROUTE_ICONS = {
+  Dashboard: LayoutDashboardIcon,
+  Contacts: ContactIcon,
+  Organizations: BuildingIcon,
+  Notes: FileTextIcon,
+  Tasks: CircleCheckIcon,
+  'Call Logs': PhoneLucideIcon,
+}
+
 const isFCSite = ref(window.is_fc_site)
 const isDemoSite = ref(window.is_demo_site)
 
@@ -288,7 +376,7 @@ function openNewPipeline() {
 function navLink(link) {
   return {
     label: link.label,
-    icon: link.icon,
+    icon: ROUTE_ICONS[link.route] || link.icon,
     key: link.route,
     to: { name: link.route },
   }
@@ -299,7 +387,9 @@ function navLink(link) {
 const pipelineViews = computed(() =>
   pipelines.value.map((pipeline) => ({
     label: pipeline.pipeline_name,
-    icon: DealsIcon,
+    icon: /cobran|collection/i.test(pipeline.pipeline_name || '')
+      ? ReceiptIcon
+      : HandshakeIcon,
     key: pipelineKey(pipeline.name),
     to: {
       name: 'Deals',
@@ -315,12 +405,18 @@ const allViews = computed(() => {
     (link) => !['Dashboard', 'Deals'].includes(link.route),
   )
   let _views = [
-    { name: 'Top', hideLabel: true, opened: true, views: top.map(navLink) },
+    {
+      name: 'General',
+      opened: true,
+      views: [
+        { label: 'Notifications', key: 'Notifications' },
+        ...top.map(navLink),
+      ],
+    },
     {
       name: 'Deals',
       // the cards live inside funnels: the header says so and the funnels are indented under it
       label: 'Funnels',
-      nested: true,
       opened: true,
       views: pipelineViews.value,
       // with no funnel yet, keep the header so the "+" can create the first one
@@ -328,7 +424,7 @@ const allViews = computed(() => {
     },
     {
       name: 'All Views',
-      hideLabel: true,
+      label: 'Records',
       opened: true,
       views: rest.map(navLink),
     },
@@ -626,3 +722,22 @@ onMounted(async () => {
 // Cred Hub has no public docs yet, so the list stays empty
 const articles = ref([])
 </script>
+
+<style scoped>
+/* Figma "Botão recolher" / "Botão expandir": 28px circle with a light border */
+.ct-sidebar-toggle {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border-radius: 999px;
+  border: 1px solid var(--ct-border);
+  background: var(--ct-bg-page);
+  color: var(--ct-text-primary);
+  transition: background-color 150ms;
+}
+.ct-sidebar-toggle:hover {
+  background: var(--ct-bg-soft);
+}
+</style>

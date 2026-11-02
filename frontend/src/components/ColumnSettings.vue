@@ -1,7 +1,7 @@
 <template>
   <Popover side="bottom" align="end" bare>
     <template #trigger>
-      <Button :label="__('Columns')">
+      <Button variant="outline" :label="__('Columns')">
         <template v-if="hideLabel" #icon>
           <ColumnsIcon class="h-4" />
         </template>
