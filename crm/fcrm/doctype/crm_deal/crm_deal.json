@@ -87,7 +87,9 @@
   "lost_details_tab",
   "lost_reason",
   "lost_notes",
-  "titles"
+  "titles",
+  "payments",
+  "installments"
  ],
  "fields": [
   {
@@ -572,12 +574,24 @@
    "fieldtype": "Table",
    "label": "Titles",
    "options": "CRM Deal Title"
+  },
+  {
+   "fieldname": "payments",
+   "fieldtype": "Table",
+   "label": "Payments",
+   "options": "CRM Deal Payment"
+  },
+  {
+   "fieldname": "installments",
+   "fieldtype": "Table",
+   "label": "Installments",
+   "options": "CRM Deal Installment"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-11-02 19:00:00.000000",
+ "modified": "2026-11-02 20:00:00.000000",
  "modified_by": "Administrator",
  "module": "FCRM",
  "name": "CRM Deal",
