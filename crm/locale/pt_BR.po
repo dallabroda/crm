@@ -13923,6 +13923,9 @@ msgstr "Pacote mínimo salvo."
 msgid "Could not save the minimum package."
 msgstr "Não foi possível salvar o pacote mínimo."
 
+msgid "Search..."
+msgstr "Buscar..."
+
 msgid "Title not found on this card."
 msgstr "Título não encontrado neste card."
 
