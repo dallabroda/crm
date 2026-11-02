@@ -246,7 +246,7 @@
                     "
                     @click="protestTitle(title)"
                   >
-                    Enviar
+                    {{ __('Send to protest') }}
                   </Button>
                 </div>
                 <div v-if="title.sent_at" class="flex items-center gap-2">
@@ -309,6 +309,135 @@
         @click="showAddModal = true"
       />
     </div>
+
+    <!-- Enviar a protesto: só o devedor, ou com os sócios como codevedores (opcional, credtech#315) -->
+    <Dialog v-model:open="showSend" :title="__('Send to protest')" size="2xl">
+      <template #default>
+        <div v-if="loadingPreview" class="py-6 text-sm text-ink-gray-5">
+          {{ __('Checking the title...') }}
+        </div>
+        <div v-else-if="preview" class="flex flex-col gap-4 py-1">
+          <div class="text-sm text-ink-gray-7">
+            {{
+              __(
+                'Title {0} goes to CENPROT now, in the name of the creditor of the settings. Registry fees may apply.',
+                [sendTitle?.title_number],
+              )
+            }}
+          </div>
+
+          <div v-if="preview.problems.length" class="rounded border border-outline-gray-2 p-3">
+            <div class="text-sm-medium text-ink-red-4">{{ __('Fix before sending:') }}</div>
+            <ul class="list-disc pl-5 text-p-sm text-ink-gray-8">
+              <li v-for="problem in preview.problems" :key="problem">{{ problem }}</li>
+            </ul>
+          </div>
+          <div v-if="preview.notes.length" class="rounded border border-outline-gray-2 p-3">
+            <div class="text-sm-medium text-ink-gray-8">
+              {{ __('Notes (they do not block the send):') }}
+            </div>
+            <ul class="list-disc pl-5 text-p-sm text-ink-gray-7">
+              <li v-for="note in preview.notes" :key="note">{{ note }}</li>
+            </ul>
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <div class="text-base-medium text-ink-gray-8">
+              {{ __('Send with the co-debtors (partners)?') }}
+            </div>
+            <div class="flex gap-5 text-sm text-ink-gray-8">
+              <label class="flex items-center gap-1.5">
+                <input v-model="withCodebtors" type="radio" value="no" @change="onChoice" />
+                {{ __('No, only the debtor') }}
+              </label>
+              <label class="flex items-center gap-1.5">
+                <input v-model="withCodebtors" type="radio" value="yes" @change="onChoice" />
+                {{ __('Yes, with the partners') }}
+              </label>
+            </div>
+            <div class="text-p-xs text-ink-gray-5">
+              {{
+                __(
+                  'Optional. Sending the partners together with the company is more effective, but each extra debtor may add registry fees, paid by the client.',
+                )
+              }}
+            </div>
+          </div>
+
+          <div
+            v-if="withCodebtors === 'yes'"
+            class="flex flex-col gap-3 rounded border border-outline-gray-2 p-3"
+          >
+            <div v-if="!preview.codebtors.length" class="text-sm text-ink-gray-6">
+              {{
+                __(
+                  'This company has no contacts yet. Add the partners as contacts (CPF and address) or find them with Localize.',
+                )
+              }}
+            </div>
+            <div v-for="c in preview.codebtors" :key="c.contact" class="flex items-start gap-2">
+              <input
+                v-model="selected"
+                type="checkbox"
+                class="mt-1"
+                :value="c.contact"
+                :disabled="c.missing.length > 0"
+              />
+              <div class="flex-1">
+                <div class="text-sm text-ink-gray-9">
+                  {{ c.name }}
+                  <span class="text-ink-gray-5">
+                    · {{ c.cpf || __('no CPF') }}
+                    <template v-if="c.designation"> · {{ c.designation }}</template>
+                    <template v-if="c.share != null"> · {{ c.share }}%</template>
+                  </span>
+                </div>
+                <div v-if="c.missing.length" class="text-p-xs text-ink-red-4">
+                  {{ __('Missing: {0}', [c.missing.join(', ')]) }}
+                </div>
+                <div v-else class="text-p-xs text-ink-green-3">{{ __('Ready to go') }}</div>
+              </div>
+              <router-link
+                :to="{ name: 'Contact', params: { contactId: c.contact } }"
+                target="_blank"
+                class="text-p-xs text-ink-blue-3 hover:underline"
+              >
+                {{ __('Open contact') }}
+              </router-link>
+            </div>
+            <div v-if="preview.codebtors.length" class="text-sm text-ink-gray-7">
+              {{ __('{0} ready to go, {1} with data missing', [readyCount, incompleteCount]) }}
+            </div>
+            <div v-if="incompleteCount || !preview.codebtors.length" class="text-p-xs text-ink-gray-6">
+              {{
+                __(
+                  'Fill the missing data in the contact (CPF and address), or let Localize find them (optional: a paid query, billed by the provider on the client account).',
+                )
+              }}
+            </div>
+            <div class="flex gap-2">
+              <LocalizeContacts
+                v-if="preview.organization"
+                :organization="preview.organization"
+                @done="loadPreview"
+              />
+              <Button :label="__('Check again')" @click="loadPreview" />
+            </div>
+          </div>
+        </div>
+      </template>
+      <template #actions>
+        <div class="flex justify-end gap-2">
+          <Button :label="__('Cancel')" @click="showSend = false" />
+          <Button
+            variant="solid"
+            :label="confirmLabel"
+            :disabled="!canConfirm"
+            @click="confirmSend"
+          />
+        </div>
+      </template>
+    </Dialog>
 
     <!-- Modal de Adicionar Título -->
     <Dialog v-model:open="showAddModal" :title="__('Adicionar Título de Cobrança')" size="lg">
@@ -393,6 +522,7 @@ import { computed, ref } from 'vue'
 import { Badge, Button, Dialog, FormControl, Tooltip, call, toast } from 'frappe-ui'
 import { createDialog } from '@/utils/dialogs'
 import Icon from '@/components/Icon.vue'
+import LocalizeContacts from '@/components/LocalizeContacts.vue'
 
 const props = defineProps({
   deal: { type: Object, required: true },
@@ -400,7 +530,29 @@ const props = defineProps({
 
 const emit = defineEmits(['reload', 'sendWhatsapp'])
 
+const API = 'cred_hub.integrations.protest.'
 const showAddModal = ref(false)
+// Envio a protesto: sem codevedores (só o devedor) ou com os sócios que o operador marcar
+const showSend = ref(false)
+const sendTitle = ref(null)
+const preview = ref(null)
+const loadingPreview = ref(false)
+const withCodebtors = ref('no')
+const selected = ref([])
+
+const readyCount = computed(() => (preview.value?.codebtors || []).filter((c) => !c.missing.length).length)
+const incompleteCount = computed(() => (preview.value?.codebtors || []).length - readyCount.value)
+const canConfirm = computed(
+  () =>
+    Boolean(preview.value) &&
+    !preview.value.problems.length &&
+    (withCodebtors.value === 'no' || selected.value.length > 0),
+)
+const confirmLabel = computed(() =>
+  withCodebtors.value === 'yes'
+    ? __('Send with {0} co-debtor(s)', [selected.value.length])
+    : __('Send only the debtor'),
+)
 const loadingProtest = ref(null)
 const uploadingTitle = ref(null)
 const fileInputRef = ref(null)
@@ -615,22 +767,46 @@ async function protestTitle(title) {
     return
   }
 
-  createDialog({
-    title: __('Send to protest'),
-    message: __('Title {0} goes to CENPROT now, in the name of the creditor of the settings. Registry fees may apply.', [title.title_number]),
-    size: 'md',
-    actions: [
-      { label: __('Cancel'), onClick: ({ close }) => close() },
-      {
-        label: __('Send to protest'),
-        variant: 'solid',
-        onClick: ({ close }) => {
-          close()
-          runTitle(title, 'send_row')
-        },
-      },
-    ],
-  })
+  sendTitle.value = title
+  withCodebtors.value = 'no'
+  selected.value = []
+  preview.value = null
+  showSend.value = true
+  await loadPreview()
+}
+
+// O servidor confere o título e os contatos da empresa (nada é enviado nem cobrado aqui)
+async function loadPreview() {
+  loadingPreview.value = true
+  try {
+    preview.value = await call(API + 'preview_row', {
+      deal: props.deal.name,
+      title_row: sendTitle.value.name,
+      codebtors: selected.value,
+    })
+    selectReady()
+  } catch (err) {
+    showSend.value = false
+    toast.error(err.messages?.[0] || err.message || __('Could not check the title.'))
+  } finally {
+    loadingPreview.value = false
+  }
+}
+
+function selectReady() {
+  if (withCodebtors.value !== 'yes') return
+  selected.value = (preview.value?.codebtors || []).filter((c) => !c.missing.length).map((c) => c.contact)
+}
+
+function onChoice() {
+  if (withCodebtors.value === 'yes') selectReady()
+  else selected.value = []
+}
+
+async function confirmSend() {
+  const title = sendTitle.value
+  showSend.value = false
+  await runTitle(title, 'send_row', withCodebtors.value === 'yes' ? { codebtors: selected.value } : {})
 }
 
 // Envia, consulta ou retira um título; o status novo sempre vem do servidor (CENPROT)

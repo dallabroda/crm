@@ -13217,3 +13217,57 @@ msgstr "Cedente"
 
 msgid "Sent to CENPROT: the species can no longer change."
 msgstr "Enviado à CENPROT: a espécie não pode mais mudar."
+
+msgid "Checking the title..."
+msgstr "Conferindo o título..."
+
+msgid "Fix before sending:"
+msgstr "Corrija antes de enviar:"
+
+msgid "Notes (they do not block the send):"
+msgstr "Avisos (não impedem o envio):"
+
+msgid "Send with the co-debtors (partners)?"
+msgstr "Enviar com os codevedores (sócios)?"
+
+msgid "No, only the debtor"
+msgstr "Não, só o devedor"
+
+msgid "Yes, with the partners"
+msgstr "Sim, com os sócios"
+
+msgid "Optional. Sending the partners together with the company is more effective, but each extra debtor may add registry fees, paid by the client."
+msgstr "Opcional. Mandar os sócios junto com a empresa é mais eficiente, mas cada devedor a mais pode gerar custas no cartório, pagas pelo cliente."
+
+msgid "This company has no contacts yet. Add the partners as contacts (CPF and address) or find them with Localize."
+msgstr "Esta empresa ainda não tem contatos. Cadastre os sócios como contatos (CPF e endereço) ou busque pelo Localizar."
+
+msgid "no CPF"
+msgstr "sem CPF"
+
+msgid "Missing: {0}"
+msgstr "Falta: {0}"
+
+msgid "Ready to go"
+msgstr "Pronto para ir"
+
+msgid "Open contact"
+msgstr "Abrir contato"
+
+msgid "{0} ready to go, {1} with data missing"
+msgstr "{0} prontos para ir, {1} com dado faltando"
+
+msgid "Fill the missing data in the contact (CPF and address), or let Localize find them (optional: a paid query, billed by the provider on the client account)."
+msgstr "Preencha o que falta no contato (CPF e endereço) ou deixe o Localizar buscar (opcional: é uma consulta paga, cobrada pelo provedor na conta do cliente)."
+
+msgid "Check again"
+msgstr "Conferir de novo"
+
+msgid "Send with {0} co-debtor(s)"
+msgstr "Enviar com {0} codevedor(es)"
+
+msgid "Send only the debtor"
+msgstr "Enviar só o devedor"
+
+msgid "Could not check the title."
+msgstr "Não foi possível conferir o título."
