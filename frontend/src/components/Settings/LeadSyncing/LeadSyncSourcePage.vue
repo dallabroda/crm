@@ -9,7 +9,7 @@
         }}
       </template>
     </SettingsPageHeader>
-    <div class="flex flex-1 flex-col gap-8 overflow-y-auto px-2">
+    <div class="flex flex-1 flex-col gap-8 overflow-y-auto">
       <MetaLeadsSource @changed="activity?.load()" />
       <WebhookSources @changed="activity?.load()" />
       <ChatConnection />

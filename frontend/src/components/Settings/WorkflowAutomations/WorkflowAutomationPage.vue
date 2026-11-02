@@ -6,7 +6,7 @@
   >
     <template #header-actions>
       <Button
-        :label="__('New')"
+        :label="__('New automation')"
         variant="solid"
         icon-left="lucide-plus"
         @click="newAutomation"
@@ -37,13 +37,15 @@
       <div v-if="automations.list.loading" class="mt-10 flex justify-center">
         <LoadingIndicator class="w-4" />
       </div>
-      <EmptyState
+      <SettingsEmptyState
         v-else-if="!filteredAutomations.length"
-        name="Workflow Automations"
-        :icon="WorkflowIcon"
+        :icon="LucideWorkflow"
         :title="__('No workflow automations yet')"
-        :description="__('Add one to get started.')"
-        width="lg"
+        :description="
+          __('Create automations to do repetitive tasks without effort.')
+        "
+        :action-label="__('New automation')"
+        @action="newAutomation"
       />
       <List
         v-else
@@ -145,12 +147,12 @@
 </template>
 
 <script setup>
+import LucideWorkflow from '~icons/lucide/workflow'
+import SettingsEmptyState from '@/components/Settings/SettingsEmptyState.vue'
 import SettingsLayoutBase from '@/components/Layouts/SettingsLayoutBase.vue'
-import EmptyState from '@/components/ListViews/EmptyState.vue'
 import WorkflowAutomationBuilder from './WorkflowAutomationBuilder.vue'
 import WorkflowAutomationDetail from './WorkflowAutomationDetail.vue'
 import UserAvatar from '@/components/UserAvatar.vue'
-import WorkflowIcon from '~icons/lucide/workflow'
 import { ConfirmDelete } from '@/utils'
 import { createDialog } from '@/utils/dialogs'
 import { usersStore } from '@/stores/users'

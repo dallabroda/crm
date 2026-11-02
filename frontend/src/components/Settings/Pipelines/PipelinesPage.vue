@@ -34,22 +34,26 @@
     >
       <LoadingIndicator class="w-4" />
     </div>
-    <div v-else class="w-full overflow-y-auto">
-      <div class="flex items-center p-2 text-sm text-ink-gray-5">
+    <div
+      v-else
+      class="w-full overflow-hidden overflow-y-auto rounded-lg border border-outline-gray-1"
+    >
+      <div
+        class="flex h-10 items-center gap-4 border-b border-outline-gray-1 bg-surface-gray-2 px-4 text-xs font-medium text-ink-gray-6"
+      >
         <div class="w-6/12">{{ __('Funnel') }}</div>
         <div class="w-2/12">{{ __('Stages') }}</div>
         <div class="w-2/12">{{ __('My role') }}</div>
         <div class="w-2/12">{{ __('Active') }}</div>
       </div>
-      <div class="mx-2 h-px border-t border-outline-elevation-2" />
       <template v-for="(pipeline, i) in list" :key="pipeline.name">
         <div
-          class="flex cursor-pointer items-center rounded-4 p-3 hover:bg-surface-sidebar"
+          class="flex min-h-14 cursor-pointer items-center gap-4 px-4 py-2 hover:bg-surface-gray-2"
           @click="editing = pipeline.name"
         >
           <div class="flex w-6/12 items-center gap-2">
             <IndicatorIcon :class="parseColor(pipeline.color)" />
-            <span class="text-base-medium text-ink-gray-7">
+            <span class="text-base text-ink-gray-9">
               {{ __(pipeline.pipeline_name) }}
             </span>
           </div>
@@ -63,7 +67,7 @@
             {{ pipeline.is_active ? __('Yes') : __('No') }}
           </div>
         </div>
-        <hr v-if="list.length !== i + 1" class="mx-2" />
+        <div v-if="list.length !== i + 1" class="h-px bg-outline-gray-1" />
       </template>
     </div>
   </div>

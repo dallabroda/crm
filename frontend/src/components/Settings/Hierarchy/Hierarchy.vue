@@ -32,22 +32,13 @@
       <LoadingIndicator class="size-6" />
     </div>
 
-    <div
-      v-else-if="!hierarchyEnabled"
-      class="relative flex flex-1 w-full justify-center"
-    >
-      <div
-        class="absolute left-1/2 flex w-64 -translate-x-1/2 flex-col items-center gap-3"
-        :style="{ top: '35%' }"
+    <div v-else-if="!hierarchyEnabled" class="flex w-full">
+      <SettingsEmptyState
+        :icon="LucideNetwork"
+        :title="__('Enable Sales Hierarchy')"
+        :description="__('Restrict visibility using a reporting tree')"
       >
-        <lucide-network class="size-7.5 text-ink-gray-5" />
-        <div class="flex flex-col items-center gap-1.5 text-center">
-          <span class="text-lg-medium text-ink-gray-8">
-            {{ __('Enable Sales Hierarchy') }}
-          </span>
-          <span class="text-center text-p-base text-ink-gray-6">
-            {{ __('Restrict visibility using a reporting tree') }}
-          </span>
+        <template #actions>
           <Button
             variant="solid"
             :loading="fcrmSettings.setValue.loading"
@@ -55,11 +46,11 @@
           >
             {{ __('Enable') }}
           </Button>
-        </div>
-      </div>
+        </template>
+      </SettingsEmptyState>
     </div>
 
-    <div v-else class="flex-1 min-h-0 flex flex-col px-2">
+    <div v-else class="flex-1 min-h-0 flex flex-col">
       <div class="flex items-center gap-2 pt-0.5 pb-4">
         <TextInput
           v-if="enrichedNodes.length"
@@ -231,6 +222,8 @@
 </template>
 
 <script setup>
+import LucideNetwork from '~icons/lucide/network'
+import SettingsEmptyState from '@/components/Settings/SettingsEmptyState.vue'
 import SettingsPageHeader from '@/components/Settings/SettingsPageHeader.vue'
 import EmptyState from '@/components/ListViews/EmptyState.vue'
 import HierarchyRow from './HierarchyRow.vue'
@@ -240,7 +233,6 @@ import { useRemoveNode } from './useRemoveNode'
 import { useDragDrop } from './useDragDrop'
 import { globalStore } from '@/stores/global'
 import { usersStore } from '@/stores/users'
-import LucideNetwork from '~icons/lucide/network'
 import {
   Button,
   Dialog,

@@ -33,11 +33,11 @@
       </template>
     </SettingsPageHeader>
 
-    <div class="px-2">
+    <div>
       <TabButtons v-model="tab" :options="tabs" />
     </div>
 
-    <div class="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-2">
+    <div class="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto">
       <div
         v-if="isCards && !pipelines.length && !loading"
         class="text-p-base text-ink-gray-5"

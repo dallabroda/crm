@@ -10,7 +10,7 @@
       </template>
       <template #actions>
         <Button
-          :label="__('New')"
+          :label="__('New rule')"
           icon-left="lucide-plus"
           variant="solid"
           @click="goToNew()"

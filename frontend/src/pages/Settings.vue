@@ -1,5 +1,5 @@
 <template>
-  <div class="flex h-full flex-col overflow-hidden">
+  <div class="settings-page flex h-full flex-col overflow-hidden">
     <LayoutHeader>
       <template #left-header>
         <!-- the panel's SettingsPageHeader teleports its title here -->
@@ -173,5 +173,28 @@ usePageMeta(() => ({
   line-height: 28px;
   font-weight: 600;
   color: var(--ink-gray-9);
+}
+</style>
+
+<style>
+/* Figma "Campo" 48px (labels 14/500 gray, value 16px, 14px side padding),
+   for the fields the Figma draws at 48px in the settings */
+.settings-page .ct-field-48 input:not([type='checkbox']):not([type='radio']),
+.settings-page .ct-field-48 button,
+.settings-page .ct-field-48 select {
+  height: 48px;
+  font-size: 16px;
+  padding-inline: 14px;
+  border-radius: 6px;
+}
+.settings-page .ct-field-48 textarea {
+  font-size: 16px;
+  padding: 12px 14px;
+  border-radius: 6px;
+}
+.settings-page .ct-field-48 label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink-gray-6);
 }
 </style>

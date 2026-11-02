@@ -36,7 +36,7 @@
     <div v-if="loading" class="mt-12 flex items-center justify-center">
       <LoadingIndicator class="w-4" />
     </div>
-    <div v-else class="flex flex-col gap-8 overflow-y-auto px-2 pb-6">
+    <div v-else class="flex flex-col gap-8 overflow-y-auto pb-6">
       <ErrorMessage v-if="error" :message="error" />
 
       <!-- Funnel -->

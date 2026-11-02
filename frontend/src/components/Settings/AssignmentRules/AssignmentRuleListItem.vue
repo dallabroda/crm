@@ -1,9 +1,9 @@
 <template>
   <div
-    class="flex p-3 items-center justify-between cursor-pointer hover:bg-surface-sidebar rounded-4"
+    class="flex min-h-14 items-center justify-between gap-4 px-4 py-2 cursor-pointer hover:bg-surface-gray-2"
   >
     <div class="w-7/12" @click="updateStep('view', data)">
-      <div class="text-base-medium text-ink-gray-7">{{ data.name }}</div>
+      <div class="text-base text-ink-gray-9">{{ data.name }}</div>
       <div
         v-if="data.description && data.description.length > 0"
         class="text-p-base w-full text-ink-gray-5 mt-0.5 whitespace-nowrap overflow-ellipsis overflow-hidden"
