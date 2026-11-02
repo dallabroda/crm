@@ -13670,3 +13670,27 @@ msgstr "Não foi possível instalar o funil."
 
 msgid "Credit analysis"
 msgstr "Análise de crédito"
+
+msgid "Enable Serasa Experian (Advanced PJ Report, your own contract)"
+msgstr "Ligar o Serasa Experian (Relatório Avançado PJ, contrato próprio)"
+
+msgid "Serasa Client ID"
+msgstr "Client ID do Serasa"
+
+msgid "Serasa Client Secret"
+msgstr "Client Secret do Serasa"
+
+msgid "Serasa environment"
+msgstr "Ambiente do Serasa"
+
+msgid "Homologation (tests only)"
+msgstr "Homologação (só para testes)"
+
+msgid "Serasa report name"
+msgstr "Nome do relatório do Serasa"
+
+msgid "Test login"
+msgstr "Testar login"
+
+msgid "Only signs in to Serasa. It makes no query and costs nothing."
+msgstr "Só entra no Serasa. Não faz consulta e não custa nada."

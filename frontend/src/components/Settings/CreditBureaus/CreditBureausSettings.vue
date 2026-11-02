@@ -406,7 +406,9 @@
             <Checkbox
               v-model="settingsDoc.serasa_enabled"
               :label="
-                __('Enable Serasa Experian (Relato PJ, your own contract)')
+                __(
+                  'Enable Serasa Experian (Advanced PJ Report, your own contract)',
+                )
               "
             />
             <div
@@ -414,17 +416,51 @@
               class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2"
             >
               <FormControl
-                v-model="settingsDoc.serasa_endpoint_url"
+                v-model="settingsDoc.serasa_client_id"
                 type="text"
-                :label="__('Serasa endpoint URL')"
-                placeholder="https://..."
-              />
-              <FormControl
-                v-model="settingsDoc.serasa_token"
-                type="password"
-                :label="__('Serasa token')"
+                :label="__('Serasa Client ID')"
                 autocomplete="off"
               />
+              <FormControl
+                v-model="settingsDoc.serasa_client_secret"
+                type="password"
+                :label="__('Serasa Client Secret')"
+                autocomplete="off"
+              />
+              <FormControl
+                v-model="settingsDoc.serasa_environment"
+                type="select"
+                :label="__('Serasa environment')"
+                :options="[
+                  { label: __('Production'), value: 'Production' },
+                  {
+                    label: __('Homologation (tests only)'),
+                    value: 'Homologation',
+                  },
+                ]"
+              />
+              <FormControl
+                v-model="settingsDoc.serasa_report_name"
+                type="text"
+                :label="__('Serasa report name')"
+              />
+              <div class="md:col-span-2 flex items-center gap-3">
+                <Button
+                  variant="subtle"
+                  :loading="testing === 'serasa'"
+                  :disabled="!settingsDoc.serasa_client_id"
+                  @click="testSerasa"
+                >
+                  {{ __('Test login') }}
+                </Button>
+                <span class="text-p-sm text-ink-gray-5">
+                  {{
+                    __(
+                      'Only signs in to Serasa. It makes no query and costs nothing.',
+                    )
+                  }}
+                </span>
+              </div>
             </div>
             <div class="pt-4 mt-4 border-t border-outline-gray-2 space-y-3">
               <p class="text-p-sm text-ink-gray-6">
@@ -529,8 +565,10 @@ const settingsDoc = ref({
   block_on_protest: false,
   block_on_fgts_irregular: false,
   serasa_enabled: false,
-  serasa_endpoint_url: '',
-  serasa_token: '',
+  serasa_client_id: '',
+  serasa_client_secret: '',
+  serasa_environment: 'Production',
+  serasa_report_name: 'RELATORIO_AVANCADO_PJ_PME',
   boavista_risco_enabled: false,
   dossie_quod_enabled: false,
   scr_bacen_enabled: false,
@@ -662,6 +700,24 @@ function testProvider(provider, label, token) {
       },
     ],
   })
+}
+
+async function testSerasa() {
+  testing.value = 'serasa'
+  try {
+    const res = await call('cred_hub.credit_check.api.test_serasa_connection', {
+      client_id: settingsDoc.value.serasa_client_id,
+      client_secret: settingsDoc.value.serasa_client_secret,
+      environment: settingsDoc.value.serasa_environment,
+    })
+    if (res?.ok) {
+      toast.success(res.message || __('Connection successful!'))
+    }
+  } catch (err) {
+    toast.error(err?.messages?.[0] || __('Connection failed.'))
+  } finally {
+    testing.value = ''
+  }
 }
 
 async function runTest(provider, token, cnpj) {
