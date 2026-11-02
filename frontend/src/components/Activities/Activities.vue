@@ -30,13 +30,13 @@
         <WhatsAppArea
           v-model="whatsappMessages"
           v-model:reply="replyMessage"
-          class="px-3 sm:px-10"
+          class="px-3 sm:px-6"
           :messages="whatsappMessages.data"
         />
       </div>
       <div
         v-else-if="title == 'Notes'"
-        class="grid grid-cols-1 gap-4 px-3 pb-3 sm:px-10 sm:pb-5 lg:grid-cols-2 xl:grid-cols-3"
+        class="grid grid-cols-1 gap-4 px-3 pb-3 sm:px-6 sm:pb-5 lg:grid-cols-2 xl:grid-cols-3"
       >
         <div
           v-for="note in activities"
@@ -49,7 +49,7 @@
       <div v-else-if="title == 'Comments'" class="pb-5">
         <div v-for="(comment, i) in activities" :key="comment.name">
           <div
-            class="activity grid grid-cols-[30px_minmax(auto,_1fr)] gap-2 px-3 sm:gap-4 sm:px-10"
+            class="activity grid grid-cols-[30px_minmax(auto,_1fr)] gap-2 px-3 sm:gap-4 sm:px-6"
           >
             <div
               class="z-0 relative flex justify-center before:absolute before:left-[50%] before:-z-[1] before:top-0 before:border-l before:border-outline-elevation-2"
@@ -71,13 +71,13 @@
           </div>
         </div>
       </div>
-      <div v-else-if="title == 'Tasks'" class="px-3 pb-3 sm:px-10 sm:pb-5">
+      <div v-else-if="title == 'Tasks'" class="px-3 pb-3 sm:px-6 sm:pb-5">
         <TaskArea :modalRef="modalRef" :tasks="activities" :doctype="doctype" />
       </div>
       <div v-else-if="title == 'Calls'" class="activity">
         <div v-for="(call, i) in activities" :key="call.name">
           <div
-            class="activity grid grid-cols-[30px_minmax(auto,_1fr)] gap-4 px-3 sm:px-10"
+            class="activity grid grid-cols-[30px_minmax(auto,_1fr)] gap-4 px-3 sm:px-6"
           >
             <div
               class="z-0 relative flex justify-center before:absolute before:left-[50%] before:-z-[1] before:top-0 before:border-l before:border-outline-elevation-2"
@@ -105,10 +105,7 @@
           </div>
         </div>
       </div>
-      <div
-        v-else-if="title == 'Attachments'"
-        class="px-3 pb-3 sm:px-10 sm:pb-5"
-      >
+      <div v-else-if="title == 'Attachments'" class="px-3 pb-3 sm:px-6 sm:pb-5">
         <AttachmentArea
           :attachments="activities"
           @reload="all_activities.reload() && scroll()"
@@ -118,7 +115,7 @@
         <div
           v-for="(activity, i) in activities"
           :key="activity.name"
-          class="activity px-3 sm:px-10"
+          class="activity px-3 sm:px-6"
           :class="
             ['Activity', 'Emails'].includes(title)
               ? 'grid grid-cols-[30px_minmax(auto,_1fr)] gap-2 sm:gap-4'
@@ -444,7 +441,7 @@
     </div>
     <div
       v-else-if="title == 'Data'"
-      class="flex h-full min-h-0 flex-col overflow-hidden px-3 sm:px-10"
+      class="flex h-full min-h-0 flex-col overflow-hidden px-3 sm:px-6"
     >
       <DataFields
         v-model:fieldLayoutTabIndex="fieldLayoutTabIndex"
