@@ -13271,3 +13271,6 @@ msgstr "Enviar só o devedor"
 
 msgid "Could not check the title."
 msgstr "Não foi possível conferir o título."
+
+msgid "Goes with the company address"
+msgstr "Vai com o endereço da empresa"

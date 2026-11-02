@@ -396,6 +396,12 @@
                   {{ __('Missing: {0}', [c.missing.join(', ')]) }}
                 </div>
                 <div v-else class="text-p-xs text-ink-green-3">{{ __('Ready to go') }}</div>
+                <div
+                  v-if="c.address_from === 'company' && !c.missing.length"
+                  class="text-p-xs text-ink-gray-5"
+                >
+                  {{ __('Goes with the company address') }}
+                </div>
               </div>
               <router-link
                 :to="{ name: 'Contact', params: { contactId: c.contact } }"
