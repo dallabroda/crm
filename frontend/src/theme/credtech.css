@@ -1,0 +1,250 @@
+/*
+ * CredTech design tokens for Cred Hub.
+ *
+ * Source: Figma "CredTech Digital" (IoiEQWKQK5e9WwHgi7kY4F), page "Style Guide",
+ * variable collection "CredTech · Tokens", mode "Claro".
+ *
+ * Two layers:
+ * 1. `--ct-*` variables: the CredTech palette, named after the Figma tokens.
+ *    Theme patches (src/theme/frappeUiTheme.js) and app components read these.
+ *    Each one has a light value and a dark value, so dark mode keeps working.
+ * 2. frappe-ui semantic variables (`--ink-*`, `--surface-*`, `--outline-*`)
+ *    remapped to the CredTech palette in light mode only. Every screen that
+ *    uses frappe-ui's semantic utilities (`text-ink-gray-8`, `bg-surface-gray-2`,
+ *    `border-outline-gray-2`...) follows the new palette without per-screen edits.
+ *    Dark mode keeps frappe-ui's own dark values.
+ */
+
+:root {
+  /* Texto */
+  --ct-text-primary: #000000;
+  --ct-text-secondary: #5e6068;
+  --ct-text-tertiary: #8a8c94;
+  --ct-text-inverse: #ffffff;
+  --ct-text-accent: #0088ff;
+  --ct-text-error: #b42318;
+
+  /* Fundo */
+  --ct-bg-page: #ffffff;
+  --ct-bg-soft: #f5f5f7;
+  --ct-bg-panel: #e6e7eb;
+  --ct-bg-selected: #e5f1ff;
+
+  /* Borda */
+  --ct-border: #dcdde2;
+  --ct-border-soft: #e6e7eb;
+  --ct-border-strong: #000000;
+
+  /* Ação */
+  --ct-action-primary: #000000;
+  --ct-action-primary-hover: #2a2b30;
+  --ct-action-neutral: #f5f5f7;
+  --ct-action-neutral-hover: #e6e7eb;
+  --ct-action-light-hover: #ededf0;
+  --ct-accent: #0088ff;
+  --ct-accent-hover: #0070e0;
+  --ct-accent-active: #0059b8;
+  --ct-accent-soft: #e5f1ff;
+  --ct-accent-soft-hover: #d6e9ff;
+  --ct-accent-text: #0070e0;
+  --ct-danger: #b42318;
+  --ct-danger-hover: #912018;
+  --ct-danger-soft: #fef3f2;
+  --ct-danger-soft-hover: #fde4e1;
+
+  /* Feedback */
+  --ct-success: #1f7a3d;
+  --ct-success-soft: #e7f6ec;
+  --ct-warning: #8a5a00;
+  --ct-warning-soft: #fff4d6;
+  --ct-error: #b42318;
+  --ct-error-soft: #fef3f2;
+  --ct-info: #0070e0;
+  --ct-info-soft: #e5f1ff;
+  --ct-counter-alert: #fc534a;
+
+  /* Status (pontos de etapa) */
+  --ct-status-gray: #8e8e93;
+  --ct-status-blue: #0088ff;
+  --ct-status-purple: #af52de;
+  --ct-status-orange: #ff8d28;
+  --ct-status-yellow: #ffcc00;
+  --ct-status-green: #34c759;
+  --ct-status-red: #ff3b30;
+
+  /* Gráficos (escala azul) */
+  --ct-chart-1: #0070e0;
+  --ct-chart-2: #0088ff;
+  --ct-chart-3: #66b8ff;
+  --ct-chart-4: #b3dbff;
+  --ct-chart-5: #dcdde2;
+
+  /* Avatar (fundo / texto) */
+  --ct-avatar-neutral-bg: #e6e7eb;
+  --ct-avatar-neutral-fg: #000000;
+  --ct-avatar-green-bg: #ddf5e3;
+  --ct-avatar-green-fg: #1e7a3c;
+  --ct-avatar-orange-bg: #ffe8d6;
+  --ct-avatar-orange-fg: #b04f00;
+  --ct-avatar-yellow-bg: #fff3c4;
+  --ct-avatar-yellow-fg: #806000;
+  --ct-avatar-blue-bg: #e0efff;
+  --ct-avatar-blue-fg: #0059b8;
+  --ct-avatar-purple-bg: #f1e4fa;
+  --ct-avatar-purple-fg: #7a2da6;
+  --ct-avatar-pink-bg: #fde4ef;
+  --ct-avatar-pink-fg: #a8205f;
+  --ct-avatar-cyan-bg: #dcf4f8;
+  --ct-avatar-cyan-fg: #0a6878;
+
+  /* Dica, overlay e sombras */
+  --ct-tooltip-bg: #1e1f23;
+  --ct-tooltip-fg: #ffffff;
+  --ct-overlay: rgba(26, 24, 12, 0.4);
+  --ct-shadow-modal: 0 10px 30px rgba(0, 0, 0, 0.18);
+  --ct-shadow-tooltip: 0 2px 6px rgba(0, 0, 0, 0.12);
+
+  /* Raio */
+  --ct-radius-sm: 6px;
+  --ct-radius-md: 8px;
+  --ct-radius-lg: 12px;
+  --ct-radius-pill: 999px;
+
+  /* Foco: anel azul visível sobre fundo branco e cinza */
+  --focus-outline-default: 2px solid rgba(0, 136, 255, 0.55);
+}
+
+[data-theme='dark'] {
+  --ct-text-primary: var(--ink-gray-9);
+  --ct-text-secondary: var(--ink-gray-6);
+  --ct-text-tertiary: var(--ink-gray-4);
+  --ct-text-inverse: #ffffff;
+  --ct-text-accent: #4da8ff;
+  --ct-text-error: #f97066;
+
+  --ct-bg-page: var(--surface-base);
+  --ct-bg-soft: var(--surface-gray-2);
+  --ct-bg-panel: var(--surface-gray-4);
+  --ct-bg-selected: #0f2a44;
+
+  --ct-border: var(--outline-gray-2);
+  --ct-border-soft: var(--outline-gray-1);
+  --ct-border-strong: var(--outline-gray-5);
+
+  --ct-action-primary: #ffffff;
+  --ct-action-primary-hover: #e6e7eb;
+  --ct-action-neutral: var(--surface-gray-2);
+  --ct-action-neutral-hover: var(--surface-gray-3);
+  --ct-action-light-hover: var(--surface-gray-3);
+  --ct-accent: #0088ff;
+  --ct-accent-hover: #2b9bff;
+  --ct-accent-active: #0070e0;
+  --ct-accent-soft: #0f2a44;
+  --ct-accent-soft-hover: #143657;
+  --ct-accent-text: #4da8ff;
+  --ct-danger: #d92d20;
+  --ct-danger-hover: #b42318;
+  --ct-danger-soft: #3d1714;
+  --ct-danger-soft-hover: #4d1d19;
+
+  --ct-success: #47cd89;
+  --ct-success-soft: #133322;
+  --ct-warning: #fdb022;
+  --ct-warning-soft: #3a2c0d;
+  --ct-error: #f97066;
+  --ct-error-soft: #3d1714;
+  --ct-info: #4da8ff;
+  --ct-info-soft: #0f2a44;
+
+  --ct-avatar-neutral-bg: var(--surface-gray-4);
+  --ct-avatar-neutral-fg: var(--ink-gray-8);
+  --ct-avatar-green-bg: rgba(52, 199, 89, 0.2);
+  --ct-avatar-green-fg: #6cde7e;
+  --ct-avatar-orange-bg: rgba(255, 141, 40, 0.2);
+  --ct-avatar-orange-fg: #ffb072;
+  --ct-avatar-yellow-bg: rgba(255, 204, 0, 0.18);
+  --ct-avatar-yellow-fg: #ffd84d;
+  --ct-avatar-blue-bg: rgba(0, 136, 255, 0.2);
+  --ct-avatar-blue-fg: #66b8ff;
+  --ct-avatar-purple-bg: rgba(175, 82, 222, 0.22);
+  --ct-avatar-purple-fg: #d39cf0;
+  --ct-avatar-pink-bg: rgba(232, 62, 140, 0.2);
+  --ct-avatar-pink-fg: #f590bd;
+  --ct-avatar-cyan-bg: rgba(10, 160, 190, 0.2);
+  --ct-avatar-cyan-fg: #6fd6e8;
+
+  --ct-tooltip-bg: var(--surface-gray-4);
+  --ct-tooltip-fg: var(--ink-gray-9);
+  --ct-overlay: rgba(0, 0, 0, 0.6);
+  --ct-shadow-modal: 0 10px 30px rgba(0, 0, 0, 0.5);
+
+  --focus-outline-default: 2px solid rgba(77, 168, 255, 0.6);
+}
+
+/*
+ * frappe-ui semantic tokens → CredTech palette (light mode only).
+ * `:root:not([data-theme='dark'])` keeps the dark theme on frappe-ui's values.
+ */
+:root:not([data-theme='dark']) {
+  /* Texto: principal #000, secundário #5e6068, terciário #8a8c94 */
+  --ink-gray-9: #000000;
+  --ink-gray-8: #1e1f23;
+  --ink-gray-7: #2a2b30;
+  --ink-gray-6: #5e6068;
+  --ink-gray-5: #5e6068;
+  --ink-gray-4: #8a8c94;
+  --ink-blue-link: #0088ff;
+  --ink-blue-5: #0088ff;
+  --ink-blue-6: #0070e0;
+  --ink-blue-7: #0070e0;
+  --ink-blue-8: #0059b8;
+  --ink-green-6: #1f7a3d;
+  --ink-green-7: #1f7a3d;
+  --ink-green-8: #1f7a3d;
+  --ink-amber-6: #8a5a00;
+  --ink-amber-7: #8a5a00;
+  --ink-amber-8: #8a5a00;
+  --ink-red-5: #b42318;
+  --ink-red-6: #b42318;
+  --ink-red-7: #b42318;
+  --ink-red-8: #912018;
+
+  /* Fundos neutros: suave #f5f5f7, hover #ededf0, painel #e6e7eb */
+  --surface-base: #ffffff;
+  --surface-gray-1: #fafafb;
+  --surface-gray-2: #f5f5f7;
+  --surface-gray-3: #ededf0;
+  --surface-gray-4: #e6e7eb;
+  --surface-gray-5: #dcdde2;
+  --surface-elevation-1: #ffffff;
+  --surface-elevation-2: #ffffff;
+  --surface-elevation-3: #ffffff;
+
+  /* Azul de destaque */
+  --surface-blue-1: #f2f8ff;
+  --surface-blue-2: #e5f1ff;
+  --surface-blue-3: #d6e9ff;
+  --surface-blue-6: #0088ff;
+  --surface-blue-7: #0070e0;
+  --surface-blue-8: #0059b8;
+
+  /* Feedback com fundo claro */
+  --surface-green-2: #e7f6ec;
+  --surface-amber-2: #fff4d6;
+  --surface-red-1: #fef3f2;
+  --surface-red-2: #fef3f2;
+  --surface-red-3: #fde4e1;
+  --surface-red-7: #b42318;
+  --surface-red-8: #912018;
+  --surface-red-9: #7a1a14;
+
+  /* Bordas: padrão #dcdde2, suave #e6e7eb */
+  --outline-gray-1: #e6e7eb;
+  --outline-gray-2: #dcdde2;
+  --outline-elevation-1: #e6e7eb;
+  --outline-elevation-2: #e6e7eb;
+  --outline-blue-1: #b3dbff;
+  --outline-blue-4: #0088ff;
+  --outline-red-1: #fbd0cb;
+  --outline-red-3: #b42318;
+}

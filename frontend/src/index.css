@@ -1,4 +1,6 @@
 @import 'frappe-ui/style.css';
+/* CredTech design tokens (Figma Style Guide); after frappe-ui so they win */
+@import './theme/credtech.css';
 
 @layer components {
   .prose-f {
