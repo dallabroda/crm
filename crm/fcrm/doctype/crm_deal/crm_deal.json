@@ -17,6 +17,7 @@
   "column_break_ijan",
   "pipeline",
   "status",
+  "outcome",
   "deal_owner",
   "section_break_jgpm",
   "probability",
@@ -165,6 +166,16 @@
    "label": "Status",
    "options": "CRM Deal Status",
    "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "default": "In progress",
+   "description": "Won and Lost close the card; the stage stays where it was (standard CRM).",
+   "fieldname": "outcome",
+   "fieldtype": "Select",
+   "in_standard_filter": 0,
+   "label": "Card status",
+   "options": "In progress\nWon\nLost",
    "search_index": 1
   },
   {
@@ -566,7 +577,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-10-28 23:00:00.000000",
+ "modified": "2026-11-02 19:00:00.000000",
  "modified_by": "Administrator",
  "module": "FCRM",
  "name": "CRM Deal",

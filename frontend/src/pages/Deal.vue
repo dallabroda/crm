@@ -39,6 +39,38 @@
         iconLeft="lucide-arrow-right-left"
         @click="showChangePipelineModal = true"
       />
+      <!-- Status do card (credtech#315): em andamento, ganho ou perdido, separado da etapa -->
+      <template v-if="doc.name && doc.outcome">
+        <template v-if="doc.outcome === 'In progress'">
+          <Button
+            :label="__('Won')"
+            theme="green"
+            variant="subtle"
+            iconLeft="lucide-thumbs-up"
+            @click="setOutcome('Won')"
+          />
+          <Button
+            :label="__('Lost')"
+            theme="red"
+            variant="subtle"
+            iconLeft="lucide-thumbs-down"
+            @click="setOutcome('Lost')"
+          />
+        </template>
+        <template v-else>
+          <Badge
+            :label="doc.outcome === 'Won' ? __('Won') : __('Lost')"
+            :theme="doc.outcome === 'Won' ? 'green' : 'red'"
+            variant="subtle"
+            size="lg"
+          />
+          <Button
+            :label="__('Reopen')"
+            iconLeft="lucide-rotate-ccw"
+            @click="setOutcome('In progress')"
+          />
+        </template>
+      </template>
       <Dropdown v-if="doc && document.statuses" :options="statuses" align="end">
         <template #default="{ open }">
           <Button
@@ -1375,6 +1407,33 @@ function onPipelineChanged() {
 }
 
 const showLostReasonModal = ref(false)
+
+// Ganho / Perdido / Reabrir (credtech#315). Perdido pede o motivo na janela de motivo de perda do CRM.
+function setOutcome(value) {
+  document.doc.outcome = value
+  if (value === 'Lost') {
+    showLostReasonModal.value = true
+    return
+  }
+  document.save.submit(null, {
+    onSuccess: () => {
+      sections.reload()
+      document.reload?.()
+    },
+  })
+}
+
+// Janela de motivo fechada sem salvar: o card continua como estava
+watch(showLostReasonModal, (open) => {
+  if (
+    !open &&
+    document.doc?.outcome === 'Lost' &&
+    document.originalDoc?.outcome !== 'Lost' &&
+    !document.doc?.lost_reason
+  ) {
+    document.doc.outcome = document.originalDoc?.outcome || 'In progress'
+  }
+})
 
 function setLostReason() {
   if (

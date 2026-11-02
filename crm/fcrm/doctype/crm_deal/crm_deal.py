@@ -5,7 +5,7 @@ import frappe
 from frappe import _
 from frappe.desk.form.assign_to import _add as assign
 from frappe.model.document import Document
-from frappe.utils import flt
+from frappe.utils import flt, nowdate
 
 from crm.api.exchange_rate import get_exchange_rate
 from crm.fcrm.doctype.crm_pipeline.crm_pipeline import get_first_stage
@@ -115,6 +115,7 @@ class CRMDeal(Document):
 			if frappe.db.get_value("CRM Deal Status", self.status, "type") == "Won":
 				self.closed_date = frappe.utils.nowdate()
 		self.validate_forecasting_fields()
+		self.validate_outcome()
 		self.validate_lost_reason()
 		self.update_exchange_rate()
 		if getattr(self, "titles", None):
@@ -341,11 +342,61 @@ class CRMDeal(Document):
 			if not self.expected_closure_date:
 				frappe.throw(_("Expected closure date is required."), frappe.MandatoryError)
 
+	def validate_outcome(self):
+		"""Card status (credtech#315): In progress, Won or Lost, separate from the stage, as in the mainstream CRMs.
+		A stage of type Won/Lost (older funnels) also closes the card. Won and Lost record the close date; Lost
+		needs the reason; reopening clears both."""
+		stage_type = frappe.db.get_value("CRM Deal Status", self.status, "type") if self.status else None
+		if (
+			stage_type in ("Won", "Lost")
+			and (self.is_new() or self.has_value_changed("status"))
+			and not (not self.is_new() and self.has_value_changed("outcome"))
+		):
+			self.outcome = stage_type
+		elif stage_type not in ("Won", "Lost") and not self.is_new() and self.has_value_changed("status"):
+			# Older funnels: leaving a Won/Lost stage for an open one reopens the card, unless the outcome was chosen
+			before = self.get_doc_before_save()
+			before_type = (
+				frappe.db.get_value("CRM Deal Status", before.status, "type") if before and before.status else None
+			)
+			if before_type in ("Won", "Lost") and not self.has_value_changed("outcome"):
+				self.outcome = "In progress"
+		if self.outcome not in ("In progress", "Won", "Lost"):
+			self.outcome = "In progress"
+		if self.is_new() or not self.has_value_changed("outcome"):
+			return
+		previous = (self.get_doc_before_save() or frappe._dict()).get("outcome") or "In progress"
+		if self.outcome in ("Won", "Lost"):
+			self.closed_date = self.closed_date or nowdate()
+		else:
+			self.closed_date = None
+			if stage_type != "Lost":
+				self.lost_reason = None
+				self.lost_notes = None
+		self.flags.outcome_change = (previous, self.outcome)
+
+	def on_update(self):
+		change = self.flags.pop("outcome_change", None) if self.flags else None
+		if not change:
+			return
+		if change[1] == "Won":
+			text = _("Card marked as won.")
+		elif change[1] == "Lost":
+			reason = self.lost_reason or ""
+			if self.lost_reason == "Other" and self.lost_notes:
+				reason = self.lost_notes
+			text = _("Card marked as lost: {0}").format(reason) if reason else _("Card marked as lost.")
+		else:
+			text = _("Card reopened.")
+		self.add_comment("Info", text)
+
 	def validate_lost_reason(self):
 		"""
-		Validate the lost reason if the status is set to "Lost".
+		Validate the lost reason if the status is set to "Lost", or the card is marked as lost.
 		"""
-		if self.status and frappe.get_cached_value("CRM Deal Status", self.status, "type") == "Lost":
+		if (self.status and frappe.get_cached_value("CRM Deal Status", self.status, "type") == "Lost") or (
+			self.get("outcome") == "Lost"
+		):
 			if not self.lost_reason:
 				frappe.throw(_("Please specify a reason for losing the deal."), frappe.ValidationError)
 			elif self.lost_reason == "Other" and not self.lost_notes:

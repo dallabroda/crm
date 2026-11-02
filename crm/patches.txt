@@ -51,3 +51,4 @@ crm.patches.credhub.contact_single_name
 crm.patches.credhub.card_name
 crm.patches.credhub.telephony_extensions
 crm.patches.credhub.deal_title_cedente
+crm.patches.credhub.deal_outcome

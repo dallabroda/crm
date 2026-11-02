@@ -8,6 +8,15 @@
         v-if="dealsListView?.customListActions"
         :actions="dealsListView.customListActions"
       />
+      <!-- Status do card (credtech#315): por padrão o funil mostra só os em andamento -->
+      <Dropdown :options="outcomeOptions" align="end">
+        <template #default="{ open }">
+          <Button
+            :label="outcomeLabel"
+            :iconRight="open ? 'lucide-chevron-up' : 'lucide-chevron-down'"
+          />
+        </template>
+      </Dropdown>
       <!-- Só no funil de Cobrança (credtech#315): importar títulos vencidos por planilha -->
       <CollectionImport v-if="pipelineName" :key="pipelineName" :pipeline="pipelineName" />
       <Button
@@ -20,7 +29,7 @@
   </LayoutHeader>
   <ViewControls
     v-if="pipelinesReady"
-    :key="pipelineName"
+    :key="`${pipelineName}-${outcome}`"
     ref="viewControls"
     v-model="deals"
     v-model:loadMore="loadMore"
@@ -36,7 +45,7 @@
   />
   <KanbanView
     v-if="pipelinesReady && route.params.viewType == 'kanban'"
-    :key="pipelineName"
+    :key="`${pipelineName}-${outcome}`"
     v-model="deals"
     :options="{
       getRoute: (row) => getRoute(row.name),
@@ -303,9 +312,38 @@ const pipeline = computed(
 const pipelineName = computed(() => pipeline.value?.name || '')
 const pipelinesReady = computed(() => pipelinesLoaded.value)
 
-const pipelineFilters = computed(() =>
-  pipelineName.value ? { pipeline: pipelineName.value } : {},
+// Status do card no endereço (?outcome=won|lost|all); sem ele, só os em andamento (padrão de CRM)
+const OUTCOMES = { in_progress: 'In progress', won: 'Won', lost: 'Lost' }
+const outcome = computed(() =>
+  route.query.outcome === 'all' || OUTCOMES[route.query.outcome]
+    ? route.query.outcome
+    : 'in_progress',
 )
+const outcomeLabels = {
+  in_progress: __('In progress'),
+  won: __('Won'),
+  lost: __('Lost'),
+  all: __('All cards'),
+}
+const outcomeLabel = computed(() => outcomeLabels[outcome.value])
+const outcomeOptions = computed(() =>
+  Object.entries(outcomeLabels).map(([value, label]) => ({
+    label,
+    onClick: () =>
+      router.replace({
+        name: route.name,
+        params: route.params,
+        query: { ...route.query, outcome: value === 'in_progress' ? undefined : value },
+        hash: route.hash,
+      }),
+  })),
+)
+
+const pipelineFilters = computed(() => {
+  const filters = pipelineName.value ? { pipeline: pipelineName.value } : {}
+  if (OUTCOMES[outcome.value]) filters.outcome = OUTCOMES[outcome.value]
+  return filters
+})
 
 const pipelineColumns = computed(() =>
   (pipeline.value?.stages || []).map((stage) => ({
