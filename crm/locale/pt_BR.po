@@ -13922,3 +13922,315 @@ msgstr "Pacote mínimo salvo."
 
 msgid "Could not save the minimum package."
 msgstr "Não foi possível salvar o pacote mínimo."
+
+msgid "No email account connected"
+msgstr "Nenhuma conta de e-mail conectada"
+
+msgid "Connect an account to send and receive emails from the CRM."
+msgstr "Conecte uma conta para enviar e receber e-mails pelo CRM."
+
+msgid "No email templates yet"
+msgstr "Nenhum modelo de e-mail ainda"
+
+msgid "Create templates to reply faster and keep your messages consistent."
+msgstr "Crie modelos para responder mais rápido e manter o padrão das mensagens."
+
+msgid "No assignment rules yet"
+msgstr "Nenhuma regra de atribuição ainda"
+
+msgid "Create rules to share the cards among the team automatically."
+msgstr "Crie regras para distribuir os cards entre a equipe automaticamente."
+
+msgid "New rule"
+msgstr "Nova regra"
+
+msgid "No lead capture forms yet"
+msgstr "Nenhum formulário de captura ainda"
+
+msgid "Create forms to receive contacts from your website straight into the CRM."
+msgstr "Crie formulários para receber contatos do seu site direto no CRM."
+
+msgid "Create automations to do repetitive tasks without effort."
+msgstr "Crie automações para fazer tarefas repetidas sem esforço."
+
+msgid "New automation"
+msgstr "Nova automação"
+
+msgid "No SLA policies yet"
+msgstr "Nenhuma política de SLA ainda"
+
+msgid "Create policies to set response and resolution deadlines."
+msgstr "Crie políticas para definir prazos de resposta e de resolução."
+
+msgid "New policy"
+msgstr "Nova política"
+
+msgid "Create a key to connect other systems to the CRM."
+msgstr "Crie uma chave para integrar outros sistemas ao CRM."
+
+msgid "Search..."
+msgstr "Buscar..."
+
+msgid "Title not found on this card."
+msgstr "Título não encontrado neste card."
+
+msgid "The payment must be greater than zero."
+msgstr "O pagamento deve ser maior que zero."
+
+msgid "The payment date cannot be in the future."
+msgstr "A data do pagamento não pode ser futura."
+
+msgid "Payment not found on this card."
+msgstr "Pagamento não encontrado neste card."
+
+msgid "The balance must be greater than zero. To settle the title, register a payment."
+msgstr "O saldo deve ser maior que zero. Para quitar o título, registre um pagamento."
+
+msgid "This title has an agreement in progress. Cancel the agreement before changing the balance."
+msgstr "Este título tem um acordo em andamento. Cancele o acordo antes de mudar o saldo."
+
+msgid "Balance of title {0} changed from {1} to {2}."
+msgstr "Saldo do título {0} alterado de {1} para {2}."
+
+msgid "The registry keeps the amount it received."
+msgstr "O cartório mantém o valor que recebeu."
+
+msgid "The agreement needs at least one installment."
+msgstr "O acordo precisa de pelo menos uma parcela."
+
+msgid "This title already has an agreement in progress. Cancel it before creating another."
+msgstr "Este título já tem um acordo em andamento. Cancele-o antes de criar outro."
+
+msgid "This title has no agreement in progress."
+msgstr "Este título não tem acordo em andamento."
+
+msgid "Title {0} is with the registry ({1}). Withdrawing or cancelling it is your decision and may have a cost."
+msgstr "O título {0} está no cartório ({1}). Retirar ou cancelar é decisão sua e pode ter custo."
+
+msgid "Installment not found on this title."
+msgstr "Parcela não encontrada neste título."
+
+msgid "Payment of {0} registered on title {1}. Balance: {2}."
+msgstr "Pagamento de {0} registrado no título {1}. Saldo: {2}."
+
+msgid "Payment of {0} reversed on title {1}. Balance: {2}."
+msgstr "Pagamento de {0} estornado no título {1}. Saldo: {2}."
+
+msgid "Promise of payment cleared on title {0}."
+msgstr "Promessa de pagamento removida do título {0}."
+
+msgid "The promise date cannot be in the past."
+msgstr "A data da promessa não pode ser passada."
+
+msgid "The promised amount must be greater than zero."
+msgstr "O valor prometido deve ser maior que zero."
+
+msgid "Promise of {0} on {1} registered on title {2}."
+msgstr "Promessa de {0} para {1} registrada no título {2}."
+
+msgid "Every installment needs a due date."
+msgstr "Toda parcela precisa de data de vencimento."
+
+msgid "An installment cannot be due in the past."
+msgstr "Uma parcela não pode vencer no passado."
+
+msgid "Every installment must be greater than zero."
+msgstr "Toda parcela deve ser maior que zero."
+
+msgid "Agreement of {0} in {1} installment(s) created on title {2}: first due on {3}."
+msgstr "Acordo de {0} em {1} parcela(s) criado no título {2}: primeira em {3}."
+
+msgid "Agreement cancelled on title {0}."
+msgstr "Acordo cancelado no título {0}."
+
+msgid "The payment ({0}) is higher than the balance of the title ({1}). Adjust the balance first if it is wrong."
+msgstr "O pagamento ({0}) é maior que o saldo do título ({1}). Se o saldo estiver errado, ajuste-o primeiro."
+
+msgid "Reason: {0}"
+msgstr "Motivo: {0}"
+
+msgid "An agreement can have up to {0} installments."
+msgstr "Um acordo pode ter até {0} parcelas."
+
+msgid "The installments add up to {0} but the balance of the title is {1}. For a discount or interest, adjust the balance first."
+msgstr "As parcelas somam {0}, mas o saldo do título é {1}. Para desconto ou juros, ajuste o saldo primeiro."
+
+msgid "An agreement can have from 1 to {0} installments."
+msgstr "Um acordo pode ter de 1 a {0} parcelas."
+
+msgid "Installment {0} is already paid."
+msgstr "A parcela {0} já está paga."
+
+msgid "Original amount"
+msgstr "Valor original"
+
+msgid "Paid"
+msgstr "Pago"
+
+msgid "Balance"
+msgstr "Saldo"
+
+msgid "Payments"
+msgstr "Pagamentos"
+
+msgid "This title is fully paid."
+msgstr "Este título está totalmente pago."
+
+msgid "Paid on"
+msgstr "Pago em"
+
+msgid "PIX, boleto, bank transfer..."
+msgstr "PIX, boleto, transferência..."
+
+msgid "Register payment"
+msgstr "Registrar pagamento"
+
+msgid "Balance after"
+msgstr "Saldo depois"
+
+msgid "Registered by"
+msgstr "Registrado por"
+
+msgid "installment {0}"
+msgstr "parcela {0}"
+
+msgid "Reverse"
+msgstr "Estornar"
+
+msgid "No payment registered yet."
+msgstr "Nenhum pagamento registrado ainda."
+
+msgid "Promise of payment"
+msgstr "Promessa de pagamento"
+
+msgid "Promised for"
+msgstr "Prometido para"
+
+msgid "Promised amount (R$)"
+msgstr "Valor prometido (R$)"
+
+msgid "Save promise"
+msgstr "Salvar promessa"
+
+msgid "The promise of {0} was not kept."
+msgstr "A promessa de {0} não foi cumprida."
+
+msgid "Agreement"
+msgstr "Acordo"
+
+msgid "Due date"
+msgstr "Vencimento"
+
+msgid "Paid on {0}"
+msgstr "Pago em {0}"
+
+msgid "Overdue"
+msgstr "Vencida"
+
+msgid "Mark as paid"
+msgstr "Marcar como paga"
+
+msgid "Cancel agreement"
+msgstr "Cancelar acordo"
+
+msgid "Number of installments"
+msgstr "Número de parcelas"
+
+msgid "First due date"
+msgstr "Primeiro vencimento"
+
+msgid "Build schedule"
+msgstr "Montar cronograma"
+
+msgid "Installments: {0}. Balance: {1}."
+msgstr "Parcelas: {0}. Saldo: {1}."
+
+msgid "They must add up to the balance. For a discount or interest, adjust the balance first."
+msgstr "Devem somar o saldo. Para desconto ou juros, ajuste o saldo primeiro."
+
+msgid "Create agreement"
+msgstr "Criar acordo"
+
+msgid "Start over"
+msgstr "Recomeçar"
+
+msgid "Adjust balance"
+msgstr "Ajustar saldo"
+
+msgid "New balance (R$)"
+msgstr "Novo saldo (R$)"
+
+msgid "Interest until today, discount agreed..."
+msgstr "Juros até hoje, desconto combinado..."
+
+msgid "Save balance"
+msgstr "Salvar saldo"
+
+msgid "Negotiation of title {0}"
+msgstr "Negociação do título {0}"
+
+msgid "This title is with the registry ({0}). Withdrawing or cancelling it is your decision and may have a cost."
+msgstr "Este título está no cartório ({0}). Retirar ou cancelar é decisão sua e pode ter custo."
+
+msgid "Could not save."
+msgstr "Não foi possível salvar."
+
+msgid "Payment registered."
+msgstr "Pagamento registrado."
+
+msgid "Every title of this card is paid. Mark the card as Won when you are ready."
+msgstr "Todos os títulos deste card estão pagos. Marque o card como Ganho quando quiser."
+
+msgid "Installment {0} paid."
+msgstr "Parcela {0} paga."
+
+msgid "Reverse payment"
+msgstr "Estornar pagamento"
+
+msgid "The {0} of {1} goes back to the balance of the title."
+msgstr "O valor de {0} de {1} volta para o saldo do título."
+
+msgid "Payment reversed."
+msgstr "Pagamento estornado."
+
+msgid "Promise saved."
+msgstr "Promessa salva."
+
+msgid "Promise cleared."
+msgstr "Promessa removida."
+
+msgid "Balance updated."
+msgstr "Saldo atualizado."
+
+msgid "Could not build the schedule."
+msgstr "Não foi possível montar o cronograma."
+
+msgid "Agreement created."
+msgstr "Acordo criado."
+
+msgid "The open installments are removed. The ones already paid stay in the history."
+msgstr "As parcelas em aberto são removidas. As já pagas ficam no histórico."
+
+msgid "Agreement cancelled."
+msgstr "Acordo cancelado."
+
+msgid "Every title of this card is paid."
+msgstr "Todos os títulos deste card estão pagos."
+
+msgid "Mark card as Won"
+msgstr "Marcar card como Ganho"
+
+msgid "Paid {0}"
+msgstr "Pago {0}"
+
+msgid "Negotiate"
+msgstr "Negociar"
+
+msgid "Agreement broken"
+msgstr "Acordo quebrado"
+
+msgid "Promise broken"
+msgstr "Promessa quebrada"
+
+msgid "Promise {0}"
+msgstr "Promessa {0}"

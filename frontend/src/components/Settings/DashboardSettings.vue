@@ -1,104 +1,88 @@
 <template>
-  <div class="flex h-full flex-col gap-6 py-8 px-6 text-ink-gray-8">
-    <div class="flex justify-between px-2 text-ink-gray-8">
-      <div class="flex flex-col gap-1">
-        <h2 class="flex gap-2 text-2xl-semibold leading-none h-5">
-          {{ __('Dashboard') }}
-        </h2>
-        <p class="text-p-base text-ink-gray-6">
-          {{
-            __('Choose how the dashboard forecasts deals and shows currency.')
-          }}
-        </p>
-      </div>
-      <div class="flex item-center space-x-2 w-3/12 justify-end">
-        <Button
-          v-if="settings.isDirty"
-          :label="__('Update')"
-          variant="solid"
-          :loading="settings.loading"
-          @click="updateSettings"
-        />
-      </div>
-    </div>
+  <div class="flex h-full flex-col gap-6 text-ink-gray-8">
+    <SettingsPageHeader :title="__('Dashboard')">
+      <template #description>
+        {{ __('Choose how the dashboard forecasts deals and shows currency.') }}
+      </template>
+      <template #actions>
+        <template v-if="settings.isDirty">
+          <Button
+            v-if="settings.isDirty"
+            :label="__('Update')"
+            variant="solid"
+            :loading="settings.loading"
+            @click="updateSettings"
+          />
+        </template>
+      </template>
+    </SettingsPageHeader>
 
-    <div class="flex-1 flex flex-col overflow-y-auto">
-      <div class="flex items-center justify-between py-3 px-2">
-        <div class="flex flex-col">
-          <div class="text-p-base-medium text-ink-gray-7 truncate">
-            {{ __('Enable Forecasting') }}
-          </div>
-          <div class="text-p-sm text-ink-gray-5 truncate">
-            {{
-              __(
-                'Makes "Expected Closure Date" and "Deal Value" mandatory for deal value forecasting',
-              )
-            }}
-          </div>
+    <div class="flex flex-1 flex-col gap-6 overflow-y-auto">
+      <SettingsRow>
+        <template #label>
+          {{ __('Enable Forecasting') }}
+        </template>
+        <template #description>
+          {{
+            __(
+              'Makes "Expected Closure Date" and "Deal Value" mandatory for deal value forecasting',
+            )
+          }}
+        </template>
+        <Switch v-model="settings.doc.enable_forecasting" size="sm" />
+      </SettingsRow>
+      <SettingsDivider />
+      <SettingsRow>
+        <template #label>
+          {{ __('Dashboard Currency') }}
+        </template>
+        <template #description>
+          {{
+            __(
+              "Currency for dashboard cards and charts. Can't be changed once set.",
+            )
+          }}
+        </template>
+        <div v-if="settings.doc?.currency" class="text-base text-ink-gray-8">
+          {{ settings.doc.currency }}
         </div>
-        <div>
-          <Switch v-model="settings.doc.enable_forecasting" size="sm" />
-        </div>
-      </div>
-      <div class="h-px border-t mx-2 border-outline-elevation-2" />
-      <div class="flex items-center justify-between gap-8 py-3 px-2">
-        <div class="flex flex-col">
-          <div class="text-p-base-medium text-ink-gray-7 truncate">
-            {{ __('Dashboard Currency') }}
-          </div>
-          <div class="text-p-sm text-ink-gray-5">
-            {{
-              __(
-                "Currency for dashboard cards and charts. Can't be changed once set.",
-              )
-            }}
-          </div>
-        </div>
-        <div>
-          <div v-if="settings.doc?.currency" class="text-base text-ink-gray-8">
-            {{ settings.doc.currency }}
-          </div>
-          <Link
-            v-else
-            class="form-control flex-1 truncate w-40"
-            :value="settings.doc?.currency"
-            doctype="Currency"
-            :placeholder="__('Select Currency')"
-            placement="bottom-end"
-            @change="(v) => setCurrency(v)"
-          />
-        </div>
-      </div>
-      <div class="h-px border-t mx-2 border-outline-elevation-2" />
-      <div class="flex items-center justify-between gap-8 py-3 px-2">
-        <div class="flex flex-col">
-          <div class="text-p-base-medium text-ink-gray-7 truncate">
-            {{ __('Exchange Rate Provider') }}
-          </div>
-          <div class="text-p-sm text-ink-gray-5">
-            {{ __('Configure the exchange rate provider for your CRM') }}
-          </div>
-        </div>
-        <div class="flex items-center gap-2">
-          <FormControl
-            v-model="settings.doc.service_provider"
-            type="select"
-            class="w-44"
-            :options="[
-              { label: 'Frankfurter', value: 'frankfurter.app' },
-              {
-                label: 'Fawaz Ahmed Exchange API',
-                value: 'fawazahmed-exchange-api',
-              },
-              { label: 'Exchangerate Host', value: 'exchangerate.host' },
-              { label: 'Exchangerate API', value: 'exchangerate-api' },
-            ]"
-            :placeholder="__('Select Provider')"
-            :disabled="!settings.doc?.currency"
-            @update:modelValue="() => (settings.doc.access_key = '')"
-          />
-        </div>
-      </div>
+        <Link
+          v-else
+          class="form-control flex-1 truncate w-40"
+          :value="settings.doc?.currency"
+          doctype="Currency"
+          :placeholder="__('Select Currency')"
+          placement="bottom-end"
+          @change="(v) => setCurrency(v)"
+        />
+      </SettingsRow>
+      <SettingsDivider />
+      <SettingsRow>
+        <template #label>
+          {{ __('Exchange Rate Provider') }}
+        </template>
+        <template #description>
+          {{ __('Configure the exchange rate provider for your CRM') }}
+        </template>
+        <FormControl
+          v-model="settings.doc.service_provider"
+          type="select"
+          variant="outline"
+          class="w-44"
+          :options="[
+            { label: 'Frankfurter', value: 'frankfurter.app' },
+            {
+              label: 'Fawaz Ahmed Exchange API',
+              value: 'fawazahmed-exchange-api',
+            },
+            { label: 'Exchangerate Host', value: 'exchangerate.host' },
+            { label: 'Exchangerate API', value: 'exchangerate-api' },
+          ]"
+          :placeholder="__('Select Provider')"
+          :disabled="!settings.doc?.currency"
+          @update:modelValue="() => (settings.doc.access_key = '')"
+        />
+      </SettingsRow>
       <div
         v-if="requiresAccessKey"
         class="h-px border-t mx-2 border-outline-elevation-2"
@@ -146,6 +130,9 @@
   </div>
 </template>
 <script setup>
+import SettingsRow from '@/components/Settings/SettingsRow.vue'
+import SettingsDivider from '@/components/Settings/SettingsDivider.vue'
+import SettingsPageHeader from '@/components/Settings/SettingsPageHeader.vue'
 import { getSettings } from '@/stores/settings'
 import { globalStore } from '@/stores/global'
 import { useBroadcast } from '@/composables/useBroadcast'

@@ -112,6 +112,7 @@
           v-if="activeTab === 'titles'"
           :deal="doc"
           @reload="reloadResources"
+          @setOutcome="setOutcome"
         />
         <OrganizationCreditDossie
           v-else-if="activeTab === 'credit'"
@@ -1509,6 +1510,8 @@ function onEnriched() {
 }
 
 function reloadResources(data) {
+  // Pagamentos, promessa e acordo mudam o card no servidor (credtech#315)
+  if (data?.reloadDoc) document.reload?.()
   if (Object.hasOwn(data ?? {}, 'deal_owner')) {
     assignees.reload()
   }

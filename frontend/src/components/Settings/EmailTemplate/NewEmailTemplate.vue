@@ -1,8 +1,11 @@
 <template>
-  <div class="flex h-full flex-col gap-6 p-8 text-ink-gray-8">
-    <!-- Header -->
-    <div class="flex justify-between">
-      <div class="flex gap-1 -ml-4 w-9/12">
+  <div class="flex h-full flex-col gap-6 text-ink-gray-8">
+    <SettingsPageHeader
+      :title="
+        templateData?.name ? __('Duplicate Template') : __('New Template')
+      "
+    >
+      <template #title>
         <Button
           variant="ghost"
           icon-left="lucide-chevron-left"
@@ -13,8 +16,8 @@
           class="cursor-pointer hover:bg-transparent focus:bg-transparent focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:none active:bg-transparent active:outline-none active:ring-0 active:ring-offset-0 active:text-ink-gray-5 text-2xl-semibold hover:opacity-70 !pr-0 !max-w-96 !justify-start"
           @click="() => emit('updateStep', 'template-list')"
         />
-      </div>
-      <div class="flex item-center space-x-4 w-3/12 justify-end">
+      </template>
+      <template #actions>
         <div class="flex items-center space-x-2 h-7">
           <Switch v-model="template.enabled" size="sm" />
           <span class="text-sm text-ink-gray-7">{{ __('Enabled') }}</span>
@@ -25,8 +28,8 @@
           variant="solid"
           @click="createTemplate"
         />
-      </div>
-    </div>
+      </template>
+    </SettingsPageHeader>
 
     <!-- Fields -->
     <div class="flex flex-1 flex-col gap-4 overflow-y-auto">
@@ -119,6 +122,7 @@
   </div>
 </template>
 <script setup>
+import SettingsPageHeader from '@/components/Settings/SettingsPageHeader.vue'
 import { useBroadcast } from '@/composables/useBroadcast'
 import RichTextField from '@/components/RichTextField.vue'
 import { FormControl, Switch, toast } from 'frappe-ui'

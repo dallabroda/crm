@@ -6,6 +6,7 @@
   >
     <template #trigger="{ open, setOpen }">
       <Button
+        variant="outline"
         :label="
           hideLabel
             ? groupByValue?.label

@@ -1,11 +1,6 @@
 <template>
   <div class="flex flex-col h-full gap-4">
-    <!-- title and desc -->
-    <div role="heading" aria-level="1" class="flex justify-between gap-1">
-      <h2 class="flex gap-2 text-2xl-semibold leading-none h-5 text-ink-gray-8">
-        {{ __('Edit Email') }}
-      </h2>
-    </div>
+    <SettingsPageHeader :title="__('Edit Email')"> </SettingsPageHeader>
     <div class="w-fit">
       <EmailProviderIcon
         :logo="emailIcon[accountData.service]"
@@ -89,6 +84,7 @@
 </template>
 
 <script setup>
+import SettingsPageHeader from '@/components/Settings/SettingsPageHeader.vue'
 import { computed, reactive, ref } from 'vue'
 import { call, toast } from 'frappe-ui'
 import EmailProviderIcon from './EmailProviderIcon.vue'

@@ -1,30 +1,22 @@
 <template>
-  <div class="flex h-full flex-col gap-6 p-6 text-ink-gray-8">
-    <!-- Header -->
-    <div class="flex justify-between px-2 pt-2">
-      <div class="flex flex-col gap-1 w-9/12">
-        <div class="flex gap-2 items-center">
-          <h2 class="flex text-2xl-semibold leading-none h-5">
-            {{ __('Lead capture forms') }}
-          </h2>
-        </div>
-        <p class="text-p-base text-ink-gray-6">
-          {{
-            __(
-              'Capture leads and deals from public forms you embed on your website.',
-            )
-          }}
-        </p>
-      </div>
-      <div class="flex item-center space-x-2 w-3/12 justify-end">
+  <div class="flex h-full flex-col gap-6 text-ink-gray-8">
+    <SettingsPageHeader :title="__('Lead capture forms')">
+      <template #description>
+        {{
+          __(
+            'Capture leads and deals from public forms you embed on your website.',
+          )
+        }}
+      </template>
+      <template #actions>
         <Button
-          :label="__('New')"
+          :label="__('New form')"
           icon-left="lucide-plus"
           variant="solid"
           @click="openCreate"
         />
-      </div>
-    </div>
+      </template>
+    </SettingsPageHeader>
 
     <!-- List -->
     <div class="flex h-full flex-col overflow-y-auto">
@@ -34,28 +26,38 @@
       >
         <LoadingIndicator class="w-4" />
       </div>
-      <EmptyState
+      <SettingsEmptyState
         v-else-if="forms.data?.length === 0"
-        :title="__('No web forms yet')"
-        :description="__('Create one to start capturing leads.')"
-        :icon="h(LucideTextCursorInput)"
+        :icon="LucideTextCursorInput"
+        :title="__('No lead capture forms yet')"
+        :description="
+          __(
+            'Create forms to receive contacts from your website straight into the CRM.',
+          )
+        "
+        :action-label="__('New form')"
+        @action="openCreate"
       />
-      <div v-else class="w-full">
-        <div class="flex items-center p-2 text-sm text-ink-gray-5">
+      <div
+        v-else
+        class="w-full overflow-hidden rounded-lg border border-outline-gray-1"
+      >
+        <div
+          class="flex h-10 items-center gap-4 border-b border-outline-gray-1 bg-surface-gray-2 px-4 text-xs font-medium text-ink-gray-6"
+        >
           <div class="w-6/12">{{ __('Form') }}</div>
           <div class="w-3/12">{{ __('Maps to') }}</div>
           <div class="w-3/12">{{ __('Status') }}</div>
         </div>
-        <div class="h-px border-t mx-2 border-outline-elevation-2" />
         <template v-for="(form, i) in forms.data" :key="form.name">
           <div
-            class="flex w-full items-center rounded-4 px-2 py-3 hover:bg-surface-gray-2"
+            class="flex min-h-14 w-full items-center gap-4 px-4 py-2 hover:bg-surface-gray-2"
           >
             <div
               class="w-6/12 min-w-0 cursor-pointer"
               @click="$emit('open', form.name)"
             >
-              <div class="truncate text-base-medium text-ink-gray-7">
+              <div class="truncate text-base text-ink-gray-9">
                 {{ form.title }}
               </div>
               <div class="mt-0.5 truncate text-p-base text-ink-gray-5">
@@ -84,7 +86,10 @@
               </Dropdown>
             </div>
           </div>
-          <hr v-if="forms.data.length !== i + 1" class="mx-2" />
+          <div
+            v-if="forms.data.length !== i + 1"
+            class="h-px bg-outline-gray-1"
+          />
         </template>
       </div>
     </div>
@@ -138,7 +143,9 @@
 </template>
 
 <script setup>
-import EmptyState from '@/components/ListViews/EmptyState.vue'
+import LucideTextCursorInput from '~icons/lucide/text-cursor-input'
+import SettingsEmptyState from '@/components/Settings/SettingsEmptyState.vue'
+import SettingsPageHeader from '@/components/Settings/SettingsPageHeader.vue'
 import {
   Button,
   Badge,
@@ -152,8 +159,7 @@ import {
   toast,
 } from 'frappe-ui'
 import { useTelemetry } from '@framework/ui/telemetry'
-import LucideTextCursorInput from '~icons/lucide/text-cursor-input'
-import { ref, reactive, h } from 'vue'
+import { ref, reactive } from 'vue'
 import { ConfirmDelete, copyToClipboard } from '../../../utils'
 
 const emit = defineEmits(['open'])

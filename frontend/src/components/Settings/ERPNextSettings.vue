@@ -3,13 +3,6 @@
     :title="__('ERPNext Settings')"
     :description="__('Manage ERPNext integration settings.')"
   >
-    <template #title>
-      <div class="flex gap-2 items-center">
-        <h2 class="flex text-2xl-semibold leading-none h-5">
-          {{ __('ERPNext Settings') }}
-        </h2>
-      </div>
-    </template>
     <template #header-actions>
       <div
         v-if="

@@ -1,20 +1,15 @@
 <template>
-  <div class="flex h-full flex-col gap-6 p-6 text-ink-gray-8">
-    <div class="flex justify-between px-2 pt-2">
-      <div class="flex flex-col gap-1 w-9/12">
-        <h2 class="flex gap-2 text-2xl-semibold leading-none h-5">
-          {{ __('Users and Plan') }}
-        </h2>
-        <p class="text-p-base text-ink-gray-6">
-          {{
-            __(
-              'After the free trial, your plan includes {0} free user. Each extra user costs {1} per month, paid by card.',
-              [data?.free ?? 1, money(data?.price_per_user)],
-            )
-          }}
-        </p>
-      </div>
-    </div>
+  <div class="flex h-full flex-col gap-6 text-ink-gray-8">
+    <SettingsPageHeader :title="__('Users and Plan')">
+      <template #description>
+        {{
+          __(
+            'After the free trial, your plan includes {0} free user. Each extra user costs {1} per month, paid by card.',
+            [data?.free ?? 1, money(data?.price_per_user)],
+          )
+        }}
+      </template>
+    </SettingsPageHeader>
 
     <div v-if="!data" class="flex mt-28 justify-between w-full h-full">
       <Button
@@ -27,12 +22,12 @@
 
     <div
       v-else-if="data.unlimited"
-      class="mx-2 rounded border border-outline-gray-1 px-4 py-3 text-p-base text-ink-gray-7"
+      class="rounded-lg bg-surface-blue-2 px-3.5 py-2.5 text-base font-medium text-ink-blue-5"
     >
       {{ __('Your company has no user limit.') }}
     </div>
 
-    <div v-else class="flex flex-col gap-6 overflow-y-auto px-2">
+    <div v-else class="flex flex-col gap-6 overflow-y-auto">
       <!-- Usage and status -->
       <div class="flex flex-col gap-3 rounded border border-outline-gray-1 p-4">
         <div class="flex items-center justify-between gap-4">
@@ -277,6 +272,7 @@
 </template>
 
 <script setup>
+import SettingsPageHeader from '@/components/Settings/SettingsPageHeader.vue'
 import { usersStore } from '@/stores/users'
 import { formatDate } from '@/utils'
 import { formatCurrency } from '@/utils/numberFormat'
