@@ -6,7 +6,7 @@
         <div class="mb-5 flex items-center justify-between">
           <div>
             <Dialog.Title as-child>
-              <h3 class="text-3xl-semibold leading-6 text-ink-gray-9">
+              <h3 class="text-[20px] font-semibold leading-7 text-ink-gray-9">
                 {{ __('Call Details') }}
               </h3>
             </Dialog.Title>
@@ -116,7 +116,7 @@
               </div>
               <div
                 v-else-if="field.name == 'note'"
-                class="w-full cursor-pointer rounded-4 border px-2 pt-1.5 text-base text-ink-gray-7"
+                class="w-full cursor-pointer rounded-[var(--ct-radius-md)] border border-[var(--ct-border-soft)] px-2 pt-1.5 text-base text-ink-gray-9"
                 @click="() => showNote(field.value?.name)"
               >
                 <FadedScrollableDiv class="max-h-24 min-h-16 overflow-y-auto">
@@ -133,7 +133,7 @@
               </div>
               <div
                 v-else-if="field.name == 'task'"
-                class="w-full cursor-pointer rounded-4 border px-2 pt-1.5 text-base text-ink-gray-7"
+                class="w-full cursor-pointer rounded-[var(--ct-radius-md)] border border-[var(--ct-border-soft)] px-2 pt-1.5 text-base text-ink-gray-9"
                 @click="() => showTask(field.value?.name)"
               >
                 <FadedScrollableDiv class="max-h-24 min-h-16 overflow-y-auto">

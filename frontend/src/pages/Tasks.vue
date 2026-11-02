@@ -81,9 +81,11 @@
             :status="getRow(itemName, fieldName).label"
           />
         </div>
-        <div v-else-if="fieldName === 'priority'">
-          <TaskPriorityIcon :priority="getRow(itemName, fieldName).label" />
-        </div>
+        <!-- Figma "Tarefas · Kanban" (811:2): priority as a colored pill -->
+        <TaskPriorityBadge
+          v-else-if="fieldName === 'priority'"
+          :priority="getRow(itemName, fieldName).label"
+        />
         <div v-else-if="fieldName === 'assigned_to'">
           <UserAvatar
             v-if="getRow(itemName, fieldName).full_name"
@@ -94,7 +96,7 @@
         </div>
         <div
           v-if="['modified', 'creation'].includes(fieldName)"
-          class="truncate text-base"
+          class="truncate text-xs text-ink-gray-4"
         >
           <Tooltip :text="getRow(itemName, fieldName).label">
             <div>{{ getRow(itemName, fieldName).timeAgo }}</div>
@@ -113,9 +115,9 @@
           />
           <!-- eslint-enable vue/no-v-html -->
         </div>
-        <div v-else class="truncate text-base">
+        <div v-else-if="fieldName !== 'priority'" class="truncate text-base">
           {{
-            ['status', 'priority'].includes(fieldName)
+            fieldName === 'status'
               ? __(getRow(itemName, fieldName).label)
               : getRow(itemName, fieldName).label
           }}
@@ -125,24 +127,24 @@
     <template #actions="{ itemName }">
       <div class="flex gap-2 items-center justify-between">
         <div>
-          <Button
+          <!-- Figma: the linked record as a blue text link -->
+          <button
             v-if="getRow(itemName, 'reference_docname').label"
-            class="-ml-2"
-            variant="ghost"
-            size="sm"
-            :label="
-              getRow(itemName, 'reference_doctype').label == 'CRM Deal'
-                ? __('Deal')
-                : __('Lead')
-            "
-            :iconRight="ArrowUpRightIcon"
+            type="button"
+            class="rounded-[var(--ct-radius-sm)] text-base font-medium text-[color:var(--ct-text-accent)] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-outline-gray-3"
             @click.stop="
               redirect(
                 getRow(itemName, 'reference_doctype').label,
                 getRow(itemName, 'reference_docname').label,
               )
             "
-          />
+          >
+            {{
+              getRow(itemName, 'reference_doctype').label == 'CRM Deal'
+                ? __('Deal')
+                : __('Lead')
+            }}
+          </button>
         </div>
         <Dropdown
           class="flex items-center gap-2"
@@ -209,7 +211,7 @@
 import UserAvatar from '@/components/UserAvatar.vue'
 import ViewBreadcrumbs from '@/components/ViewBreadcrumbs.vue'
 import CustomActions from '@/components/CustomActions.vue'
-import ArrowUpRightIcon from '@/components/Icons/ArrowUpRightIcon.vue'
+import TaskPriorityBadge from '@/components/TaskPriorityBadge.vue'
 import TaskStatusIcon from '@/components/Icons/TaskStatusIcon.vue'
 import TaskPriorityIcon from '@/components/Icons/TaskPriorityIcon.vue'
 import TaskIcon from '@/components/Icons/TaskIcon.vue'

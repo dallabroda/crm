@@ -4,7 +4,7 @@
       <div class="px-4 pb-6 pt-5 sm:px-6">
         <div class="mb-4 flex items-start justify-between gap-4">
           <Dialog.Title as-child>
-            <h3 class="text-3xl-semibold leading-8 text-ink-gray-9">
+            <h3 class="text-[20px] font-semibold leading-7 text-ink-gray-9">
               {{ doc.title }}
             </h3>
           </Dialog.Title>
@@ -32,9 +32,9 @@
             </Dialog.Close>
           </div>
         </div>
-        <div v-if="doc.owner" class="mb-5 flex items-center gap-2 text-p-sm">
+        <div v-if="doc.owner" class="mb-5 flex items-center gap-2 text-p-base">
           <UserAvatar :user="doc.owner" size="xs" />
-          <span class="text-ink-gray-8">
+          <span class="text-ink-gray-9">
             {{ getUser(doc.owner).full_name }}
           </span>
           <span class="text-ink-gray-5">·</span>
@@ -56,7 +56,7 @@
         <!-- eslint-disable vue/no-v-html -->
         <div
           v-if="doc.content"
-          class="prose-f max-h-[60vh] overflow-y-auto text-ink-gray-8 [&>*:first-child]:mt-0"
+          class="prose-f max-h-[60vh] overflow-y-auto text-ink-gray-9 [&>*:first-child]:mt-0"
           v-html="sanitizeHTML(doc.content)"
         />
         <!-- eslint-enable vue/no-v-html -->

@@ -21,7 +21,7 @@
       </div>
     </div>
     <div
-      class="flex flex-col gap-2 border cursor-pointer border-outline-elevation-2 rounded-5 bg-surface-elevation-1 px-3 py-2.5 text-ink-gray-9"
+      class="flex flex-col gap-2 border cursor-pointer border-[var(--ct-border-soft)] rounded-[var(--ct-radius-md)] bg-surface-elevation-1 px-3 py-2.5 text-ink-gray-9 transition-colors hover:bg-[var(--ct-bg-soft)]"
       @click="showCallLogDetailModal = true"
     >
       <div class="flex items-center justify-between">
