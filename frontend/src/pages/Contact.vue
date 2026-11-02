@@ -1,11 +1,21 @@
 <template>
   <LayoutHeader v-if="contact.doc">
+    <!-- Figma "Contatos · Detalhe" (805:2): "Voltar" + contact name on the
+         left, "Novo card" as the primary action on the right -->
     <template #left-header>
-      <Breadcrumbs :items="breadcrumbs">
-        <template #prefix="{ item }">
-          <Icon v-if="item.icon" :icon="item.icon" class="mr-2 h-4" />
-        </template>
-      </Breadcrumbs>
+      <router-link
+        :to="backRoute"
+        class="flex h-8 shrink-0 items-center gap-1 rounded-[var(--ct-radius-md)] pl-1 pr-2 text-base font-medium text-ink-gray-6 transition-colors hover:bg-[var(--ct-bg-soft)] hover:text-ink-gray-9 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-outline-gray-3"
+      >
+        <span class="lucide-chevron-left size-4" aria-hidden="true" />
+        {{ __('Back') }}
+      </router-link>
+      <h1
+        class="truncate text-[20px] font-semibold leading-7 text-ink-gray-9"
+        :title="contact.doc.full_name || title"
+      >
+        {{ contact.doc.full_name || title }}
+      </h1>
     </template>
     <template #right-header>
       <CustomActions
@@ -13,6 +23,7 @@
         :actions="contact._actions"
       />
       <Button
+        variant="solid"
         :label="__('New Deal')"
         iconLeft="lucide-plus"
         @click="openDealModal"
@@ -23,20 +34,24 @@
     <Resizer
       v-if="contact.doc"
       :parent="$refs.parentRef"
-      class="flex h-full flex-col overflow-hidden border-r"
+      class="flex h-full flex-col overflow-hidden border-r border-[var(--ct-border-soft)]"
     >
-      <div class="border-b">
+      <div class="border-b border-[var(--ct-border-soft)]">
         <FileUploader
           :validateFile="validateIsImageFile"
           @success="changeContactImage"
         >
           <template #default="{ openFileSelector, error }">
-            <div class="flex flex-col items-start justify-start gap-4 p-5">
-              <div class="flex gap-4 items-center">
-                <div class="group relative h-15.5 w-15.5">
+            <!-- Figma side panel header: 62px avatar, 20 Semi Bold name,
+                 then the actions as 32px buttons -->
+            <div
+              class="flex flex-col items-start justify-start gap-2 px-6 py-5"
+            >
+              <div class="flex w-full min-w-0 items-center gap-4">
+                <div class="group relative h-15.5 w-15.5 shrink-0">
                   <Avatar
                     size="3xl"
-                    class="h-15.5 w-15.5"
+                    class="h-15.5 w-15.5 [&>div]:text-[20px] [&>div]:font-semibold"
                     :label="contact.doc.full_name"
                     :image="contact.doc.image"
                   />
@@ -76,7 +91,7 @@
                   </component>
                 </div>
                 <div class="flex flex-col gap-2 truncate text-ink-gray-9">
-                  <div class="truncate text-3xl-medium">
+                  <div class="truncate text-[20px] font-semibold leading-7">
                     <span v-if="contact.doc.salutation">
                       {{ contact.doc.salutation + ' ' }}
                     </span>
@@ -84,7 +99,7 @@
                   </div>
                   <div
                     v-if="contact.doc.company_name"
-                    class="flex items-center gap-1.5 text-base text-ink-gray-8"
+                    class="flex items-center gap-1.5 text-base text-ink-gray-9"
                   >
                     <router-link
                       v-if="getOrganization(contact.doc.company_name)"
@@ -101,26 +116,29 @@
                   <ErrorMessage :message="__(error)" />
                 </div>
               </div>
-              <div class="flex gap-1.5">
+              <div class="flex gap-2">
                 <Button
                   v-if="callEnabled && contact.doc.mobile_no"
+                  size="md"
+                  variant="outline"
                   :label="__('Make Call')"
-                  size="sm"
                   :iconLeft="PhoneIcon"
                   @click="callEnabled && makeCall(contact.doc.mobile_no)"
                 />
                 <Button
                   v-if="contact.doc.mobile_no"
+                  size="md"
+                  variant="outline"
                   :label="__('WhatsApp')"
-                  size="sm"
                   :iconLeft="WhatsAppIcon"
                   @click="showWhatsApp = true"
                 />
                 <Button
                   v-if="canDelete"
+                  size="md"
                   :label="__('Delete')"
                   theme="red"
-                  size="sm"
+                  variant="subtle"
                   iconLeft="lucide-trash-2"
                   @click="deleteContact()"
                 />
@@ -145,18 +163,11 @@
       v-model="activeTab"
       as="div"
       :tabs="tabs"
-      class="flex flex-1 overflow-hidden flex-col [&_[role='tab']]:px-1 [&_[role='tab']]:shrink-0 [&_[role='tablist']]:px-5 [&_[role='tablist']::-webkit-scrollbar]:h-0 [&_[role='tablist']]:min-h-[45px] [&_[role='tablist']]:gap-[22px] [&>[role='tabpanel']:not([hidden])]:flex [&>[role='tabpanel']:not([hidden])]:grow [&>[data-slot=tab-list]]:overflow-x-auto [&_[data-slot=tab-indicator]]:translate-y-0 [&>[data-slot=tab-panel]]:min-h-0 [&>[data-slot=tab-panel]]:flex-col [&>[data-slot=tab-panel]]:overflow-auto"
+      class="flex flex-1 overflow-hidden flex-col [&_[role='tab']]:px-1 [&_[role='tab']]:shrink-0 [&_[role='tablist']]:px-6 [&_[role='tablist']::-webkit-scrollbar]:h-0 [&_[role='tablist']]:min-h-[45px] [&_[role='tablist']]:gap-4 [&_[role='tablist']]:border-[var(--ct-border-soft)] [&>[role='tabpanel']:not([hidden])]:flex [&>[role='tabpanel']:not([hidden])]:grow [&>[data-slot=tab-list]]:overflow-x-auto [&_[data-slot=tab-indicator]]:translate-y-0 [&>[data-slot=tab-panel]]:min-h-0 [&>[data-slot=tab-panel]]:flex-col [&>[data-slot=tab-panel]]:overflow-auto"
     >
       <template #tab-label="{ tab }">{{ __(tab.label) }}</template>
       <template #tab-suffix="{ tab, active }">
-        <Badge
-          :class="[active ? 'bg-surface-gray-10' : 'bg-gray-600']"
-          variant="solid"
-          theme="gray"
-          size="sm"
-        >
-          {{ tab.count }}
-        </Badge>
+        <TabCounter :count="tab.count" :active="active" />
       </template>
       <template #tab-panel="{ tab }">
         <DealsListView
@@ -178,8 +189,17 @@
           v-if="tab.value !== 'notes' && !rows.length"
           :icon="tab.iconLeft"
           name="Deals"
+          :title="__('No deals found')"
           :description="__('Use New Deal to create a deal for this contact.')"
-        />
+        >
+          <Button
+            class="mt-2"
+            variant="solid"
+            :label="__('New Deal')"
+            iconLeft="lucide-plus"
+            @click="openDealModal"
+          />
+        </EmptyState>
       </template>
     </Tabs>
   </div>
@@ -212,17 +232,17 @@
 
 <script setup>
 import RecordNotes from '@/components/RecordNotes.vue'
-import NoteIcon from '@/components/Icons/NoteIcon.vue'
+import TabCounter from '@/components/TabCounter.vue'
+import HandshakeIcon from '~icons/lucide/handshake'
+import FileTextIcon from '~icons/lucide/file-text'
 import ErrorPage from '@/components/ErrorPage.vue'
 import Resizer from '@/components/Resizer.vue'
-import Icon from '@/components/Icon.vue'
 import SidePanelLayout from '@/components/SidePanelLayout.vue'
 import LayoutHeader from '@/components/LayoutHeader.vue'
 import PhoneIcon from '@/components/Icons/PhoneIcon.vue'
 import WhatsAppIcon from '@/components/Icons/WhatsAppIcon.vue'
 import SmartChatWhatsAppModal from '@/components/Modals/SmartChatWhatsAppModal.vue'
 import CameraIcon from '@/components/Icons/CameraIcon.vue'
-import DealsIcon from '@/components/Icons/DealsIcon.vue'
 import DealsListView from '@/components/ListViews/DealsListView.vue'
 import DealModal from '@/components/Modals/DealModal.vue'
 import CustomActions from '@/components/CustomActions.vue'
@@ -240,7 +260,6 @@ import { statusesStore } from '@/stores/statuses'
 import { callEnabled } from '@/composables/telephony'
 import { globalFormSections } from '@/utils/pipelines'
 import {
-  Breadcrumbs,
   Avatar,
   FileUploader,
   Tabs,
@@ -324,6 +343,10 @@ const title = computed(() => {
   return contact.doc?.[t] || props.contactId
 })
 
+const backRoute = computed(
+  () => breadcrumbs.value[breadcrumbs.value.length - 2].route,
+)
+
 usePageMeta(() => {
   return {
     title: title.value,
@@ -374,14 +397,14 @@ const tabs = [
   {
     value: 'deals',
     label: 'Deals',
-    iconLeft: DealsIcon,
+    iconLeft: HandshakeIcon,
     count: computed(() => deals.data?.length),
   },
   // the contact's own notes (credtech#214)
   {
     value: 'notes',
     label: 'Notes',
-    iconLeft: NoteIcon,
+    iconLeft: FileTextIcon,
     count: computed(() => notesCount.value),
   },
 ]

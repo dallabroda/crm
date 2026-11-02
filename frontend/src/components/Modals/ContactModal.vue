@@ -5,7 +5,7 @@
         <div class="mb-5 flex items-center justify-between">
           <div>
             <Dialog.Title as-child>
-              <h3 class="text-3xl-semibold leading-6 text-ink-gray-9">
+              <h3 class="text-[20px] font-semibold leading-7 text-ink-gray-9">
                 {{ __('New Contact') }}
               </h3>
             </Dialog.Title>

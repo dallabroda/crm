@@ -24,25 +24,27 @@
     }"
   />
   <div class="flex-1 overflow-y-auto">
+    <!-- Figma "Anotações · Lista" (808:2): 4 columns, 16px gaps, 24px sides;
+         cards with radius 12 and a soft border, no shadow -->
     <div
       v-if="notes.data?.data?.length"
-      class="grid grid-cols-1 gap-2 px-3 pb-2 sm:grid-cols-4 sm:gap-4 sm:px-5 sm:pb-3"
+      class="grid grid-cols-1 gap-2 px-3 pb-2 sm:grid-cols-4 sm:gap-4 sm:px-6 sm:pb-3"
     >
       <div
         v-for="note in notes.data.data"
         :key="note.name"
-        class="group flex h-56 cursor-pointer flex-col justify-between gap-2 rounded-6 border px-5 py-4 shadow-sm hover:bg-surface-sidebar"
+        class="group flex h-56 cursor-pointer flex-col justify-between gap-2 rounded-[var(--ct-radius-lg)] border border-[var(--ct-border-soft)] px-5 py-4 transition-colors hover:bg-[var(--ct-bg-soft)]"
         @click="openNote(note, { edit: () => editNote(note.name) })"
       >
         <div class="flex items-center justify-between gap-2">
           <div class="flex min-w-0 flex-col gap-1">
-            <div class="truncate text-lg-medium text-ink-gray-9">
+            <div class="truncate text-lg font-medium leading-6 text-ink-gray-9">
               {{ note.title }}
             </div>
             <router-link
               v-if="linkedRoute(note)"
               :to="linkedRoute(note)"
-              class="truncate text-sm text-ink-gray-5 hover:text-ink-gray-8 hover:underline"
+              class="truncate text-base text-ink-gray-6 hover:text-ink-gray-9 hover:underline"
               @click.stop
             >
               {{ linkedLabel(note) }}
@@ -79,19 +81,19 @@
         <!-- eslint-disable vue/no-v-html -->
         <div
           v-if="note.content"
-          class="prose-f prose-sm text-p-sm max-w-none text-ink-gray-5 flex-1 overflow-hidden prose-headings:my-1 prose-headings:text-p-sm prose-headings:font-medium prose-headings:text-ink-gray-7 [&>*:first-child]:mt-0"
+          class="prose-f prose-sm text-p-base max-w-none text-ink-gray-6 flex-1 overflow-hidden prose-headings:my-1 prose-headings:text-p-base prose-headings:font-medium prose-headings:text-ink-gray-7 [&>*:first-child]:mt-0"
           v-html="sanitizeHTML(note.content)"
         />
         <!-- eslint-enable vue/no-v-html -->
         <div class="mt-2 flex items-center justify-between gap-2">
           <div class="flex items-center gap-2">
             <UserAvatar :user="note.owner" size="xs" />
-            <div class="text-sm text-ink-gray-8">
+            <div class="text-base text-ink-gray-9">
               {{ getUser(note.owner).full_name }}
             </div>
           </div>
           <Tooltip :text="formatDate(note.modified)">
-            <div class="text-sm text-ink-gray-7">
+            <div class="text-base text-ink-gray-9">
               {{ __(timeAgo(note.modified)) }}
             </div>
           </Tooltip>
@@ -102,7 +104,7 @@
   <ListFooter
     v-if="notes.data?.data?.length"
     v-model="notes.data.page_length_count"
-    class="border-t px-3 py-2 sm:px-5"
+    class="border-t border-[var(--ct-border-soft)] px-3 py-2 sm:px-6"
     :options="{
       rowCount: notes.data.row_count,
       totalCount: notes.data.total_count,

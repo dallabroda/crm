@@ -1,13 +1,13 @@
 <template>
   <div
-    class="activity group flex h-48 cursor-pointer flex-col justify-between gap-2 rounded-5 bg-surface-gray-1 px-4 py-3 hover:bg-surface-gray-2"
+    class="activity group flex h-48 cursor-pointer flex-col justify-between gap-2 rounded-[var(--ct-radius-md)] bg-[var(--ct-bg-soft)] p-4 transition-colors hover:bg-[var(--ct-bg-panel)]"
   >
     <div class="flex items-center justify-between">
       <div class="flex min-w-0 items-center gap-1.5">
         <Tooltip v-if="note.pinned" :text="pinnedText">
           <span class="lucide-pin size-3.5 shrink-0 text-ink-gray-5" />
         </Tooltip>
-        <div class="truncate text-lg-medium text-ink-gray-8">
+        <div class="truncate text-lg font-medium leading-6 text-ink-gray-9">
           {{ note.title }}
         </div>
       </div>
@@ -40,7 +40,7 @@
         <Button
           icon="lucide-more-horizontal"
           variant="ghost"
-          class="!h-6 !w-6 hover:bg-surface-gray-2"
+          class="!h-6 !w-6 hover:bg-surface-gray-4"
           @click.stop.prevent
         />
       </Dropdown>
@@ -49,7 +49,7 @@
     <!-- eslint-disable vue/no-v-html -->
     <div
       v-if="note.content"
-      class="prose-f prose-sm text-p-sm max-w-none text-ink-gray-5 flex-1 overflow-hidden prose-headings:my-1 prose-headings:text-p-sm prose-headings:font-medium prose-headings:text-ink-gray-7 [&>*:first-child]:mt-0"
+      class="prose-f prose-sm text-p-base max-w-none text-ink-gray-6 flex-1 overflow-hidden prose-headings:my-1 prose-headings:text-p-base prose-headings:font-medium prose-headings:text-ink-gray-7 [&>*:first-child]:mt-0"
       v-html="sanitizeHTML(note.content, { ADD_ATTR: ['target'] })"
     />
     <!-- eslint-enable vue/no-v-html -->
@@ -57,7 +57,7 @@
       <div class="flex items-center gap-2 truncate">
         <UserAvatar :user="note.owner" size="xs" />
         <div
-          class="truncate text-sm text-ink-gray-8"
+          class="truncate text-base text-ink-gray-9"
           :title="getUser(note.owner).full_name"
         >
           {{ getUser(note.owner).full_name }}
@@ -65,7 +65,7 @@
       </div>
       <TimelineTimestamp
         :date="note.modified"
-        class-name="truncate text-sm text-ink-gray-7"
+        class-name="truncate text-base text-ink-gray-9"
       />
     </div>
   </div>
