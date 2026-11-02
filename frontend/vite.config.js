@@ -4,11 +4,14 @@ import vueJsx from '@vitejs/plugin-vue-jsx'
 import path from 'path'
 import { VitePWA } from 'vite-plugin-pwa'
 import frappeui from 'frappe-ui/vite'
+import credtechFrappeUiTheme from './src/theme/frappeUiTheme.js'
 
 // https://vitejs.dev/config/
 export default defineConfig(() => {
   const config = {
     plugins: [
+      // CredTech look for frappe-ui components; must run before vue()
+      credtechFrappeUiTheme(),
       vue(),
       vueJsx(),
       VitePWA({
