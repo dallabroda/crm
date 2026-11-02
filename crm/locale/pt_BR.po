@@ -13694,3 +13694,21 @@ msgstr "Testar login"
 
 msgid "Only signs in to Serasa. It makes no query and costs nothing."
 msgstr "Só entra no Serasa. Não faz consulta e não custa nada."
+
+msgid "Credit dossier"
+msgstr "Dossiê de crédito"
+
+msgid "A PDF with every field that each provider returned, for the company and the partners queried, with the names in Portuguese and the values exactly as they came. It has no credit recommendation. The original JSON of each query goes along as a file. Each generation creates new files and nothing is overwritten."
+msgstr "Um PDF com todos os campos que cada provedor devolveu, da empresa e dos sócios consultados, com os nomes em português e os valores exatamente como vieram. Não tem recomendação de crédito. O JSON original de cada consulta vai junto, em um arquivo. Cada geração cria arquivos novos e nada é sobrescrito."
+
+msgid "Generate dossier (PDF)"
+msgstr "Gerar dossiê (PDF)"
+
+msgid "{0} queries will be included."
+msgstr "{0} consultas entram no dossiê."
+
+msgid "Generated dossiers"
+msgstr "Dossiês gerados"
+
+msgid "Dossier generated. Some queries only had a summary saved: run the analysis again for the complete return."
+msgstr "Dossiê gerado. Algumas consultas só tinham o resumo guardado: rode a análise de novo para ter o retorno completo."
