@@ -2,6 +2,7 @@
   <Dropdown v-if="visible" :options="options" align="end">
     <template #default="{ open }">
       <Button
+        variant="outline"
         :label="label"
         :loading="running"
         :iconRight="open ? 'lucide-chevron-up' : 'lucide-chevron-down'"

@@ -1,13 +1,37 @@
 <template>
   <LayoutHeader>
+    <!-- Figma "Card · Atividade" (798:2): "Voltar" + card name on the left,
+         stage, enrich, owner and funnel actions on the right (outline, 32px) -->
     <template #left-header>
-      <Breadcrumbs :items="breadcrumbs">
-        <template #prefix="{ item }">
-          <Icon v-if="item.icon" :icon="item.icon" class="mr-2 h-4" />
-        </template>
-      </Breadcrumbs>
+      <router-link
+        :to="backRoute"
+        class="flex h-8 shrink-0 items-center gap-1 rounded-[var(--ct-radius-md)] pl-1 pr-2 text-base font-medium text-ink-gray-6 transition-colors hover:bg-[var(--ct-bg-soft)] hover:text-ink-gray-9 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-outline-gray-3"
+      >
+        <span class="lucide-chevron-left size-4" aria-hidden="true" />
+        {{ __('Back') }}
+      </router-link>
+      <h1
+        class="truncate text-[20px] font-semibold leading-7 text-ink-gray-9"
+        :title="title"
+      >
+        {{ title }}
+      </h1>
     </template>
     <template v-if="!errorTitle" #right-header>
+      <Dropdown v-if="doc && document.statuses" :options="statuses" align="end">
+        <template #default="{ open }">
+          <Button
+            v-if="doc.status"
+            variant="outline"
+            :label="statusLabel(doc.status)"
+            :iconRight="open ? 'lucide-chevron-up' : 'lucide-chevron-down'"
+          >
+            <template #prefix>
+              <IndicatorIcon :class="getDealStatus(doc.status).color" />
+            </template>
+          </Button>
+        </template>
+      </Dropdown>
       <CustomActions
         v-if="document._actions?.length"
         :actions="document._actions"
@@ -35,6 +59,7 @@
       />
       <Button
         v-if="doc.pipeline && pipelines.length > 1"
+        variant="outline"
         :label="__('Move to another funnel')"
         iconLeft="lucide-arrow-right-left"
         @click="showChangePipelineModal = true"
@@ -65,25 +90,13 @@
             size="lg"
           />
           <Button
+            variant="outline"
             :label="__('Reopen')"
             iconLeft="lucide-rotate-ccw"
             @click="setOutcome('In progress')"
           />
         </template>
       </template>
-      <Dropdown v-if="doc && document.statuses" :options="statuses" align="end">
-        <template #default="{ open }">
-          <Button
-            v-if="doc.status"
-            :label="statusLabel(doc.status)"
-            :iconRight="open ? 'lucide-chevron-up' : 'lucide-chevron-down'"
-          >
-            <template #prefix>
-              <IndicatorIcon :class="getDealStatus(doc.status).color" />
-            </template>
-          </Button>
-        </template>
-      </Dropdown>
     </template>
   </LayoutHeader>
   <div v-if="doc.name" class="flex h-full overflow-hidden">
@@ -92,7 +105,7 @@
       v-model="activeTab"
       as="div"
       :tabs="tabs"
-      class="flex flex-1 overflow-hidden flex-col [&_[role='tab']]:px-1 [&_[role='tab']]:shrink-0 [&_[role='tablist']]:px-5 [&_[role='tablist']::-webkit-scrollbar]:h-0 [&_[role='tablist']]:min-h-[45px] [&_[role='tablist']]:gap-[22px] [&>[role='tabpanel']:not([hidden])]:flex [&>[role='tabpanel']:not([hidden])]:grow [&>[data-slot=tab-list]]:overflow-x-auto [&_[data-slot=tab-indicator]]:translate-y-0 [&>[data-slot=tab-panel]]:min-h-0 [&>[data-slot=tab-panel]]:flex-col [&>[data-slot=tab-panel]]:overflow-auto"
+      class="flex flex-1 overflow-hidden flex-col [&_[role='tab']]:px-1 [&_[role='tab']]:shrink-0 [&_[role='tablist']]:px-6 [&_[role='tablist']::-webkit-scrollbar]:h-0 [&_[role='tablist']]:min-h-[45px] [&_[role='tablist']]:gap-4 [&_[role='tablist']]:border-[var(--ct-border-soft)] [&>[role='tabpanel']:not([hidden])]:flex [&>[role='tabpanel']:not([hidden])]:grow [&>[data-slot=tab-list]]:overflow-x-auto [&_[data-slot=tab-indicator]]:translate-y-0 [&>[data-slot=tab-panel]]:min-h-0 [&>[data-slot=tab-panel]]:flex-col [&>[data-slot=tab-panel]]:overflow-auto"
     >
       <template #tab-panel>
         <DealTitlesTable
@@ -119,19 +132,26 @@
         />
       </template>
     </Tabs>
-    <Resizer side="right" class="flex flex-col justify-between border-l">
+    <Resizer
+      side="right"
+      class="flex flex-col justify-between border-l border-[var(--ct-border-soft)]"
+    >
+      <!-- Figma side panel: card id (16 Medium), then avatar, name and
+           outline icon buttons -->
       <div
-        class="flex h-[45px] cursor-copy items-center border-b px-5 py-2.5 text-lg-medium text-ink-gray-9"
+        class="flex h-[45px] cursor-copy items-center border-b border-[var(--ct-border-soft)] px-5 py-2.5 text-lg font-medium text-ink-gray-9"
         @click="copyToClipboard(dealId)"
       >
         {{ __(dealId) }}
       </div>
-      <div class="flex items-center justify-start gap-5 border-b p-5">
+      <div
+        class="flex items-center justify-start gap-5 border-b border-[var(--ct-border-soft)] p-5"
+      >
         <Tooltip :text="__('Organization Logo')">
-          <div class="group relative size-12">
+          <div class="group relative size-10">
             <Avatar
-              size="3xl"
-              class="size-12"
+              size="2xl"
+              class="size-10"
               :label="title"
               :image="doc.organization_logo || organization?.organization_logo"
             />
@@ -139,25 +159,28 @@
         </Tooltip>
         <div class="flex flex-col gap-2.5 truncate text-ink-gray-9">
           <Tooltip :text="organization?.name || __('Set an Organization')">
-            <div class="truncate text-3xl-medium">
+            <div class="truncate text-lg font-medium leading-6">
               {{ title }}
             </div>
           </Tooltip>
-          <div class="flex gap-1.5">
+          <div class="flex gap-2">
             <Button
               v-if="callEnabled"
+              variant="outline"
               :tooltip="__('Make a Call')"
               :icon="PhoneIcon"
               @click="triggerCall"
             />
 
             <Button
+              variant="outline"
               :tooltip="__('Send WhatsApp')"
               :icon="WhatsAppIcon"
               @click="openWhatsApp"
             />
 
             <Button
+              variant="outline"
               :tooltip="__('Send an Email')"
               :icon="Email2Icon"
               @click="
@@ -170,6 +193,7 @@
             />
 
             <Button
+              variant="outline"
               :tooltip="__('Go to Website')"
               :icon="LinkIcon"
               @click="
@@ -180,6 +204,7 @@
             />
 
             <Button
+              variant="outline"
               :tooltip="__('Attach a File')"
               :icon="AttachmentIcon"
               @click="showFilesUploader = true"
@@ -188,9 +213,8 @@
             <Button
               v-if="canDelete"
               :tooltip="__('Delete')"
-              variant="subtle"
+              variant="outline"
               icon="lucide-trash-2"
-              theme="red"
               @click="deleteDeal"
             />
           </div>
@@ -450,7 +474,6 @@
 <script setup>
 import DeleteLinkedDocModal from '@/components/DeleteLinkedDocModal.vue'
 import ErrorPage from '@/components/ErrorPage.vue'
-import Icon from '@/components/Icon.vue'
 import Resizer from '@/components/Resizer.vue'
 import LoadingIndicator from '@/components/Icons/LoadingIndicator.vue'
 import MoneyIcon from '@/components/Icons/MoneyIcon.vue'
@@ -525,7 +548,6 @@ import {
   Tooltip,
   Avatar,
   Tabs,
-  Breadcrumbs,
   call,
   usePageMeta,
   toast,
@@ -681,6 +703,11 @@ const breadcrumbs = computed(() => {
   })
   return items
 })
+
+// "Voltar" goes where the breadcrumb before the card pointed (the list or view)
+const backRoute = computed(
+  () => breadcrumbs.value[breadcrumbs.value.length - 2].route,
+)
 
 const title = computed(() => {
   let t = doctypeMeta.value?.title_field || 'name'

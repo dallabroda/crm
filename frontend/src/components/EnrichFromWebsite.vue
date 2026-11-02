@@ -1,6 +1,7 @@
 <template>
   <Button
     v-if="canUndo && !running"
+    variant="outline"
     :label="__('Undo')"
     :tooltip="__('Undo last enrichment')"
     iconLeft="lucide-undo-2"
@@ -11,13 +12,19 @@
        tabindex lets keyboard users focus it and see the tooltip too. -->
   <Tooltip v-if="!hasWebsite" :text="__('Add website to auto enrich')">
     <div class="inline-flex" tabindex="0">
-      <Button :label="__('Enrich')" iconLeft="lucide-zap" disabled />
+      <Button
+        variant="outline"
+        :label="__('Enrich')"
+        iconLeft="lucide-zap"
+        disabled
+      />
     </div>
   </Tooltip>
   <!-- No `loading` prop: it restyles the button. The prefix slot swaps in the
        same Spinner instead. -->
   <Button
     v-else
+    variant="outline"
     :label="label"
     :tooltip="tooltip"
     iconLeft="lucide-zap"
