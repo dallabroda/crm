@@ -57,11 +57,13 @@
   <EmptyState
     v-else-if="dataImports.data && !rows.length"
     name="Data Imports"
-    icon="import"
+    icon="upload"
+    :title="__('No imports yet')"
     :filtered="
       !!Object.keys({ ...queryFilters, ...dataImports.params?.filters }).length
     "
     :description="__('Imports you start from a list appear here.')"
+    @create="router.push({ name: 'NewDataImport' })"
   />
 </template>
 

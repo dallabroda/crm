@@ -1,5 +1,7 @@
 <template>
-  <div class="flex-1 overflow-y-auto p-3">
+  <!-- Figma: cards start 24px from the sides and 16px below the top bar
+       (16px here + the 8px around each card) -->
+  <div class="flex-1 overflow-y-auto px-4 pb-4 pt-2">
     <GridLayout
       v-if="items.length > 0"
       class="h-fit w-full"
