@@ -261,7 +261,7 @@ const { makeCall, $dialog, $socket } = globalStore()
 
 const { getUser } = usersStore()
 const { getOrganization } = organizationsStore()
-const { getDealStatus } = statusesStore()
+const { getDealStatus, getDealStatusLabel } = statusesStore()
 const { doctypeMeta } = getMeta('Contact')
 const { capture } = useTelemetry()
 
@@ -472,7 +472,7 @@ function getDealRowObject(deal) {
     },
     deal_value: getFormattedCurrency('deal_value', deal),
     status: {
-      label: __(deal.status),
+      label: getDealStatusLabel(deal.status),
       color: getDealStatus(deal.status)?.color,
     },
     email: deal.email,

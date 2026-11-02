@@ -13070,3 +13070,207 @@ msgstr "Retirar ou cancelar o protesto quando o card entra na etapa de acordo"
 
 msgid "Off until you turn it on: withdrawal and cancellation may have registry fees."
 msgstr "Desligado até você ligar: retirada e cancelamento podem ter custas do cartório."
+
+msgid "See the reason in the card activity."
+msgstr "Veja o motivo na atividade do card."
+
+msgid "Update status"
+msgstr "Atualizar status"
+
+msgid "Issue date"
+msgstr "Data de emissão"
+
+msgid "Fill number, species, issue date, due date and amount."
+msgstr "Preencha número, espécie, data de emissão, vencimento e valor."
+
+msgid "Cancel sending"
+msgstr "Cancelar envio"
+
+msgid "Withdraw from the registry"
+msgstr "Retirar do cartório"
+
+msgid "Cancel the protest"
+msgstr "Cancelar o protesto"
+
+msgid "Title {0} goes to CENPROT now, in the name of the creditor of the settings. Registry fees may apply."
+msgstr "O título {0} vai agora para a CENPROT, em nome do credor das configurações. O cartório pode cobrar custas."
+
+msgid "Done."
+msgstr "Pronto."
+
+msgid "CENPROT did not accept the request."
+msgstr "A CENPROT não aceitou o pedido."
+
+msgid "CENPROT receives the request for title {0} now. The status changes only when CENPROT confirms it."
+msgstr "A CENPROT recebe agora o pedido do título {0}. O status só muda quando a CENPROT confirmar."
+
+msgid "Requested by the operator in HubTech"
+msgstr "Pedido pelo operador no HubTech"
+
+msgid "Import titles"
+msgstr "Importar títulos"
+
+msgid "Import titles from a spreadsheet"
+msgstr "Importar títulos de uma planilha"
+
+msgid "Send a .xlsx or .csv file with one title per line. The first line must have the column names."
+msgstr "Envie um arquivo .xlsx ou .csv com um título por linha. A primeira linha precisa ter o nome das colunas."
+
+msgid "Cards are grouped by: {0}."
+msgstr "Os cards são agrupados por: {0}."
+
+msgid "Change file"
+msgstr "Trocar arquivo"
+
+msgid "Choose file"
+msgstr "Escolher arquivo"
+
+msgid "{0} lines"
+msgstr "{0} linhas"
+
+msgid "Which column is each field?"
+msgstr "Qual coluna é cada campo?"
+
+msgid "Species only comes in when the column has a registry code (DMI, DSI, CCB...): there is no default."
+msgstr "A espécie só entra quando a coluna tem um código de cartório (DMI, DSI, CCB...): não existe padrão."
+
+msgid "Preview (nothing saved yet)"
+msgstr "Prévia (nada foi gravado ainda)"
+
+msgid "Valid lines: {0} of {1}"
+msgstr "Linhas válidas: {0} de {1}"
+
+msgid "New cards: {0}"
+msgstr "Cards novos: {0}"
+
+msgid "Cards updated: {0}"
+msgstr "Cards atualizados: {0}"
+
+msgid "New titles: {0}"
+msgstr "Títulos novos: {0}"
+
+msgid "Titles updated: {0}"
+msgstr "Títulos atualizados: {0}"
+
+msgid "Already at CENPROT (kept): {0}"
+msgstr "Já na CENPROT (mantidos): {0}"
+
+msgid "New people (contacts): {0}"
+msgstr "Pessoas novas (contatos): {0}"
+
+msgid "New companies: {0}"
+msgstr "Empresas novas: {0}"
+
+msgid "Lines with notes: {0}"
+msgstr "Linhas com observação: {0}"
+
+msgid "{0} lines will be left out:"
+msgstr "{0} linhas vão ficar de fora:"
+
+msgid "Line {0}: {1}"
+msgstr "Linha {0}: {1}"
+
+msgid "Import {0} titles"
+msgstr "Importar {0} títulos"
+
+msgid "debtor"
+msgstr "sacado"
+
+msgid "debtor and cedente"
+msgstr "sacado e cedente"
+
+msgid "(not in the spreadsheet)"
+msgstr "(não está na planilha)"
+
+msgid "Column {0}"
+msgstr "Coluna {0}"
+
+msgid "Send the spreadsheet as .xlsx or .csv."
+msgstr "Envie a planilha em .xlsx ou .csv."
+
+msgid "Could not read the spreadsheet."
+msgstr "Não foi possível ler a planilha."
+
+msgid "Could not check the spreadsheet."
+msgstr "Não foi possível conferir a planilha."
+
+msgid "Import started. You get a notification with the summary when it ends."
+msgstr "Importação iniciada. Você recebe uma notificação com o resumo quando terminar."
+
+msgid "Could not start the import."
+msgstr "Não foi possível iniciar a importação."
+
+msgid "Group the cards by"
+msgstr "Agrupar os cards por"
+
+msgid "Used by the spreadsheet import. The cedente is kept on each title either way."
+msgstr "Usado pela importação por planilha. O cedente fica guardado em cada título nos dois casos."
+
+msgid "Debtor and cedente (one card per pair)"
+msgstr "Sacado e cedente (um card por par)"
+
+msgid "Debtor (one card per debtor)"
+msgstr "Sacado (um card por sacado)"
+
+msgid "Cedente"
+msgstr "Cedente"
+
+msgid "Sent to CENPROT: the species can no longer change."
+msgstr "Enviado à CENPROT: a espécie não pode mais mudar."
+
+msgid "Checking the title..."
+msgstr "Conferindo o título..."
+
+msgid "Fix before sending:"
+msgstr "Corrija antes de enviar:"
+
+msgid "Notes (they do not block the send):"
+msgstr "Avisos (não impedem o envio):"
+
+msgid "Send with the co-debtors (partners)?"
+msgstr "Enviar com os codevedores (sócios)?"
+
+msgid "No, only the debtor"
+msgstr "Não, só o devedor"
+
+msgid "Yes, with the partners"
+msgstr "Sim, com os sócios"
+
+msgid "Optional. Sending the partners together with the company is more effective, but each extra debtor may add registry fees, paid by the client."
+msgstr "Opcional. Mandar os sócios junto com a empresa é mais eficiente, mas cada devedor a mais pode gerar custas no cartório, pagas pelo cliente."
+
+msgid "This company has no contacts yet. Add the partners as contacts (CPF and address) or find them with Localize."
+msgstr "Esta empresa ainda não tem contatos. Cadastre os sócios como contatos (CPF e endereço) ou busque pelo Localizar."
+
+msgid "no CPF"
+msgstr "sem CPF"
+
+msgid "Missing: {0}"
+msgstr "Falta: {0}"
+
+msgid "Ready to go"
+msgstr "Pronto para ir"
+
+msgid "Open contact"
+msgstr "Abrir contato"
+
+msgid "{0} ready to go, {1} with data missing"
+msgstr "{0} prontos para ir, {1} com dado faltando"
+
+msgid "Fill the missing data in the contact (CPF and address), or let Localize find them (optional: a paid query, billed by the provider on the client account)."
+msgstr "Preencha o que falta no contato (CPF e endereço) ou deixe o Localizar buscar (opcional: é uma consulta paga, cobrada pelo provedor na conta do cliente)."
+
+msgid "Check again"
+msgstr "Conferir de novo"
+
+msgid "Send with {0} co-debtor(s)"
+msgstr "Enviar com {0} codevedor(es)"
+
+msgid "Send only the debtor"
+msgstr "Enviar só o devedor"
+
+msgid "Could not check the title."
+msgstr "Não foi possível conferir o título."
+
+msgid "Goes with the company address"
+msgstr "Vai com o endereço da empresa"

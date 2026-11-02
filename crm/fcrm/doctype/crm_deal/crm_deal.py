@@ -117,6 +117,9 @@ class CRMDeal(Document):
 		self.validate_forecasting_fields()
 		self.validate_lost_reason()
 		self.update_exchange_rate()
+		if getattr(self, "titles", None):
+			self.deal_value = sum(flt(t.updated_amount or t.original_amount) for t in self.titles)
+			self.annual_budget = self.deal_value
 		if self.organization and (self.is_new() or self.has_value_changed("organization")):
 			self.copy_enrichment_from_organization()
 

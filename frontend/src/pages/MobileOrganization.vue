@@ -188,7 +188,7 @@ const props = defineProps({
 const { brand } = getSettings()
 const { getUser } = usersStore()
 const { $dialog } = globalStore()
-const { getDealStatus } = statusesStore()
+const { getDealStatus, getDealStatusLabel } = statusesStore()
 const { doctypeMeta } = getMeta('CRM Organization')
 const { capture } = useTelemetry()
 
