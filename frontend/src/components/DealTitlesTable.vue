@@ -92,8 +92,11 @@
 
             <!-- Título cartório (Dropdown obrigatório) -->
             <td class="py-3 px-3">
+              <!-- Quem escolhe a espécie é o analista; depois de enviado à CENPROT não muda (a consulta usa a mesma) -->
               <select
                 :value="title.species || ''"
+                :disabled="Boolean(title.sent_at)"
+                :title="title.sent_at ? __('Sent to CENPROT: the species can no longer change.') : ''"
                 class="w-full text-xs rounded border border-outline-gray-2 bg-surface-white px-2 py-1.5 text-ink-gray-9 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600"
                 @change="onSpeciesChange(title, $event.target.value)"
               >

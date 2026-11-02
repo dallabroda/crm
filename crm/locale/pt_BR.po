@@ -13214,3 +13214,6 @@ msgstr "Sacado (um card por sacado)"
 
 msgid "Cedente"
 msgstr "Cedente"
+
+msgid "Sent to CENPROT: the species can no longer change."
+msgstr "Enviado à CENPROT: a espécie não pode mais mudar."
