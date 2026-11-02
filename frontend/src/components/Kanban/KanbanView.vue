@@ -86,7 +86,7 @@
             >
               <template #item="{ element: fields }">
                 <div
-                  class="relative pt-3 px-3.5 pb-2.5 rounded-6 border bg-surface-base text-base flex flex-col text-ink-gray-9"
+                  class="relative p-4 rounded-6 border border-outline-gray-2 bg-surface-base text-base flex flex-col text-ink-gray-9"
                   :data-name="fields.name"
                   @click="options.onClick && options.onClick(fields)"
                 >
@@ -115,7 +115,7 @@
                       </div>
                     </slot>
                   </div>
-                  <div class="border-b h-px my-2.5" />
+                  <div class="border-b border-outline-gray-2 h-px my-3" />
 
                   <div
                     class="relative pointer-events-none [&_[data-slot=trigger]]:pointer-events-auto flex flex-col gap-3.5"
@@ -135,7 +135,7 @@
                       </slot>
                     </template>
                   </div>
-                  <div class="border-b h-px mt-2.5 mb-2" />
+                  <div class="border-b border-outline-gray-2 h-px mt-3 mb-2" />
                   <div
                     class="relative z-10 pointer-events-none [&_button]:pointer-events-auto"
                   >

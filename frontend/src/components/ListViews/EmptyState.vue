@@ -5,7 +5,7 @@
       :class="widthClass"
       :style="{ top: top }"
     >
-      <Icon :icon="icon" class="size-7.5 text-ink-gray-5" />
+      <Icon :icon="icon" class="size-7.5 text-ink-gray-9" />
       <div class="flex flex-col items-center gap-1">
         <span class="text-lg-medium text-ink-gray-8">
           {{ computedTitle }}
