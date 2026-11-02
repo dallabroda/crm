@@ -6,17 +6,18 @@
       item-key="column"
       :disabled="options.fixedColumns"
       :delay="isTouchScreenDevice() ? 200 : 0"
-      class="flex sm:mx-2.5 mx-2 pb-3.5"
+      class="flex gap-4 px-3 py-4 sm:px-6"
       @end="updateColumn"
     >
       <template #item="{ element: column }">
         <div
           v-if="!column.column.delete"
-          class="flex flex-col gap-2.5 min-w-72 w-72 hover:bg-surface-gray-2 rounded-6 p-2.5"
+          class="flex flex-col gap-3 min-w-72 w-72 rounded-[var(--ct-radius-lg)]"
         >
-          <div class="flex gap-2 items-center group justify-between">
-            <div class="flex items-center text-base">
-              <div v-if="options.fixedColumns" class="px-1.5">
+          <!-- Figma "Vendas · Kanban" (791:2): status dot + stage name, ghost "+" -->
+          <div class="flex h-8 gap-2 items-center group justify-between">
+            <div class="flex min-w-0 items-center text-base">
+              <div v-if="options.fixedColumns" class="shrink-0">
                 <IndicatorIcon :class="parseColor(column.column.color)" />
               </div>
               <Popover v-else bare>
@@ -53,7 +54,7 @@
                   </div>
                 </template>
               </Popover>
-              <div class="text-ink-gray-9">
+              <div class="truncate text-ink-gray-9">
                 {{ __(column.column.label || column.column.name) }}
               </div>
             </div>
@@ -79,27 +80,29 @@
               :list="column.data"
               group="fields"
               item-key="name"
-              class="flex flex-col gap-3.5 flex-1"
+              class="flex flex-col gap-3 flex-1"
               :delay="isTouchScreenDevice() ? 200 : 0"
               :data-column="column.column.name"
               @end="updateColumn"
             >
               <template #item="{ element: fields }">
                 <div
-                  class="relative p-4 rounded-6 border border-outline-gray-2 bg-surface-base text-base flex flex-col text-ink-gray-9"
+                  class="relative flex flex-col gap-3 rounded-[var(--ct-radius-lg)] border border-outline-gray-2 bg-surface-base p-4 text-base text-ink-gray-9"
                   :data-name="fields.name"
                   @click="options.onClick && options.onClick(fields)"
                 >
+                  <!-- Figma "Card de Kanban" (1215:1371): radius 12, border #dcdde2,
+                       16px padding, 12px between title, details, divider and footer -->
                   <!-- covers the whole card so the actions row can hold its own buttons outside the link -->
                   <router-link
                     v-if="options.getRoute"
                     :to="options.getRoute(fields)"
-                    class="absolute inset-0 rounded-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-outline-gray-4"
+                    class="absolute inset-0 rounded-[var(--ct-radius-lg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-outline-gray-4"
                     :aria-label="fields[titleField] || __('No Title')"
                   />
                   <!-- clicks fall through to the card link; only tooltip triggers take hover -->
                   <div
-                    class="relative pointer-events-none [&_[data-slot=trigger]]:pointer-events-auto"
+                    class="relative pointer-events-none font-medium [&_.text-base]:font-medium [&_[data-slot=trigger]]:pointer-events-auto"
                   >
                     <slot
                       name="title"
@@ -115,10 +118,9 @@
                       </div>
                     </slot>
                   </div>
-                  <div class="border-b border-outline-gray-2 h-px my-3" />
-
                   <div
-                    class="relative pointer-events-none [&_[data-slot=trigger]]:pointer-events-auto flex flex-col gap-3.5"
+                    v-if="column.fields?.length"
+                    class="relative pointer-events-none [&_[data-slot=trigger]]:pointer-events-auto flex flex-col gap-3"
                   >
                     <template v-for="value in column.fields" :key="value">
                       <slot
@@ -135,7 +137,7 @@
                       </slot>
                     </template>
                   </div>
-                  <div class="border-b border-outline-gray-2 h-px mt-3 mb-2" />
+                  <div class="border-b border-outline-gray-2 h-px" />
                   <div
                     class="relative z-10 pointer-events-none [&_button]:pointer-events-auto"
                   >

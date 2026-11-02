@@ -1,7 +1,11 @@
 <template>
   <LayoutHeader>
     <template #left-header>
-      <ViewBreadcrumbs v-model="viewControls" routeName="Deals" />
+      <ViewBreadcrumbs
+        v-model="viewControls"
+        routeName="Deals"
+        :title="pipeline?.pipeline_name || ''"
+      />
     </template>
     <template #right-header>
       <CustomActions
@@ -12,6 +16,7 @@
       <Dropdown :options="outcomeOptions" align="end">
         <template #default="{ open }">
           <Button
+            variant="outline"
             :label="outcomeLabel"
             :iconRight="open ? 'lucide-chevron-up' : 'lucide-chevron-down'"
           />
@@ -154,7 +159,7 @@
               'response_by',
             ].includes(fieldName)
           "
-          class="truncate text-base"
+          class="truncate text-xs text-ink-gray-4"
         >
           <Tooltip :text="getRow(itemName, fieldName).label">
             <div>{{ getRow(itemName, fieldName).timeAgo }}</div>
@@ -178,7 +183,16 @@
             size="xs"
           />
         </div>
-        <div v-else class="truncate text-base">
+        <!-- Figma "Card de Kanban": the card value stands out (16 Medium) -->
+        <div
+          v-else
+          class="truncate"
+          :class="
+            MONEY_FIELDS.includes(fieldName)
+              ? 'text-lg font-medium text-ink-gray-9'
+              : 'text-base'
+          "
+        >
           {{ getRow(itemName, fieldName).label }}
         </div>
       </div>
@@ -376,6 +390,15 @@ function getRoute(name) {
     query: { view: route.query.view, viewType: route.params.viewType },
   }
 }
+
+// Kanban card fields shown as the card value (Figma "Card de Kanban")
+const MONEY_FIELDS = [
+  'annual_revenue',
+  'deal_value',
+  'expected_deal_value',
+  'net_total',
+  'total',
+]
 
 const dealsListView = ref(null)
 const showDealModal = ref(false)
