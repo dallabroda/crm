@@ -110,36 +110,56 @@
           </div>
         </div>
       </div>
+    </template>
 
-      <!-- Dossiê -->
-      <div
-        class="p-5 bg-surface-white rounded-lg border border-outline-gray-2 space-y-3"
-      >
-        <span class="text-lg-semibold text-ink-gray-9">{{
-          __('Full Dossier')
-        }}</span>
-        <p class="text-p-sm text-ink-gray-6">
-          {{
-            __(
-              'Generates a structured PDF with every section (sanctions, lawsuits, fiscal, protests, score, premium bureaus consulted) and attaches it to this organization.',
-            )
-          }}
-        </p>
-        <div class="flex items-center gap-2">
-          <Button variant="solid" :loading="generatingPdf" @click="generatePdf">
-            {{ __('Generate Dossier (PDF)') }}
-          </Button>
+    <!-- Credit dossier, PDF 1 (credtech#316): the complete return of every query, no recommendation -->
+    <div
+      v-if="hasQueries"
+      class="p-5 bg-surface-white rounded-lg border border-outline-gray-2 space-y-3"
+    >
+      <span class="text-lg-semibold text-ink-gray-9">{{
+        __('Credit dossier')
+      }}</span>
+      <p class="text-p-sm text-ink-gray-6">
+        {{
+          __(
+            'A PDF with every field that each provider returned, for the company and the partners queried, with the names in Portuguese and the values exactly as they came. It has no credit recommendation. The original JSON of each query goes along as a file. Each generation creates new files and nothing is overwritten.',
+          )
+        }}
+      </p>
+      <div class="flex items-center gap-2">
+        <Button
+          variant="solid"
+          :loading="generatingPdf"
+          :disabled="!canGenerate"
+          @click="generatePdf"
+        >
+          {{ __('Generate dossier (PDF)') }}
+        </Button>
+        <span class="text-p-sm text-ink-gray-5">
+          {{ __('{0} queries will be included.', [queryCount]) }}
+        </span>
+      </div>
+      <div v-if="dossiers.data && dossiers.data.length" class="space-y-1 pt-2">
+        <div class="text-p-sm text-ink-gray-5">
+          {{ __('Generated dossiers') }}
+        </div>
+        <div
+          v-for="file in dossiers.data"
+          :key="file.name"
+          class="flex items-center gap-2 text-p-sm"
+        >
           <a
-            v-if="report.data.dossie_pdf_url"
-            :href="report.data.dossie_pdf_url"
+            :href="file.file_url"
             target="_blank"
-            class="text-p-sm text-ink-blue-3 underline"
+            class="text-ink-blue-3 underline truncate"
           >
-            {{ __('Open last generated PDF') }}
+            {{ file.file_name }}
           </a>
+          <span class="text-ink-gray-5">{{ formatDate(file.creation) }}</span>
         </div>
       </div>
-    </template>
+    </div>
 
     <!-- Partners (credtech#316): full CPF, and the operator picks who to query; nobody comes ticked -->
     <div
@@ -500,16 +520,43 @@ async function runCheck(force) {
   }
 }
 
+const dossiers = createResource({
+  url: 'cred_hub.credit_check.api.list_credit_dossiers',
+  params: { organization_name: props.organizationId },
+  auto: true,
+})
+
+// What the dossier will contain: the automatic analysis (when there is one) plus the bureau queries made
+const queryCount = computed(
+  () => (org.data?.credit_report ? 1 : 0) + (results.data?.length || 0),
+)
+const hasQueries = computed(() => queryCount.value > 0)
+const canGenerate = computed(() => Boolean(options.data?.can_request))
+
+function formatDate(value) {
+  return value ? String(value).slice(0, 16) : ''
+}
+
 async function generatePdf() {
   generatingPdf.value = true
   try {
-    const res = await call('cred_hub.credit_check.api.generate_dossie_pdf', {
-      organization_name: props.organizationId,
-    })
-    if (res?.file_url) {
-      report.reload()
-      window.open(res.file_url, '_blank')
-      toast.success(__('Dossier generated and attached to the organization.'))
+    const res = await call(
+      'cred_hub.credit_check.api.generate_credit_dossier',
+      {
+        organization_name: props.organizationId,
+        deal_name: props.dealId || null,
+      },
+    )
+    if (res?.pdf_url) {
+      dossiers.reload()
+      window.open(res.pdf_url, '_blank')
+      toast.success(
+        res.complete
+          ? __('Dossier generated and attached to the organization.')
+          : __(
+              'Dossier generated. Some queries only had a summary saved: run the analysis again for the complete return.',
+            ),
+      )
     }
   } catch (err) {
     toast.error(err?.messages?.[0] || __('Could not generate the dossier.'))
