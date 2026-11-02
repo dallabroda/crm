@@ -13274,3 +13274,30 @@ msgstr "Não foi possível conferir o título."
 
 msgid "Goes with the company address"
 msgstr "Vai com o endereço da empresa"
+
+msgid "In progress"
+msgstr "Em andamento"
+
+msgid "Reopen"
+msgstr "Reabrir"
+
+msgid "All cards"
+msgstr "Todos os cards"
+
+msgid "Card status"
+msgstr "Status do card"
+
+msgid "Card marked as won."
+msgstr "Card marcado como ganho."
+
+msgid "Card marked as lost: {0}"
+msgstr "Card marcado como perdido: {0}"
+
+msgid "Card marked as lost."
+msgstr "Card marcado como perdido."
+
+msgid "Card reopened."
+msgstr "Card reaberto."
+
+msgid "Won and Lost close the card; the stage stays where it was (standard CRM)."
+msgstr "Ganho e Perdido fecham o card; a etapa fica onde estava (padrão de CRM)."
