@@ -14234,3 +14234,15 @@ msgstr "Promessa quebrada"
 
 msgid "Promise {0}"
 msgstr "Promessa {0}"
+
+msgid "No deals found"
+msgstr "Nenhum card encontrado"
+
+msgid "No contacts found"
+msgstr "Nenhum contato encontrado"
+
+msgid "Credit Analysis"
+msgstr "Análise de crédito"
+
+msgid "When someone mentions you or assigns you a deal or a task, the notice shows up here."
+msgstr "Quando alguém mencionar você ou atribuir um card ou uma tarefa a você, o aviso aparece aqui."
