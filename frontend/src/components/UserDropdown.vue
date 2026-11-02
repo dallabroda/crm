@@ -1,44 +1,30 @@
 <template>
+  <!-- Figma "Barra lateral · HubTech" footer: avatar, name and e-mail of the
+       signed-in user; opens the account menu. Collapsed, only the avatar. -->
   <Dropdown :options="dropdownItems" v-bind="$attrs">
     <template #default="{ open }">
       <button
-        class="flex h-12 items-center rounded-5 py-2 duration-300 ease-in-out"
-        :class="
-          isCollapsed
-            ? 'w-auto px-0'
-            : open
-              ? 'w-full px-2 bg-surface-elevation-3 shadow-sm'
-              : 'w-full px-2 hover:bg-surface-gray-2'
-        "
+        type="button"
+        class="flex w-full items-center gap-2.5 rounded-[var(--ct-radius-md)] text-left transition-colors duration-300 ease-in-out"
+        :class="[
+          isCollapsed ? 'justify-center' : 'py-1 pl-1.5 pr-1',
+          open ? 'bg-[var(--ct-bg-soft)]' : 'hover:bg-[var(--ct-bg-soft)]',
+        ]"
+        :aria-label="user.full_name"
       >
-        <BrandLogo v-model="brand" class="h-8 max-w-16 flex-shrink-0" />
-        <div
-          class="flex flex-1 flex-col text-left duration-300 ease-in-out truncate"
-          :class="
-            isCollapsed
-              ? 'ml-0 w-0 overflow-hidden opacity-0'
-              : 'ml-2 w-auto opacity-100'
-          "
-        >
-          <div class="text-base-medium leading-none text-ink-gray-9 truncate">
-            {{ brand.name || 'HubTech CRM' }}
-          </div>
-          <div class="mt-1 text-sm leading-none text-ink-gray-7 truncate">
+        <Avatar
+          :label="user.full_name"
+          :image="user.user_image"
+          size="xl"
+          class="shrink-0"
+        />
+        <div v-if="!isCollapsed" class="flex min-w-0 flex-1 flex-col">
+          <span class="truncate text-sm font-medium leading-5 text-ink-gray-9">
             {{ user.full_name }}
-          </div>
-        </div>
-        <div
-          class="duration-300 ease-in-out"
-          :class="
-            isCollapsed
-              ? 'ml-0 w-0 overflow-hidden opacity-0'
-              : 'ml-2 w-auto opacity-100'
-          "
-        >
-          <span
-            class="lucide-chevron-down size-4 text-ink-gray-5"
-            aria-hidden="true"
-          />
+          </span>
+          <span class="truncate text-sm leading-5 text-ink-gray-6">
+            {{ user.email || user.name }}
+          </span>
         </div>
       </button>
     </template>
@@ -46,7 +32,6 @@
 </template>
 
 <script setup>
-import BrandLogo from '@/components/BrandLogo.vue'
 import FrappeCloudIcon from '@/components/Icons/FrappeCloudIcon.vue'
 import AppsIcon from '@/components/Icons/AppsIcon.vue'
 import { sessionStore } from '@/stores/session'
@@ -56,14 +41,14 @@ import { showSettings, isMobileView } from '@/composables/settings'
 import { showAboutModal } from '@/composables/modals'
 import { confirmLoginToFrappeCloud } from '@/composables/frappecloud'
 import { spriteIcon } from '@/utils/spriteIcon'
-import { createResource, Dropdown } from 'frappe-ui'
+import { Avatar, createResource, Dropdown } from 'frappe-ui'
 import { computed, h, markRaw } from 'vue'
 
 defineProps({
   isCollapsed: { type: Boolean, default: false },
 })
 
-const { settings, brand } = getSettings()
+const { settings } = getSettings()
 const { logout } = sessionStore()
 const { getUser } = usersStore()
 

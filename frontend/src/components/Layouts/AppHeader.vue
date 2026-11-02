@@ -1,5 +1,8 @@
 <template>
-  <div class="flex border-b pr-5">
+  <!-- Figma "Barra superior": white, bottom border #e6e7eb, 24px right edge -->
+  <div
+    class="flex border-b border-[var(--ct-border-soft)] bg-surface-base pr-6"
+  >
     <div id="app-header" class="flex-1"></div>
     <div class="flex items-center justify-center">
       <CallUI />

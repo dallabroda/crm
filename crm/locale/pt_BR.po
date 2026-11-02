@@ -13968,6 +13968,9 @@ msgstr "Nova política"
 msgid "Create a key to connect other systems to the CRM."
 msgstr "Crie uma chave para integrar outros sistemas ao CRM."
 
+msgid "Search..."
+msgstr "Buscar..."
+
 msgid "Title not found on this card."
 msgstr "Título não encontrado neste card."
 

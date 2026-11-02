@@ -2,7 +2,8 @@
   <div v-if="brand?.logo">
     <img :src="brand.logo" class="h-full w-full object-cover" />
   </div>
-  <CRMLogo v-else class="size-8 shrink-0 rounded-4" />
+  <!-- sized by the caller (the sidebar header uses 28px, radius 7) -->
+  <div v-else><CRMLogo class="h-full w-full" /></div>
 </template>
 
 <script setup>

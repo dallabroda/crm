@@ -1,5 +1,6 @@
 <template>
   <Button
+    variant="outline"
     :label="__('Kanban settings')"
     v-bind="$attrs"
     :iconLeft="KanbanIcon"

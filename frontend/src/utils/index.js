@@ -448,7 +448,22 @@ export const colors = [
   'black',
 ]
 
+// Stage dots follow the Figma status palette (--ct-status-*, Style Guide).
+// Colors without a CredTech status tone keep the Tailwind shade.
+const STATUS_DOT_CLASSES = {
+  gray: '!text-[color:var(--ct-status-gray)]',
+  blue: '!text-[color:var(--ct-status-blue)]',
+  purple: '!text-[color:var(--ct-status-purple)]',
+  violet: '!text-[color:var(--ct-status-purple)]',
+  orange: '!text-[color:var(--ct-status-orange)]',
+  yellow: '!text-[color:var(--ct-status-yellow)]',
+  amber: '!text-[color:var(--ct-status-yellow)]',
+  green: '!text-[color:var(--ct-status-green)]',
+  red: '!text-[color:var(--ct-status-red)]',
+}
+
 export function parseColor(color) {
+  if (STATUS_DOT_CLASSES[color]) return STATUS_DOT_CLASSES[color]
   let textColor = `!text-${color}-600`
   if (color == 'black') {
     textColor = '!text-ink-gray-9'

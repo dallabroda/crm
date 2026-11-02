@@ -17,12 +17,13 @@
     @update:selections="(selections) => emit('selectionsChanged', selections)"
   >
     <ListHeader
-      class="sm:mx-5 mx-3"
+      class="!rounded-[var(--ct-radius-md)] sm:mx-6 mx-3"
       @columnWidthUpdated="emit('columnWidthUpdated')"
     >
       <ListHeaderItem
         v-for="column in columns"
         :key="column.key"
+        class="!text-base"
         :item="column"
         @columnWidthUpdated="(e) => onColumnWidthUpdated(e, column)"
       >
@@ -53,9 +54,7 @@
             <MultipleAvatar
               :avatars="item"
               size="sm"
-              :label-class="
-                isVisited ? 'text-ink-gray-6' : 'font-medium text-ink-gray-9'
-              "
+              :label-class="isVisited ? 'text-ink-gray-6' : 'text-ink-gray-9'"
               @click="
                 (event) =>
                   emit('applyFilter', {
@@ -104,9 +103,7 @@
               ].includes(column.key)
             "
             class="truncate text-base"
-            :class="
-              isVisited ? 'text-ink-gray-6' : 'font-medium text-ink-gray-9'
-            "
+            :class="isVisited ? 'text-ink-gray-6' : 'text-ink-gray-9'"
             @click="
               (event) =>
                 emit('applyFilter', {
@@ -193,9 +190,7 @@
           <div
             v-else-if="label"
             class="truncate text-base"
-            :class="
-              isVisited ? 'text-ink-gray-6' : 'font-medium text-ink-gray-9'
-            "
+            :class="isVisited ? 'text-ink-gray-6' : 'text-ink-gray-9'"
             @click="
               (event) =>
                 emit('applyFilter', {
@@ -225,7 +220,7 @@
   <ListFooter
     v-if="pageLengthCount"
     v-model="pageLengthCount"
-    class="border-t sm:px-5 px-3 py-2"
+    class="border-t border-surface-gray-3 px-3 py-3 sm:px-6"
     :options="{
       rowCount: options.rowCount,
       totalCount: options.totalCount,
