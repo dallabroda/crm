@@ -20,10 +20,13 @@
         />
       </template>
     </SettingsPageHeader>
-    <div class="flex-1 flex flex-col px-2 gap-8 overflow-y-auto">
+    <div class="flex-1 flex flex-col gap-8 overflow-y-auto">
       <div>
         <FormControl
           type="textarea"
+          class="ct-field-48"
+          variant="outline"
+          :rows="4"
           :label="__('Invite By Email')"
           placeholder="user1@example.com, user2@example.com, ..."
           :debounce="100"
@@ -44,7 +47,9 @@
         <FormControl
           v-model="role"
           type="select"
-          class="mt-4"
+          class="ct-field-48 mt-6"
+          variant="outline"
+          size="lg"
           :label="__('Invite As')"
           :options="roleOptions"
           :description="description"

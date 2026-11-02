@@ -1,5 +1,5 @@
 <template>
-  <div class="enrichment-tabs flex h-full flex-col text-ink-gray-8">
+  <div class="enrichment-tabs flex h-full flex-col gap-6 text-ink-gray-8">
     <SettingsPageHeader :title="__('Enrichment Settings')">
       <template #badge>
         <Badge
@@ -35,7 +35,7 @@
       class="flex-1 overflow-hidden [&>[data-slot=tab-panel]]:min-h-0 [&>[data-slot=tab-panel]]:flex-1"
     >
       <template #tab-panel="{ tab }">
-        <div class="flex h-full flex-col overflow-y-auto px-8 py-5">
+        <div class="flex h-full flex-col overflow-y-auto pt-6">
           <GeneralTab
             v-if="tab.value === 'general'"
             v-model:max-pages="maxPages"
@@ -250,11 +250,11 @@ async function save() {
 </script>
 
 <style scoped>
-/* Same tab list alignment as WhatsAppSettings: frappe-ui bakes px-5 into it. */
+/* frappe-ui bakes px-5 into the tab list; align it with the page content. */
 .enrichment-tabs :deep([role='tablist']) {
   padding-left: 0;
   padding-right: 0;
-  margin-left: 2rem;
-  margin-right: 2rem;
+  margin-left: 0;
+  margin-right: 0;
 }
 </style>

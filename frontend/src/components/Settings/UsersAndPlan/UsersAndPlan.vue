@@ -22,12 +22,12 @@
 
     <div
       v-else-if="data.unlimited"
-      class="mx-2 rounded border border-outline-gray-1 px-4 py-3 text-p-base text-ink-gray-7"
+      class="rounded-lg bg-surface-blue-2 px-3.5 py-2.5 text-base font-medium text-ink-blue-5"
     >
       {{ __('Your company has no user limit.') }}
     </div>
 
-    <div v-else class="flex flex-col gap-6 overflow-y-auto px-2">
+    <div v-else class="flex flex-col gap-6 overflow-y-auto">
       <!-- Usage and status -->
       <div class="flex flex-col gap-3 rounded border border-outline-gray-1 p-4">
         <div class="flex items-center justify-between gap-4">

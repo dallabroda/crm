@@ -29,7 +29,7 @@
       />
     </div>
 
-    <div v-else class="flex flex-col gap-4 overflow-y-auto px-2">
+    <div v-else class="flex flex-col gap-4 overflow-y-auto">
       <!-- Old keys (token of a user, made in the technical screen) stop on a date set on deploy -->
       <div
         v-if="data.legacy_until && data.legacy_users.length"
@@ -70,12 +70,14 @@
         }}
       </p>
 
-      <div
+      <SettingsEmptyState
         v-if="!data.keys.length"
-        class="rounded border border-outline-gray-1 px-4 py-6 text-center text-p-base text-ink-gray-6"
-      >
-        {{ __('No API keys yet.') }}
-      </div>
+        :icon="LucideKeyRound"
+        :title="__('No API keys yet.')"
+        :description="__('Create a key to connect other systems to the CRM.')"
+        :action-label="__('New key')"
+        @action="openForm()"
+      />
 
       <div
         v-for="key in data.keys"
@@ -281,6 +283,8 @@
 </template>
 
 <script setup>
+import LucideKeyRound from '~icons/lucide/key-round'
+import SettingsEmptyState from '@/components/Settings/SettingsEmptyState.vue'
 import SettingsPageHeader from '@/components/Settings/SettingsPageHeader.vue'
 import {
   Badge,

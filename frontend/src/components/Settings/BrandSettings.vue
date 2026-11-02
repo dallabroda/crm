@@ -18,33 +18,27 @@
     </SettingsPageHeader>
 
     <!-- Fields -->
-    <div class="flex flex-1 flex-col p-2 gap-4 overflow-y-auto">
-      <!-- Brand Anm -->
-      <div class="flex items-center justify-between gap-8">
-        <div class="flex flex-col">
-          <div class="text-p-base-medium text-ink-gray-7 truncate">
-            {{ __('Brand Name') }}
-          </div>
-          <div class="text-p-sm text-ink-gray-5">
-            {{ __('Set the name of your brand. Appears in the left sidebar.') }}
-          </div>
-        </div>
-        <div class="flex items-center gap-2">
-          <FormControl
-            v-model="settings.doc.brand_name"
-            type="text"
-            size="md"
-            :placeholder="__('Enter Brand Name')"
-          />
-        </div>
-      </div>
-      <div class="h-px border-t border-outline-elevation-2" />
+    <div class="flex flex-1 flex-col gap-6 overflow-y-auto">
+      <!-- Brand name: 48px field with help below (Figma "Campo com ajuda") -->
+      <FormControl
+        v-model="settings.doc.brand_name"
+        class="ct-field-48"
+        type="text"
+        size="lg"
+        variant="outline"
+        :label="__('Brand Name')"
+        :description="
+          __('Set the name of your brand. Appears in the left sidebar.')
+        "
+        :placeholder="__('Enter Brand Name')"
+      />
+      <SettingsDivider />
 
       <!-- logo -->
       <div class="flex flex-col justify-between gap-4">
-        <div class="flex items-center flex-1 gap-5">
+        <div class="flex items-center flex-1 gap-6">
           <div
-            class="flex items-center justify-center rounded-4 border border-outline-elevation-2 size-20"
+            class="flex items-center justify-center rounded-lg border border-outline-gray-2 size-20"
           >
             <img
               v-if="settings.doc?.brand_logo"
@@ -55,7 +49,9 @@
             <ImageIcon v-else class="size-5 text-ink-gray-4" />
           </div>
           <div class="flex flex-1 flex-col gap-1">
-            <span class="text-base-medium">{{ __('Brand Logo') }}</span>
+            <span class="text-base font-medium text-ink-gray-9">{{
+              __('Brand Logo')
+            }}</span>
             <span class="text-p-base text-ink-gray-6">
               {{
                 __(
@@ -77,9 +73,9 @@
 
       <!-- favicon -->
       <div class="flex flex-col justify-between gap-4">
-        <div class="flex items-center flex-1 gap-5">
+        <div class="flex items-center flex-1 gap-6">
           <div
-            class="flex items-center justify-center rounded-4 border border-outline-elevation-2 size-20"
+            class="flex items-center justify-center rounded-lg border border-outline-gray-2 size-20"
           >
             <img
               v-if="settings.doc?.favicon"
@@ -90,7 +86,9 @@
             <ImageIcon v-else class="size-5 text-ink-gray-4" />
           </div>
           <div class="flex flex-1 flex-col gap-1">
-            <span class="text-base-medium">{{ __('Favicon') }}</span>
+            <span class="text-base font-medium text-ink-gray-9">{{
+              __('Favicon')
+            }}</span>
             <span class="text-p-base text-ink-gray-6">
               {{
                 __(
@@ -113,6 +111,7 @@
   </div>
 </template>
 <script setup>
+import SettingsDivider from '@/components/Settings/SettingsDivider.vue'
 import SettingsPageHeader from '@/components/Settings/SettingsPageHeader.vue'
 import ImageIcon from '~icons/lucide/image'
 import ImageUploader from '@/components/Controls/ImageUploader.vue'
