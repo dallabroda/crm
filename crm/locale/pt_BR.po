@@ -13592,3 +13592,51 @@ msgstr "Consulta pedida."
 
 msgid "Could not request the query."
 msgstr "Não foi possível pedir a consulta."
+
+msgid "Partners"
+msgstr "Sócios"
+
+msgid "Tick the partners to include in the next query. Every partner query is paid on your provider account. The Receita shows only a masked CPF: use \"Find contacts\" (Assertiva) or type the CPF."
+msgstr "Marque os sócios que entram na próxima consulta. Toda consulta de sócio é paga na sua conta no provedor. A Receita só mostra o CPF mascarado: use \"Buscar contatos\" (Assertiva) ou digite o CPF."
+
+msgid "Full CPF"
+msgstr "CPF completo"
+
+msgid "Save CPF"
+msgstr "Salvar CPF"
+
+msgid "Request for {0} partner(s)"
+msgstr "Pedir para {0} sócio(s)"
+
+msgid "Queries made"
+msgstr "Consultas feitas"
+
+msgid "Company"
+msgstr "Empresa"
+
+msgid "Queried with the pre-filter alert: {0}"
+msgstr "Consultado com o alerta do pré-filtro: {0}"
+
+msgid "View return"
+msgstr "Ver retorno"
+
+msgid "Complete return, exactly as the provider sent it. Nothing is left out."
+msgstr "Retorno completo, exatamente como o provedor enviou. Nada é omitido."
+
+msgid "CPF saved."
+msgstr "CPF salvo."
+
+msgid "Could not save the CPF."
+msgstr "Não foi possível salvar o CPF."
+
+msgid "Could not open the return."
+msgstr "Não foi possível abrir o retorno."
+
+msgid "Partners: {0}. {1} queries"
+msgstr "Sócios: {0}. {1} consultas"
+
+msgid "(about {0} in total at list price)."
+msgstr "(cerca de {0} no total, a preço de tabela)."
+
+msgid "{0} of {1} queries requested."
+msgstr "{0} de {1} consultas pedidas."
