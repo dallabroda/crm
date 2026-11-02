@@ -1,31 +1,21 @@
 <template>
-  <div class="flex items-center">
+  <!-- Figma "Barra superior": page title 20 Semi Bold; the saved-view switch
+       is a "Filtro" (outline, 32px) next to it. -->
+  <div class="flex min-w-0 items-center gap-3">
     <router-link
       :to="{ name: routeName }"
-      class="px-0.5 py-1 text-lg-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-outline-gray-3"
-      :class="[
-        viewControls && viewControls.viewsDropdownOptions
-          ? 'text-ink-gray-5 hover:text-ink-gray-7'
-          : 'text-ink-gray-7',
-      ]"
+      class="truncate rounded-[var(--ct-radius-sm)] text-[20px] font-semibold leading-7 text-ink-gray-9 focus:outline-none focus-visible:ring-2 focus-visible:ring-outline-gray-3"
     >
-      {{ __(routeName) }}
+      {{ title || __(routeName) }}
     </router-link>
-    <span
-      v-if="viewControls && viewControls.viewsDropdownOptions"
-      class="mx-0.5 text-base text-ink-gray-4"
-      aria-hidden="true"
-    >
-      /
-    </span>
     <Dropdown
       v-if="viewControls && viewControls.viewsDropdownOptions"
       :options="viewControls.viewsDropdownOptions"
     >
       <template #default="{ open }">
         <Button
-          variant="ghost"
-          class="text-lg-medium text-nowrap"
+          variant="outline"
+          class="text-nowrap"
           :label="__(viewControls.currentView?.label)"
           :iconRight="open ? 'lucide-chevron-up' : 'lucide-chevron-down'"
         >
@@ -69,6 +59,8 @@ import { Dropdown } from 'frappe-ui'
 
 defineProps({
   routeName: { type: String, required: true },
+  // shown instead of the route name (a funnel shows its own name)
+  title: { type: String, default: '' },
 })
 
 const viewControls = defineModel({ type: Object, default: () => ({}) })

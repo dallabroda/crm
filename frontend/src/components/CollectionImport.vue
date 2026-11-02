@@ -1,7 +1,7 @@
 <template>
   <Button
     v-if="context?.enabled"
-    variant="subtle"
+    variant="outline"
     iconLeft="lucide-upload"
     :label="__('Import titles')"
     @click="open"
