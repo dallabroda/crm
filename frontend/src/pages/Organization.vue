@@ -299,7 +299,7 @@ const props = defineProps({
 const { brand } = getSettings()
 const { $dialog, $socket } = globalStore()
 const { getUser } = usersStore()
-const { getDealStatus } = statusesStore()
+const { getDealStatus, getDealStatusLabel } = statusesStore()
 const { doctypeMeta } = getMeta('CRM Organization')
 const { capture } = useTelemetry()
 
@@ -577,7 +577,7 @@ function getDealRowObject(deal) {
     },
     deal_value: getFormattedCurrency('deal_value', deal),
     status: {
-      label: __(deal.status),
+      label: getDealStatusLabel(deal.status),
       color: getDealStatus(deal.status)?.color,
     },
     email: deal.email,

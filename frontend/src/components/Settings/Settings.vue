@@ -296,14 +296,14 @@ const tabs = computed(() => {
           condition: () => isAdmin() && apiKeys.enabled,
         },
         {
-          label: __('Bureaus'),
+          label: __('Cartório & Localização'),
           icon: LucideSearchCheck,
           component: markRaw(BureausSettings),
           // Assertiva Localize and CENPROT (credtech#290): admins only, with the cred_hub app
           condition: () => isAdmin() && apiKeys.enabled,
         },
         {
-          label: __('Credit & Legal Bureaus'),
+          label: __('Políticas de Crédito & Compliance'),
           icon: ShieldCheck,
           component: markRaw(CreditBureausSettings),
           condition: () => isManager(),

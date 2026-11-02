@@ -1,7 +1,7 @@
 <template>
   <SettingsLayoutBase
-    :title="__('Credit & Legal Bureaus')"
-    :description="__('Configure Escavador API, Infosimples and automated credit analysis.')"
+    :title="__('Políticas de Crédito & Compliance')"
+    :description="__('Configuração de regras de análise de crédito, prevenção a fraudes e consultas jurídicas.')"
   >
     <template #header-actions>
       <div v-if="settingsDoc" class="flex items-center gap-2">
@@ -25,10 +25,10 @@
         <div class="flex items-center justify-between p-4 bg-surface-gray-2 rounded-lg border border-outline-gray-2">
           <div class="flex flex-col gap-0.5">
             <span class="text-base-medium font-semibold text-ink-gray-9">
-              {{ __('Enable Credit & Compliance Pipeline') }}
+              {{ __('Habilitar Análise de Risco & Compliance') }}
             </span>
             <span class="text-p-sm text-ink-gray-6">
-              {{ __('Active background checking for lawsuits, federal debt, labor debt and protests.') }}
+              {{ __('Verificação automatizada de processos, dívida ativa, débitos trabalhistas e protestos.') }}
             </span>
           </div>
           <Switch v-model="settingsDoc.enabled" />
@@ -40,19 +40,19 @@
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
                 <span class="text-lg-semibold text-ink-gray-9">
-                  {{ __('Step 0 — CEIS/CNEP Sanctions (Portal da Transparência / CGU)') }}
+                  {{ __('Etapa 0 — Sanções CEIS/CNEP (Controladoria-Geral da União)') }}
                 </span>
-                <Badge label="Grátis" theme="green" variant="subtle" />
+                <Badge label="Incluso" theme="green" variant="subtle" />
               </div>
               <Switch v-model="settingsDoc.cgu_enabled" />
             </div>
             <p class="text-p-sm text-ink-gray-6">
-              {{ __('Runs first, for free (CredTech credential, nothing to configure here). If the company is already sanctioned and rejection is on, the paid providers below are skipped entirely — no cost spent.') }}
+              {{ __('Consulta inicial de sanções públicas (Portal da Transparência). Se a empresa estiver sancionada e o bloqueio estiver ativo, a análise é reprovada imediatamente.') }}
             </p>
             <div v-if="settingsDoc.cgu_enabled" class="pt-2">
               <Checkbox
                 v-model="settingsDoc.block_on_ceis_cnep"
-                :label="__('Reject immediately if listed in CEIS/CNEP')"
+                :label="__('Desqualificar imediatamente se constar no CEIS/CNEP')"
               />
             </div>
           </div>
@@ -62,21 +62,21 @@
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
                 <span class="text-lg-semibold text-ink-gray-9">
-                  {{ __('Escavador API (v2) — Unified Lawsuits') }}
+                  {{ __('Pesquisa Processual Unificada') }}
                 </span>
-                <Badge label="~R$ 0,50 / CNPJ" theme="blue" variant="subtle" />
+                <Badge label="Judicial" theme="blue" variant="subtle" />
               </div>
               <Switch v-model="settingsDoc.escavador_enabled" />
             </div>
             <p class="text-p-sm text-ink-gray-6">
-              {{ __('Searches state, federal, labor courts and STJ across Brazil in 1 unified call using only the CNPJ.') }}
+              {{ __('Consulta tribunais estaduais, federais, trabalhistas e superiores (STJ/STF) em todo o Brasil usando o CNPJ.') }}
             </p>
             <div v-if="settingsDoc.escavador_enabled" class="space-y-3 pt-2">
               <FormControl
                 v-model="settingsDoc.escavador_token"
                 type="password"
-                :label="__('Escavador Bearer Token')"
-                :placeholder="__('Enter the Escavador API token')"
+                :label="__('Token de Acesso da API Judicial')"
+                :placeholder="__('Informe o token do provedor judicial')"
                 autocomplete="off"
               />
               <div class="flex items-center gap-2">
@@ -84,7 +84,7 @@
                   v-model="testCnpj.escavador"
                   type="text"
                   class="w-48"
-                  :placeholder="__('CNPJ to test with')"
+                  :placeholder="__('CNPJ para teste')"
                 />
                 <Button
                   variant="subtle"
@@ -92,7 +92,7 @@
                   :disabled="!testCnpj.escavador"
                   @click="testProvider('escavador', settingsDoc.escavador_token)"
                 >
-                  {{ __('Test Connection (real paid query)') }}
+                  {{ __('Testar Conexão') }}
                 </Button>
               </div>
             </div>
@@ -103,14 +103,14 @@
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
                 <span class="text-lg-semibold text-ink-gray-9">
-                  {{ __('Infosimples API (v2) — Fiscal & Protests') }}
+                  {{ __('Regularidade Fiscal e Certidões Federais') }}
                 </span>
-                <Badge label="~R$ 0,96 / CNPJ (custo + 20%)" theme="blue" variant="subtle" />
+                <Badge label="Fiscal" theme="blue" variant="subtle" />
               </div>
               <Switch v-model="settingsDoc.infosimples_enabled" />
             </div>
             <p class="text-p-sm text-ink-gray-6">
-              {{ __('Queries PGFN Active Debt of the Union, CND Federal (Receita/PGFN), CNDT (Labor Court TST) and CENPROT. CredTech credential, nothing to configure — billed from your credit balance.') }}
+              {{ __('Consulta automática de Dívida Ativa da União (PGFN), CND Federal (Receita/PGFN), CNDT (Justiça do Trabalho) e cartórios de protesto.') }}
             </p>
           </div>
 
@@ -119,29 +119,29 @@
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
                 <span class="text-lg-semibold text-ink-gray-9">
-                  {{ __('DirectD — Score, National Protests & Lawsuits') }}
+                  {{ __('Bureau de Risco e Protestos Nacionais') }}
                 </span>
-                <Badge label="R$ 1,80 a R$ 3,54 / consulta (custo + 20%)" theme="blue" variant="subtle" />
+                <Badge label="Score & Cartórios" theme="blue" variant="subtle" />
               </div>
               <Switch v-model="settingsDoc.directd_enabled" />
             </div>
             <p class="text-p-sm text-ink-gray-6">
-              {{ __('3 products: QUOD credit Score (PF/PJ), Protestos Nacional - IEPTB (all of Brazil, unlike the SP-only CENPROT above) and Processos Judiciais - Simplificada. CredTech credential, nothing to configure — billed from your credit balance.') }}
+              {{ __('Score de Crédito analítico (PJ/PF), abrangência nacional de cartórios (IEPTB Nacional) e apontamentos cadastrais.') }}
             </p>
             <div v-if="settingsDoc.directd_enabled" class="space-y-3 pt-2">
               <FormControl
                 v-model.number="settingsDoc.min_directd_score"
                 type="number"
-                :label="__('Minimum DirectD Score Tolerated (0 = do not reject by score)')"
+                :label="__('Score Mínimo Exigido (0 = não reprovar por score)')"
               />
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
                 <Checkbox
                   v-model="settingsDoc.directd_fgts_enabled"
-                  :label="__('Check FGTS regularity (~R$ 0,43 / CNPJ, custo + 20%)')"
+                  :label="__('Consultar regularidade do FGTS (CRF)')"
                 />
                 <Checkbox
                   v-model="settingsDoc.directd_sintegra_enabled"
-                  :label="__('Check Sintegra/CCC — state registration (~R$ 2,16 / CNPJ, custo + 20%)')"
+                  :label="__('Consultar Sintegra / CCC (Inscrição Estadual)')"
                 />
               </div>
             </div>
@@ -150,22 +150,22 @@
           <!-- 3. Funnel Automation Triggers -->
           <div class="p-5 bg-surface-white rounded-lg border border-outline-gray-2 space-y-4">
             <span class="text-lg-semibold text-ink-gray-9">
-              {{ __('Funnel Stage Automation Trigger') }}
+              {{ __('Gatilho de Automação no Funil') }}
             </span>
             <p class="text-p-sm text-ink-gray-6">
-              {{ __('Automatically execute the R$ 1.20 screening when a card moves to this stage in the sales funnel.') }}
+              {{ __('Executar automaticamente a validação de compliance quando um card for movido para esta etapa.') }}
             </p>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormControl
                 v-model="settingsDoc.auto_trigger_stage"
                 type="text"
-                :label="__('Trigger Stage Name / Key')"
+                :label="__('Nome da Etapa de Gatilho')"
                 placeholder="ex: Pre-Analysis or Compliance"
               />
               <div class="flex items-center gap-2 pt-6">
                 <Checkbox
                   v-model="settingsDoc.check_second_organization"
-                  :label="__('Check Second Organization (Sacado) if present')"
+                  :label="__('Verificar Segunda Organização (Sacado), se houver')"
                 />
               </div>
             </div>
@@ -174,36 +174,36 @@
           <!-- 4. Risk Tolerance & Cutoff Rules -->
           <div class="p-5 bg-surface-white rounded-lg border border-outline-gray-2 space-y-4">
             <span class="text-lg-semibold text-ink-gray-9">
-              {{ __('Risk Tolerances & Automatic Disqualification') }}
+              {{ __('Critérios de Risco e Alçadas de Bloqueio') }}
             </span>
             <p class="text-p-sm text-ink-gray-6">
-              {{ __('Define criteria to automatically flag cards as Pre-Approved or Rejected.') }}
+              {{ __('Defina critérios objetivos para pré-aprovação ou recusa automática de operações.') }}
             </p>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
               <FormControl
                 v-model.number="settingsDoc.max_lawsuits_defendant"
                 type="number"
-                :label="__('Max Lawsuits as Defendant Allowed')"
+                :label="__('Limite de Processos como Réu')"
               />
               <FormControl
                 v-model.number="settingsDoc.max_pgfn_debt"
                 type="number"
-                :label="__('Max PGFN Active Debt Tolerated (R$)')"
+                :label="__('Limite Tolerado de Dívida PGFN (R$)')"
               />
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
               <Checkbox
                 v-model="settingsDoc.block_on_bankruptcy"
-                :label="__('Reject immediately on bankruptcy or judicial recovery')"
+                :label="__('Bloquear imediatamente se em Recuperação Judicial ou Falência')"
               />
               <Checkbox
                 v-model="settingsDoc.block_on_protest"
-                :label="__('Reject immediately if notary protests exist (CENPROT)')"
+                :label="__('Bloquear imediatamente se constar Protesto em Cartório')"
               />
               <Checkbox
                 v-if="settingsDoc.directd_fgts_enabled"
                 v-model="settingsDoc.block_on_fgts_irregular"
-                :label="__('Reject immediately if FGTS is irregular')"
+                :label="__('Bloquear se FGTS estiver irregular')"
               />
             </div>
           </div>
@@ -212,55 +212,55 @@
           <div class="p-5 bg-surface-white rounded-lg border border-outline-gray-2 space-y-4">
             <div class="flex items-center justify-between">
               <span class="text-lg-semibold text-ink-gray-9">
-                {{ __('Final Bureau (On-Demand)') }}
+                {{ __('Relatórios de Bureau Completo (Sob Demanda)') }}
               </span>
-              <Badge label="R$ 25 a R$ 40 / Consulta" theme="amber" variant="subtle" />
+              <Badge label="Sob Demanda" theme="amber" variant="subtle" />
             </div>
             <p class="text-p-sm text-ink-gray-6">
-              {{ __('Activated strictly on demand for leads approved in the pre-filter. Uses your own Serasa contract — CredTech never pays for this query.') }}
+              {{ __('Acionamento sob demanda para casos pré-aprovados ou alçadas especiais de análise de crédito.') }}
             </p>
             <Checkbox
               v-model="settingsDoc.serasa_enabled"
-              :label="__('Enable Serasa Experian (Relato PJ)')"
+              :label="__('Habilitar Serasa Experian (Relato PJ — Contrato Próprio)')"
             />
             <div v-if="settingsDoc.serasa_enabled" class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
               <FormControl
                 v-model="settingsDoc.serasa_endpoint_url"
                 type="text"
-                :label="__('Serasa Relato PJ Endpoint (your contract)')"
+                :label="__('URL de Endpoint do Serasa')"
                 placeholder="https://..."
               />
               <FormControl
                 v-model="settingsDoc.serasa_token"
                 type="password"
-                :label="__('Serasa Access Token (your contract)')"
+                :label="__('Token / Chave de Acesso Serasa')"
                 autocomplete="off"
               />
             </div>
             <div class="pt-4 mt-4 border-t border-outline-gray-2 space-y-3">
               <p class="text-p-sm text-ink-gray-6">
-                {{ __('These 3 run on the CredTech DirectD account and are billed from your credit balance at a fixed price, independent of the automatic DirectD toggle above.') }}
+                {{ __('Relatórios analíticos especializados acionados sob demanda no cockpit da operação:') }}
               </p>
               <div class="flex items-center justify-between">
                 <Checkbox
                   v-model="settingsDoc.boavista_risco_enabled"
                   :label="__('Boa Vista - Risco Positivo PJ')"
                 />
-                <Badge label="custo R$14,03 · cliente R$18,00" theme="amber" variant="subtle" />
+                <Badge label="Sob Demanda" theme="amber" variant="subtle" />
               </div>
               <div class="flex items-center justify-between">
                 <Checkbox
                   v-model="settingsDoc.dossie_quod_enabled"
                   :label="__('Dossiê QUOD - Completo')"
                 />
-                <Badge label="custo R$6,99 · cliente R$10,00" theme="amber" variant="subtle" />
+                <Badge label="Sob Demanda" theme="amber" variant="subtle" />
               </div>
               <div class="flex items-center justify-between">
                 <Checkbox
                   v-model="settingsDoc.scr_bacen_enabled"
                   :label="__('SCR Analítico - Resumo BACEN')"
                 />
-                <Badge label="custo R$3,90 · cliente R$6,00" theme="amber" variant="subtle" />
+                <Badge label="Sob Demanda" theme="amber" variant="subtle" />
               </div>
             </div>
           </div>
@@ -322,7 +322,7 @@ const settingsDoc = ref({
 
 const testCnpj = ref({ escavador: '' })
 
-const TEST_COST = { escavador: '0,50' }
+// test provider
 
 const isDirty = computed(() => {
   if (!originalDoc.value) return false
@@ -383,7 +383,7 @@ async function testProvider(provider, token) {
     return
   }
   const confirmed = window.confirm(
-    __('This runs a real query against {0} and costs about R$ {1}. Continue?').replace('{0}', provider).replace('{1}', TEST_COST[provider])
+    __('Deseja executar uma consulta de teste no provedor para o CNPJ informado?')
   )
   if (!confirmed) return
 

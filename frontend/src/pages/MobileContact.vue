@@ -192,7 +192,7 @@ const { $dialog, makeCall } = globalStore()
 
 const { getUser } = usersStore()
 const { getOrganization } = organizationsStore()
-const { getDealStatus } = statusesStore()
+const { getDealStatus, getDealStatusLabel } = statusesStore()
 const { doctypeMeta } = getMeta('Contact')
 const { capture } = useTelemetry()
 

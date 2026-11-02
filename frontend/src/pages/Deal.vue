@@ -63,7 +63,13 @@
       class="flex flex-1 overflow-hidden flex-col [&_[role='tab']]:px-1 [&_[role='tab']]:shrink-0 [&_[role='tablist']]:px-5 [&_[role='tablist']::-webkit-scrollbar]:h-0 [&_[role='tablist']]:min-h-[45px] [&_[role='tablist']]:gap-[22px] [&>[role='tabpanel']:not([hidden])]:flex [&>[role='tabpanel']:not([hidden])]:grow [&>[data-slot=tab-list]]:overflow-x-auto [&_[data-slot=tab-indicator]]:translate-y-0 [&>[data-slot=tab-panel]]:min-h-0 [&>[data-slot=tab-panel]]:flex-col [&>[data-slot=tab-panel]]:overflow-auto"
     >
       <template #tab-panel>
+        <DealTitlesTable
+          v-if="activeTab === 'titles'"
+          :deal="doc"
+          @reload="reloadResources"
+        />
         <Activities
+          v-else
           ref="activities"
           v-model:reload="reload"
           v-model:activeTab="activeTab"
@@ -409,6 +415,8 @@ import ErrorPage from '@/components/ErrorPage.vue'
 import Icon from '@/components/Icon.vue'
 import Resizer from '@/components/Resizer.vue'
 import LoadingIndicator from '@/components/Icons/LoadingIndicator.vue'
+import MoneyIcon from '@/components/Icons/MoneyIcon.vue'
+import DealTitlesTable from '@/components/DealTitlesTable.vue'
 import ActivityIcon from '@/components/Icons/ActivityIcon.vue'
 import EmailIcon from '@/components/Icons/EmailIcon.vue'
 import Email2Icon from '@/components/Icons/Email2Icon.vue'
@@ -841,6 +849,12 @@ usePageMeta(() => {
 
 const tabs = computed(() => {
   let tabOptions = [
+    {
+      name: 'Titles',
+      value: 'titles',
+      label: __('Títulos'),
+      iconLeft: MoneyIcon,
+    },
     {
       name: 'Activity',
       value: 'activity',

@@ -14,7 +14,7 @@ export const statusesStore = defineStore('crm-statuses', () => {
 
   const leadStatuses = createListResource({
     doctype: 'CRM Lead Status',
-    fields: ['name', 'color', 'position', 'type'],
+    fields: ['name', 'deal_status', 'color', 'position', 'type'],
     orderBy: 'position asc',
     cache: 'lead-statuses',
     initialData: [],
@@ -30,7 +30,7 @@ export const statusesStore = defineStore('crm-statuses', () => {
 
   const dealStatuses = createListResource({
     doctype: 'CRM Deal Status',
-    fields: ['name', 'color', 'position', 'type'],
+    fields: ['name', 'deal_status', 'color', 'position', 'type'],
     orderBy: 'position asc',
     cache: 'deal-statuses',
     initialData: [],
@@ -67,9 +67,15 @@ export const statusesStore = defineStore('crm-statuses', () => {
 
   function getDealStatus(name) {
     if (!name) {
-      name = dealStatuses.data[0].name
+      name = dealStatuses.data[0]?.name
     }
     return dealStatusesByName[name]
+  }
+
+  function getDealStatusLabel(name) {
+    if (!name) return ''
+    let s = dealStatusesByName[name]
+    return s?.deal_status ? __(s.deal_status) : __(name)
   }
 
   function getCommunicationStatus(name) {
@@ -117,6 +123,7 @@ export const statusesStore = defineStore('crm-statuses', () => {
     communicationStatuses,
     getLeadStatus,
     getDealStatus,
+    getDealStatusLabel,
     getCommunicationStatus,
     statusOptions,
   }
