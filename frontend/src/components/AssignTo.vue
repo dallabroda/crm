@@ -5,10 +5,11 @@
         <component
           :is="assignees?.length == 1 ? 'Button' : 'div'"
           v-if="assignees?.length"
+          :variant="assignees?.length == 1 ? 'outline' : undefined"
         >
           <MultipleAvatar :avatars="assignees" />
         </component>
-        <Button v-else :label="__('Assign To')" />
+        <Button v-else variant="outline" :label="__('Assign To')" />
       </div>
     </template>
     <template #default="{ open }">
