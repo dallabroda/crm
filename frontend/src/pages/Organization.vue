@@ -1,11 +1,21 @@
 <template>
   <LayoutHeader v-if="organization.doc">
+    <!-- Figma "Organizações · Detalhe" (807:2): "Voltar" + organization name
+         on the left; outline actions and the solid primary one on the right -->
     <template #left-header>
-      <Breadcrumbs :items="breadcrumbs">
-        <template #prefix="{ item }">
-          <Icon v-if="item.icon" :icon="item.icon" class="mr-2 h-4" />
-        </template>
-      </Breadcrumbs>
+      <router-link
+        :to="backRoute"
+        class="flex h-8 shrink-0 items-center gap-1 rounded-[var(--ct-radius-md)] pl-1 pr-2 text-base font-medium text-ink-gray-6 transition-colors hover:bg-[var(--ct-bg-soft)] hover:text-ink-gray-9 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-outline-gray-3"
+      >
+        <span class="lucide-chevron-left size-4" aria-hidden="true" />
+        {{ __('Back') }}
+      </router-link>
+      <h1
+        class="truncate text-[20px] font-semibold leading-7 text-ink-gray-9"
+        :title="title"
+      >
+        {{ title }}
+      </h1>
     </template>
     <template #right-header>
       <CustomActions
@@ -25,6 +35,7 @@
       />
       <Button
         v-if="activeTab === 'deals'"
+        variant="solid"
         :label="__('New Deal')"
         iconLeft="lucide-plus"
         @click="showDealModal = true"
@@ -48,6 +59,7 @@
       >
         <template #target="{ togglePopover }">
           <Button
+            variant="solid"
             :label="__('Add Contact')"
             iconLeft="lucide-plus"
             @click="togglePopover()"
@@ -60,20 +72,24 @@
     <Resizer
       v-if="organization.doc"
       :parent="$refs.parentRef"
-      class="flex h-full flex-col overflow-hidden border-r"
+      class="flex h-full flex-col overflow-hidden border-r border-[var(--ct-border-soft)]"
     >
-      <div class="border-b">
+      <div class="border-b border-[var(--ct-border-soft)]">
         <FileUploader
           :validateFile="validateIsImageFile"
           @success="changeOrganizationImage"
         >
           <template #default="{ openFileSelector, error }">
-            <div class="flex flex-col items-start justify-start gap-4 p-5">
-              <div class="flex gap-4 items-center">
-                <div class="group relative h-15.5 w-15.5">
+            <!-- Figma side panel header: 62px avatar, 20 Semi Bold name and
+                 the site, then 32px actions -->
+            <div
+              class="flex flex-col items-start justify-start gap-4 px-6 py-5"
+            >
+              <div class="flex w-full min-w-0 items-center gap-4">
+                <div class="group relative h-15.5 w-15.5 shrink-0">
                   <Avatar
                     size="3xl"
-                    class="h-15.5 w-15.5"
+                    class="h-15.5 w-15.5 [&>div]:text-[20px] [&>div]:font-semibold"
                     :label="organization.doc.organization_name"
                     :image="organization.doc.organization_logo"
                   />
@@ -113,12 +129,14 @@
                   </component>
                 </div>
                 <div class="flex flex-col gap-2 truncate">
-                  <div class="truncate text-3xl-medium text-ink-gray-9">
+                  <div
+                    class="truncate text-[20px] font-semibold leading-7 text-ink-gray-9"
+                  >
                     <span>{{ organization.doc.name }}</span>
                   </div>
                   <div
                     v-if="organization.doc.website"
-                    class="flex items-center gap-1.5 text-base text-ink-gray-8"
+                    class="flex items-center gap-1.5 text-base text-ink-gray-9"
                   >
                     <WebsiteIcon class="size-4" />
                     <span>{{ website(organization.doc.website) }}</span>
@@ -126,16 +144,19 @@
                   <ErrorMessage :message="__(error)" />
                 </div>
               </div>
-              <div class="flex gap-1.5">
+              <div class="flex gap-2">
                 <Button
                   v-if="canDelete"
+                  size="md"
                   :label="__('Delete')"
                   theme="red"
-                  size="sm"
+                  variant="subtle"
                   iconLeft="lucide-trash-2"
                   @click="deleteOrganization()"
                 />
                 <Button
+                  size="md"
+                  variant="outline"
                   :tooltip="__('Open Website')"
                   icon="lucide-link"
                   @click="openWebsite"
@@ -162,18 +183,11 @@
       v-model="activeTab"
       as="div"
       :tabs="tabs"
-      class="flex flex-1 overflow-hidden flex-col [&_[role='tablist']]:gap-7.5 [&_[role='tablist']]:px-5 [&_[role='tablist']::-webkit-scrollbar]:h-0 [&_[role='tablist']]:min-h-[45px] [&>[role='tabpanel']:not([hidden])]:flex [&>[role='tabpanel']:not([hidden])]:grow [&>[data-slot=tab-list]]:overflow-x-auto [&_[data-slot=tab-indicator]]:translate-y-0 [&>[data-slot=tab-panel]]:min-h-0 [&>[data-slot=tab-panel]]:flex-col [&>[data-slot=tab-panel]]:overflow-auto"
+      class="flex flex-1 overflow-hidden flex-col [&_[role='tab']]:px-1 [&_[role='tab']]:shrink-0 [&_[role='tablist']]:gap-4 [&_[role='tablist']]:px-6 [&_[role='tablist']]:border-[var(--ct-border-soft)] [&_[role='tablist']::-webkit-scrollbar]:h-0 [&_[role='tablist']]:min-h-[45px] [&>[role='tabpanel']:not([hidden])]:flex [&>[role='tabpanel']:not([hidden])]:grow [&>[data-slot=tab-list]]:overflow-x-auto [&_[data-slot=tab-indicator]]:translate-y-0 [&>[data-slot=tab-panel]]:min-h-0 [&>[data-slot=tab-panel]]:flex-col [&>[data-slot=tab-panel]]:overflow-auto"
     >
       <template #tab-label="{ tab }">{{ __(tab.label) }}</template>
       <template #tab-suffix="{ tab, active }">
-        <Badge
-          :class="[active ? 'bg-surface-gray-10' : 'bg-gray-600']"
-          variant="solid"
-          theme="gray"
-          size="sm"
-        >
-          {{ tab.count }}
-        </Badge>
+        <TabCounter :count="tab.count" :active="active" />
       </template>
       <template #tab-panel="{ tab }">
         <DealsListView
@@ -204,6 +218,11 @@
           v-if="tab.value !== 'notes' && tab.value !== 'credit' && !rows.length"
           :icon="tab.iconLeft"
           :name="__(tab.label)"
+          :title="
+            tab.value === 'deals'
+              ? __('No deals found')
+              : __('No contacts found')
+          "
           :description="
             tab.value === 'deals'
               ? __('Use New Deal to create a deal for this organization.')
@@ -241,19 +260,19 @@
 <script setup>
 import RecordNotes from '@/components/RecordNotes.vue'
 import OrganizationCreditDossie from '@/components/CreditCheck/OrganizationCreditDossie.vue'
-import NoteIcon from '@/components/Icons/NoteIcon.vue'
+import FileTextIcon from '~icons/lucide/file-text'
+import TabCounter from '@/components/TabCounter.vue'
 import MoneyIcon from '@/components/Icons/MoneyIcon.vue'
 import ErrorPage from '@/components/ErrorPage.vue'
 import Resizer from '@/components/Resizer.vue'
 import SidePanelLayout from '@/components/SidePanelLayout.vue'
-import Icon from '@/components/Icon.vue'
 import LayoutHeader from '@/components/LayoutHeader.vue'
 import DealsListView from '@/components/ListViews/DealsListView.vue'
 import ContactsListView from '@/components/ListViews/ContactsListView.vue'
 import WebsiteIcon from '@/components/Icons/WebsiteIcon.vue'
 import CameraIcon from '@/components/Icons/CameraIcon.vue'
-import DealsIcon from '@/components/Icons/DealsIcon.vue'
-import ContactsIcon from '@/components/Icons/ContactsIcon.vue'
+import HandshakeIcon from '~icons/lucide/handshake'
+import ContactIcon from '~icons/lucide/contact'
 import DeleteLinkedDocModal from '@/components/DeleteLinkedDocModal.vue'
 import ContactModal from '@/components/Modals/ContactModal.vue'
 import DealModal from '@/components/Modals/DealModal.vue'
@@ -276,7 +295,6 @@ import {
 } from '@/utils'
 import { timestampCell } from '@/composables/useTimelinePreferences'
 import {
-  Breadcrumbs,
   Avatar,
   FileUploader,
   Dropdown,
@@ -376,6 +394,10 @@ const title = computed(() => {
   let t = doctypeMeta.value?.title_field || 'name'
   return organization.doc?.[t] || props.organizationId
 })
+
+const backRoute = computed(
+  () => breadcrumbs.value[breadcrumbs.value.length - 2].route,
+)
 
 usePageMeta(() => {
   return {
@@ -480,20 +502,20 @@ const tabs = [
   {
     value: 'deals',
     label: 'Deals',
-    iconLeft: DealsIcon,
+    iconLeft: HandshakeIcon,
     count: computed(() => deals.data?.length),
   },
   {
     value: 'contacts',
     label: 'Contacts',
-    iconLeft: ContactsIcon,
+    iconLeft: ContactIcon,
     count: computed(() => contacts.data?.length),
   },
   // the organization's own notes (credtech#214)
   {
     value: 'notes',
     label: 'Notes',
-    iconLeft: NoteIcon,
+    iconLeft: FileTextIcon,
     count: computed(() => notesCount.value),
   },
   // credit/legal pre-screening dossier for this organization (credtech#302)

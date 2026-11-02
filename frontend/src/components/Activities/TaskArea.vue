@@ -1,39 +1,32 @@
 <template>
-  <div v-if="tasks.length">
-    <div v-for="(task, i) in tasks" :key="task.name">
+  <!-- Figma "Card · Tarefas" (801:2): one bordered card per task (radius
+       12, 16px padding, 8px apart); assignee, due date and a priority pill -->
+  <div v-if="tasks.length" class="flex flex-col gap-2">
+    <div v-for="task in tasks" :key="task.name">
       <div
-        class="activity flex cursor-pointer gap-6 rounded-4 p-2.5 duration-300 ease-in-out hover:bg-surface-gray-1"
+        class="activity flex cursor-pointer items-center gap-6 rounded-[var(--ct-radius-lg)] border border-[var(--ct-border)] p-4 transition-colors hover:bg-[var(--ct-bg-soft)]"
         @click="modalRef.showTask(task)"
       >
-        <div class="flex flex-1 flex-col gap-1.5 text-base truncate">
+        <div class="flex flex-1 flex-col gap-2 text-base truncate">
           <div class="font-medium text-ink-gray-9 truncate">
             {{ task.title }}
           </div>
-          <div class="flex gap-1.5 text-ink-gray-8">
-            <div class="flex items-center gap-1.5">
-              <UserAvatar :user="task.assigned_to" size="xs" />
+          <div class="flex flex-wrap items-center gap-4 text-ink-gray-6">
+            <div class="flex items-center gap-2">
+              <UserAvatar :user="task.assigned_to" size="sm" />
               {{ getUser(task.assigned_to).full_name }}
-            </div>
-            <div v-if="task.due_date" class="flex items-center justify-center">
-              <DotIcon class="h-2.5 w-2.5 text-ink-gray-5" :radius="2" />
             </div>
             <div v-if="task.due_date">
               <Tooltip
                 :text="formatDate(task.due_date, 'ddd, MMM D, YYYY | hh:mm a')"
               >
-                <div class="flex gap-2">
+                <div class="flex items-center gap-1.5">
                   <CalendarIcon />
                   <div>{{ formatDate(task.due_date, 'D MMM, hh:mm a') }}</div>
                 </div>
               </Tooltip>
             </div>
-            <div class="flex items-center justify-center">
-              <DotIcon class="h-2.5 w-2.5 text-ink-gray-5" :radius="2" />
-            </div>
-            <div class="flex gap-2">
-              <TaskPriorityIcon :priority="task.priority" />
-              {{ __(task.priority) }}
-            </div>
+            <TaskPriorityBadge :priority="task.priority" />
           </div>
         </div>
         <div class="flex items-center gap-1">
@@ -83,18 +76,13 @@
           </Dropdown>
         </div>
       </div>
-      <div
-        v-if="i < tasks.length - 1"
-        class="h-px border-t border-outline-elevation-2"
-      />
     </div>
   </div>
 </template>
 <script setup>
 import CalendarIcon from '@/components/Icons/CalendarIcon.vue'
 import TaskStatusIcon from '@/components/Icons/TaskStatusIcon.vue'
-import TaskPriorityIcon from '@/components/Icons/TaskPriorityIcon.vue'
-import DotIcon from '@/components/Icons/DotIcon.vue'
+import TaskPriorityBadge from '@/components/TaskPriorityBadge.vue'
 import UserAvatar from '@/components/UserAvatar.vue'
 import { formatDate, taskStatusOptions } from '@/utils'
 import { usersStore } from '@/stores/users'
