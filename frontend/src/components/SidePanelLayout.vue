@@ -4,11 +4,11 @@
       <div v-if="section.visible" class="section flex flex-col">
         <div
           v-if="i !== firstVisibleIndex()"
-          class="w-full section-border h-px border-t"
+          class="w-full section-border h-px border-t border-[var(--ct-border-soft)]"
         />
         <div class="p-1 sm:p-3">
           <Section
-            labelClass="px-2 font-semibold"
+            labelClass="px-2 font-medium text-ink-gray-9"
             headerClass="h-8"
             :label="section.label"
             :hideLabel="!section.label"
@@ -51,7 +51,7 @@
                         class="w-[35%] min-w-20 shrink-0 flex items-center gap-0.5"
                         :class="{ 'pt-[9px]': isTextareaField(field) }"
                       >
-                        <div class="truncate text-sm text-ink-gray-5">
+                        <div class="truncate text-base text-ink-gray-6">
                           {{ __(field.label) }}
                         </div>
                         <div
