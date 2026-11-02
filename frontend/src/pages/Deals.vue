@@ -8,6 +8,8 @@
         v-if="dealsListView?.customListActions"
         :actions="dealsListView.customListActions"
       />
+      <!-- Só no funil de Cobrança (credtech#315): importar títulos vencidos por planilha -->
+      <CollectionImport v-if="pipelineName" :key="pipelineName" :pipeline="pipelineName" />
       <Button
         variant="solid"
         :label="__('Create')"
@@ -244,6 +246,7 @@ import UserAvatar from '@/components/UserAvatar.vue'
 import ViewBreadcrumbs from '@/components/ViewBreadcrumbs.vue'
 import MultipleAvatar from '@/components/MultipleAvatar.vue'
 import CustomActions from '@/components/CustomActions.vue'
+import CollectionImport from '@/components/CollectionImport.vue'
 import PhoneIcon from '@/components/Icons/PhoneIcon.vue'
 import NoteIcon from '@/components/Icons/NoteIcon.vue'
 import TaskIcon from '@/components/Icons/TaskIcon.vue'

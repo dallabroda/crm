@@ -13106,3 +13106,111 @@ msgstr "A CENPROT recebe agora o pedido do título {0}. O status só muda quando
 
 msgid "Requested by the operator in HubTech"
 msgstr "Pedido pelo operador no HubTech"
+
+msgid "Import titles"
+msgstr "Importar títulos"
+
+msgid "Import titles from a spreadsheet"
+msgstr "Importar títulos de uma planilha"
+
+msgid "Send a .xlsx or .csv file with one title per line. The first line must have the column names."
+msgstr "Envie um arquivo .xlsx ou .csv com um título por linha. A primeira linha precisa ter o nome das colunas."
+
+msgid "Cards are grouped by: {0}."
+msgstr "Os cards são agrupados por: {0}."
+
+msgid "Change file"
+msgstr "Trocar arquivo"
+
+msgid "Choose file"
+msgstr "Escolher arquivo"
+
+msgid "{0} lines"
+msgstr "{0} linhas"
+
+msgid "Which column is each field?"
+msgstr "Qual coluna é cada campo?"
+
+msgid "Species only comes in when the column has a registry code (DMI, DSI, CCB...): there is no default."
+msgstr "A espécie só entra quando a coluna tem um código de cartório (DMI, DSI, CCB...): não existe padrão."
+
+msgid "Preview (nothing saved yet)"
+msgstr "Prévia (nada foi gravado ainda)"
+
+msgid "Valid lines: {0} of {1}"
+msgstr "Linhas válidas: {0} de {1}"
+
+msgid "New cards: {0}"
+msgstr "Cards novos: {0}"
+
+msgid "Cards updated: {0}"
+msgstr "Cards atualizados: {0}"
+
+msgid "New titles: {0}"
+msgstr "Títulos novos: {0}"
+
+msgid "Titles updated: {0}"
+msgstr "Títulos atualizados: {0}"
+
+msgid "Already at CENPROT (kept): {0}"
+msgstr "Já na CENPROT (mantidos): {0}"
+
+msgid "New people (contacts): {0}"
+msgstr "Pessoas novas (contatos): {0}"
+
+msgid "New companies: {0}"
+msgstr "Empresas novas: {0}"
+
+msgid "Lines with notes: {0}"
+msgstr "Linhas com observação: {0}"
+
+msgid "{0} lines will be left out:"
+msgstr "{0} linhas vão ficar de fora:"
+
+msgid "Line {0}: {1}"
+msgstr "Linha {0}: {1}"
+
+msgid "Import {0} titles"
+msgstr "Importar {0} títulos"
+
+msgid "debtor"
+msgstr "sacado"
+
+msgid "debtor and cedente"
+msgstr "sacado e cedente"
+
+msgid "(not in the spreadsheet)"
+msgstr "(não está na planilha)"
+
+msgid "Column {0}"
+msgstr "Coluna {0}"
+
+msgid "Send the spreadsheet as .xlsx or .csv."
+msgstr "Envie a planilha em .xlsx ou .csv."
+
+msgid "Could not read the spreadsheet."
+msgstr "Não foi possível ler a planilha."
+
+msgid "Could not check the spreadsheet."
+msgstr "Não foi possível conferir a planilha."
+
+msgid "Import started. You get a notification with the summary when it ends."
+msgstr "Importação iniciada. Você recebe uma notificação com o resumo quando terminar."
+
+msgid "Could not start the import."
+msgstr "Não foi possível iniciar a importação."
+
+msgid "Group the cards by"
+msgstr "Agrupar os cards por"
+
+msgid "Used by the spreadsheet import. The cedente is kept on each title either way."
+msgstr "Usado pela importação por planilha. O cedente fica guardado em cada título nos dois casos."
+
+msgid "Debtor and cedente (one card per pair)"
+msgstr "Sacado e cedente (um card por par)"
+
+msgid "Debtor (one card per debtor)"
+msgstr "Sacado (um card por sacado)"
+
+msgid "Cedente"
+msgstr "Cedente"

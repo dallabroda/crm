@@ -259,13 +259,8 @@
             <div class="text-base-medium text-ink-gray-8">
               {{ __('Title defaults') }}
             </div>
+            <!-- Sem tipo de título padrão: a espécie é escolhida em cada título (dono, 02/11/2026) -->
             <div class="grid grid-cols-2 gap-4">
-              <FormControl
-                v-model="settings.doc.default_species"
-                type="select"
-                :label="__('Default title type')"
-                :options="speciesOptions"
-              />
               <FormControl
                 v-model="settings.doc.default_endorsement"
                 type="select"
@@ -296,6 +291,17 @@
                   }}
                 </span>
               </div>
+              <FormControl
+                v-model="settings.doc.collection_grouping"
+                type="select"
+                :label="__('Group the cards by')"
+                :options="groupingOptions"
+                :description="
+                  __(
+                    'Used by the spreadsheet import. The cedente is kept on each title either way.',
+                  )
+                "
+              />
               <FormControl
                 v-model="settings.doc.auto_send_on_stage"
                 type="checkbox"
@@ -419,7 +425,7 @@ const FIELDS = [
   'creditor_city',
   'creditor_state',
   'creditor_zip',
-  'default_species',
+  'collection_grouping',
   'default_endorsement',
   'titles_accepted',
   'auto_send_on_stage',
@@ -465,28 +471,10 @@ const environmentOptions = [
   { label: __('Homologation (tests)'), value: 'Homologation' },
   { label: __('Production'), value: 'Production' },
 ]
-const SPECIES = {
-  DMI: 'Duplicata mercantil por indicação',
-  DSI: 'Duplicata de serviço por indicação',
-  CBI: 'Cédula de crédito bancário por indicação',
-  CCB: 'Cédula de crédito bancário',
-  DM: 'Duplicata mercantil',
-  DS: 'Duplicata de serviço',
-  NP: 'Nota promissória',
-  CH: 'Cheque',
-  CD: 'Confissão de dívida',
-  CPS: 'Conta de prestação de serviços',
-  CA: 'Contrato de aluguel',
-  CL: 'Contrato de locação',
-  CM: 'Contrato de mútuo',
-  TA: 'Termo de acordo',
-  DD: 'Diversos',
-}
-// Names of the IEPTB manual: Brazilian legal terms, the same in every language
-const speciesOptions = Object.entries(SPECIES).map(([value, name]) => ({
-  label: `${value} - ${name}`,
-  value,
-}))
+const groupingOptions = [
+  { label: __('Debtor and cedente (one card per pair)'), value: 'Debtor and cedente' },
+  { label: __('Debtor (one card per debtor)'), value: 'Debtor' },
+]
 const endorsementOptions = [
   { label: __('No endorsement'), value: '' },
   { label: __('Mandate endorsement'), value: 'Mandate endorsement' },

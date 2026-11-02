@@ -9,6 +9,7 @@
   "title_number",
   "our_number",
   "species",
+  "cedente",
   "due_date",
   "issue_date",
   "column_break_1",
@@ -37,12 +38,20 @@
    "label": "Our Number"
   },
   {
-   "default": "DMI",
    "fieldname": "species",
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Species",
-   "options": "DMI\nDSI\nCBI\nCT\nCCB\nDM\nDS\nNP\nCH\nCD\nCPS\nCA\nCL\nCM\nTA\nDD"
+   "options": "\nDMI\nDSI\nCBI\nCT\nCCB\nDM\nDS\nNP\nCH\nCD\nCPS\nCA\nCL\nCM\nTA\nDD",
+   "description": "No default: the operator chooses it before protesting (owner, 02/11/2026)."
+  },
+  {
+   "fieldname": "cedente",
+   "fieldtype": "Link",
+   "label": "Cedente",
+   "options": "CRM Organization",
+   "in_list_view": 0,
+   "description": "Company that sold this title (receivable anticipation). Empty for the company's own titles."
   },
   {
    "fieldname": "due_date",
@@ -118,7 +127,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-11-01 22:55:00.000000",
+ "modified": "2026-11-02 15:00:00.000000",
  "modified_by": "Administrator",
  "module": "FCRM",
  "name": "CRM Deal Title",
