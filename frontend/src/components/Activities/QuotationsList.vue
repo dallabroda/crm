@@ -15,7 +15,7 @@
       icon="file-text"
       top="30%"
     />
-    <div v-else class="flex flex-col px-3 pb-3 sm:px-10 sm:pb-5">
+    <div v-else class="flex flex-col px-3 pb-3 sm:px-6 sm:pb-5">
       <div v-for="(quotation, i) in rows" :key="quotation.name">
         <a
           :href="quotation.url"

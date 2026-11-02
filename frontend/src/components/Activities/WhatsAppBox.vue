@@ -2,7 +2,7 @@
 <template>
   <div
     v-if="reply?.message"
-    class="flex items-center justify-around gap-2 px-3 pt-2 sm:px-10"
+    class="flex items-center justify-around gap-2 px-3 pt-2 sm:px-6"
   >
     <div
       class="mb-1 ml-13 flex-1 cursor-pointer rounded-4 border-0 border-l-4 border-green-500 bg-surface-gray-2 p-2 text-base text-ink-gray-5"
@@ -24,7 +24,7 @@
 
     <Button variant="ghost" icon="lucide-x" @click="reply = {}" />
   </div>
-  <div class="flex items-end gap-2 px-3 py-2.5 sm:px-10" v-bind="$attrs">
+  <div class="flex items-end gap-2 px-3 py-2.5 sm:px-6" v-bind="$attrs">
     <div class="flex h-8 items-center gap-2">
       <FileUploader @success="(file) => uploadFile(file)">
         <template #default="{ openFileSelector }">
