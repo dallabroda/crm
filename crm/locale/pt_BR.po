@@ -13814,3 +13814,111 @@ msgstr "Recomendação: aprovar com ressalvas"
 
 msgid "Recommendation: reject"
 msgstr "Recomendação: recusar"
+
+msgid "Generating the dossier makes the queries of the minimum package that are missing, with your own keys, and then creates PDF 1, with every field each provider returned and the original JSON, and PDF 2, the credit opinion written by the AI. Queries made in the last {0} days are reused and not paid again."
+msgstr "Gerar o dossiê faz as consultas do pacote mínimo que faltam, com as suas próprias chaves, e depois cria o PDF 1, com todos os campos que cada provedor devolveu e o JSON original, e o PDF 2, o parecer de crédito escrito pela IA. Consultas feitas nos últimos {0} dias são reaproveitadas e não são pagas de novo."
+
+msgid "Minimum package"
+msgstr "Pacote mínimo"
+
+msgid "Last attempt failed: {0}"
+msgstr "A última tentativa falhou: {0}"
+
+msgid "Partners without CPF stay out of the package: {0}."
+msgstr "Sócios sem CPF ficam fora do pacote: {0}."
+
+msgid "An admin needs to turn these bureaus on or take them out of the package in Settings › Integrations › Credit Bureaus."
+msgstr "Um administrador precisa ligar esses bureaus ou tirá-los do pacote em Configurações › Integrações › Bureaus de Crédito."
+
+msgid "Only managers can run paid queries. Ask a manager to generate the dossier."
+msgstr "Só gestores podem fazer consultas pagas. Peça a um gestor para gerar o dossiê."
+
+msgid "Generate dossier (PDF 1 + AI opinion)"
+msgstr "Gerar dossiê (PDF 1 + parecer da IA)"
+
+msgid "queried on {0}"
+msgstr "consultado em {0}"
+
+msgid "not available: {0}"
+msgstr "indisponível: {0}"
+
+msgid "missing · list price {0}, billed by {1} on your account"
+msgstr "falta · preço de tabela {0}, cobrado pela {1} na sua conta"
+
+msgid "missing · billed by {0} on your account, as per your contract"
+msgstr "falta · cobrado pela {0} na sua conta, conforme o seu contrato"
+
+msgid "All queries of the minimum package are done. Generating does not cost queries."
+msgstr "Todas as consultas do pacote mínimo estão feitas. Gerar não gasta consultas."
+
+msgid "To generate: {0} paid queries, about {1} at list price, billed by the provider on your account. CredTech charges nothing for queries."
+msgstr "Para gerar: {0} consultas pagas, cerca de {1} pelo preço de tabela, cobradas pelo provedor na sua conta. A CredTech não cobra nada pelas consultas."
+
+msgid "Serasa is billed as per your contract."
+msgstr "A Serasa cobra conforme o seu contrato."
+
+msgid "The dossier will come without the AI opinion: the credit opinion AI is not configured on this site yet."
+msgstr "O dossiê vai sair sem o parecer da IA: a IA do parecer de crédito ainda não está configurada neste site."
+
+msgid "The dossier will come without the AI opinion: the opinions included this month are used up. An admin can allow paid extra opinions (R$ {0} each) in the Credit settings."
+msgstr "O dossiê vai sair sem o parecer da IA: os pareceres incluídos neste mês acabaram. Um administrador pode permitir pareceres extras pagos (R$ {0} cada) nas configurações de Crédito."
+
+msgid "The AI opinion is an extra this month: R$ {0} from the credit wallet."
+msgstr "O parecer da IA é extra neste mês: R$ {0} da carteira de créditos."
+
+msgid "Paid queries, billed by the provider on your account (CredTech charges nothing): {0}."
+msgstr "Consultas pagas, cobradas pelo provedor na sua conta (a CredTech não cobra nada): {0}."
+
+msgid "About {0} at list price."
+msgstr "Cerca de {0} pelo preço de tabela."
+
+msgid "Generate credit dossier"
+msgstr "Gerar dossiê de crédito"
+
+msgid "Query anyway and generate"
+msgstr "Consultar mesmo assim e gerar"
+
+msgid "Confirm and generate"
+msgstr "Confirmar e gerar"
+
+msgid "Generating the dossier without the AI opinion: {0}"
+msgstr "Gerando o dossiê sem o parecer da IA: {0}"
+
+msgid "Generating the dossier: the queries, PDF 1 and the AI opinion take a few minutes."
+msgstr "Gerando o dossiê: as consultas, o PDF 1 e o parecer da IA levam alguns minutos."
+
+msgid "Minimum package of the dossier"
+msgstr "Pacote mínimo do dossiê"
+
+msgid "The queries every credit dossier needs. The \"Generate dossier\" button shows what is missing and its list price, makes the missing queries with your keys after confirmation and then creates PDF 1 and the AI opinion. Only a query of this package that is missing or failed lowers the AI recommendation."
+msgstr "As consultas que todo dossiê de crédito precisa ter. O botão \"Gerar dossiê\" mostra o que falta e o preço de tabela, faz as consultas que faltam com as suas chaves depois da confirmação e então cria o PDF 1 e o parecer da IA. Só uma consulta deste pacote que falta ou falhou rebaixa a recomendação da IA."
+
+msgid "no API credential yet"
+msgstr "ainda sem credencial de API"
+
+msgid "turn this bureau on below first"
+msgstr "ligue este bureau mais abaixo primeiro"
+
+msgid "Each partner with a full CPF"
+msgstr "Cada sócio com CPF completo"
+
+msgid "Reuse queries made up to how many days ago (0 = always query again)"
+msgstr "Reaproveitar consultas feitas há até quantos dias (0 = sempre consultar de novo)"
+
+msgid "Save package"
+msgstr "Salvar pacote"
+
+msgid "as per your contract"
+msgstr "conforme o contrato"
+
+msgid "About {0} per company at list price, billed by the provider on your account."
+msgstr "Cerca de {0} por empresa pelo preço de tabela, cobrado pelo provedor na sua conta."
+
+msgid "Plus {0} for each partner with a CPF."
+msgstr "Mais {0} por sócio com CPF."
+
+msgid "Minimum package saved."
+msgstr "Pacote mínimo salvo."
+
+msgid "Could not save the minimum package."
+msgstr "Não foi possível salvar o pacote mínimo."

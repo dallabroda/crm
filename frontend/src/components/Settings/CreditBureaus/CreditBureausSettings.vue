@@ -150,6 +150,80 @@
           </div>
         </div>
 
+        <!-- Minimum package of the credit dossier (credtech#316): the queries every dossier needs -->
+        <div
+          class="p-5 bg-surface-white rounded-lg border border-outline-gray-2 space-y-3"
+        >
+          <span class="text-lg-semibold text-ink-gray-9">{{
+            __('Minimum package of the dossier')
+          }}</span>
+          <p class="text-p-sm text-ink-gray-6">
+            {{
+              __(
+                'The queries every credit dossier needs. The "Generate dossier" button shows what is missing and its list price, makes the missing queries with your keys after confirmation and then creates PDF 1 and the AI opinion. Only a query of this package that is missing or failed lowers the AI recommendation.',
+              )
+            }}
+          </p>
+          <template v-if="packageDoc">
+            <div class="text-p-sm text-ink-gray-5">{{ __('Company') }}</div>
+            <div
+              v-for="opt in packageOptions('company')"
+              :key="opt.item"
+              class="flex items-center gap-2"
+            >
+              <Checkbox
+                v-model="packageDoc.selected[opt.item]"
+                :label="packageOptionLabel(opt)"
+              />
+              <span v-if="!opt.configured" class="text-p-sm text-ink-amber-3">
+                {{
+                  opt.enabled
+                    ? __('no API credential yet')
+                    : __('turn this bureau on below first')
+                }}
+              </span>
+            </div>
+            <div class="text-p-sm text-ink-gray-5 pt-2">
+              {{ __('Each partner with a full CPF') }}
+            </div>
+            <div
+              v-for="opt in packageOptions('partners')"
+              :key="opt.item"
+              class="flex items-center gap-2"
+            >
+              <Checkbox
+                v-model="packageDoc.selected[opt.item]"
+                :label="packageOptionLabel(opt)"
+              />
+              <span v-if="!opt.configured" class="text-p-sm text-ink-amber-3">
+                {{
+                  opt.enabled
+                    ? __('no API credential yet')
+                    : __('turn this bureau on below first')
+                }}
+              </span>
+            </div>
+            <FormControl
+              v-model.number="packageDoc.reuse_days"
+              type="number"
+              class="max-w-md"
+              :label="
+                __(
+                  'Reuse queries made up to how many days ago (0 = always query again)',
+                )
+              "
+            />
+            <div class="text-p-sm text-ink-gray-7">{{ packageCostText }}</div>
+            <Button
+              variant="solid"
+              :loading="savingPackage"
+              @click="savePackage"
+            >
+              {{ __('Save package') }}
+            </Button>
+          </template>
+        </div>
+
         <!-- Master Enable Switch -->
         <div
           class="flex items-center justify-between p-4 bg-surface-gray-2 rounded-lg border border-outline-gray-2"
@@ -720,6 +794,79 @@ function restoreDefaultPolicy() {
   }
 }
 
+// Minimum package of the dossier (credtech#316): default Dossiê QUOD + SCR Bacen of the company, 30 days of reuse
+const packageDoc = ref(null)
+const savingPackage = ref(false)
+
+async function loadPackage() {
+  try {
+    const res = await call('cred_hub.credit_check.api.get_dossier_package')
+    const selected = {}
+    for (const opt of res.options)
+      selected[opt.item] = res.items.includes(opt.item)
+    packageDoc.value = {
+      options: res.options,
+      selected,
+      reuse_days: res.reuse_days,
+    }
+  } catch {
+    packageDoc.value = null
+  }
+}
+
+function packageOptions(scope) {
+  return (packageDoc.value?.options || []).filter((opt) => opt.scope === scope)
+}
+
+function packageOptionLabel(opt) {
+  return opt.price_reference
+    ? `${opt.label} — ${formatMoney(opt.price_reference)}`
+    : `${opt.label} — ${__('as per your contract')}`
+}
+
+const packageCostText = computed(() => {
+  if (!packageDoc.value) return ''
+  const chosen = packageDoc.value.options.filter(
+    (opt) => packageDoc.value.selected[opt.item],
+  )
+  const sum = (scope) =>
+    chosen
+      .filter((opt) => opt.scope === scope)
+      .reduce((total, opt) => total + (opt.price_reference || 0), 0)
+  let text = __(
+    'About {0} per company at list price, billed by the provider on your account.',
+    [formatMoney(sum('company'))],
+  )
+  if (sum('partners'))
+    text +=
+      ' ' +
+      __('Plus {0} for each partner with a CPF.', [
+        formatMoney(sum('partners')),
+      ])
+  if (chosen.some((opt) => !opt.price_reference))
+    text += ' ' + __('Serasa is billed as per your contract.')
+  return text
+})
+
+async function savePackage() {
+  savingPackage.value = true
+  try {
+    const items = Object.keys(packageDoc.value.selected).filter(
+      (item) => packageDoc.value.selected[item],
+    )
+    const res = await call('cred_hub.credit_check.api.save_dossier_package', {
+      items: JSON.stringify(items),
+      reuse_days: packageDoc.value.reuse_days,
+    })
+    packageDoc.value.reuse_days = res.reuse_days
+    toast.success(__('Minimum package saved.'))
+  } catch (err) {
+    toast.error(err?.messages?.[0] || __('Could not save the minimum package.'))
+  } finally {
+    savingPackage.value = false
+  }
+}
+
 const template = createResource({
   url: 'cred_hub.credit_check.api.get_credit_template_status',
   auto: true,
@@ -873,5 +1020,6 @@ async function runTest(provider, token, cnpj) {
 onMounted(() => {
   loadSettings()
   loadPolicy()
+  loadPackage()
 })
 </script>

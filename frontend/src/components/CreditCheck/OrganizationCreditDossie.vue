@@ -112,33 +112,92 @@
       </div>
     </template>
 
-    <!-- Credit dossier, PDF 1 (credtech#316): the complete return of every query, no recommendation -->
+    <!-- Credit dossier (credtech#316): the minimum package of queries, then PDF 1 (every return) and PDF 2 (AI opinion) -->
     <div
-      v-if="hasQueries"
+      v-if="pkg.data"
       class="p-5 bg-surface-white rounded-lg border border-outline-gray-2 space-y-3"
     >
-      <span class="text-lg-semibold text-ink-gray-9">{{
-        __('Credit dossier')
-      }}</span>
+      <div class="flex items-center justify-between">
+        <span class="text-lg-semibold text-ink-gray-9">{{
+          __('Credit dossier')
+        }}</span>
+        <Badge
+          v-if="pkgRunning"
+          theme="blue"
+          variant="subtle"
+          :label="__('Generating…')"
+        />
+      </div>
       <p class="text-p-sm text-ink-gray-6">
         {{
           __(
-            'A PDF with every field that each provider returned, for the company and the partners queried, with the names in Portuguese and the values exactly as they came. It has no credit recommendation. The original JSON of each query goes along as a file. Each generation creates new files and nothing is overwritten.',
+            'Generating the dossier makes the queries of the minimum package that are missing, with your own keys, and then creates PDF 1, with every field each provider returned and the original JSON, and PDF 2, the credit opinion written by the AI. Queries made in the last {0} days are reused and not paid again.',
+            [pkg.data.reuse_days],
           )
         }}
       </p>
+      <div class="space-y-1">
+        <div class="text-p-sm text-ink-gray-5">
+          {{ __('Minimum package') }}
+        </div>
+        <div
+          v-for="entry in pkg.data.items"
+          :key="entry.item + (entry.contact || '')"
+          class="flex items-start gap-2 text-p-sm"
+        >
+          <span
+            :class="
+              entry.state === 'reused'
+                ? 'text-ink-green-3'
+                : entry.state === 'unavailable'
+                  ? 'text-ink-red-3'
+                  : 'text-ink-amber-3'
+            "
+            >{{ entry.state === 'reused' ? '✓' : '•' }}</span
+          >
+          <div>
+            <span class="text-ink-gray-8"
+              >{{ entry.label }} · {{ entry.subject_name }}</span
+            >
+            <span class="text-ink-gray-5">
+              — {{ packageEntryText(entry) }}</span
+            >
+            <div v-if="entry.last_error" class="text-ink-red-3">
+              {{ __('Last attempt failed: {0}', [entry.last_error]) }}
+            </div>
+          </div>
+        </div>
+        <div
+          v-if="pkg.data.partners_without_cpf.length"
+          class="text-p-sm text-ink-gray-5"
+        >
+          {{
+            __('Partners without CPF stay out of the package: {0}.', [
+              pkg.data.partners_without_cpf.join(', '),
+            ])
+          }}
+        </div>
+      </div>
+      <div class="text-p-sm text-ink-gray-7">{{ packageSummary }}</div>
+      <div v-if="pkg.data.unavailable.length" class="text-p-sm text-ink-red-3">
+        {{
+          __(
+            'An admin needs to turn these bureaus on or take them out of the package in Settings › Integrations › Credit Bureaus.',
+          )
+        }}
+      </div>
+      <div v-if="opinionNote" class="text-p-sm text-ink-amber-3">
+        {{ opinionNote }}
+      </div>
       <div class="flex items-center gap-2">
         <Button
           variant="solid"
-          :loading="generatingPdf"
-          :disabled="!canGenerate"
-          @click="generatePdf"
+          :loading="startingPackage"
+          :disabled="!canGeneratePackage"
+          @click="askPackage"
         >
-          {{ __('Generate dossier (PDF)') }}
+          {{ __('Generate dossier (PDF 1 + AI opinion)') }}
         </Button>
-        <span class="text-p-sm text-ink-gray-5">
-          {{ __('{0} queries will be included.', [queryCount]) }}
-        </span>
       </div>
       <div v-if="dossiers.data && dossiers.data.length" class="space-y-1 pt-2">
         <div class="text-p-sm text-ink-gray-5">
@@ -161,9 +220,9 @@
       </div>
     </div>
 
-    <!-- Credit opinion by AI, PDF 2 (credtech#316): a recommendation; the analyst decides -->
+    <!-- Credit opinion by AI, PDF 2 (credtech#316): a recommendation; the analyst decides. Generated with the dossier -->
     <div
-      v-if="hasQueries"
+      v-if="opinionStatus.data"
       class="p-5 bg-surface-white rounded-lg border border-outline-gray-2 space-y-3"
     >
       <div class="flex items-center justify-between">
@@ -205,29 +264,6 @@
             [formatPrice(opinionStatus.data.extra_price)],
           )
         }}
-      </div>
-      <div class="flex items-center gap-2">
-        <Button
-          variant="solid"
-          :loading="requestingOpinion"
-          :disabled="!canRequestOpinion"
-          @click="askOpinion"
-        >
-          {{ __('Generate opinion (AI)') }}
-        </Button>
-        <span
-          v-if="
-            opinionStatus.data?.next_is_extra &&
-            opinionStatus.data?.extra_allowed
-          "
-          class="text-p-sm text-ink-gray-5"
-        >
-          {{
-            __('Extra opinion: R$ {0} from the credit wallet.', [
-              formatPrice(opinionStatus.data.extra_price),
-            ])
-          }}
-        </span>
       </div>
       <div v-if="opinions.data && opinions.data.length" class="space-y-2 pt-2">
         <div
@@ -478,7 +514,6 @@ const props = defineProps({
 })
 
 const checking = ref(false)
-const generatingPdf = ref(false)
 const requesting = ref('')
 const selected = ref([])
 const cpfDraft = reactive({})
@@ -639,13 +674,6 @@ const dossiers = createResource({
   auto: true,
 })
 
-// What the dossier will contain: the automatic analysis (when there is one) plus the bureau queries made
-const queryCount = computed(
-  () => (org.data?.credit_report ? 1 : 0) + (results.data?.length || 0),
-)
-const hasQueries = computed(() => queryCount.value > 0)
-const canGenerate = computed(() => Boolean(options.data?.can_request))
-
 // AI opinion (PDF 2): counter for the month, list, and polling while one is being generated
 const opinionStatus = createResource({
   url: 'cred_hub.credit_check.api.get_credit_opinion_status',
@@ -657,15 +685,8 @@ const opinions = createResource({
   params: { organization_name: props.organizationId },
   auto: true,
 })
-const requestingOpinion = ref(false)
 let pollTimer = null
 let pollRounds = 0
-
-const canRequestOpinion = computed(() => {
-  const data = opinionStatus.data
-  if (!data || !data.configured || !hasQueries.value) return false
-  return !data.next_is_extra || data.extra_allowed
-})
 
 // Own texts, not bare "Approve"/"Reject": those words already have other global translations
 function resultLabel(result) {
@@ -717,82 +738,208 @@ watch(
   },
 )
 
-function askOpinion() {
-  const data = opinionStatus.data
+function formatDate(value) {
+  return value ? String(value).slice(0, 16) : ''
+}
+
+// Minimum package of the dossier (credtech#316): what is already done in the reuse window, what is missing and its
+// list price (billed by the provider on the client's account), then one job runs the queries, PDF 1 and PDF 2
+const pkg = createResource({
+  url: 'cred_hub.credit_check.api.get_dossier_package_status',
+  params: {
+    organization_name: props.organizationId,
+    deal_name: props.dealId || null,
+  },
+  auto: true,
+})
+const startingPackage = ref(false)
+const packageStarted = ref(false)
+let pkgTimer = null
+let pkgRounds = 0
+
+const pkgRunning = computed(() =>
+  Boolean(pkg.data?.running || packageStarted.value),
+)
+
+const canGeneratePackage = computed(() => {
+  const data = pkg.data
+  return Boolean(data && !pkgRunning.value && !data.unavailable.length)
+})
+
+function packageEntryText(entry) {
+  if (entry.state === 'reused')
+    return __('queried on {0}', [formatDate(entry.last_on)])
+  if (entry.state === 'unavailable')
+    return __('not available: {0}', [entry.reason])
+  return entry.price_reference
+    ? __('missing · list price {0}, billed by {1} on your account', [
+        formatMoney(entry.price_reference),
+        entry.provider,
+      ])
+    : __('missing · billed by {0} on your account, as per your contract', [
+        entry.provider,
+      ])
+}
+
+const packageSummary = computed(() => {
+  const data = pkg.data
+  if (!data) return ''
+  if (!data.missing.length)
+    return __(
+      'All queries of the minimum package are done. Generating does not cost queries.',
+    )
+  let text = __(
+    'To generate: {0} paid queries, about {1} at list price, billed by the provider on your account. CredTech charges nothing for queries.',
+    [data.missing.length, formatMoney(data.missing_cost)],
+  )
+  if (data.missing_has_contract_price)
+    text += ' ' + __('Serasa is billed as per your contract.')
+  return text
+})
+
+const opinionNote = computed(() => {
+  const opinion = pkg.data?.opinion
+  if (!opinion) return ''
+  if (!opinion.configured)
+    return __(
+      'The dossier will come without the AI opinion: the credit opinion AI is not configured on this site yet.',
+    )
+  if (opinion.next_is_extra && !opinion.extra_allowed)
+    return __(
+      'The dossier will come without the AI opinion: the opinions included this month are used up. An admin can allow paid extra opinions (R$ {0} each) in the Credit settings.',
+      [formatPrice(opinion.extra_price)],
+    )
+  if (opinion.next_is_extra)
+    return __(
+      'The AI opinion is an extra this month: R$ {0} from the credit wallet.',
+      [formatPrice(opinion.extra_price)],
+    )
+  return ''
+})
+
+function stopPackagePolling() {
+  if (pkgTimer) clearInterval(pkgTimer)
+  pkgTimer = null
+}
+
+// While the job runs: refresh the package, the queries made and the files; the opinion has its own polling
+function startPackagePolling() {
+  stopPackagePolling()
+  pkgRounds = 0
+  pkgTimer = setInterval(async () => {
+    pkgRounds += 1
+    await pkg.reload()
+    if (!pkg.data?.running || pkgRounds > 120) {
+      packageStarted.value = false
+      stopPackagePolling()
+      dossiers.reload()
+      results.reload()
+      opinions.reload()
+      opinionStatus.reload()
+    }
+  }, 5000)
+}
+
+onBeforeUnmount(stopPackagePolling)
+
+function askPackage() {
+  const data = pkg.data
   if (!data) return
-  if (!data.next_is_extra) {
-    requestOpinion(false)
+  const opinion = data.opinion || {}
+  const extraOpinion =
+    opinion.configured && opinion.next_is_extra && opinion.extra_allowed
+  const needsAck = Boolean(data.needs_acknowledgement)
+  if (!data.missing.length && !extraOpinion) {
+    generatePackage(false, false)
     return
   }
+  const lines = []
+  if (data.missing.length) {
+    lines.push(
+      __(
+        'Paid queries, billed by the provider on your account (CredTech charges nothing): {0}.',
+        [
+          data.missing
+            .map((entry) => `${entry.label} (${entry.subject_name})`)
+            .join(', '),
+        ],
+      ),
+    )
+    lines.push(__('About {0} at list price.', [formatMoney(data.missing_cost)]))
+  }
+  if (needsAck) {
+    lines.push(
+      __('Alert: the pre-filter result for this organization is {0}.', [
+        verdictText(data.verdict),
+      ]) +
+        (data.verdict_summary ? ' ' + data.verdict_summary : '') +
+        ' ' +
+        __('The query will be recorded as made with the alert.'),
+    )
+  }
+  if (extraOpinion) {
+    lines.push(
+      __(
+        'The opinions included this month are used up. This one costs R$ {0} from the credit wallet (current balance R$ {1}).',
+        [formatPrice(opinion.extra_price), formatPrice(opinion.balance)],
+      ),
+    )
+  }
   createDialog({
-    title: __('Extra credit opinion'),
-    message: __(
-      'The opinions included this month are used up. This one costs R$ {0} from the credit wallet (current balance R$ {1}).',
-      [formatPrice(data.extra_price), formatPrice(data.balance)],
-    ),
-    size: 'md',
+    title: __('Generate credit dossier'),
+    message: lines.join(' '),
+    size: 'lg',
     actions: [
       { label: __('Cancel'), onClick: ({ close }) => close() },
       {
-        label: __('Confirm paid opinion'),
+        label: needsAck
+          ? __('Query anyway and generate')
+          : __('Confirm and generate'),
         variant: 'solid',
+        theme: needsAck ? 'red' : 'gray',
         onClick: ({ close }) => {
           close()
-          requestOpinion(true)
+          generatePackage(needsAck, extraOpinion)
         },
       },
     ],
   })
 }
 
-async function requestOpinion(confirmExtra) {
-  requestingOpinion.value = true
-  try {
-    await call('cred_hub.credit_check.api.request_credit_opinion', {
-      organization_name: props.organizationId,
-      deal_name: props.dealId || null,
-      confirm_extra_cost: confirmExtra ? 1 : 0,
-    })
-    toast.success(__('Generating the opinion. It takes about a minute.'))
-    await opinions.reload()
-    opinionStatus.reload()
-    startPolling()
-  } catch (err) {
-    toast.error(err?.messages?.[0] || __('Could not request the opinion.'))
-  } finally {
-    requestingOpinion.value = false
-  }
-}
-
-function formatDate(value) {
-  return value ? String(value).slice(0, 16) : ''
-}
-
-async function generatePdf() {
-  generatingPdf.value = true
+async function generatePackage(acknowledged, confirmExtra) {
+  startingPackage.value = true
   try {
     const res = await call(
-      'cred_hub.credit_check.api.generate_credit_dossier',
+      'cred_hub.credit_check.api.generate_credit_package',
       {
         organization_name: props.organizationId,
         deal_name: props.dealId || null,
+        confirm_cost: 1,
+        acknowledged_warning: acknowledged ? 1 : 0,
+        confirm_extra_cost: confirmExtra ? 1 : 0,
       },
     )
-    if (res?.pdf_url) {
-      dossiers.reload()
-      window.open(res.pdf_url, '_blank')
+    packageStarted.value = true
+    if (res?.opinion_skipped) {
+      toast.warning(
+        __('Generating the dossier without the AI opinion: {0}', [
+          res.opinion_skipped,
+        ]),
+      )
+    } else {
       toast.success(
-        res.complete
-          ? __('Dossier generated and attached to the organization.')
-          : __(
-              'Dossier generated. Some queries only had a summary saved: run the analysis again for the complete return.',
-            ),
+        __(
+          'Generating the dossier: the queries, PDF 1 and the AI opinion take a few minutes.',
+        ),
       )
     }
+    opinions.reload()
+    startPackagePolling()
   } catch (err) {
     toast.error(err?.messages?.[0] || __('Could not generate the dossier.'))
+    pkg.reload()
   } finally {
-    generatingPdf.value = false
+    startingPackage.value = false
   }
 }
 
