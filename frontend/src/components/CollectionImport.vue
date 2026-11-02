@@ -6,20 +6,20 @@
     :label="__('Import titles')"
     @click="open"
   />
+  <!-- Figma "Cobrança · Lista · Importar títulos" (1331:19905) -->
   <Dialog v-model:open="show" :title="__('Import titles from a spreadsheet')" size="3xl">
     <template #default>
-      <div class="flex flex-col gap-4 py-1">
+      <div class="ct-collection-import flex flex-col gap-4">
         <!-- 1. Arquivo -->
-        <div class="flex items-center justify-between gap-3">
-          <div class="text-p-sm text-ink-gray-6">
-            {{ __('Send a .xlsx or .csv file with one title per line. The first line must have the column names.') }}
-            <div class="mt-1">
-              {{ __('Cards are grouped by: {0}.', [groupingLabel]) }}
-            </div>
-          </div>
+        <p class="text-p-base text-ink-gray-6">
+          {{ __('Send a .xlsx or .csv file with one title per line. The first line must have the column names.') }}
+          {{ __('Cards are grouped by: {0}.', [groupingLabel]) }}
+        </p>
+        <div class="flex items-center gap-3">
           <FileUploader file-types=".xlsx,.csv" :validate-file="validateFile" @success="onUploaded">
             <template #default="{ openFileSelector, uploading }">
               <Button
+                variant="outline"
                 :loading="uploading"
                 :label="file ? __('Change file') : __('Choose file')"
                 iconLeft="lucide-file-spreadsheet"
@@ -27,62 +27,76 @@
               />
             </template>
           </FileUploader>
-        </div>
-        <div v-if="file" class="text-sm text-ink-gray-7">
-          {{ file.file_name }} · {{ __('{0} lines', [columns?.rows || 0]) }}
+          <div v-if="file" class="min-w-0 truncate text-base text-ink-gray-6">
+            {{ file.file_name }} · {{ __('{0} lines', [columns?.rows || 0]) }}
+          </div>
         </div>
 
         <!-- 2. Colunas -->
-        <div v-if="columns" class="flex flex-col gap-2">
-          <div class="text-base-medium text-ink-gray-8">{{ __('Which column is each field?') }}</div>
-          <div class="grid grid-cols-3 gap-3">
+        <div v-if="columns" class="flex flex-col gap-4">
+          <div class="text-base font-semibold text-ink-gray-9">{{ __('Which column is each field?') }}</div>
+          <div class="ct-columns grid grid-cols-3 gap-3">
             <FormControl
               v-for="target in columns.targets"
               :key="target.key"
               v-model="mapping[target.key]"
               type="select"
+              variant="outline"
               :label="target.label + (target.required ? ' *' : '')"
               :options="columnOptions"
               @update:modelValue="result = null"
             />
           </div>
-          <div class="text-p-xs text-ink-gray-5">
+          <div class="text-p-xs text-ink-gray-6">
             {{ __('Species only comes in when the column has a registry code (DMI, DSI, CCB...): there is no default.') }}
           </div>
         </div>
 
         <!-- 3. Prévia -->
-        <div v-if="result" class="flex flex-col gap-2 rounded border border-outline-gray-2 p-3">
-          <div class="text-base-medium text-ink-gray-8">{{ __('Preview (nothing saved yet)') }}</div>
-          <div class="grid grid-cols-3 gap-2 text-sm text-ink-gray-7">
-            <div>{{ __('Valid lines: {0} of {1}', [result.valid, result.rows]) }}</div>
-            <div>{{ __('New cards: {0}', [result.cards_new]) }}</div>
-            <div>{{ __('Cards updated: {0}', [result.cards_update]) }}</div>
-            <div>{{ __('New titles: {0}', [result.titles_new]) }}</div>
-            <div>{{ __('Titles updated: {0}', [result.titles_update]) }}</div>
-            <div>{{ __('Already at CENPROT (kept): {0}', [result.titles_locked]) }}</div>
-            <div>{{ __('New people (contacts): {0}', [result.people_new]) }}</div>
-            <div>{{ __('New companies: {0}', [result.companies_new]) }}</div>
-            <div>{{ __('Lines with notes: {0}', [result.warnings]) }}</div>
+        <div
+          v-if="result"
+          class="flex flex-col gap-3 rounded-[var(--ct-radius-md)] bg-[var(--ct-bg-soft)] p-4"
+        >
+          <div class="text-base font-semibold text-ink-gray-9">{{ __('Preview (nothing saved yet)') }}</div>
+          <div class="grid max-w-[456px] grid-cols-2 gap-x-3 gap-y-2">
+            <div
+              v-for="stat in previewStats"
+              :key="stat.label"
+              class="flex items-baseline justify-between gap-2"
+            >
+              <span class="text-xs text-ink-gray-6">{{ stat.label }}</span>
+              <span class="text-base font-semibold tabular-nums text-ink-gray-9">{{ stat.value }}</span>
+            </div>
           </div>
-          <div v-if="result.problem_count" class="mt-1">
-            <div class="text-sm-medium text-ink-red-4">
+          <template v-if="result.problem_count">
+            <div class="text-base font-semibold text-[color:var(--ct-text-error)]">
               {{ __('{0} lines will be left out:', [result.problem_count]) }}
             </div>
-            <div class="max-h-36 overflow-y-auto text-p-xs text-ink-gray-6">
+            <div
+              class="flex max-h-36 flex-col gap-1 overflow-y-auto rounded-[var(--ct-radius-sm)] bg-surface-base px-3 py-2 text-xs text-[color:var(--ct-text-error)]"
+            >
               <div v-for="problem in result.problems" :key="problem.line">
                 {{ __('Line {0}: {1}', [problem.line, problem.message]) }}
               </div>
             </div>
-          </div>
+          </template>
         </div>
       </div>
     </template>
     <template #actions>
-      <div class="flex justify-end gap-2">
-        <Button :label="__('Cancel')" @click="show = false" />
+      <!-- Figma "Rodapé": gray band across the modal -->
+      <div
+        class="-mx-4 -mb-7 -mt-4 flex justify-end gap-3 bg-[var(--ct-bg-soft)] px-4 py-4 sm:-mx-6 sm:px-6"
+      >
+        <Button
+          class="!border-[var(--ct-border-strong)]"
+          variant="outline"
+          :label="__('Cancel')"
+          @click="show = false"
+        />
         <Button
           v-if="columns"
+          variant="outline"
           :label="__('Preview')"
           :loading="busy === 'preview'"
           @click="runPreview"
@@ -123,6 +137,21 @@ const busy = ref('')
 const groupingLabel = computed(() =>
   context.value?.grouping === 'Debtor' ? __('debtor') : __('debtor and cedente'),
 )
+// label/value pairs of the preview (Figma "Números")
+const previewStats = computed(() => {
+  const r = result.value || {}
+  return [
+    { label: __('Valid lines'), value: __('{0} of {1}', [r.valid, r.rows]) },
+    { label: __('New cards'), value: r.cards_new },
+    { label: __('Cards updated'), value: r.cards_update },
+    { label: __('New titles'), value: r.titles_new },
+    { label: __('Titles updated'), value: r.titles_update },
+    { label: __('Already at CENPROT (kept)'), value: r.titles_locked },
+    { label: __('New people (contacts)'), value: r.people_new },
+    { label: __('New companies'), value: r.companies_new },
+    { label: __('Lines with notes'), value: r.warnings },
+  ]
+})
 const columnOptions = computed(() => [
   { label: __('(not in the spreadsheet)'), value: '' },
   ...(columns.value?.headers || []).map((header, index) => ({
@@ -199,3 +228,19 @@ async function startImport() {
   }
 }
 </script>
+
+<style scoped>
+/* Figma "Campo" (Seleção) at 48px: label 14/500 gray, value 16px */
+.ct-columns :deep(select),
+.ct-columns :deep(button) {
+  height: 48px;
+  font-size: 16px;
+  padding-inline: 14px;
+  border-radius: 6px;
+}
+.ct-columns :deep(label) {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink-gray-6);
+}
+</style>

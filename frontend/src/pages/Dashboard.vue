@@ -1,35 +1,118 @@
 <template>
-  <div class="flex flex-col h-full overflow-hidden">
+  <div class="ct-dashboard flex flex-col h-full overflow-hidden">
     <LayoutHeader>
       <template #left-header>
         <ViewBreadcrumbs routeName="Dashboard" />
       </template>
+      <!-- Figma "Painel · Visão geral" (819:2): period and sales user
+           filters live in the top bar, before Atualizar (outline) and
+           Editar (Destaque) -->
       <template #right-header>
+        <Dropdown
+          v-if="!showDatePicker"
+          v-model="preset"
+          :options="options"
+          class="form-control"
+          :placeholder="__('Select Range')"
+          :button="{
+            label: __(preset),
+            class: 'justify-start [&>span]:mr-auto [&>svg]:text-ink-gray-5',
+            variant: 'outline',
+            iconRight: 'lucide-chevron-down',
+          }"
+        />
+        <DateRangePicker
+          v-else
+          ref="datePickerRef"
+          class="!w-48"
+          :model-value="filters.period ? parseDateRange(filters.period) : []"
+          variant="outline"
+          :placeholder="__('Period')"
+          :formatter="formatRange"
+          @change="
+            (v) =>
+              updateFilter('period', v, () => {
+                showDatePicker = false
+                if (!v) {
+                  filters.period = getLastXDays()
+                  preset = 'Last 30 Days'
+                } else {
+                  preset = formatter(v)
+                }
+              })
+          "
+        >
+          <template #prefix>
+            <LucideCalendar class="size-4 text-ink-gray-5 mr-2" />
+          </template>
+        </DateRangePicker>
+        <Link
+          v-if="isAdmin() || isManager()"
+          class="form-control w-44"
+          variant="outline"
+          :value="filters.user && getUser(filters.user).full_name"
+          doctype="User"
+          :filters="{
+            name: ['in', users.data.crmUsers?.map((u) => u.name)],
+            ignore_user_type: 1,
+          }"
+          :placeholder="__('Sales User')"
+          :hideMe="true"
+          @change="(v) => updateFilter('user', v)"
+        >
+          <template #prefix>
+            <UserAvatar
+              v-if="filters.user"
+              class="mr-2"
+              :user="filters.user"
+              size="sm"
+            />
+          </template>
+          <template #item-prefix="{ option }">
+            <UserAvatar class="mr-2" :user="option.value" size="sm" />
+          </template>
+          <template #item-label="{ option }">
+            <Tooltip :text="option.value">
+              <div class="cursor-pointer text-ink-gray-9">
+                {{ getUser(option.value).full_name }}
+              </div>
+            </Tooltip>
+          </template>
+        </Link>
         <Button
           v-if="!editing"
+          variant="outline"
           :label="__('Refresh')"
-          :iconLeft="LucideRefreshCcw"
+          :iconLeft="LucideRefreshCw"
           @click="dashboardItems.reload"
         />
         <Button
           v-if="!editing && isAdmin()"
+          variant="solid"
           :label="__('Edit')"
-          :iconLeft="LucidePenLine"
+          :iconLeft="LucideSquarePen"
           @click="enableEditing"
         />
         <Button
           v-if="editing"
+          variant="outline"
           :label="__('Chart')"
           iconLeft="lucide-plus"
           @click="showAddChartModal = true"
         />
         <Button
           v-if="editing && isAdmin()"
+          variant="outline"
           :label="__('Reset to Default')"
           :iconLeft="LucideUndo2"
           @click="resetToDefault"
         />
-        <Button v-if="editing" :label="__('Cancel')" @click="cancel" />
+        <Button
+          v-if="editing"
+          variant="outline"
+          :label="__('Cancel')"
+          @click="cancel"
+        />
         <Button
           v-if="editing"
           variant="solid"
@@ -41,87 +124,10 @@
       </template>
     </LayoutHeader>
 
-    <div class="p-5 pb-2 flex items-center gap-4">
-      <Dropdown
-        v-if="!showDatePicker"
-        v-model="preset"
-        :options="options"
-        class="form-control"
-        :placeholder="__('Select Range')"
-        :button="{
-          label: __(preset),
-          class:
-            '!w-full justify-start [&>span]:mr-auto [&>svg]:text-ink-gray-5',
-          variant: 'outline',
-          iconRight: 'lucide-chevron-down',
-          iconLeft: 'lucide-calendar',
-        }"
-      />
-      <DateRangePicker
-        v-else
-        ref="datePickerRef"
-        class="!w-48"
-        :model-value="filters.period ? parseDateRange(filters.period) : []"
-        variant="outline"
-        :placeholder="__('Period')"
-        :formatter="formatRange"
-        @change="
-          (v) =>
-            updateFilter('period', v, () => {
-              showDatePicker = false
-              if (!v) {
-                filters.period = getLastXDays()
-                preset = 'Last 30 Days'
-              } else {
-                preset = formatter(v)
-              }
-            })
-        "
-      >
-        <template #prefix>
-          <LucideCalendar class="size-4 text-ink-gray-5 mr-2" />
-        </template>
-      </DateRangePicker>
-      <Link
-        v-if="isAdmin() || isManager()"
-        class="form-control w-48"
-        variant="outline"
-        :value="filters.user && getUser(filters.user).full_name"
-        doctype="User"
-        :filters="{
-          name: ['in', users.data.crmUsers?.map((u) => u.name)],
-          ignore_user_type: 1,
-        }"
-        :placeholder="__('Sales User')"
-        :hideMe="true"
-        @change="(v) => updateFilter('user', v)"
-      >
-        <template #prefix>
-          <UserAvatar
-            v-if="filters.user"
-            class="mr-2"
-            :user="filters.user"
-            size="sm"
-          />
-        </template>
-        <template #item-prefix="{ option }">
-          <UserAvatar class="mr-2" :user="option.value" size="sm" />
-        </template>
-        <template #item-label="{ option }">
-          <Tooltip :text="option.value">
-            <div class="cursor-pointer text-ink-gray-9">
-              {{ getUser(option.value).full_name }}
-            </div>
-          </Tooltip>
-        </template>
-      </Link>
-    </div>
-
     <div class="w-full overflow-y-scroll">
       <DashboardGrid
         v-if="!dashboardItems.loading && dashboardItems.data"
         v-model="dashboardItems.data"
-        class="pt-1"
         :editing="editing"
       />
     </div>
@@ -135,9 +141,9 @@
 
 <script setup lang="ts">
 import AddChartModal from '@/components/Dashboard/AddChartModal.vue'
-import LucideRefreshCcw from '~icons/lucide/refresh-ccw'
+import LucideRefreshCw from '~icons/lucide/refresh-cw'
 import LucideUndo2 from '~icons/lucide/undo-2'
-import LucidePenLine from '~icons/lucide/pen-line'
+import LucideSquarePen from '~icons/lucide/square-pen'
 import DashboardGrid from '@/components/Dashboard/DashboardGrid.vue'
 import UserAvatar from '@/components/UserAvatar.vue'
 import ViewBreadcrumbs from '@/components/ViewBreadcrumbs.vue'
@@ -312,3 +318,28 @@ usePageMeta(() => {
   return { title: __('CRM Dashboard'), icon: brand.favicon }
 })
 </script>
+
+<style scoped>
+/* Figma "Painel · Visão geral" (819:2). Cards: radius 12, #dcdde2 border, 12/16 padding */
+.ct-dashboard :deep([data-slot='chart-card']) {
+  border-radius: var(--ct-radius-lg);
+  border-color: var(--ct-border);
+  padding: 12px 16px;
+}
+
+/* Chart title 14 black, description 14 gray */
+.ct-dashboard :deep([data-slot='chart-header'] .text-p-base) {
+  color: var(--ct-text-primary);
+}
+.ct-dashboard :deep([data-slot='chart-header'] .text-p-sm) {
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--ct-text-secondary);
+}
+
+/* "Legenda de gráfico": 8px dot, 12px gray label, 4px between items */
+.ct-dashboard :deep([data-slot='chart-legend']) {
+  column-gap: 4px;
+  font-size: 12px;
+}
+</style>

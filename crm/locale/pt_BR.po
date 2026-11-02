@@ -4460,6 +4460,39 @@ msgstr "Importando {0}"
 msgid "Imports you start from a list appear here."
 msgstr "As importações que você começa numa lista aparecem aqui."
 
+msgid "No data to show in this chart yet."
+msgstr "Ainda não há dados para mostrar neste gráfico."
+
+msgid "No imports yet"
+msgstr "Nenhuma importação ainda"
+
+msgid "Valid lines"
+msgstr "Linhas válidas"
+
+msgid "New cards"
+msgstr "Cards novos"
+
+msgid "Cards updated"
+msgstr "Cards atualizados"
+
+msgid "New titles"
+msgstr "Títulos novos"
+
+msgid "Titles updated"
+msgstr "Títulos atualizados"
+
+msgid "Already at CENPROT (kept)"
+msgstr "Já na CENPROT (mantidos)"
+
+msgid "New people (contacts)"
+msgstr "Pessoas novas (contatos)"
+
+msgid "New companies"
+msgstr "Empresas novas"
+
+msgid "Lines with notes"
+msgstr "Linhas com observação"
+
 #: frontend/src/components/Filter.vue:303 frontend/src/components/Filter.vue:324 frontend/src/components/Filter.vue:339 frontend/src/components/Filter.vue:352 frontend/src/components/Filter.vue:366
 msgid "In"
 msgstr "Em"
