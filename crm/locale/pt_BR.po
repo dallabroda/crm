@@ -13301,3 +13301,294 @@ msgstr "Card reaberto."
 
 msgid "Won and Lost close the card; the stage stays where it was (standard CRM)."
 msgstr "Ganho e Perdido fecham o card; a etapa fica onde estava (padrão de CRM)."
+
+msgid "Credit & Compliance"
+msgstr "Crédito e Compliance"
+
+msgid "Credit analysis rules, fraud prevention and legal queries."
+msgstr "Regras de análise de crédito, prevenção a fraudes e consultas jurídicas."
+
+msgid "Every paid query uses your own account with each provider: the provider bills you directly and CredTech charges nothing. Prices shown are the providers' list prices, for reference only; your contract may differ."
+msgstr "Toda consulta paga usa a sua própria conta em cada provedor: o provedor cobra direto de você e a CredTech não cobra nada. Os preços mostrados são os preços de tabela dos provedores, só como referência; o seu contrato pode ser diferente."
+
+msgid "Enable risk & compliance analysis"
+msgstr "Ligar a análise de risco e compliance"
+
+msgid "Automatic check of lawsuits, federal tax debt, labor debt and notary protests."
+msgstr "Verificação automática de processos, dívida ativa da União, débitos trabalhistas e protestos em cartório."
+
+msgid "Step 0: CEIS/CNEP sanctions (CGU)"
+msgstr "Etapa 0: sanções CEIS/CNEP (CGU)"
+
+msgid "Free"
+msgstr "Grátis"
+
+msgid "Initial check of public sanctions (Portal da Transparência). If the company is sanctioned and the block is on, the analysis is rejected right away."
+msgstr "Consulta inicial de sanções públicas (Portal da Transparência). Se a empresa estiver sancionada e o bloqueio estiver ligado, a análise é reprovada na hora."
+
+msgid "Reject right away if listed in CEIS/CNEP"
+msgstr "Reprovar na hora se constar no CEIS/CNEP"
+
+msgid "Unified lawsuit search (Escavador)"
+msgstr "Pesquisa processual unificada (Escavador)"
+
+msgid "Lawsuits"
+msgstr "Processos"
+
+msgid "Searches state, federal, labor and higher courts (STJ/STF) across Brazil by CNPJ."
+msgstr "Pesquisa tribunais estaduais, federais, trabalhistas e superiores (STJ/STF) em todo o Brasil pelo CNPJ."
+
+msgid "List price: about {0} per check, billed by Escavador on your account."
+msgstr "Preço de tabela: cerca de {0} por consulta, cobrado pelo Escavador na sua conta."
+
+msgid "Escavador API token"
+msgstr "Token da API do Escavador"
+
+msgid "Token from your Escavador account"
+msgstr "Token da sua conta no Escavador"
+
+msgid "Tax status and federal certificates (Infosimples)"
+msgstr "Regularidade fiscal e certidões federais (Infosimples)"
+
+msgid "Tax"
+msgstr "Fiscal"
+
+msgid "Federal tax debt (PGFN), Federal CND, labor CNDT and São Paulo notary protests."
+msgstr "Dívida ativa da União (PGFN), CND Federal, CNDT trabalhista e protestos em cartórios de São Paulo."
+
+msgid "List price: about {0} per check (4 queries), billed by Infosimples on your account."
+msgstr "Preço de tabela: cerca de {0} por verificação (4 consultas), cobrado pela Infosimples na sua conta."
+
+msgid "Infosimples API token"
+msgstr "Token da API da Infosimples"
+
+msgid "Token from your Infosimples account"
+msgstr "Token da sua conta na Infosimples"
+
+msgid "Credit score and nationwide protests (DirectD)"
+msgstr "Score de crédito e protestos nacionais (DirectD)"
+
+msgid "Score & notaries"
+msgstr "Score e cartórios"
+
+msgid "QUOD credit score, nationwide notary protests (IEPTB) and lawsuits."
+msgstr "Score de crédito QUOD, protestos em cartórios de todo o Brasil (IEPTB) e processos."
+
+msgid "List price per check: score {0}, protests {1}, lawsuits {2}; FGTS {3} and Sintegra {4} when turned on. Billed by DirectD on your account."
+msgstr "Preço de tabela por verificação: score {0}, protestos {1}, processos {2}; FGTS {3} e Sintegra {4} quando ligados. Cobrado pela DirectD na sua conta."
+
+msgid "DirectD API token"
+msgstr "Token da API da DirectD"
+
+msgid "Token from your DirectD account"
+msgstr "Token da sua conta na DirectD"
+
+msgid "The same token is used for Boa Vista, Dossiê QUOD and SCR Bacen below."
+msgstr "O mesmo token vale para a Boa Vista, o Dossiê QUOD e o SCR Bacen abaixo."
+
+msgid "Minimum score (0 = never reject by score)"
+msgstr "Score mínimo (0 = nunca reprovar por score)"
+
+msgid "Check FGTS status (CRF)"
+msgstr "Consultar a regularidade do FGTS (CRF)"
+
+msgid "Check Sintegra / CCC (state registration)"
+msgstr "Consultar Sintegra / CCC (inscrição estadual)"
+
+msgid "Funnel automation trigger"
+msgstr "Gatilho de automação no funil"
+
+msgid "Run the check automatically when a card moves to this stage. Each automatic check runs paid queries on your provider accounts."
+msgstr "Roda a verificação automaticamente quando um card entra nesta etapa. Cada verificação automática faz consultas pagas nas suas contas dos provedores."
+
+msgid "Trigger stage name"
+msgstr "Nome da etapa do gatilho"
+
+msgid "Also check the second organization (sacado), if any"
+msgstr "Verificar também a segunda organização (sacado), se houver"
+
+msgid "Risk criteria and blocks"
+msgstr "Critérios de risco e bloqueios"
+
+msgid "Objective criteria for pre-approval or rejection in the pre-filter."
+msgstr "Critérios objetivos para aprovar ou reprovar no pré-filtro."
+
+msgid "Maximum lawsuits as defendant"
+msgstr "Máximo de processos como réu"
+
+msgid "Maximum tolerated PGFN debt (R$)"
+msgstr "Máximo tolerado de dívida na PGFN (R$)"
+
+msgid "Block right away on judicial recovery or bankruptcy"
+msgstr "Bloquear na hora em caso de recuperação judicial ou falência"
+
+msgid "Block right away on a notary protest"
+msgstr "Bloquear na hora se houver protesto em cartório"
+
+msgid "Block if FGTS is irregular"
+msgstr "Bloquear se o FGTS estiver irregular"
+
+msgid "Full bureau reports (on demand)"
+msgstr "Relatórios completos de bureau (sob demanda)"
+
+msgid "On demand"
+msgstr "Sob demanda"
+
+msgid "Requested by the operator on the organization. There is no pre-approval lock: before each query the operator sees the pre-filter result, the reason and the cost, and confirms."
+msgstr "Pedidos pelo operador na organização. Não há trava de pré-aprovação: antes de cada consulta o operador vê o resultado do pré-filtro, o motivo e o custo, e confirma."
+
+msgid "Enable Serasa Experian (Relato PJ, your own contract)"
+msgstr "Ligar o Serasa Experian (Relato PJ, contrato próprio)"
+
+msgid "Serasa endpoint URL"
+msgstr "URL do endpoint do Serasa"
+
+msgid "Serasa token"
+msgstr "Token do Serasa"
+
+msgid "Through DirectD, with the DirectD token above:"
+msgstr "Pela DirectD, com o token da DirectD acima:"
+
+msgid "List price {0}"
+msgstr "Preço de tabela {0}"
+
+msgid "Enter the DirectD token above to use these reports."
+msgstr "Informe o token da DirectD acima para usar estes relatórios."
+
+msgid "CNPJ for the test"
+msgstr "CNPJ para o teste"
+
+msgid "Credit settings saved successfully!"
+msgstr "Configurações de crédito salvas com sucesso!"
+
+msgid "Failed to save credit settings."
+msgstr "Não foi possível salvar as configurações de crédito."
+
+msgid "The test runs a real query on CNPJ {0}, billed by {1} on your account (list price about {2}). CredTech charges nothing."
+msgstr "O teste faz uma consulta de verdade no CNPJ {0}, cobrada por {1} na sua conta (preço de tabela cerca de {2}). A CredTech não cobra nada."
+
+msgid "Run paid test"
+msgstr "Fazer teste pago"
+
+msgid "Connection successful!"
+msgstr "Conexão feita com sucesso!"
+
+msgid "Connection failed."
+msgstr "A conexão falhou."
+
+msgid "CNPJ"
+msgstr "CNPJ"
+
+msgid "Check Credit"
+msgstr "Consultar crédito"
+
+msgid "Force New Check"
+msgstr "Forçar nova consulta"
+
+msgid "No credit analysis has run for this organization yet."
+msgstr "Ainda não foi feita nenhuma análise de crédito desta organização."
+
+msgid "CEIS/CNEP Sanctions"
+msgstr "Sanções CEIS/CNEP"
+
+msgid "Sanctioned"
+msgstr "Sancionada"
+
+msgid "None"
+msgstr "Nenhuma"
+
+msgid "Not checked"
+msgstr "Não verificado"
+
+msgid "Lawsuits (as defendant)"
+msgstr "Processos (como réu)"
+
+msgid "PGFN Active Debt"
+msgstr "Dívida ativa na PGFN"
+
+msgid "Notary Protests (CENPROT)"
+msgstr "Protestos em cartório (CENPROT)"
+
+msgid "{0} found"
+msgstr "{0} encontrados"
+
+msgid "FGTS"
+msgstr "FGTS"
+
+msgid "Credit Score (DirectD/QUOD)"
+msgstr "Score de crédito (DirectD/QUOD)"
+
+msgid "Full Dossier"
+msgstr "Dossiê completo"
+
+msgid "Generates a structured PDF with every section (sanctions, lawsuits, fiscal, protests, score, premium bureaus consulted) and attaches it to this organization."
+msgstr "Gera um PDF estruturado com todas as seções (sanções, processos, fiscal, protestos, score e bureaus consultados) e anexa na organização."
+
+msgid "Generate Dossier (PDF)"
+msgstr "Gerar dossiê (PDF)"
+
+msgid "Open last generated PDF"
+msgstr "Abrir o último PDF gerado"
+
+msgid "Final Bureaus (On-Demand)"
+msgstr "Bureaus finais (sob demanda)"
+
+msgid "Each query is billed by the provider on your own account. CredTech charges nothing."
+msgstr "Cada consulta é cobrada pelo provedor na sua própria conta. A CredTech não cobra nada."
+
+msgid "Pre-filter: {0}"
+msgstr "Pré-filtro: {0}"
+
+msgid "You can still query. You will be asked to confirm the alert."
+msgstr "Você ainda pode consultar. Vamos pedir para você confirmar o alerta."
+
+msgid "Credential missing in the Credit settings."
+msgstr "Falta a credencial nas configurações de Crédito."
+
+msgid "Request"
+msgstr "Pedir"
+
+msgid "Not Checked"
+msgstr "Pendente de consulta"
+
+msgid "List price {0}, billed by {1} on your account"
+msgstr "Preço de tabela {0}, cobrado por {1} na sua conta"
+
+msgid "Billed by {0} on your account, as per your contract"
+msgstr "Cobrado por {0} na sua conta, conforme o seu contrato"
+
+msgid "Credit analysis queued. Refresh in a moment to see the result."
+msgstr "Análise de crédito na fila. Atualize em instantes para ver o resultado."
+
+msgid "Could not start the analysis."
+msgstr "Não foi possível iniciar a análise."
+
+msgid "Dossier generated and attached to the organization."
+msgstr "Dossiê gerado e anexado à organização."
+
+msgid "Could not generate the dossier."
+msgstr "Não foi possível gerar o dossiê."
+
+msgid "This query is paid and billed by {0} on your account (list price {1}). CredTech charges nothing."
+msgstr "Esta consulta é paga e cobrada por {0} na sua conta (preço de tabela {1}). A CredTech não cobra nada."
+
+msgid "This query is paid and billed by {0} on your account, as per your contract. CredTech charges nothing."
+msgstr "Esta consulta é paga e cobrada por {0} na sua conta, conforme o seu contrato. A CredTech não cobra nada."
+
+msgid "Alert: the pre-filter result for this organization is {0}."
+msgstr "Alerta: o resultado do pré-filtro desta organização é {0}."
+
+msgid "The query will be recorded as made with the alert."
+msgstr "A consulta vai ficar registrada como feita com o alerta."
+
+msgid "Query anyway (paid)"
+msgstr "Consultar mesmo assim (pago)"
+
+msgid "Confirm paid query"
+msgstr "Confirmar consulta paga"
+
+msgid "Query requested."
+msgstr "Consulta pedida."
+
+msgid "Could not request the query."
+msgstr "Não foi possível pedir a consulta."
