@@ -13070,3 +13070,39 @@ msgstr "Retirar ou cancelar o protesto quando o card entra na etapa de acordo"
 
 msgid "Off until you turn it on: withdrawal and cancellation may have registry fees."
 msgstr "Desligado até você ligar: retirada e cancelamento podem ter custas do cartório."
+
+msgid "See the reason in the card activity."
+msgstr "Veja o motivo na atividade do card."
+
+msgid "Update status"
+msgstr "Atualizar status"
+
+msgid "Issue date"
+msgstr "Data de emissão"
+
+msgid "Fill number, species, issue date, due date and amount."
+msgstr "Preencha número, espécie, data de emissão, vencimento e valor."
+
+msgid "Cancel sending"
+msgstr "Cancelar envio"
+
+msgid "Withdraw from the registry"
+msgstr "Retirar do cartório"
+
+msgid "Cancel the protest"
+msgstr "Cancelar o protesto"
+
+msgid "Title {0} goes to CENPROT now, in the name of the creditor of the settings. Registry fees may apply."
+msgstr "O título {0} vai agora para a CENPROT, em nome do credor das configurações. O cartório pode cobrar custas."
+
+msgid "Done."
+msgstr "Pronto."
+
+msgid "CENPROT did not accept the request."
+msgstr "A CENPROT não aceitou o pedido."
+
+msgid "CENPROT receives the request for title {0} now. The status changes only when CENPROT confirms it."
+msgstr "A CENPROT recebe agora o pedido do título {0}. O status só muda quando a CENPROT confirmar."
+
+msgid "Requested by the operator in HubTech"
+msgstr "Pedido pelo operador no HubTech"

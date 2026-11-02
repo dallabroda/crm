@@ -169,7 +169,7 @@
                 <!-- DEVOLVIDO -->
                 <template v-else-if="(title.protest_status || '').toUpperCase() === 'DEVOLVIDO'">
                   <Badge label="DEVOLVIDO" theme="red" variant="subtle" />
-                  <span class="text-[11px] text-red-600">Ausência do Documento Físico.</span>
+                  <span class="text-[11px] text-ink-gray-5">{{ __('See the reason in the card activity.') }}</span>
                   <Button
                     size="sm"
                     variant="subtle"
@@ -180,20 +180,12 @@
                   </Button>
                 </template>
 
-                <!-- ENVIO SOLICITADO -->
-                <template v-else-if="['SOLICITADO', 'ENVIO SOLICITADO', 'ENVIADO'].includes((title.protest_status || '').toUpperCase())">
-                  <Badge label="Envio solicitado" theme="gray" variant="subtle" />
-                  <span class="text-[10px] text-ink-gray-5">
-                    {{ title.sent_at ? `Envio pedido em ${title.sent_at}` : 'Envio solicitado' }}
+                <!-- Na CENPROT / no cartório (status oficiais do manual v2.2) -->
+                <template v-else-if="IN_PROGRESS.includes(statusOf(title))">
+                  <Badge :label="statusOf(title)" :theme="statusOf(title) === 'CONFIRMADO' ? 'orange' : 'blue'" variant="subtle" />
+                  <span v-if="title.sent_at" class="text-[10px] text-ink-gray-5">
+                    {{ __('Sent on {0}', [formatBrazilianDate(String(title.sent_at).slice(0, 10))]) }}
                   </span>
-                  <span class="text-[10px] text-blue-600">· Fila das 17h30</span>
-                  <button
-                    type="button"
-                    class="text-[11px] text-red-600 hover:underline mt-0.5"
-                    @click="cancelProtest(title)"
-                  >
-                    Cancelar envio
-                  </button>
                 </template>
 
                 <!-- PAGO -->
@@ -247,14 +239,31 @@
                       loadingProtest === title.name ||
                       !title.species ||
                       (requiresAttachment(title.species) && !title.attachment) ||
-                      ['SOLICITADO', 'ENVIO SOLICITADO', 'COLETADO', 'ENVIADO', 'INTIMADO', 'PROTESTADO', 'PAGO'].includes(
-                        (title.protest_status || '').toUpperCase()
-                      )
+                      !SENDABLE.includes(statusOf(title))
                     "
                     @click="protestTitle(title)"
                   >
                     Enviar
                   </Button>
+                </div>
+                <div v-if="title.sent_at" class="flex items-center gap-2">
+                  <button
+                    type="button"
+                    class="text-[11px] text-ink-gray-6 hover:underline"
+                    :disabled="loadingProtest === title.name"
+                    @click="refreshTitle(title)"
+                  >
+                    {{ __('Update status') }}
+                  </button>
+                  <button
+                    v-if="WITHDRAW_LABEL[statusOf(title)]"
+                    type="button"
+                    class="text-[11px] text-red-600 hover:underline"
+                    :disabled="loadingProtest === title.name"
+                    @click="confirmWithdraw(title)"
+                  >
+                    {{ __(WITHDRAW_LABEL[statusOf(title)]) }}
+                  </button>
                 </div>
 
                 <!-- Mensagens de Validação Obrigatória em Vermelho Embaixo do Botão -->
@@ -323,6 +332,12 @@
             required
           />
           <FormControl
+            v-model="newTitle.issue_date"
+            type="date"
+            :label="__('Issue date')"
+            required
+          />
+          <FormControl
             v-model="newTitle.due_date"
             type="date"
             :label="__('Data de Vencimento')"
@@ -373,6 +388,7 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { Badge, Button, Dialog, FormControl, Tooltip, call, toast } from 'frappe-ui'
+import { createDialog } from '@/utils/dialogs'
 import Icon from '@/components/Icon.vue'
 
 const props = defineProps({
@@ -419,12 +435,30 @@ const newTitle = ref({
   title_number: '',
   our_number: '',
   species: '',
+  issue_date: '',
   due_date: '',
   original_amount: 0,
   updated_amount: 0,
   digitable_line: '',
   attachment: '',
 })
+
+// Status da CENPROT (manual v2.2). Texto que não é status da CENPROT (ex.: "Pendente" da importação) = não enviado
+const CENPROT_STATUSES = ['INEXISTENTE', 'COLETADO', 'GERADO', 'AGENDADO', 'ENVIADO', 'CONFIRMADO', 'DEVOLVIDO', 'CANCELADO', 'PAGO', 'PROTESTADO', 'RETIRADO', 'SUSTADO', 'SUSPENSO']
+const SENDABLE = ['', 'INEXISTENTE', 'DEVOLVIDO']
+const IN_PROGRESS = ['COLETADO', 'GERADO', 'AGENDADO', 'ENVIADO', 'CONFIRMADO']
+// Operação permitida em cada status: remoção antes do cartório, desistência no cartório, cancelamento protestado
+const WITHDRAW_LABEL = {
+  COLETADO: 'Cancel sending',
+  GERADO: 'Cancel sending',
+  CONFIRMADO: 'Withdraw from the registry',
+  PROTESTADO: 'Cancel the protest',
+}
+
+function statusOf(title) {
+  const status = (title.protest_status || '').trim().toUpperCase()
+  return CENPROT_STATUSES.includes(status) ? status : ''
+}
 
 // Espécies que exigem o PDF/documento assinado anexado
 function requiresAttachment(species) {
@@ -578,42 +612,69 @@ async function protestTitle(title) {
     return
   }
 
+  createDialog({
+    title: __('Send to protest'),
+    message: __('Title {0} goes to CENPROT now, in the name of the creditor of the settings. Registry fees may apply.', [title.title_number]),
+    size: 'md',
+    actions: [
+      { label: __('Cancel'), onClick: ({ close }) => close() },
+      {
+        label: __('Send to protest'),
+        variant: 'solid',
+        onClick: ({ close }) => {
+          close()
+          runTitle(title, 'send_row')
+        },
+      },
+    ],
+  })
+}
+
+// Envia, consulta ou retira um título; o status novo sempre vem do servidor (CENPROT)
+async function runTitle(title, method, extra = {}) {
   loadingProtest.value = title.name
   try {
-    const res = await call('cred_hub.integrations.protest.send_row', {
+    const res = await call('cred_hub.integrations.protest.' + method, {
       deal: props.deal.name,
-      title_row: title.name || title.title_number,
+      title_row: title.name,
+      ...extra,
     })
     if (res.ok) {
-      title.protest_status = 'Envio solicitado'
-      toast.success(res.message || __('Envio solicitado! Agendado na fila do cartório.'))
-      emit('reload')
+      toast.success(res.message || __('Done.'))
     } else {
-      toast.error(res.message || __('Erro ao solicitar envio para cartório.'))
+      toast.error(res.message || __('CENPROT did not accept the request.'))
     }
+    emit('reload')
   } catch (err) {
-    toast.error(err.message || __('Falha na comunicação com o cartório.'))
+    toast.error(err.messages?.[0] || err.message || __('Could not reach CENPROT.'))
   } finally {
     loadingProtest.value = null
   }
 }
 
-async function cancelProtest(title) {
-  try {
-    title.protest_status = 'Pendente'
-    if (title.name) {
-      await call('frappe.client.set_value', {
-        doctype: 'CRM Deal Title',
-        name: title.name,
-        fieldname: 'protest_status',
-        value: 'Pendente',
-      })
-    }
-    toast.success(__('Envio de protesto cancelado.'))
-    emit('reload')
-  } catch (err) {
-    toast.error(err.message || __('Erro ao cancelar protesto.'))
-  }
+function refreshTitle(title) {
+  runTitle(title, 'refresh_row')
+}
+
+function confirmWithdraw(title) {
+  const label = __(WITHDRAW_LABEL[statusOf(title)])
+  createDialog({
+    title: label,
+    message: __('CENPROT receives the request for title {0} now. The status changes only when CENPROT confirms it.', [title.title_number]),
+    size: 'md',
+    actions: [
+      { label: __('Back'), onClick: ({ close }) => close() },
+      {
+        label,
+        variant: 'solid',
+        theme: 'red',
+        onClick: ({ close }) => {
+          close()
+          runTitle(title, 'withdraw_row', { justification: __('Requested by the operator in HubTech') })
+        },
+      },
+    ],
+  })
 }
 
 async function saveAllTitles() {
@@ -626,7 +687,11 @@ async function saveAllTitles() {
 }
 
 async function saveNewTitle() {
-  if (!newTitle.value.title_number || !newTitle.value.species || !newTitle.value.due_date || !newTitle.value.original_amount) return
+  const t = newTitle.value
+  if (!t.title_number || !t.species || !t.issue_date || !t.due_date || !t.original_amount) {
+    toast.error(__('Fill number, species, issue date, due date and amount.'))
+    return
+  }
 
   const row = {
     ...newTitle.value,
