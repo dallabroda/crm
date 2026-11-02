@@ -1,27 +1,24 @@
 <template>
-  <div class="flex h-full flex-col gap-6 p-6 text-ink-gray-8">
-    <div class="flex justify-between gap-4 px-2 pt-2">
-      <div class="flex flex-col gap-1 w-9/12">
-        <h2 class="flex gap-2 text-2xl-semibold leading-none h-5">
-          {{ __('API') }}
-        </h2>
-        <p class="text-p-base text-ink-gray-6">
-          {{
-            __(
-              'Keys for other systems to read and write your cards, contacts and organizations. Each key only reaches the funnels you choose and does not take a user seat.',
-            )
-          }}
-        </p>
-      </div>
-      <Button
-        v-if="data"
-        variant="solid"
-        icon-left="plus"
-        :label="__('New key')"
-        :disabled="activeCount >= data.limit"
-        @click="openForm()"
-      />
-    </div>
+  <div class="flex h-full flex-col gap-6 text-ink-gray-8">
+    <SettingsPageHeader :title="__('API')">
+      <template #description>
+        {{
+          __(
+            'Keys for other systems to read and write your cards, contacts and organizations. Each key only reaches the funnels you choose and does not take a user seat.',
+          )
+        }}
+      </template>
+      <template #actions>
+        <Button
+          v-if="data"
+          variant="solid"
+          icon-left="plus"
+          :label="__('New key')"
+          :disabled="activeCount >= data.limit"
+          @click="openForm()"
+        />
+      </template>
+    </SettingsPageHeader>
 
     <div v-if="!data" class="flex mt-28 justify-between w-full h-full">
       <Button
@@ -284,6 +281,7 @@
 </template>
 
 <script setup>
+import SettingsPageHeader from '@/components/Settings/SettingsPageHeader.vue'
 import {
   Badge,
   Button,

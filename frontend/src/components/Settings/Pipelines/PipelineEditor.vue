@@ -1,7 +1,16 @@
 <template>
-  <div class="flex h-full flex-col gap-6 p-6 text-ink-gray-8">
-    <div class="flex items-center justify-between px-2 pt-2">
-      <div class="flex items-center gap-2">
+  <div class="flex h-full flex-col gap-6 text-ink-gray-8">
+    <SettingsPageHeader
+      :title="isNew ? __('New funnel') : __(form.pipeline_name) || __('Funnel')"
+    >
+      <template #badge>
+        <Badge
+          v-if="!canManage && !loading"
+          :label="__('Read only')"
+          variant="subtle"
+        />
+      </template>
+      <template #title>
         <Button
           variant="ghost"
           icon="lucide-chevron-left"
@@ -12,20 +21,17 @@
             isNew ? __('New funnel') : __(form.pipeline_name) || __('Funnel')
           }}
         </h2>
-        <Badge
-          v-if="!canManage && !loading"
-          :label="__('Read only')"
-          variant="subtle"
+      </template>
+      <template #actions>
+        <Button
+          v-if="canManage"
+          variant="solid"
+          :label="__('Save')"
+          :loading="saving"
+          @click="save"
         />
-      </div>
-      <Button
-        v-if="canManage"
-        variant="solid"
-        :label="__('Save')"
-        :loading="saving"
-        @click="save"
-      />
-    </div>
+      </template>
+    </SettingsPageHeader>
 
     <div v-if="loading" class="mt-12 flex items-center justify-center">
       <LoadingIndicator class="w-4" />
@@ -227,6 +233,7 @@
 </template>
 
 <script setup>
+import SettingsPageHeader from '@/components/Settings/SettingsPageHeader.vue'
 import IndicatorIcon from '@/components/Icons/IndicatorIcon.vue'
 import UserAvatar from '@/components/UserAvatar.vue'
 import PipelineDistribution from './PipelineDistribution.vue'

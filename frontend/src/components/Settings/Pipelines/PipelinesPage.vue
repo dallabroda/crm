@@ -6,30 +6,27 @@
     @back="closeEditor"
     @saved="onSaved"
   />
-  <div v-else class="flex h-full flex-col gap-6 p-6 text-ink-gray-8">
-    <div class="flex justify-between px-2 pt-2">
-      <div class="flex w-9/12 flex-col gap-1">
-        <h2 class="flex h-5 text-2xl-semibold leading-none">
-          {{ __('Funnels') }}
-        </h2>
-        <p class="text-p-base text-ink-gray-6">
-          {{
-            __(
-              'Each funnel has its own stages, members and fields. Salespeople only see the funnels they are part of.',
-            )
-          }}
-        </p>
-      </div>
-      <div class="flex w-3/12 items-center justify-end">
-        <Button
-          v-if="pipelineUsers.can_create"
-          :label="__('New')"
-          icon-left="lucide-plus"
-          variant="solid"
-          @click="editing = ''"
-        />
-      </div>
-    </div>
+  <div v-else class="flex h-full flex-col gap-6 text-ink-gray-8">
+    <SettingsPageHeader :title="__('Funnels')">
+      <template #description>
+        {{
+          __(
+            'Each funnel has its own stages, members and fields. Salespeople only see the funnels they are part of.',
+          )
+        }}
+      </template>
+      <template #actions>
+        <template v-if="pipelineUsers.can_create">
+          <Button
+            v-if="pipelineUsers.can_create"
+            :label="__('New')"
+            icon-left="lucide-plus"
+            variant="solid"
+            @click="editing = ''"
+          />
+        </template>
+      </template>
+    </SettingsPageHeader>
 
     <div
       v-if="loading && !list.length"
@@ -73,6 +70,7 @@
 </template>
 
 <script setup>
+import SettingsPageHeader from '@/components/Settings/SettingsPageHeader.vue'
 import IndicatorIcon from '@/components/Icons/IndicatorIcon.vue'
 import PipelineEditor from './PipelineEditor.vue'
 import { pipelinesStore } from '@/stores/pipelines'

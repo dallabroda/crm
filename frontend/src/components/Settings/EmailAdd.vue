@@ -1,14 +1,10 @@
 <template>
   <div class="flex flex-col h-full gap-4">
-    <!-- title and desc -->
-    <div role="heading" aria-level="1" class="flex flex-col gap-1">
-      <h2 class="flex gap-2 text-2xl-semibold leading-none h-5 text-ink-gray-8">
-        {{ __('Setup Email') }}
-      </h2>
-      <p class="text-p-base text-ink-gray-6">
+    <SettingsPageHeader :title="__('Setup Email')">
+      <template #description>
         {{ __('Choose the email service provider you want to configure.') }}
-      </p>
-    </div>
+      </template>
+    </SettingsPageHeader>
     <!-- email service provider selection -->
     <div class="flex flex-wrap items-center">
       <div
@@ -100,6 +96,7 @@
 </template>
 
 <script setup>
+import SettingsPageHeader from '@/components/Settings/SettingsPageHeader.vue'
 import { computed, reactive, ref } from 'vue'
 import { createResource, toast } from 'frappe-ui'
 import { useTelemetry } from '@framework/ui/telemetry'

@@ -1,17 +1,14 @@
 <template>
-  <div class="flex h-full flex-col gap-6 p-6 text-ink-gray-8">
-    <div class="flex flex-col gap-1 px-2 pt-2">
-      <h2 class="flex h-5 text-2xl-semibold leading-none">
-        {{ __('Lead Sources') }}
-      </h2>
-      <p class="text-p-base text-ink-gray-6">
+  <div class="flex h-full flex-col gap-6 text-ink-gray-8">
+    <SettingsPageHeader :title="__('Lead Sources')">
+      <template #description>
         {{
           __(
             'Leads from your ads and forms land in the funnel within seconds, already assigned to a salesperson.',
           )
         }}
-      </p>
-    </div>
+      </template>
+    </SettingsPageHeader>
     <div class="flex flex-1 flex-col gap-8 overflow-y-auto px-2">
       <MetaLeadsSource @changed="activity?.load()" />
       <WebhookSources @changed="activity?.load()" />
@@ -23,6 +20,7 @@
 </template>
 
 <script setup>
+import SettingsPageHeader from '@/components/Settings/SettingsPageHeader.vue'
 // Lead sources connected by the company admin (credtech#51). The old screen,
 // where a Meta access token was pasted by hand, gave way to "Connect with
 // Facebook": the token never shows up here.

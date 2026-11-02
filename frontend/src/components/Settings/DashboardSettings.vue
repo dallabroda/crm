@@ -1,26 +1,21 @@
 <template>
-  <div class="flex h-full flex-col gap-6 py-8 px-6 text-ink-gray-8">
-    <div class="flex justify-between px-2 text-ink-gray-8">
-      <div class="flex flex-col gap-1">
-        <h2 class="flex gap-2 text-2xl-semibold leading-none h-5">
-          {{ __('Dashboard') }}
-        </h2>
-        <p class="text-p-base text-ink-gray-6">
-          {{
-            __('Choose how the dashboard forecasts deals and shows currency.')
-          }}
-        </p>
-      </div>
-      <div class="flex item-center space-x-2 w-3/12 justify-end">
-        <Button
-          v-if="settings.isDirty"
-          :label="__('Update')"
-          variant="solid"
-          :loading="settings.loading"
-          @click="updateSettings"
-        />
-      </div>
-    </div>
+  <div class="flex h-full flex-col gap-6 text-ink-gray-8">
+    <SettingsPageHeader :title="__('Dashboard')">
+      <template #description>
+        {{ __('Choose how the dashboard forecasts deals and shows currency.') }}
+      </template>
+      <template #actions>
+        <template v-if="settings.isDirty">
+          <Button
+            v-if="settings.isDirty"
+            :label="__('Update')"
+            variant="solid"
+            :loading="settings.loading"
+            @click="updateSettings"
+          />
+        </template>
+      </template>
+    </SettingsPageHeader>
 
     <div class="flex-1 flex flex-col overflow-y-auto">
       <div class="flex items-center justify-between py-3 px-2">
@@ -146,6 +141,7 @@
   </div>
 </template>
 <script setup>
+import SettingsPageHeader from '@/components/Settings/SettingsPageHeader.vue'
 import { getSettings } from '@/stores/settings'
 import { globalStore } from '@/stores/global'
 import { useBroadcast } from '@/composables/useBroadcast'

@@ -1,20 +1,14 @@
 <template>
-  <div class="flex h-full flex-col gap-6 p-6 text-ink-gray-8">
-    <!-- Header -->
-    <div class="flex justify-between px-2 pt-2">
-      <div class="flex flex-col gap-1 w-9/12">
-        <h2 class="flex gap-2 text-2xl-semibold leading-none h-5">
-          {{ __('Users') }}
-        </h2>
-        <p class="text-p-base text-ink-gray-6">
-          {{
-            __(
-              'Invite users and choose their role to control what they can see and do.',
-            )
-          }}
-        </p>
-      </div>
-      <div class="flex item-center space-x-2 w-3/12 justify-end">
+  <div class="flex h-full flex-col gap-6 text-ink-gray-8">
+    <SettingsPageHeader :title="__('Users')">
+      <template #description>
+        {{
+          __(
+            'Invite users and choose their role to control what they can see and do.',
+          )
+        }}
+      </template>
+      <template #actions>
         <!-- Access is only by invitation (credtech#190): "New" opens the invitation -->
         <Button
           :label="__('New')"
@@ -22,8 +16,8 @@
           variant="solid"
           @click="activeSettingsPage = 'Invite User'"
         />
-      </div>
-    </div>
+      </template>
+    </SettingsPageHeader>
 
     <!-- loading state -->
     <div v-if="users.loading" class="flex mt-28 justify-between w-full h-full">
@@ -157,6 +151,7 @@
 </template>
 
 <script setup>
+import SettingsPageHeader from '@/components/Settings/SettingsPageHeader.vue'
 import AvailabilityDot from '@/components/AvailabilityDot.vue'
 import EmptyState from '@/components/ListViews/EmptyState.vue'
 import { activeSettingsPage } from '@/composables/settings'

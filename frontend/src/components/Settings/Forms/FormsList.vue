@@ -1,30 +1,22 @@
 <template>
-  <div class="flex h-full flex-col gap-6 p-6 text-ink-gray-8">
-    <!-- Header -->
-    <div class="flex justify-between px-2 pt-2">
-      <div class="flex flex-col gap-1 w-9/12">
-        <div class="flex gap-2 items-center">
-          <h2 class="flex text-2xl-semibold leading-none h-5">
-            {{ __('Lead capture forms') }}
-          </h2>
-        </div>
-        <p class="text-p-base text-ink-gray-6">
-          {{
-            __(
-              'Capture leads and deals from public forms you embed on your website.',
-            )
-          }}
-        </p>
-      </div>
-      <div class="flex item-center space-x-2 w-3/12 justify-end">
+  <div class="flex h-full flex-col gap-6 text-ink-gray-8">
+    <SettingsPageHeader :title="__('Lead capture forms')">
+      <template #description>
+        {{
+          __(
+            'Capture leads and deals from public forms you embed on your website.',
+          )
+        }}
+      </template>
+      <template #actions>
         <Button
           :label="__('New')"
           icon-left="lucide-plus"
           variant="solid"
           @click="openCreate"
         />
-      </div>
-    </div>
+      </template>
+    </SettingsPageHeader>
 
     <!-- List -->
     <div class="flex h-full flex-col overflow-y-auto">
@@ -138,6 +130,7 @@
 </template>
 
 <script setup>
+import SettingsPageHeader from '@/components/Settings/SettingsPageHeader.vue'
 import EmptyState from '@/components/ListViews/EmptyState.vue'
 import {
   Button,

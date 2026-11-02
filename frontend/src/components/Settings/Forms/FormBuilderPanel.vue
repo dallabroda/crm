@@ -1,8 +1,16 @@
 <template>
   <div class="flex h-full flex-col text-ink-gray-8">
-    <!-- header -->
-    <div class="flex items-center justify-between px-6 pt-8 pb-4">
-      <div class="flex items-center gap-2">
+    <SettingsPageHeader :title="form.title || __('Untitled')">
+      <template #badge>
+        <Badge
+          v-if="dirty"
+          variant="subtle"
+          theme="amber"
+          size="sm"
+          :label="__('Not Saved')"
+        />
+      </template>
+      <template #title>
         <Button
           variant="ghost"
           icon-left="lucide-chevron-left"
@@ -11,15 +19,8 @@
           class="-ml-4 cursor-pointer !max-w-96 !justify-start !pr-0 text-lg-semibold text-ink-gray-7 no-underline hover:bg-transparent hover:no-underline hover:opacity-70 focus:bg-transparent focus:outline-none focus:ring-0"
           @click="goBack"
         />
-        <Badge
-          v-if="dirty"
-          variant="subtle"
-          theme="amber"
-          size="sm"
-          :label="__('Not Saved')"
-        />
-      </div>
-      <div class="flex items-center gap-4">
+      </template>
+      <template #actions>
         <div
           class="flex items-center justify-between gap-2 h-7"
           @click="togglePublish"
@@ -46,10 +47,10 @@
           :loading="saving"
           @click="saveNow"
         />
-      </div>
-    </div>
+      </template>
+    </SettingsPageHeader>
 
-    <div v-if="loaded" class="flex-1 overflow-y-auto px-6 pb-6">
+    <div v-if="loaded" class="flex-1 overflow-y-auto pb-6">
       <!-- EDIT MODE -->
       <div v-if="mode === 'edit'" class="wf-tabs">
         <Tabs v-model="activeTab" as="div" :tabs="tabs">
@@ -661,6 +662,7 @@
 </template>
 
 <script setup>
+import SettingsPageHeader from '@/components/Settings/SettingsPageHeader.vue'
 import { pipelinesStore } from '@/stores/pipelines'
 import { storeToRefs } from 'pinia'
 import {

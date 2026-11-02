@@ -1,28 +1,22 @@
 <template>
-  <div class="flex h-full flex-col gap-6 p-6 text-ink-gray-8">
-    <!-- Header -->
-    <div class="flex justify-between px-2 pt-2">
-      <div class="flex flex-col gap-1 w-9/12">
-        <h2 class="flex gap-2 text-2xl-semibold leading-none h-5">
-          {{ __('Email Templates') }}
-        </h2>
-        <p class="text-p-base text-ink-gray-6">
-          {{
-            __(
-              'Add, edit, and manage email templates for various CRM communications.',
-            )
-          }}
-        </p>
-      </div>
-      <div class="flex item-center space-x-2 w-3/12 justify-end">
+  <div class="flex h-full flex-col gap-6 text-ink-gray-8">
+    <SettingsPageHeader :title="__('Email Templates')">
+      <template #description>
+        {{
+          __(
+            'Add, edit, and manage email templates for various CRM communications.',
+          )
+        }}
+      </template>
+      <template #actions>
         <Button
           :label="__('New')"
           icon-left="lucide-plus"
           variant="solid"
           @click="emit('updateStep', 'new-template')"
         />
-      </div>
-    </div>
+      </template>
+    </SettingsPageHeader>
 
     <!-- loading state -->
     <div
@@ -148,6 +142,7 @@
   </div>
 </template>
 <script setup>
+import SettingsPageHeader from '@/components/Settings/SettingsPageHeader.vue'
 import EmailTemplateIcon from '@/components/Icons/EmailTemplateIcon.vue'
 import EmptyState from '../../ListViews/EmptyState.vue'
 import { useBroadcast } from '@/composables/useBroadcast'

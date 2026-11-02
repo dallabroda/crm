@@ -3,13 +3,6 @@
     :title="__('SLA Policies')"
     :description="__('Manage your service level agreement policies.')"
   >
-    <template #title>
-      <div class="flex gap-2 items-center">
-        <h2 class="flex text-2xl-semibold leading-none h-5">
-          {{ __('SLA Policies') }}
-        </h2>
-      </div>
-    </template>
     <template #header-actions>
       <Button
         :label="__('New')"

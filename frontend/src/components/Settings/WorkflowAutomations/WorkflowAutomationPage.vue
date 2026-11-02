@@ -4,13 +4,6 @@
     :title="__('Workflow Automations')"
     :description="__('Create workflow automations for CRM documents.')"
   >
-    <template #title>
-      <div class="flex items-center gap-2">
-        <h2 class="flex text-2xl-semibold leading-none h-5">
-          {{ __('Workflow Automations') }}
-        </h2>
-      </div>
-    </template>
     <template #header-actions>
       <Button
         :label="__('New')"
