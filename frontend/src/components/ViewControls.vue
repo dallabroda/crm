@@ -24,12 +24,14 @@
         <div class="flex shrink-0 gap-2">
           <Button
             v-if="filterChip"
+            variant="outline"
             :label="filterChip.label"
             iconRight="lucide-x"
             :tooltip="__('Show all records')"
             @click="filterChip.clear"
           />
           <Button
+            variant="outline"
             :tooltip="__('Refresh')"
             icon="lucide-refresh-ccw"
             :loading="isLoading"
@@ -81,7 +83,7 @@
   </div>
   <div
     v-else-if="customizeQuickFilter"
-    class="flex items-center justify-between gap-2 p-5"
+    class="flex items-center justify-between gap-2 px-6 py-4"
   >
     <div class="flex flex-1 items-center overflow-hidden pl-1 gap-2">
       <FadedScrollableDiv
@@ -149,7 +151,9 @@
       <Button icon="lucide-x" @click="customizeQuickFilter = false" />
     </div>
   </div>
-  <div v-else class="flex items-center justify-between gap-2 px-5 py-4">
+  <!-- Figma "Vendas · Lista" (790:2): quick filters and search on the left,
+       outline actions on the right, 24px sides. -->
+  <div v-else class="flex items-center justify-between gap-2 px-6 py-4">
     <FadedScrollableDiv
       class="flex flex-1 items-center overflow-x-auto -ml-1 h-9"
       orientation="horizontal"
@@ -177,12 +181,14 @@
       <div class="flex items-center gap-2">
         <Button
           v-if="filterChip"
+          variant="outline"
           :label="filterChip.label"
           iconRight="lucide-x"
           :tooltip="__('Show all records')"
           @click="filterChip.clear"
         />
         <Button
+          variant="outline"
           :tooltip="__('Refresh')"
           icon="lucide-refresh-ccw"
           :loading="isLoading"
@@ -259,6 +265,7 @@
         >
           <template #default>
             <Button
+              variant="outline"
               :tooltip="__('More Options')"
               icon="lucide-more-horizontal"
             />

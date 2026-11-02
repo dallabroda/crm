@@ -2,7 +2,7 @@
   <div
     v-if="showGroupedRows"
     ref="groupedScrollContainer"
-    class="mx-3 mt-2 h-full overflow-y-auto sm:mx-5"
+    class="mx-3 mt-2 h-full overflow-y-auto sm:mx-6"
   >
     <div v-for="group in reactivieRows" :key="group.group">
       <ListGroupHeader :group="group">
@@ -33,7 +33,7 @@
       </ListGroupRows>
     </div>
   </div>
-  <ListRows v-else ref="scrollContainer" class="mx-3 sm:mx-5">
+  <ListRows v-else ref="scrollContainer" class="mx-3 sm:mx-6">
     <ListRow
       v-for="row in reactivieRows"
       :key="row.name"

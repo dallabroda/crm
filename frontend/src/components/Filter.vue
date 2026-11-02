@@ -3,6 +3,7 @@
     <template #trigger="{ close }">
       <div class="flex items-center">
         <Button
+          variant="outline"
           :label="__('Filter')"
           :class="filters?.size ? 'rounded-r-none' : ''"
           :iconLeft="FilterIcon"
@@ -17,8 +18,9 @@
         </Button>
         <Button
           v-if="filters?.size"
+          variant="outline"
           :tooltip="__('Clear All Filters')"
-          class="rounded-l-none border-l"
+          class="-ml-px rounded-l-none"
           icon="lucide-x"
           @click.stop="clearfilter(close)"
         />
