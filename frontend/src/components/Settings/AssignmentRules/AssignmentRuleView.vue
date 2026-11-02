@@ -1,10 +1,23 @@
 <template>
   <div
     v-if="!getAssignmentRuleData.loading"
-    class="flex flex-col h-full gap-6 px-6 py-8 text-ink-gray-8"
+    class="flex flex-col h-full gap-6 text-ink-gray-8"
   >
-    <div class="flex justify-between px-2 w-full">
-      <div class="flex items-center gap-2">
+    <SettingsPageHeader
+      :title="
+        assignmentRuleData.assignmentRuleName || __('New Assignment Rule')
+      "
+    >
+      <template #badge>
+        <Badge
+          v-if="isDirty"
+          :variant="'subtle'"
+          :theme="'amber'"
+          size="sm"
+          :label="__('Not Saved')"
+        />
+      </template>
+      <template #title>
         <Button
           variant="ghost"
           icon-left="lucide-chevron-left"
@@ -15,15 +28,8 @@
           class="cursor-pointer -ml-4 hover:bg-transparent focus:bg-transparent focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:none active:bg-transparent active:outline-none active:ring-0 active:ring-offset-0 active:text-ink-gray-5 text-2xl-semibold hover:opacity-70 !pr-0 !max-w-96 !justify-start"
           @click="goBack()"
         />
-        <Badge
-          v-if="isDirty"
-          :variant="'subtle'"
-          :theme="'amber'"
-          size="sm"
-          :label="__('Not Saved')"
-        />
-      </div>
-      <div class="flex gap-4">
+      </template>
+      <template #actions>
         <div
           class="flex items-center justify-between gap-2 h-7"
           @click="assignmentRuleData.disabled = !assignmentRuleData.disabled"
@@ -39,8 +45,8 @@
           :loading="isLoading || getAssignmentRuleData.loading"
           @click="saveAssignmentRule()"
         />
-      </div>
-    </div>
+      </template>
+    </SettingsPageHeader>
     <div class="overflow-y-auto px-2">
       <div class="grid grid-cols-2 gap-5">
         <div>
@@ -308,6 +314,7 @@
 </template>
 
 <script setup>
+import SettingsPageHeader from '@/components/Settings/SettingsPageHeader.vue'
 import {
   Badge,
   Button,

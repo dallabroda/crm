@@ -1,29 +1,23 @@
 <template>
-  <div class="flex h-full flex-col gap-6 p-6 text-ink-gray-8">
-    <!-- Header -->
-    <div class="flex justify-between px-2 pt-2">
-      <div class="flex flex-col gap-1 w-9/12">
-        <h2 class="flex gap-2 text-2xl-semibold leading-none h-5">
-          {{ __('Users') }}
-        </h2>
-        <p class="text-p-base text-ink-gray-6">
-          {{
-            __(
-              'Invite users and choose their role to control what they can see and do.',
-            )
-          }}
-        </p>
-      </div>
-      <div class="flex item-center space-x-2 w-3/12 justify-end">
+  <div class="flex h-full flex-col gap-6 text-ink-gray-8">
+    <SettingsPageHeader :title="__('Users')">
+      <template #description>
+        {{
+          __(
+            'Invite users and choose their role to control what they can see and do.',
+          )
+        }}
+      </template>
+      <template #actions>
         <!-- Access is only by invitation (credtech#190): "New" opens the invitation -->
         <Button
-          :label="__('New')"
+          :label="__('Invite User')"
           icon-left="lucide-plus"
           variant="solid"
           @click="activeSettingsPage = 'Invite User'"
         />
-      </div>
-    </div>
+      </template>
+    </SettingsPageHeader>
 
     <!-- loading state -->
     <div v-if="users.loading" class="flex mt-28 justify-between w-full h-full">
@@ -50,7 +44,7 @@
     >
       <div
         v-if="users.data?.crmUsers?.length > 10"
-        class="flex items-center gap-2 mb-4 px-2 pt-0.5"
+        class="flex items-center gap-2 mb-4 pt-0.5"
       >
         <TextInput
           ref="searchRef"
@@ -77,9 +71,11 @@
           ]"
         />
       </div>
-      <ul class="divide-y divide-outline-elevation-2 overflow-y-auto px-2">
+      <ul
+        class="divide-y divide-outline-gray-1 overflow-y-auto rounded-lg border border-outline-gray-1"
+      >
         <template v-for="user in usersList" :key="user.name">
-          <li class="flex items-center justify-between py-2">
+          <li class="flex items-center justify-between gap-3 px-4 py-3">
             <div class="flex items-center">
               <div class="relative shrink-0">
                 <Avatar
@@ -94,10 +90,12 @@
                 </div>
               </div>
               <div class="flex flex-col ml-3">
-                <div class="flex items-center text-p-base text-ink-gray-8">
+                <div
+                  class="flex items-center text-base font-medium text-ink-gray-9"
+                >
                   {{ user.full_name }}
                 </div>
-                <div class="text-p-sm text-ink-gray-5">
+                <div class="text-base text-ink-gray-6">
                   {{ user.name }}
                 </div>
               </div>
@@ -157,6 +155,7 @@
 </template>
 
 <script setup>
+import SettingsPageHeader from '@/components/Settings/SettingsPageHeader.vue'
 import AvailabilityDot from '@/components/AvailabilityDot.vue'
 import EmptyState from '@/components/ListViews/EmptyState.vue'
 import { activeSettingsPage } from '@/composables/settings'

@@ -1,30 +1,22 @@
 <template>
-  <div class="flex h-full flex-col gap-6 p-6 text-ink-gray-8">
-    <!-- Header -->
-    <div class="flex justify-between px-2 pt-2">
-      <div class="flex flex-col gap-1 w-9/12">
-        <div class="flex gap-2 items-center">
-          <h2 class="flex text-2xl-semibold leading-none h-5">
-            {{ __('Assignment Rules') }}
-          </h2>
-        </div>
-        <p class="text-p-base text-ink-gray-6">
-          {{
-            __(
-              'Auto-assign leads/deals to the right sales user based on predefined conditions.',
-            )
-          }}
-        </p>
-      </div>
-      <div class="flex item-center space-x-2 w-3/12 justify-end">
+  <div class="flex h-full flex-col gap-6 text-ink-gray-8">
+    <SettingsPageHeader :title="__('Assignment Rules')">
+      <template #description>
+        {{
+          __(
+            'Auto-assign leads/deals to the right sales user based on predefined conditions.',
+          )
+        }}
+      </template>
+      <template #actions>
         <Button
-          :label="__('New')"
+          :label="__('New rule')"
           icon-left="lucide-plus"
           variant="solid"
           @click="goToNew()"
         />
-      </div>
-    </div>
+      </template>
+    </SettingsPageHeader>
 
     <!-- Assignment rules list -->
     <div class="flex h-full overflow-y-auto">
@@ -34,6 +26,7 @@
 </template>
 
 <script setup>
+import SettingsPageHeader from '@/components/Settings/SettingsPageHeader.vue'
 import AssignmentRulesList from './AssignmentRulesList.vue'
 import { createResource } from 'frappe-ui'
 import { inject, provide } from 'vue'

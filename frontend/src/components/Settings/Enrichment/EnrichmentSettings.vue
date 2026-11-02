@@ -1,32 +1,31 @@
 <template>
-  <div class="enrichment-tabs flex h-full flex-col text-ink-gray-8">
-    <div class="flex items-start justify-between px-8 pt-8 pb-4">
-      <div class="flex flex-col gap-1">
-        <h2 class="flex gap-2 text-2xl-semibold leading-none h-5">
-          {{ __('Enrichment Settings') }}
-          <Badge
-            v-if="hasUnsavedChanges"
-            :label="__('Not Saved')"
-            variant="subtle"
-            theme="amber"
-          />
-        </h2>
-        <p class="text-p-base text-ink-gray-6">
-          {{
-            __(
-              'Set up enrichment availability and match website data to CRM fields.',
-            )
-          }}
-        </p>
-      </div>
-      <Button
-        :label="__('Update')"
-        variant="solid"
-        :loading="saving"
-        :disabled="!hasUnsavedChanges"
-        @click="save"
-      />
-    </div>
+  <div class="enrichment-tabs flex h-full flex-col gap-6 text-ink-gray-8">
+    <SettingsPageHeader :title="__('Enrichment Settings')">
+      <template #badge>
+        <Badge
+          v-if="hasUnsavedChanges"
+          :label="__('Not Saved')"
+          variant="subtle"
+          theme="amber"
+        />
+      </template>
+      <template #description>
+        {{
+          __(
+            'Set up enrichment availability and match website data to CRM fields.',
+          )
+        }}
+      </template>
+      <template #actions>
+        <Button
+          :label="__('Update')"
+          variant="solid"
+          :loading="saving"
+          :disabled="!hasUnsavedChanges"
+          @click="save"
+        />
+      </template>
+    </SettingsPageHeader>
 
     <Tabs
       v-if="settings.doc"
@@ -36,7 +35,7 @@
       class="flex-1 overflow-hidden [&>[data-slot=tab-panel]]:min-h-0 [&>[data-slot=tab-panel]]:flex-1"
     >
       <template #tab-panel="{ tab }">
-        <div class="flex h-full flex-col overflow-y-auto px-8 py-5">
+        <div class="flex h-full flex-col overflow-y-auto pt-6">
           <GeneralTab
             v-if="tab.value === 'general'"
             v-model:max-pages="maxPages"
@@ -65,6 +64,7 @@
 </template>
 
 <script setup lang="ts">
+import SettingsPageHeader from '@/components/Settings/SettingsPageHeader.vue'
 import {
   Badge,
   Button,
@@ -250,11 +250,11 @@ async function save() {
 </script>
 
 <style scoped>
-/* Same tab list alignment as WhatsAppSettings: frappe-ui bakes px-5 into it. */
+/* frappe-ui bakes px-5 into the tab list; align it with the page content. */
 .enrichment-tabs :deep([role='tablist']) {
   padding-left: 0;
   padding-right: 0;
-  margin-left: 2rem;
-  margin-right: 2rem;
+  margin-left: 0;
+  margin-right: 0;
 }
 </style>

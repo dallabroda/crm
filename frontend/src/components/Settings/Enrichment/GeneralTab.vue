@@ -1,41 +1,35 @@
 <template>
-  <div class="flex-1 flex flex-col">
-    <div class="flex gap-4 items-center justify-between py-3">
-      <div class="flex flex-col">
-        <div class="text-p-base-medium text-ink-gray-7 truncate">
-          {{ __('Enable enrichment') }}
-        </div>
-        <div class="text-p-sm text-ink-gray-5">
-          {{
-            __(
-              'Fill in company details on Leads, Deals and Organizations from their website.',
-            )
-          }}
-        </div>
-      </div>
-      <div>
-        <Switch
-          :model-value="Boolean(doc.enabled)"
-          size="sm"
-          @update:model-value="(value) => emit('toggle', 'enabled', value)"
-        />
-      </div>
-    </div>
+  <div class="flex flex-1 flex-col gap-6">
+    <SettingsRow>
+      <template #label>
+        {{ __('Enable enrichment') }}
+      </template>
+      <template #description>
+        {{
+          __(
+            'Fill in company details on Leads, Deals and Organizations from their website.',
+          )
+        }}
+      </template>
+      <Switch
+        :model-value="Boolean(doc.enabled)"
+        size="sm"
+        @update:model-value="(value) => emit('toggle', 'enabled', value)"
+      />
+    </SettingsRow>
 
     <template v-if="doc.enabled">
-      <div class="flex gap-4 items-start justify-between py-3">
-        <div class="flex flex-col">
-          <div class="text-p-base-medium text-ink-gray-7 truncate">
-            {{ __('Maximum pages') }}
-          </div>
-          <div class="text-p-sm text-ink-gray-5">
-            {{
-              __(
-                'Maximum number of pages that can be crawled during a single enrichment run.',
-              )
-            }}
-          </div>
-        </div>
+      <SettingsRow>
+        <template #label>
+          {{ __('Maximum pages') }}
+        </template>
+        <template #description>
+          {{
+            __(
+              'Maximum number of pages that can be crawled during a single enrichment run.',
+            )
+          }}
+        </template>
         <div class="flex flex-col items-end">
           <!-- Not :error: it renders inside the w-24 box and gets squeezed. -->
           <FormControl
@@ -43,7 +37,9 @@
             type="number"
             min="1"
             :max="maxPagesLimit"
-            class="w-24"
+            class="ct-field-48 w-24"
+            variant="outline"
+            size="lg"
             @update:model-value="
               (value: string | number) => emit('update:maxPages', value)
             "
@@ -54,36 +50,31 @@
             :message="maxPagesError"
           />
         </div>
-      </div>
+      </SettingsRow>
 
-      <div class="flex gap-4 items-center justify-between py-3">
-        <div class="flex flex-col">
-          <div class="text-p-base-medium text-ink-gray-7 truncate">
-            {{ __('Auto-enrich new records') }}
-          </div>
-          <div class="text-p-sm text-ink-gray-5">
-            {{
-              __(
-                'Automatically enrich new Leads, Deals and Organizations in the background when they have a website. When off, use the Enrich button on the record.',
-              )
-            }}
-          </div>
-        </div>
-        <div>
-          <Switch
-            :model-value="Boolean(doc.auto_enrich)"
-            size="sm"
-            @update:model-value="
-              (value) => emit('toggle', 'auto_enrich', value)
-            "
-          />
-        </div>
-      </div>
+      <SettingsRow>
+        <template #label>
+          {{ __('Auto-enrich new records') }}
+        </template>
+        <template #description>
+          {{
+            __(
+              'Automatically enrich new Leads, Deals and Organizations in the background when they have a website. When off, use the Enrich button on the record.',
+            )
+          }}
+        </template>
+        <Switch
+          :model-value="Boolean(doc.auto_enrich)"
+          size="sm"
+          @update:model-value="(value) => emit('toggle', 'auto_enrich', value)"
+        />
+      </SettingsRow>
     </template>
   </div>
 </template>
 
 <script setup lang="ts">
+import SettingsRow from '@/components/Settings/SettingsRow.vue'
 import { ErrorMessage, FormControl, Switch } from 'frappe-ui'
 import type { EnrichmentSettingsDoc } from './types'
 

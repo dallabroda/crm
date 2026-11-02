@@ -1,15 +1,17 @@
 <template>
   <div
-    class="flex items-center justify-between px-2 py-3 border-outline-elevation-2 cursor-pointer hover:bg-surface-sidebar rounded-4"
+    class="flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-surface-gray-2"
   >
     <!-- avatar and name -->
     <div class="flex items-center justify-between gap-2">
       <EmailProviderIcon :logo="emailIcon[emailAccount.service]" />
       <div>
-        <div class="text-p-base text-ink-gray-8">
+        <div class="text-base font-medium text-ink-gray-9">
           {{ emailAccount.email_account_name }}
         </div>
-        <div class="text-p-sm text-ink-gray-5">{{ emailAccount.email_id }}</div>
+        <div class="text-base text-ink-gray-6">
+          {{ emailAccount.email_id }}
+        </div>
       </div>
     </div>
     <div>

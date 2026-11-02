@@ -1,28 +1,22 @@
 <template>
-  <div class="flex h-full flex-col gap-6 p-6 text-ink-gray-8">
-    <!-- Header -->
-    <div class="flex justify-between px-2 pt-2">
-      <div class="flex flex-col gap-1 w-9/12">
-        <h2 class="flex gap-2 text-2xl-semibold leading-none h-5">
-          {{ __('Email Templates') }}
-        </h2>
-        <p class="text-p-base text-ink-gray-6">
-          {{
-            __(
-              'Add, edit, and manage email templates for various CRM communications.',
-            )
-          }}
-        </p>
-      </div>
-      <div class="flex item-center space-x-2 w-3/12 justify-end">
+  <div class="flex h-full flex-col gap-6 text-ink-gray-8">
+    <SettingsPageHeader :title="__('Email Templates')">
+      <template #description>
+        {{
+          __(
+            'Add, edit, and manage email templates for various CRM communications.',
+          )
+        }}
+      </template>
+      <template #actions>
         <Button
-          :label="__('New')"
+          :label="__('New Template')"
           icon-left="lucide-plus"
           variant="solid"
           @click="emit('updateStep', 'new-template')"
         />
-      </div>
-    </div>
+      </template>
+    </SettingsPageHeader>
 
     <!-- loading state -->
     <div
@@ -38,11 +32,17 @@
     </div>
 
     <!-- Empty State -->
-    <EmptyState
+    <SettingsEmptyState
       v-else-if="!templates.loading && !templates.data?.length"
-      name="Email Templates"
-      description="Add one to get started."
-      :icon="EmailTemplateIcon"
+      :icon="LucideBuilding2"
+      :title="__('No email templates yet')"
+      :description="
+        __(
+          'Create templates to reply faster and keep your messages consistent.',
+        )
+      "
+      :action-label="__('New Template')"
+      @action="emit('updateStep', 'new-template')"
     />
 
     <!-- Email template list -->
@@ -52,7 +52,7 @@
     >
       <div
         v-if="templates.data?.length > 10"
-        class="flex items-center justify-between mb-4 px-2 pt-0.5"
+        class="flex items-center justify-between mb-4 pt-0.5"
       >
         <TextInput
           ref="searchRef"
@@ -77,20 +77,23 @@
           ]"
         />
       </div>
-      <div class="flex items-center py-2 px-4 text-sm text-ink-gray-5">
+      <div
+        class="flex h-10 items-center rounded-t-lg border border-outline-gray-1 bg-surface-gray-2 px-4 text-xs font-medium text-ink-gray-6"
+      >
         <div class="w-4/6">{{ __('Template Name') }}</div>
         <div class="w-1/6">{{ __('For') }}</div>
         <div class="w-1/6">{{ __('Enabled') }}</div>
       </div>
-      <div class="h-px border-t mx-4 border-outline-elevation-2" />
-      <ul class="overflow-y-auto px-2">
+      <ul
+        class="overflow-y-auto rounded-b-lg border border-t-0 border-outline-gray-1"
+      >
         <template v-for="(template, i) in templatesList" :key="template.name">
           <li
-            class="flex items-center justify-between p-3 cursor-pointer hover:bg-surface-sidebar rounded-4"
+            class="flex min-h-14 items-center justify-between px-4 py-2 cursor-pointer hover:bg-surface-gray-2"
             @click="() => emit('updateStep', 'edit-template', { ...template })"
           >
             <div class="flex flex-col w-4/6 pr-5">
-              <div class="text-p-base-medium text-ink-gray-7 truncate">
+              <div class="text-base text-ink-gray-9 truncate">
                 {{ template.name }}
               </div>
               <div class="text-p-sm text-ink-gray-5 truncate">
@@ -127,7 +130,7 @@
           </li>
           <div
             v-if="templatesList.length !== i + 1"
-            class="h-px border-t mx-2 border-outline-elevation-2"
+            class="h-px bg-outline-gray-1"
           />
         </template>
         <!-- Load More Button -->
@@ -148,8 +151,9 @@
   </div>
 </template>
 <script setup>
-import EmailTemplateIcon from '@/components/Icons/EmailTemplateIcon.vue'
-import EmptyState from '../../ListViews/EmptyState.vue'
+import LucideBuilding2 from '~icons/lucide/building-2'
+import SettingsEmptyState from '@/components/Settings/SettingsEmptyState.vue'
+import SettingsPageHeader from '@/components/Settings/SettingsPageHeader.vue'
 import { useBroadcast } from '@/composables/useBroadcast'
 import { TextInput, FormControl, Switch, Dropdown, toast } from 'frappe-ui'
 import { ref, computed, inject } from 'vue'

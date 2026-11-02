@@ -1,40 +1,33 @@
 <template>
   <div class="flex h-full flex-col gap-6">
-    <div class="flex justify-between">
-      <div class="flex flex-col gap-1 w-9/12">
-        <div class="flex gap-1 items-center">
-          <Button
-            v-if="back"
-            variant="ghost"
-            icon-left="lucide-chevron-left"
-            :label="title || __(doctype)"
-            size="md"
-            class="cursor-pointer -ml-4 hover:bg-transparent focus:bg-transparent focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:none active:bg-transparent active:outline-none active:ring-0 active:ring-offset-0 active:text-ink-gray-5 text-2xl-semibold hover:opacity-70 !pr-0 !max-w-96 !justify-start"
-            @click="back"
-          />
-          <h2
-            v-else
-            class="flex gap-2 text-2xl-semibold leading-none h-5 text-ink-gray-8"
-          >
-            {{ title || __(doctype) }}
-          </h2>
-          <Badge
-            v-if="data.isDirty"
-            :label="__('Not Saved')"
-            variant="subtle"
-            theme="amber"
-          />
-        </div>
-      </div>
-      <div class="flex item-center space-x-2 w-3/12 justify-end">
+    <SettingsPageHeader :title="title || __(doctype)">
+      <template v-if="back" #title>
+        <Button
+          variant="ghost"
+          icon-left="lucide-chevron-left"
+          :label="title || __(doctype)"
+          size="md"
+          class="cursor-pointer -ml-4 hover:bg-transparent focus:bg-transparent focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:none active:bg-transparent active:outline-none active:ring-0 active:ring-offset-0 active:text-ink-gray-5 text-2xl-semibold hover:opacity-70 !pr-0 !max-w-96 !justify-start"
+          @click="back"
+        />
+      </template>
+      <template #badge>
+        <Badge
+          v-if="data.isDirty"
+          :label="__('Not Saved')"
+          variant="subtle"
+          theme="amber"
+        />
+      </template>
+      <template #actions>
         <Button
           :loading="data.save.loading"
           :label="__('Update')"
           variant="solid"
           @click="data.save.submit()"
         />
-      </div>
-    </div>
+      </template>
+    </SettingsPageHeader>
     <div v-if="!data.get.loading" class="flex-1 overflow-y-auto">
       <FieldLayout
         v-if="data?.doc && tabs"
@@ -50,6 +43,7 @@
   </div>
 </template>
 <script setup>
+import SettingsPageHeader from '@/components/Settings/SettingsPageHeader.vue'
 import FieldLayout from '@/components/FieldLayout/FieldLayout.vue'
 import {
   createDocumentResource,

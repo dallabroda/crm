@@ -229,7 +229,6 @@
   </div>
 
   <template v-if="!mobile">
-    <Settings />
     <HelpModal
       v-if="showHelpModal"
       v-model="showHelpModal"
@@ -280,7 +279,6 @@ import OrganizationsIcon from '@/components/Icons/OrganizationsIcon.vue'
 import PhoneIcon from '@/components/Icons/PhoneIcon.vue'
 import TaskIcon from '@/components/Icons/TaskIcon.vue'
 import Notifications from '@/components/Notifications.vue'
-import Settings from '@/components/Settings/Settings.vue'
 import { viewsStore } from '@/stores/views'
 import { pipelinesStore } from '@/stores/pipelines'
 import { storeToRefs } from 'pinia'

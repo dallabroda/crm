@@ -3,16 +3,9 @@
     :title="__('SLA Policies')"
     :description="__('Manage your service level agreement policies.')"
   >
-    <template #title>
-      <div class="flex gap-2 items-center">
-        <h2 class="flex text-2xl-semibold leading-none h-5">
-          {{ __('SLA Policies') }}
-        </h2>
-      </div>
-    </template>
     <template #header-actions>
       <Button
-        :label="__('New')"
+        :label="__('New policy')"
         variant="solid"
         icon-left="lucide-plus"
         @click="createNewSlaPolicy"
@@ -53,14 +46,18 @@
         <LoadingIndicator class="w-4" />
       </div>
       <div v-else class="h-full">
-        <EmptyState
+        <SettingsEmptyState
           v-if="
             !slaPolicyListResource.list.loading &&
             !slaPolicyListResource.list.data?.length
           "
-          title="No SLA Policies Found"
-          description="Add one to get started."
-          :icon="ShieldCheck"
+          :icon="LucideShieldCheck"
+          :title="__('No SLA policies yet')"
+          :description="
+            __('Create policies to set response and resolution deadlines.')
+          "
+          :action-label="__('New policy')"
+          @action="createNewSlaPolicy"
         />
         <div v-else class="-ml-2">
           <div
@@ -154,9 +151,9 @@
 </template>
 
 <script setup>
+import LucideShieldCheck from '~icons/lucide/shield-check'
+import SettingsEmptyState from '@/components/Settings/SettingsEmptyState.vue'
 import SettingsLayoutBase from '@/components/Layouts/SettingsLayoutBase.vue'
-import EmptyState from '@/components/ListViews/EmptyState.vue'
-import ShieldCheck from '~icons/lucide/shield-check'
 import {
   Badge,
   Button,

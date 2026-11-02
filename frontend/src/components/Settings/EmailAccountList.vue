@@ -1,20 +1,14 @@
 <template>
-  <div class="flex flex-col h-full">
-    <!-- header -->
-    <div class="flex justify-between text-ink-gray-8">
-      <div class="flex flex-col gap-1 w-9/12">
-        <h2 class="flex gap-2 text-2xl-semibold leading-none h-5">
-          {{ __('Email Accounts') }}
-        </h2>
-        <p class="text-p-base text-ink-gray-6">
-          {{
-            __(
-              'Connect email accounts to send and receive emails from CRM. Set one as the default for incoming and outgoing emails.',
-            )
-          }}
-        </p>
-      </div>
-      <div class="flex item-center space-x-2 w-3/12 justify-end">
+  <div class="flex h-full flex-col gap-6">
+    <SettingsPageHeader :title="__('Email Accounts')">
+      <template #description>
+        {{
+          __(
+            'Connect email accounts to send and receive emails from CRM. Set one as the default for incoming and outgoing emails.',
+          )
+        }}
+      </template>
+      <template #actions>
         <Button
           :label="__('Add Account')"
           theme="gray"
@@ -22,13 +16,13 @@
           icon-left="lucide-plus"
           @click="emit('update:step', 'email-add')"
         />
-      </div>
-    </div>
+      </template>
+    </SettingsPageHeader>
 
     <!-- list accounts -->
     <div
       v-if="!emailAccounts.loading && Boolean(emailAccounts.data?.length)"
-      class="mt-4"
+      class="overflow-hidden rounded-lg border border-outline-gray-1"
     >
       <div
         v-for="(emailAccount, i) in emailAccounts.data"
@@ -40,23 +34,28 @@
         />
         <div
           v-if="emailAccounts.data.length !== i + 1"
-          class="h-px border-t mx-2 border-outline-elevation-2"
+          class="h-px bg-outline-gray-1"
         />
       </div>
     </div>
     <!-- fallback if no email accounts -->
-    <EmptyState
+    <SettingsEmptyState
       v-else
-      name="Email Accounts"
-      :description="__('Add one to get started.')"
-      :icon="Email2Icon"
+      :icon="LucideMail"
+      :title="__('No email account connected')"
+      :description="
+        __('Connect an account to send and receive emails from the CRM.')
+      "
+      :action-label="__('Add Account')"
+      @action="emit('update:step', 'email-add')"
     />
   </div>
 </template>
 
 <script setup>
-import Email2Icon from '@/components/Icons/Email2Icon.vue'
-import EmptyState from '../ListViews/EmptyState.vue'
+import LucideMail from '~icons/lucide/mail'
+import SettingsEmptyState from '@/components/Settings/SettingsEmptyState.vue'
+import SettingsPageHeader from '@/components/Settings/SettingsPageHeader.vue'
 import EmailAccountCard from './EmailAccountCard.vue'
 import { getSystemEmailAccounts } from './emailConfig'
 import { createListResource } from 'frappe-ui'

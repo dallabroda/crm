@@ -1,19 +1,14 @@
 <template>
-  <div class="flex h-full flex-col gap-6 py-8 px-6 text-ink-gray-8">
-    <div class="flex px-2 justify-between">
-      <div class="flex flex-col gap-1 w-9/12">
-        <h2 class="flex gap-2 text-2xl-semibold leading-none h-5">
-          {{ __('Invite users') }}
-        </h2>
-        <p class="text-p-base text-ink-gray-6">
-          {{
-            __(
-              'Invite people by e-mail and choose what each one can do. Access to the company is only by invitation.',
-            )
-          }}
-        </p>
-      </div>
-      <div class="flex item-center space-x-2 w-3/12 justify-end">
+  <div class="flex h-full flex-col gap-6 text-ink-gray-8">
+    <SettingsPageHeader :title="__('Invite users')">
+      <template #description>
+        {{
+          __(
+            'Invite people by e-mail and choose what each one can do. Access to the company is only by invitation.',
+          )
+        }}
+      </template>
+      <template #actions>
         <Button
           :label="__('Send Invites')"
           variant="solid"
@@ -23,12 +18,15 @@
           :loading="inviteByEmail.loading"
           @click="inviteByEmail.submit()"
         />
-      </div>
-    </div>
-    <div class="flex-1 flex flex-col px-2 gap-8 overflow-y-auto">
+      </template>
+    </SettingsPageHeader>
+    <div class="flex-1 flex flex-col gap-8 overflow-y-auto">
       <div>
         <FormControl
           type="textarea"
+          class="ct-field-48"
+          variant="outline"
+          :rows="4"
           :label="__('Invite By Email')"
           placeholder="user1@example.com, user2@example.com, ..."
           :debounce="100"
@@ -49,7 +47,9 @@
         <FormControl
           v-model="role"
           type="select"
-          class="mt-4"
+          class="ct-field-48 mt-6"
+          variant="outline"
+          size="lg"
           :label="__('Invite As')"
           :options="roleOptions"
           :description="description"
@@ -148,6 +148,7 @@
   </div>
 </template>
 <script setup>
+import SettingsPageHeader from '@/components/Settings/SettingsPageHeader.vue'
 import { validateEmail, convertArrayToString, formatDate } from '@/utils'
 import { usersStore } from '@/stores/users'
 import { useTelemetry } from '@framework/ui/telemetry'

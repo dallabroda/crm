@@ -1,51 +1,43 @@
 <template>
-  <div class="flex h-full flex-col gap-6 p-6 text-ink-gray-8">
-    <div class="flex justify-between px-2 pt-2">
-      <div class="flex w-8/12 flex-col gap-1">
-        <h2 class="flex h-5 text-2xl-semibold leading-none">
-          {{ __('Form customization') }}
-        </h2>
-        <p class="text-p-base text-ink-gray-6">
-          {{
-            __(
-              'Which fields each form shows, in which order and which are required. Hiding a field never deletes what was filled in.',
-            )
-          }}
-        </p>
-      </div>
-      <div v-if="isManager()" class="flex w-4/12 flex-col items-end gap-1">
-        <div class="flex gap-2">
-          <Button
-            :label="__('Created fields')"
-            data-testid="created-fields"
-            @click="showCreated = true"
-          />
-          <Button
-            :label="__('Add field')"
-            icon-left="lucide-plus"
-            variant="solid"
-            :disabled="limitReached"
-            @click="openField(null)"
-          />
-        </div>
-        <span class="text-xs text-ink-gray-5" data-testid="field-usage">
-          {{ __('{0} of {1} custom fields', [catalog.used, catalog.limit]) }}
+  <div class="flex h-full flex-col gap-6 text-ink-gray-8">
+    <SettingsPageHeader :title="__('Form customization')">
+      <template #description>
+        {{
+          __(
+            'Which fields each form shows, in which order and which are required. Hiding a field never deletes what was filled in.',
+          )
+        }}
+        <span v-if="isManager()" class="mt-1 block text-xs text-ink-gray-4">
+          <span data-testid="field-usage">
+            {{ __('{0} of {1} custom fields', [catalog.used, catalog.limit]) }}
+          </span>
+          <span v-if="textRoomIsTighter" data-testid="field-text-room">
+            ·
+            {{ __('Room for {0} more text, list or link fields', [textRoom]) }}
+          </span>
         </span>
-        <span
-          v-if="textRoomIsTighter"
-          class="text-xs text-ink-gray-5"
-          data-testid="field-text-room"
-        >
-          {{ __('Room for {0} more text, list or link fields', [textRoom]) }}
-        </span>
-      </div>
-    </div>
+      </template>
+      <template v-if="isManager()" #actions>
+        <Button
+          :label="__('Created fields')"
+          data-testid="created-fields"
+          @click="showCreated = true"
+        />
+        <Button
+          :label="__('Add field')"
+          icon-left="lucide-plus"
+          variant="solid"
+          :disabled="limitReached"
+          @click="openField(null)"
+        />
+      </template>
+    </SettingsPageHeader>
 
-    <div class="px-2">
+    <div>
       <TabButtons v-model="tab" :options="tabs" />
     </div>
 
-    <div class="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-2">
+    <div class="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto">
       <div
         v-if="isCards && !pipelines.length && !loading"
         class="text-p-base text-ink-gray-5"
@@ -252,6 +244,7 @@
 </template>
 
 <script setup>
+import SettingsPageHeader from '@/components/Settings/SettingsPageHeader.vue'
 import FormPreview from './FormPreview.vue'
 import FormConfigModal from './FormConfigModal.vue'
 import FieldDialog from './FieldDialog.vue'

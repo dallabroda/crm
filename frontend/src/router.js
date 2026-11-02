@@ -3,6 +3,7 @@ import { call } from 'frappe-ui'
 import { usersStore } from '@/stores/users'
 import { sessionStore } from '@/stores/session'
 import { viewsStore } from '@/stores/views'
+import { installSettingsNavigation } from '@/composables/settingsNavigation'
 
 let setupChecked = false
 export const SETUP_DONE_KEY = 'crm_setup_completed'
@@ -129,6 +130,14 @@ const routes = [
     name: 'DataImport',
     component: () => import('@/pages/DataImport.vue'),
     meta: { viewKey: 'data-import' },
+  },
+  {
+    // Settings are a page with one URL per section (no longer a modal)
+    path: '/settings/:section?',
+    name: 'Settings',
+    component: () => import('@/pages/Settings.vue'),
+    // one page across sections, so the settings menu keeps its scroll
+    meta: { viewKey: 'settings' },
   },
   {
     path: '/welcome',
@@ -310,5 +319,7 @@ router.beforeEach(async (to, from, next) => {
     next()
   }
 })
+
+installSettingsNavigation(router)
 
 export default router

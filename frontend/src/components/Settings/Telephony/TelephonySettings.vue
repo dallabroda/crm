@@ -1,35 +1,31 @@
 <template>
-  <div class="flex h-full flex-col gap-6 px-6 py-8">
-    <!-- Header -->
-    <div class="flex justify-between px-2 text-ink-gray-8">
-      <div class="flex flex-col gap-1 w-9/12">
-        <h2
-          class="flex gap-2 text-2xl-semibold leading-none h-5 text-ink-gray-8"
-        >
-          {{ __('Telephony Settings') }}
-          <Badge
-            v-if="isDirty"
-            :label="__('Not Saved')"
-            variant="subtle"
-            theme="amber"
-          />
-        </h2>
-        <p class="text-p-base text-ink-gray-6">
-          {{ __('Configure telephony settings for your CRM.') }}
-        </p>
-      </div>
-      <div class="flex item-center space-x-2 w-3/12 justify-end">
-        <Button
+  <div class="flex h-full flex-col gap-6">
+    <SettingsPageHeader :title="__('Telephony Settings')">
+      <template #badge>
+        <Badge
           v-if="isDirty"
-          :loading="
-            isNewDoc ? insertResource.loading : telephonyAgent.save?.loading
-          "
-          :label="__('Update')"
-          variant="solid"
-          @click="update"
+          :label="__('Not Saved')"
+          variant="subtle"
+          theme="amber"
         />
-      </div>
-    </div>
+      </template>
+      <template #description>
+        {{ __('Configure telephony settings for your CRM.') }}
+      </template>
+      <template #actions>
+        <template v-if="isDirty">
+          <Button
+            v-if="isDirty"
+            :loading="
+              isNewDoc ? insertResource.loading : telephonyAgent.save?.loading
+            "
+            :label="__('Update')"
+            variant="solid"
+            @click="update"
+          />
+        </template>
+      </template>
+    </SettingsPageHeader>
 
     <div v-if="telephonyAgent.doc" class="flex-1 flex flex-col overflow-y-auto">
       <div class="flex items-center justify-between gap-8 py-3 pl-2 pr-1">
@@ -381,6 +377,7 @@
   </div>
 </template>
 <script setup>
+import SettingsPageHeader from '@/components/Settings/SettingsPageHeader.vue'
 import {
   FormControl,
   Badge,

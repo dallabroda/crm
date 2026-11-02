@@ -1,37 +1,29 @@
 <template>
-  <div class="flex h-full flex-col gap-4 p-6 text-ink-gray-8">
-    <div class="flex justify-between px-2 pt-2">
-      <div class="flex flex-col gap-1 w-9/12">
-        <div class="flex gap-2 items-center">
-          <h2 class="flex text-2xl-semibold leading-none h-5">
-            {{ __('Sales Hierarchy') }}
-          </h2>
-        </div>
-        <p class="text-p-base text-ink-gray-6">
-          {{
-            __(
-              'Restrict visibility of Leads and Deals based on a reporting tree.',
-            )
-          }}
-        </p>
-      </div>
-      <div
-        v-if="hierarchyEnabled && canEdit"
-        class="flex item-center space-x-2 w-3/12 justify-end"
-      >
-        <Button
-          :label="__('Disable')"
-          :loading="fcrmSettings.setValue.loading"
-          @click="toggleEnable(true)"
-        />
-        <Button
-          :label="__('Add User')"
-          icon-left="lucide-plus"
-          variant="solid"
-          @click="openAddDialog()"
-        />
-      </div>
-    </div>
+  <div class="flex h-full flex-col gap-4 text-ink-gray-8">
+    <SettingsPageHeader :title="__('Sales Hierarchy')">
+      <template #description>
+        {{
+          __(
+            'Restrict visibility of Leads and Deals based on a reporting tree.',
+          )
+        }}
+      </template>
+      <template #actions>
+        <template v-if="hierarchyEnabled && canEdit">
+          <Button
+            :label="__('Disable')"
+            :loading="fcrmSettings.setValue.loading"
+            @click="toggleEnable(true)"
+          />
+          <Button
+            :label="__('Add User')"
+            icon-left="lucide-plus"
+            variant="solid"
+            @click="openAddDialog()"
+          />
+        </template>
+      </template>
+    </SettingsPageHeader>
 
     <div
       v-if="fcrmSettings.loading && !fcrmSettings.doc"
@@ -40,22 +32,13 @@
       <LoadingIndicator class="size-6" />
     </div>
 
-    <div
-      v-else-if="!hierarchyEnabled"
-      class="relative flex flex-1 w-full justify-center"
-    >
-      <div
-        class="absolute left-1/2 flex w-64 -translate-x-1/2 flex-col items-center gap-3"
-        :style="{ top: '35%' }"
+    <div v-else-if="!hierarchyEnabled" class="flex w-full">
+      <SettingsEmptyState
+        :icon="LucideNetwork"
+        :title="__('Enable Sales Hierarchy')"
+        :description="__('Restrict visibility using a reporting tree')"
       >
-        <lucide-network class="size-7.5 text-ink-gray-5" />
-        <div class="flex flex-col items-center gap-1.5 text-center">
-          <span class="text-lg-medium text-ink-gray-8">
-            {{ __('Enable Sales Hierarchy') }}
-          </span>
-          <span class="text-center text-p-base text-ink-gray-6">
-            {{ __('Restrict visibility using a reporting tree') }}
-          </span>
+        <template #actions>
           <Button
             variant="solid"
             :loading="fcrmSettings.setValue.loading"
@@ -63,11 +46,11 @@
           >
             {{ __('Enable') }}
           </Button>
-        </div>
-      </div>
+        </template>
+      </SettingsEmptyState>
     </div>
 
-    <div v-else class="flex-1 min-h-0 flex flex-col px-2">
+    <div v-else class="flex-1 min-h-0 flex flex-col">
       <div class="flex items-center gap-2 pt-0.5 pb-4">
         <TextInput
           v-if="enrichedNodes.length"
@@ -239,6 +222,9 @@
 </template>
 
 <script setup>
+import LucideNetwork from '~icons/lucide/network'
+import SettingsEmptyState from '@/components/Settings/SettingsEmptyState.vue'
+import SettingsPageHeader from '@/components/Settings/SettingsPageHeader.vue'
 import EmptyState from '@/components/ListViews/EmptyState.vue'
 import HierarchyRow from './HierarchyRow.vue'
 import HierarchyTree from './HierarchyTree.vue'
@@ -247,7 +233,6 @@ import { useRemoveNode } from './useRemoveNode'
 import { useDragDrop } from './useDragDrop'
 import { globalStore } from '@/stores/global'
 import { usersStore } from '@/stores/users'
-import LucideNetwork from '~icons/lucide/network'
 import {
   Button,
   Dialog,

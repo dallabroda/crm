@@ -13923,6 +13923,51 @@ msgstr "Pacote mínimo salvo."
 msgid "Could not save the minimum package."
 msgstr "Não foi possível salvar o pacote mínimo."
 
+msgid "No email account connected"
+msgstr "Nenhuma conta de e-mail conectada"
+
+msgid "Connect an account to send and receive emails from the CRM."
+msgstr "Conecte uma conta para enviar e receber e-mails pelo CRM."
+
+msgid "No email templates yet"
+msgstr "Nenhum modelo de e-mail ainda"
+
+msgid "Create templates to reply faster and keep your messages consistent."
+msgstr "Crie modelos para responder mais rápido e manter o padrão das mensagens."
+
+msgid "No assignment rules yet"
+msgstr "Nenhuma regra de atribuição ainda"
+
+msgid "Create rules to share the cards among the team automatically."
+msgstr "Crie regras para distribuir os cards entre a equipe automaticamente."
+
+msgid "New rule"
+msgstr "Nova regra"
+
+msgid "No lead capture forms yet"
+msgstr "Nenhum formulário de captura ainda"
+
+msgid "Create forms to receive contacts from your website straight into the CRM."
+msgstr "Crie formulários para receber contatos do seu site direto no CRM."
+
+msgid "Create automations to do repetitive tasks without effort."
+msgstr "Crie automações para fazer tarefas repetidas sem esforço."
+
+msgid "New automation"
+msgstr "Nova automação"
+
+msgid "No SLA policies yet"
+msgstr "Nenhuma política de SLA ainda"
+
+msgid "Create policies to set response and resolution deadlines."
+msgstr "Crie políticas para definir prazos de resposta e de resolução."
+
+msgid "New policy"
+msgstr "Nova política"
+
+msgid "Create a key to connect other systems to the CRM."
+msgstr "Crie uma chave para integrar outros sistemas ao CRM."
+
 msgid "Search..."
 msgstr "Buscar..."
 

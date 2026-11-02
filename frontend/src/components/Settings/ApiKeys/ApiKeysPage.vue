@@ -1,27 +1,24 @@
 <template>
-  <div class="flex h-full flex-col gap-6 p-6 text-ink-gray-8">
-    <div class="flex justify-between gap-4 px-2 pt-2">
-      <div class="flex flex-col gap-1 w-9/12">
-        <h2 class="flex gap-2 text-2xl-semibold leading-none h-5">
-          {{ __('API') }}
-        </h2>
-        <p class="text-p-base text-ink-gray-6">
-          {{
-            __(
-              'Keys for other systems to read and write your cards, contacts and organizations. Each key only reaches the funnels you choose and does not take a user seat.',
-            )
-          }}
-        </p>
-      </div>
-      <Button
-        v-if="data"
-        variant="solid"
-        icon-left="plus"
-        :label="__('New key')"
-        :disabled="activeCount >= data.limit"
-        @click="openForm()"
-      />
-    </div>
+  <div class="flex h-full flex-col gap-6 text-ink-gray-8">
+    <SettingsPageHeader :title="__('API')">
+      <template #description>
+        {{
+          __(
+            'Keys for other systems to read and write your cards, contacts and organizations. Each key only reaches the funnels you choose and does not take a user seat.',
+          )
+        }}
+      </template>
+      <template #actions>
+        <Button
+          v-if="data"
+          variant="solid"
+          icon-left="plus"
+          :label="__('New key')"
+          :disabled="activeCount >= data.limit"
+          @click="openForm()"
+        />
+      </template>
+    </SettingsPageHeader>
 
     <div v-if="!data" class="flex mt-28 justify-between w-full h-full">
       <Button
@@ -32,7 +29,7 @@
       />
     </div>
 
-    <div v-else class="flex flex-col gap-4 overflow-y-auto px-2">
+    <div v-else class="flex flex-col gap-4 overflow-y-auto">
       <!-- Old keys (token of a user, made in the technical screen) stop on a date set on deploy -->
       <div
         v-if="data.legacy_until && data.legacy_users.length"
@@ -73,12 +70,14 @@
         }}
       </p>
 
-      <div
+      <SettingsEmptyState
         v-if="!data.keys.length"
-        class="rounded border border-outline-gray-1 px-4 py-6 text-center text-p-base text-ink-gray-6"
-      >
-        {{ __('No API keys yet.') }}
-      </div>
+        :icon="LucideKeyRound"
+        :title="__('No API keys yet.')"
+        :description="__('Create a key to connect other systems to the CRM.')"
+        :action-label="__('New key')"
+        @action="openForm()"
+      />
 
       <div
         v-for="key in data.keys"
@@ -284,6 +283,9 @@
 </template>
 
 <script setup>
+import LucideKeyRound from '~icons/lucide/key-round'
+import SettingsEmptyState from '@/components/Settings/SettingsEmptyState.vue'
+import SettingsPageHeader from '@/components/Settings/SettingsPageHeader.vue'
 import {
   Badge,
   Button,
