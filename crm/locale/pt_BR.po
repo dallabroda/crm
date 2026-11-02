@@ -13640,3 +13640,33 @@ msgstr "(cerca de {0} no total, a preço de tabela)."
 
 msgid "{0} of {1} queries requested."
 msgstr "{0} de {1} consultas pedidas."
+
+msgid "Credit PJ funnel"
+msgstr "Funil Crédito PJ"
+
+msgid "A ready funnel to prospect and analyze credit for companies. It is only a starting point: you edit stages, fields and rules like in any funnel. Nothing is required by stage and it costs nothing."
+msgstr "Um funil pronto para prospectar e analisar crédito de empresas. É só um ponto de partida: você edita etapas, campos e regras como em qualquer funil. Nada é obrigatório por etapa e não tem custo."
+
+msgid "Installed: {0}. Edit its stages in the funnel settings."
+msgstr "Instalado: {0}. Edite as etapas nas configurações do funil."
+
+msgid "Install the Credit PJ funnel"
+msgstr "Instalar o funil Crédito PJ"
+
+msgid "Nothing rejects on its own: the system warns and the operator decides. Turn a block on, or set a limit above 0, only if your policy rejects on it."
+msgstr "Nada reprova sozinho: o sistema avisa e o operador decide. Ligue um bloqueio, ou defina um limite acima de 0, só se a sua política reprova por isso."
+
+msgid "Maximum lawsuits as defendant (0 = no limit, only warns)"
+msgstr "Máximo de processos como réu (0 = sem limite, só avisa)"
+
+msgid "Maximum tolerated PGFN debt (R$) (0 = no limit, only warns)"
+msgstr "Máximo tolerado de dívida na PGFN (R$) (0 = sem limite, só avisa)"
+
+msgid "Credit PJ funnel installed."
+msgstr "Funil Crédito PJ instalado."
+
+msgid "Could not install the funnel."
+msgstr "Não foi possível instalar o funil."
+
+msgid "Credit analysis"
+msgstr "Análise de crédito"

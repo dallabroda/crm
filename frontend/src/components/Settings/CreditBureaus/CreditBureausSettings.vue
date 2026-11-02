@@ -37,6 +37,43 @@
           }}
         </div>
 
+        <!-- Credit PJ funnel template (credtech#316) -->
+        <div
+          class="p-5 bg-surface-white rounded-lg border border-outline-gray-2 space-y-3"
+        >
+          <span class="text-lg-semibold text-ink-gray-9">{{
+            __('Credit PJ funnel')
+          }}</span>
+          <p class="text-p-sm text-ink-gray-6">
+            {{
+              __(
+                'A ready funnel to prospect and analyze credit for companies. It is only a starting point: you edit stages, fields and rules like in any funnel. Nothing is required by stage and it costs nothing.',
+              )
+            }}
+          </p>
+          <p v-if="template.data" class="text-p-sm text-ink-gray-7">
+            {{ template.data.stages.join(' → ') }}
+          </p>
+          <div
+            v-if="template.data?.installed"
+            class="text-p-sm text-ink-green-3"
+          >
+            {{
+              __('Installed: {0}. Edit its stages in the funnel settings.', [
+                template.data.pipeline,
+              ])
+            }}
+          </div>
+          <Button
+            v-else
+            variant="outline"
+            :loading="installing"
+            @click="installTemplate"
+          >
+            {{ __('Install the Credit PJ funnel') }}
+          </Button>
+        </div>
+
         <!-- Master Enable Switch -->
         <div
           class="flex items-center justify-between p-4 bg-surface-gray-2 rounded-lg border border-outline-gray-2"
@@ -308,7 +345,7 @@
             <p class="text-p-sm text-ink-gray-6">
               {{
                 __(
-                  'Objective criteria for pre-approval or rejection in the pre-filter.',
+                  'Nothing rejects on its own: the system warns and the operator decides. Turn a block on, or set a limit above 0, only if your policy rejects on it.',
                 )
               }}
             </p>
@@ -316,12 +353,18 @@
               <FormControl
                 v-model.number="settingsDoc.max_lawsuits_defendant"
                 type="number"
-                :label="__('Maximum lawsuits as defendant')"
+                :label="
+                  __('Maximum lawsuits as defendant (0 = no limit, only warns)')
+                "
               />
               <FormControl
                 v-model.number="settingsDoc.max_pgfn_debt"
                 type="number"
-                :label="__('Maximum tolerated PGFN debt (R$)')"
+                :label="
+                  __(
+                    'Maximum tolerated PGFN debt (R$) (0 = no limit, only warns)',
+                  )
+                "
               />
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
@@ -466,7 +509,7 @@ const originalDoc = ref(null)
 const settingsDoc = ref({
   enabled: false,
   cgu_enabled: false,
-  block_on_ceis_cnep: true,
+  block_on_ceis_cnep: false,
   escavador_enabled: false,
   escavador_token: '',
   infosimples_enabled: false,
@@ -480,11 +523,11 @@ const settingsDoc = ref({
   check_second_organization: true,
   max_lawsuits_defendant: 0,
   max_lawsuit_value: 0,
-  block_on_bankruptcy: true,
+  block_on_bankruptcy: false,
   max_pgfn_debt: 0,
-  block_on_cndt: true,
-  block_on_protest: true,
-  block_on_fgts_irregular: true,
+  block_on_cndt: false,
+  block_on_protest: false,
+  block_on_fgts_irregular: false,
   serasa_enabled: false,
   serasa_endpoint_url: '',
   serasa_token: '',
@@ -510,6 +553,25 @@ const directdBureaus = [
     label: 'SCR Analítico - Resumo BACEN',
   },
 ]
+
+const template = createResource({
+  url: 'cred_hub.credit_check.api.get_credit_template_status',
+  auto: true,
+})
+const installing = ref(false)
+
+async function installTemplate() {
+  installing.value = true
+  try {
+    await call('cred_hub.credit_check.api.install_credit_template')
+    template.reload()
+    toast.success(__('Credit PJ funnel installed.'))
+  } catch (err) {
+    toast.error(err?.messages?.[0] || __('Could not install the funnel.'))
+  } finally {
+    installing.value = false
+  }
+}
 
 const testCnpj = ref({ escavador: '', infosimples: '', directd: '' })
 

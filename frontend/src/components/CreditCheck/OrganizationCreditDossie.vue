@@ -340,6 +340,8 @@ import { createDialog } from '@/utils/dialogs'
 
 const props = defineProps({
   organizationId: { type: String, required: true },
+  // when shown on a card, the queries and comments go to the card (credtech#316)
+  dealId: { type: String, default: '' },
 })
 
 const checking = ref(false)
@@ -383,7 +385,10 @@ watch(
 // Enabled final bureaus, list prices and the current pre-filter alert (credtech#316)
 const options = createResource({
   url: 'cred_hub.credit_check.api.get_final_bureau_options',
-  params: { organization_name: props.organizationId },
+  params: {
+    organization_name: props.organizationId,
+    deal_name: props.dealId || null,
+  },
   auto: true,
 })
 
@@ -482,6 +487,7 @@ async function runCheck(force) {
   try {
     await call('cred_hub.credit_check.api.trigger_check', {
       organization_name: props.organizationId,
+      deal_name: props.dealId || null,
       force,
     })
     toast.success(
@@ -588,6 +594,7 @@ async function requestPremiumBureau(bureau, acknowledged, contacts = []) {
     try {
       await call('cred_hub.credit_check.api.request_bureau_final', {
         organization_name: props.organizationId,
+        deal_name: props.dealId || null,
         bureau,
         confirm_cost: 1,
         acknowledged_warning: acknowledged ? 1 : 0,

@@ -100,6 +100,11 @@
           :deal="doc"
           @reload="reloadResources"
         />
+        <OrganizationCreditDossie
+          v-else-if="activeTab === 'credit'"
+          :organization-id="doc.organization"
+          :deal-id="dealId"
+        />
         <Activities
           v-else
           ref="activities"
@@ -449,6 +454,7 @@ import Resizer from '@/components/Resizer.vue'
 import LoadingIndicator from '@/components/Icons/LoadingIndicator.vue'
 import MoneyIcon from '@/components/Icons/MoneyIcon.vue'
 import DealTitlesTable from '@/components/DealTitlesTable.vue'
+import OrganizationCreditDossie from '@/components/CreditCheck/OrganizationCreditDossie.vue'
 import ActivityIcon from '@/components/Icons/ActivityIcon.vue'
 import EmailIcon from '@/components/Icons/EmailIcon.vue'
 import Email2Icon from '@/components/Icons/Email2Icon.vue'
@@ -886,6 +892,13 @@ const tabs = computed(() => {
       value: 'titles',
       label: __('Títulos'),
       iconLeft: MoneyIcon,
+    },
+    {
+      name: 'Credit',
+      value: 'credit',
+      label: __('Credit analysis'),
+      iconLeft: MoneyIcon,
+      condition: () => Boolean(doc.value?.organization),
     },
     {
       name: 'Activity',
