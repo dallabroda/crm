@@ -37,6 +37,193 @@
           }}
         </div>
 
+        <!-- Credit PJ funnel template (credtech#316) -->
+        <div
+          class="p-5 bg-surface-white rounded-lg border border-outline-gray-2 space-y-3"
+        >
+          <span class="text-lg-semibold text-ink-gray-9">{{
+            __('Credit PJ funnel')
+          }}</span>
+          <p class="text-p-sm text-ink-gray-6">
+            {{
+              __(
+                'A ready funnel to prospect and analyze credit for companies. It is only a starting point: you edit stages, fields and rules like in any funnel. Nothing is required by stage and it costs nothing.',
+              )
+            }}
+          </p>
+          <p v-if="template.data" class="text-p-sm text-ink-gray-7">
+            {{ template.data.stages.join(' → ') }}
+          </p>
+          <div
+            v-if="template.data?.installed"
+            class="text-p-sm text-ink-green-3"
+          >
+            {{
+              __('Installed: {0}. Edit its stages in the funnel settings.', [
+                template.data.pipeline,
+              ])
+            }}
+          </div>
+          <Button
+            v-else
+            variant="outline"
+            :loading="installing"
+            @click="installTemplate"
+          >
+            {{ __('Install the Credit PJ funnel') }}
+          </Button>
+        </div>
+
+        <!-- Credit policy the AI follows (credtech#316): methodology text + parameters, versioned -->
+        <div
+          class="p-5 bg-surface-white rounded-lg border border-outline-gray-2 space-y-3"
+        >
+          <div class="flex items-center justify-between">
+            <span class="text-lg-semibold text-ink-gray-9">{{
+              __('Credit policy (AI opinion)')
+            }}</span>
+            <span v-if="policyDoc" class="text-p-sm text-ink-gray-5">
+              {{
+                policyDoc.version
+                  ? __('Version {0}', [policyDoc.version])
+                  : __('Default policy')
+              }}
+            </span>
+          </div>
+          <p class="text-p-sm text-ink-gray-6">
+            {{
+              __(
+                'The AI writes the credit opinion following this methodology. The parameters become automatic alerts in the opinion; they never reject on their own (0 = no limit). Each save creates a new version, and every opinion keeps the version it used.',
+              )
+            }}
+          </p>
+          <template v-if="policyDoc">
+            <FormControl
+              v-model="policyDoc.methodology"
+              type="textarea"
+              :rows="14"
+              :label="__('Methodology')"
+            />
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormControl
+                v-model.number="policyDoc.parameters.min_company_age_months"
+                type="number"
+                :label="__('Minimum company age (months, 0 = no limit)')"
+              />
+              <FormControl
+                v-model.number="policyDoc.parameters.max_scr_overdue_percent"
+                type="number"
+                :label="
+                  __('Maximum overdue bank debt in the SCR (%, 0 = no limit)')
+                "
+              />
+            </div>
+            <Checkbox
+              v-model="policyDoc.parameters.alert_partner_restrictions"
+              :label="__('Alert when a partner has restrictions')"
+            />
+            <div class="flex items-center gap-2">
+              <Button
+                variant="solid"
+                :loading="savingPolicy"
+                @click="savePolicy"
+              >
+                {{ __('Save policy') }}
+              </Button>
+              <Button variant="subtle" @click="restoreDefaultPolicy">
+                {{ __('Restore the default text') }}
+              </Button>
+            </div>
+          </template>
+          <div class="pt-3 mt-3 border-t border-outline-gray-2 space-y-1">
+            <Checkbox
+              v-model="settingsDoc.allow_paid_extra_opinions"
+              :label="__('Allow paid extra opinions')"
+            />
+            <p class="text-p-sm text-ink-gray-5">
+              {{
+                __(
+                  'Each company has 30 AI opinions per month included. With this on, from the 31st on each opinion costs R$ 3,00 from the credit wallet, confirmed before it runs. Off, the opinion stops until the next month. Save the settings to apply.',
+                )
+              }}
+            </p>
+          </div>
+        </div>
+
+        <!-- Minimum package of the credit dossier (credtech#316): the queries every dossier needs -->
+        <div
+          class="p-5 bg-surface-white rounded-lg border border-outline-gray-2 space-y-3"
+        >
+          <span class="text-lg-semibold text-ink-gray-9">{{
+            __('Minimum package of the dossier')
+          }}</span>
+          <p class="text-p-sm text-ink-gray-6">
+            {{
+              __(
+                'The queries every credit dossier needs. The "Generate dossier" button shows what is missing and its list price, makes the missing queries with your keys after confirmation and then creates PDF 1 and the AI opinion. Only a query of this package that is missing or failed lowers the AI recommendation.',
+              )
+            }}
+          </p>
+          <template v-if="packageDoc">
+            <div class="text-p-sm text-ink-gray-5">{{ __('Company') }}</div>
+            <div
+              v-for="opt in packageOptions('company')"
+              :key="opt.item"
+              class="flex items-center gap-2"
+            >
+              <Checkbox
+                v-model="packageDoc.selected[opt.item]"
+                :label="packageOptionLabel(opt)"
+              />
+              <span v-if="!opt.configured" class="text-p-sm text-ink-amber-3">
+                {{
+                  opt.enabled
+                    ? __('no API credential yet')
+                    : __('turn this bureau on below first')
+                }}
+              </span>
+            </div>
+            <div class="text-p-sm text-ink-gray-5 pt-2">
+              {{ __('Each partner with a full CPF') }}
+            </div>
+            <div
+              v-for="opt in packageOptions('partners')"
+              :key="opt.item"
+              class="flex items-center gap-2"
+            >
+              <Checkbox
+                v-model="packageDoc.selected[opt.item]"
+                :label="packageOptionLabel(opt)"
+              />
+              <span v-if="!opt.configured" class="text-p-sm text-ink-amber-3">
+                {{
+                  opt.enabled
+                    ? __('no API credential yet')
+                    : __('turn this bureau on below first')
+                }}
+              </span>
+            </div>
+            <FormControl
+              v-model.number="packageDoc.reuse_days"
+              type="number"
+              class="max-w-md"
+              :label="
+                __(
+                  'Reuse queries made up to how many days ago (0 = always query again)',
+                )
+              "
+            />
+            <div class="text-p-sm text-ink-gray-7">{{ packageCostText }}</div>
+            <Button
+              variant="solid"
+              :loading="savingPackage"
+              @click="savePackage"
+            >
+              {{ __('Save package') }}
+            </Button>
+          </template>
+        </div>
+
         <!-- Master Enable Switch -->
         <div
           class="flex items-center justify-between p-4 bg-surface-gray-2 rounded-lg border border-outline-gray-2"
@@ -308,7 +495,7 @@
             <p class="text-p-sm text-ink-gray-6">
               {{
                 __(
-                  'Objective criteria for pre-approval or rejection in the pre-filter.',
+                  'Nothing rejects on its own: the system warns and the operator decides. Turn a block on, or set a limit above 0, only if your policy rejects on it.',
                 )
               }}
             </p>
@@ -316,12 +503,18 @@
               <FormControl
                 v-model.number="settingsDoc.max_lawsuits_defendant"
                 type="number"
-                :label="__('Maximum lawsuits as defendant')"
+                :label="
+                  __('Maximum lawsuits as defendant (0 = no limit, only warns)')
+                "
               />
               <FormControl
                 v-model.number="settingsDoc.max_pgfn_debt"
                 type="number"
-                :label="__('Maximum tolerated PGFN debt (R$)')"
+                :label="
+                  __(
+                    'Maximum tolerated PGFN debt (R$) (0 = no limit, only warns)',
+                  )
+                "
               />
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
@@ -363,7 +556,9 @@
             <Checkbox
               v-model="settingsDoc.serasa_enabled"
               :label="
-                __('Enable Serasa Experian (Relato PJ, your own contract)')
+                __(
+                  'Enable Serasa Experian (Advanced PJ Report, your own contract)',
+                )
               "
             />
             <div
@@ -371,17 +566,51 @@
               class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2"
             >
               <FormControl
-                v-model="settingsDoc.serasa_endpoint_url"
+                v-model="settingsDoc.serasa_client_id"
                 type="text"
-                :label="__('Serasa endpoint URL')"
-                placeholder="https://..."
-              />
-              <FormControl
-                v-model="settingsDoc.serasa_token"
-                type="password"
-                :label="__('Serasa token')"
+                :label="__('Serasa Client ID')"
                 autocomplete="off"
               />
+              <FormControl
+                v-model="settingsDoc.serasa_client_secret"
+                type="password"
+                :label="__('Serasa Client Secret')"
+                autocomplete="off"
+              />
+              <FormControl
+                v-model="settingsDoc.serasa_environment"
+                type="select"
+                :label="__('Serasa environment')"
+                :options="[
+                  { label: __('Production'), value: 'Production' },
+                  {
+                    label: __('Homologation (tests only)'),
+                    value: 'Homologation',
+                  },
+                ]"
+              />
+              <FormControl
+                v-model="settingsDoc.serasa_report_name"
+                type="text"
+                :label="__('Serasa report name')"
+              />
+              <div class="md:col-span-2 flex items-center gap-3">
+                <Button
+                  variant="subtle"
+                  :loading="testing === 'serasa'"
+                  :disabled="!settingsDoc.serasa_client_id"
+                  @click="testSerasa"
+                >
+                  {{ __('Test login') }}
+                </Button>
+                <span class="text-p-sm text-ink-gray-5">
+                  {{
+                    __(
+                      'Only signs in to Serasa. It makes no query and costs nothing.',
+                    )
+                  }}
+                </span>
+              </div>
             </div>
             <div class="pt-4 mt-4 border-t border-outline-gray-2 space-y-3">
               <p class="text-p-sm text-ink-gray-6">
@@ -466,7 +695,7 @@ const originalDoc = ref(null)
 const settingsDoc = ref({
   enabled: false,
   cgu_enabled: false,
-  block_on_ceis_cnep: true,
+  block_on_ceis_cnep: false,
   escavador_enabled: false,
   escavador_token: '',
   infosimples_enabled: false,
@@ -480,17 +709,20 @@ const settingsDoc = ref({
   check_second_organization: true,
   max_lawsuits_defendant: 0,
   max_lawsuit_value: 0,
-  block_on_bankruptcy: true,
+  block_on_bankruptcy: false,
   max_pgfn_debt: 0,
-  block_on_cndt: true,
-  block_on_protest: true,
-  block_on_fgts_irregular: true,
+  block_on_cndt: false,
+  block_on_protest: false,
+  block_on_fgts_irregular: false,
   serasa_enabled: false,
-  serasa_endpoint_url: '',
-  serasa_token: '',
+  serasa_client_id: '',
+  serasa_client_secret: '',
+  serasa_environment: 'Production',
+  serasa_report_name: 'RELATORIO_AVANCADO_PJ_PME',
   boavista_risco_enabled: false,
   dossie_quod_enabled: false,
   scr_bacen_enabled: false,
+  allow_paid_extra_opinions: false,
 })
 
 const directdBureaus = [
@@ -510,6 +742,149 @@ const directdBureaus = [
     label: 'SCR Analítico - Resumo BACEN',
   },
 ]
+
+const policyDoc = ref(null)
+const savingPolicy = ref(false)
+let defaultMethodology = ''
+
+async function loadPolicy() {
+  try {
+    const res = await call('cred_hub.credit_check.api.get_credit_policy')
+    defaultMethodology = res.default_methodology
+    policyDoc.value = {
+      version: res.version,
+      methodology: res.methodology,
+      parameters: {
+        ...res.parameters,
+        alert_partner_restrictions: Boolean(
+          res.parameters.alert_partner_restrictions,
+        ),
+      },
+    }
+  } catch {
+    policyDoc.value = null
+  }
+}
+
+async function savePolicy() {
+  savingPolicy.value = true
+  try {
+    const res = await call('cred_hub.credit_check.api.save_credit_policy', {
+      methodology: policyDoc.value.methodology,
+      parameters: JSON.stringify({
+        ...policyDoc.value.parameters,
+        alert_partner_restrictions: policyDoc.value.parameters
+          .alert_partner_restrictions
+          ? 1
+          : 0,
+      }),
+    })
+    policyDoc.value.version = res.version
+    toast.success(__('Credit policy saved (version {0}).', [res.version]))
+  } catch (err) {
+    toast.error(err?.messages?.[0] || __('Could not save the credit policy.'))
+  } finally {
+    savingPolicy.value = false
+  }
+}
+
+function restoreDefaultPolicy() {
+  if (policyDoc.value && defaultMethodology) {
+    policyDoc.value.methodology = defaultMethodology
+  }
+}
+
+// Minimum package of the dossier (credtech#316): default Dossiê QUOD + SCR Bacen of the company, 30 days of reuse
+const packageDoc = ref(null)
+const savingPackage = ref(false)
+
+async function loadPackage() {
+  try {
+    const res = await call('cred_hub.credit_check.api.get_dossier_package')
+    const selected = {}
+    for (const opt of res.options)
+      selected[opt.item] = res.items.includes(opt.item)
+    packageDoc.value = {
+      options: res.options,
+      selected,
+      reuse_days: res.reuse_days,
+    }
+  } catch {
+    packageDoc.value = null
+  }
+}
+
+function packageOptions(scope) {
+  return (packageDoc.value?.options || []).filter((opt) => opt.scope === scope)
+}
+
+function packageOptionLabel(opt) {
+  return opt.price_reference
+    ? `${opt.label} — ${formatMoney(opt.price_reference)}`
+    : `${opt.label} — ${__('as per your contract')}`
+}
+
+const packageCostText = computed(() => {
+  if (!packageDoc.value) return ''
+  const chosen = packageDoc.value.options.filter(
+    (opt) => packageDoc.value.selected[opt.item],
+  )
+  const sum = (scope) =>
+    chosen
+      .filter((opt) => opt.scope === scope)
+      .reduce((total, opt) => total + (opt.price_reference || 0), 0)
+  let text = __(
+    'About {0} per company at list price, billed by the provider on your account.',
+    [formatMoney(sum('company'))],
+  )
+  if (sum('partners'))
+    text +=
+      ' ' +
+      __('Plus {0} for each partner with a CPF.', [
+        formatMoney(sum('partners')),
+      ])
+  if (chosen.some((opt) => !opt.price_reference))
+    text += ' ' + __('Serasa is billed as per your contract.')
+  return text
+})
+
+async function savePackage() {
+  savingPackage.value = true
+  try {
+    const items = Object.keys(packageDoc.value.selected).filter(
+      (item) => packageDoc.value.selected[item],
+    )
+    const res = await call('cred_hub.credit_check.api.save_dossier_package', {
+      items: JSON.stringify(items),
+      reuse_days: packageDoc.value.reuse_days,
+    })
+    packageDoc.value.reuse_days = res.reuse_days
+    toast.success(__('Minimum package saved.'))
+  } catch (err) {
+    toast.error(err?.messages?.[0] || __('Could not save the minimum package.'))
+  } finally {
+    savingPackage.value = false
+  }
+}
+
+const template = createResource({
+  url: 'cred_hub.credit_check.api.get_credit_template_status',
+  auto: true,
+})
+const installing = ref(false)
+
+async function installTemplate() {
+  installing.value = true
+  try {
+    await call('cred_hub.credit_check.api.install_credit_template')
+    template.reload()
+    toast.success(__('Credit PJ funnel installed.'))
+  } catch (err) {
+    toast.error(err?.messages?.[0] || __('Could not install the funnel.'))
+  } finally {
+    installing.value = false
+  }
+}
 
 const testCnpj = ref({ escavador: '', infosimples: '', directd: '' })
 
@@ -602,6 +977,24 @@ function testProvider(provider, label, token) {
   })
 }
 
+async function testSerasa() {
+  testing.value = 'serasa'
+  try {
+    const res = await call('cred_hub.credit_check.api.test_serasa_connection', {
+      client_id: settingsDoc.value.serasa_client_id,
+      client_secret: settingsDoc.value.serasa_client_secret,
+      environment: settingsDoc.value.serasa_environment,
+    })
+    if (res?.ok) {
+      toast.success(res.message || __('Connection successful!'))
+    }
+  } catch (err) {
+    toast.error(err?.messages?.[0] || __('Connection failed.'))
+  } finally {
+    testing.value = ''
+  }
+}
+
 async function runTest(provider, token, cnpj) {
   testing.value = provider
   try {
@@ -626,5 +1019,7 @@ async function runTest(provider, token, cnpj) {
 
 onMounted(() => {
   loadSettings()
+  loadPolicy()
+  loadPackage()
 })
 </script>

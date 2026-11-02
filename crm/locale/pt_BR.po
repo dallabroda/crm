@@ -13592,3 +13592,333 @@ msgstr "Consulta pedida."
 
 msgid "Could not request the query."
 msgstr "Não foi possível pedir a consulta."
+
+msgid "Partners"
+msgstr "Sócios"
+
+msgid "Tick the partners to include in the next query. Every partner query is paid on your provider account. The Receita shows only a masked CPF: use \"Find contacts\" (Assertiva) or type the CPF."
+msgstr "Marque os sócios que entram na próxima consulta. Toda consulta de sócio é paga na sua conta no provedor. A Receita só mostra o CPF mascarado: use \"Buscar contatos\" (Assertiva) ou digite o CPF."
+
+msgid "Full CPF"
+msgstr "CPF completo"
+
+msgid "Save CPF"
+msgstr "Salvar CPF"
+
+msgid "Request for {0} partner(s)"
+msgstr "Pedir para {0} sócio(s)"
+
+msgid "Queries made"
+msgstr "Consultas feitas"
+
+msgid "Company"
+msgstr "Empresa"
+
+msgid "Queried with the pre-filter alert: {0}"
+msgstr "Consultado com o alerta do pré-filtro: {0}"
+
+msgid "View return"
+msgstr "Ver retorno"
+
+msgid "Complete return, exactly as the provider sent it. Nothing is left out."
+msgstr "Retorno completo, exatamente como o provedor enviou. Nada é omitido."
+
+msgid "CPF saved."
+msgstr "CPF salvo."
+
+msgid "Could not save the CPF."
+msgstr "Não foi possível salvar o CPF."
+
+msgid "Could not open the return."
+msgstr "Não foi possível abrir o retorno."
+
+msgid "Partners: {0}. {1} queries"
+msgstr "Sócios: {0}. {1} consultas"
+
+msgid "(about {0} in total at list price)."
+msgstr "(cerca de {0} no total, a preço de tabela)."
+
+msgid "{0} of {1} queries requested."
+msgstr "{0} de {1} consultas pedidas."
+
+msgid "Credit PJ funnel"
+msgstr "Funil Crédito PJ"
+
+msgid "A ready funnel to prospect and analyze credit for companies. It is only a starting point: you edit stages, fields and rules like in any funnel. Nothing is required by stage and it costs nothing."
+msgstr "Um funil pronto para prospectar e analisar crédito de empresas. É só um ponto de partida: você edita etapas, campos e regras como em qualquer funil. Nada é obrigatório por etapa e não tem custo."
+
+msgid "Installed: {0}. Edit its stages in the funnel settings."
+msgstr "Instalado: {0}. Edite as etapas nas configurações do funil."
+
+msgid "Install the Credit PJ funnel"
+msgstr "Instalar o funil Crédito PJ"
+
+msgid "Nothing rejects on its own: the system warns and the operator decides. Turn a block on, or set a limit above 0, only if your policy rejects on it."
+msgstr "Nada reprova sozinho: o sistema avisa e o operador decide. Ligue um bloqueio, ou defina um limite acima de 0, só se a sua política reprova por isso."
+
+msgid "Maximum lawsuits as defendant (0 = no limit, only warns)"
+msgstr "Máximo de processos como réu (0 = sem limite, só avisa)"
+
+msgid "Maximum tolerated PGFN debt (R$) (0 = no limit, only warns)"
+msgstr "Máximo tolerado de dívida na PGFN (R$) (0 = sem limite, só avisa)"
+
+msgid "Credit PJ funnel installed."
+msgstr "Funil Crédito PJ instalado."
+
+msgid "Could not install the funnel."
+msgstr "Não foi possível instalar o funil."
+
+msgid "Credit analysis"
+msgstr "Análise de crédito"
+
+msgid "Enable Serasa Experian (Advanced PJ Report, your own contract)"
+msgstr "Ligar o Serasa Experian (Relatório Avançado PJ, contrato próprio)"
+
+msgid "Serasa Client ID"
+msgstr "Client ID do Serasa"
+
+msgid "Serasa Client Secret"
+msgstr "Client Secret do Serasa"
+
+msgid "Serasa environment"
+msgstr "Ambiente do Serasa"
+
+msgid "Homologation (tests only)"
+msgstr "Homologação (só para testes)"
+
+msgid "Serasa report name"
+msgstr "Nome do relatório do Serasa"
+
+msgid "Test login"
+msgstr "Testar login"
+
+msgid "Only signs in to Serasa. It makes no query and costs nothing."
+msgstr "Só entra no Serasa. Não faz consulta e não custa nada."
+
+msgid "Credit dossier"
+msgstr "Dossiê de crédito"
+
+msgid "A PDF with every field that each provider returned, for the company and the partners queried, with the names in Portuguese and the values exactly as they came. It has no credit recommendation. The original JSON of each query goes along as a file. Each generation creates new files and nothing is overwritten."
+msgstr "Um PDF com todos os campos que cada provedor devolveu, da empresa e dos sócios consultados, com os nomes em português e os valores exatamente como vieram. Não tem recomendação de crédito. O JSON original de cada consulta vai junto, em um arquivo. Cada geração cria arquivos novos e nada é sobrescrito."
+
+msgid "Generate dossier (PDF)"
+msgstr "Gerar dossiê (PDF)"
+
+msgid "{0} queries will be included."
+msgstr "{0} consultas entram no dossiê."
+
+msgid "Generated dossiers"
+msgstr "Dossiês gerados"
+
+msgid "Dossier generated. Some queries only had a summary saved: run the analysis again for the complete return."
+msgstr "Dossiê gerado. Algumas consultas só tinham o resumo guardado: rode a análise de novo para ter o retorno completo."
+
+msgid "Credit opinion (AI)"
+msgstr "Parecer de crédito (IA)"
+
+msgid "{0} of {1} opinions used this month"
+msgstr "{0} de {1} pareceres usados este mês"
+
+msgid "The AI reads every query return, the card and the partners, follows the company credit policy and writes a recommendation (approve, approve with reservations or reject) with the risks and strengths, each citing the field and value it came from. It is only a recommendation: the analyst decides."
+msgstr "A IA lê o retorno de todas as consultas, o card e os sócios, segue a política de crédito da empresa e escreve uma recomendação (aprovar, aprovar com ressalvas ou recusar) com os riscos e os pontos fortes, cada um citando o campo e o valor de onde veio. É só uma recomendação: quem decide é o analista."
+
+msgid "The credit opinion AI is not configured on this site yet."
+msgstr "A IA do parecer de crédito ainda não está configurada neste site."
+
+msgid "The opinions included this month are used up. An admin can allow paid extra opinions (R$ {0} each) in the Credit settings."
+msgstr "Os pareceres incluídos neste mês acabaram. Um administrador pode permitir pareceres extras pagos (R$ {0} cada) nas configurações de Crédito."
+
+msgid "Generate opinion (AI)"
+msgstr "Gerar parecer (IA)"
+
+msgid "Extra opinion: R$ {0} from the credit wallet."
+msgstr "Parecer extra: R$ {0} da carteira de créditos."
+
+msgid "extra"
+msgstr "extra"
+
+msgid "Open PDF"
+msgstr "Abrir PDF"
+
+msgid "Extra credit opinion"
+msgstr "Parecer de crédito extra"
+
+msgid "The opinions included this month are used up. This one costs R$ {0} from the credit wallet (current balance R$ {1})."
+msgstr "Os pareceres incluídos neste mês acabaram. Este custa R$ {0} da carteira de créditos (saldo atual R$ {1})."
+
+msgid "Confirm paid opinion"
+msgstr "Confirmar parecer pago"
+
+msgid "Generating the opinion. It takes about a minute."
+msgstr "Gerando o parecer. Leva cerca de um minuto."
+
+msgid "Could not request the opinion."
+msgstr "Não foi possível pedir o parecer."
+
+msgid "Credit policy (AI opinion)"
+msgstr "Política de crédito (parecer da IA)"
+
+msgid "Version {0}"
+msgstr "Versão {0}"
+
+msgid "Default policy"
+msgstr "Política padrão"
+
+msgid "The AI writes the credit opinion following this methodology. The parameters become automatic alerts in the opinion; they never reject on their own (0 = no limit). Each save creates a new version, and every opinion keeps the version it used."
+msgstr "A IA escreve o parecer de crédito seguindo esta metodologia. Os parâmetros viram alertas automáticos no parecer e nunca reprovam sozinhos (0 = sem limite). Cada vez que você salva nasce uma versão nova, e cada parecer guarda a versão que usou."
+
+msgid "Methodology"
+msgstr "Metodologia"
+
+msgid "Minimum company age (months, 0 = no limit)"
+msgstr "Idade mínima da empresa (meses, 0 = sem limite)"
+
+msgid "Maximum overdue bank debt in the SCR (%, 0 = no limit)"
+msgstr "Máximo de dívida bancária vencida no SCR (%, 0 = sem limite)"
+
+msgid "Alert when a partner has restrictions"
+msgstr "Alertar quando um sócio tiver restrições"
+
+msgid "Save policy"
+msgstr "Salvar política"
+
+msgid "Restore the default text"
+msgstr "Voltar ao texto padrão"
+
+msgid "Allow paid extra opinions"
+msgstr "Permitir pareceres extras pagos"
+
+msgid "Each company has 30 AI opinions per month included. With this on, from the 31st on each opinion costs R$ 3,00 from the credit wallet, confirmed before it runs. Off, the opinion stops until the next month. Save the settings to apply."
+msgstr "Cada empresa tem 30 pareceres da IA por mês incluídos. Com isto ligado, a partir do 31º cada parecer custa R$ 3,00 da carteira de créditos, com confirmação antes. Desligado, o parecer para até o mês seguinte. Salve as configurações para valer."
+
+msgid "Credit policy saved (version {0})."
+msgstr "Política de crédito salva (versão {0})."
+
+msgid "Could not save the credit policy."
+msgstr "Não foi possível salvar a política de crédito."
+
+msgid "Approve"
+msgstr "Aprovar"
+
+msgid "Approve with reservations"
+msgstr "Aprovar com ressalvas"
+
+msgid "Generating…"
+msgstr "Gerando…"
+
+msgid "Recommendation: approve"
+msgstr "Recomendação: aprovar"
+
+msgid "Recommendation: approve with reservations"
+msgstr "Recomendação: aprovar com ressalvas"
+
+msgid "Recommendation: reject"
+msgstr "Recomendação: recusar"
+
+msgid "Generating the dossier makes the queries of the minimum package that are missing, with your own keys, and then creates PDF 1, with every field each provider returned and the original JSON, and PDF 2, the credit opinion written by the AI. Queries made in the last {0} days are reused and not paid again."
+msgstr "Gerar o dossiê faz as consultas do pacote mínimo que faltam, com as suas próprias chaves, e depois cria o PDF 1, com todos os campos que cada provedor devolveu e o JSON original, e o PDF 2, o parecer de crédito escrito pela IA. Consultas feitas nos últimos {0} dias são reaproveitadas e não são pagas de novo."
+
+msgid "Minimum package"
+msgstr "Pacote mínimo"
+
+msgid "Last attempt failed: {0}"
+msgstr "A última tentativa falhou: {0}"
+
+msgid "Partners without CPF stay out of the package: {0}."
+msgstr "Sócios sem CPF ficam fora do pacote: {0}."
+
+msgid "An admin needs to turn these bureaus on or take them out of the package in Settings › Integrations › Credit Bureaus."
+msgstr "Um administrador precisa ligar esses bureaus ou tirá-los do pacote em Configurações › Integrações › Bureaus de Crédito."
+
+msgid "Only managers can run paid queries. Ask a manager to generate the dossier."
+msgstr "Só gestores podem fazer consultas pagas. Peça a um gestor para gerar o dossiê."
+
+msgid "Generate dossier (PDF 1 + AI opinion)"
+msgstr "Gerar dossiê (PDF 1 + parecer da IA)"
+
+msgid "queried on {0}"
+msgstr "consultado em {0}"
+
+msgid "not available: {0}"
+msgstr "indisponível: {0}"
+
+msgid "missing · list price {0}, billed by {1} on your account"
+msgstr "falta · preço de tabela {0}, cobrado pela {1} na sua conta"
+
+msgid "missing · billed by {0} on your account, as per your contract"
+msgstr "falta · cobrado pela {0} na sua conta, conforme o seu contrato"
+
+msgid "All queries of the minimum package are done. Generating does not cost queries."
+msgstr "Todas as consultas do pacote mínimo estão feitas. Gerar não gasta consultas."
+
+msgid "To generate: {0} paid queries, about {1} at list price, billed by the provider on your account. CredTech charges nothing for queries."
+msgstr "Para gerar: {0} consultas pagas, cerca de {1} pelo preço de tabela, cobradas pelo provedor na sua conta. A CredTech não cobra nada pelas consultas."
+
+msgid "Serasa is billed as per your contract."
+msgstr "A Serasa cobra conforme o seu contrato."
+
+msgid "The dossier will come without the AI opinion: the credit opinion AI is not configured on this site yet."
+msgstr "O dossiê vai sair sem o parecer da IA: a IA do parecer de crédito ainda não está configurada neste site."
+
+msgid "The dossier will come without the AI opinion: the opinions included this month are used up. An admin can allow paid extra opinions (R$ {0} each) in the Credit settings."
+msgstr "O dossiê vai sair sem o parecer da IA: os pareceres incluídos neste mês acabaram. Um administrador pode permitir pareceres extras pagos (R$ {0} cada) nas configurações de Crédito."
+
+msgid "The AI opinion is an extra this month: R$ {0} from the credit wallet."
+msgstr "O parecer da IA é extra neste mês: R$ {0} da carteira de créditos."
+
+msgid "Paid queries, billed by the provider on your account (CredTech charges nothing): {0}."
+msgstr "Consultas pagas, cobradas pelo provedor na sua conta (a CredTech não cobra nada): {0}."
+
+msgid "About {0} at list price."
+msgstr "Cerca de {0} pelo preço de tabela."
+
+msgid "Generate credit dossier"
+msgstr "Gerar dossiê de crédito"
+
+msgid "Query anyway and generate"
+msgstr "Consultar mesmo assim e gerar"
+
+msgid "Confirm and generate"
+msgstr "Confirmar e gerar"
+
+msgid "Generating the dossier without the AI opinion: {0}"
+msgstr "Gerando o dossiê sem o parecer da IA: {0}"
+
+msgid "Generating the dossier: the queries, PDF 1 and the AI opinion take a few minutes."
+msgstr "Gerando o dossiê: as consultas, o PDF 1 e o parecer da IA levam alguns minutos."
+
+msgid "Minimum package of the dossier"
+msgstr "Pacote mínimo do dossiê"
+
+msgid "The queries every credit dossier needs. The \"Generate dossier\" button shows what is missing and its list price, makes the missing queries with your keys after confirmation and then creates PDF 1 and the AI opinion. Only a query of this package that is missing or failed lowers the AI recommendation."
+msgstr "As consultas que todo dossiê de crédito precisa ter. O botão \"Gerar dossiê\" mostra o que falta e o preço de tabela, faz as consultas que faltam com as suas chaves depois da confirmação e então cria o PDF 1 e o parecer da IA. Só uma consulta deste pacote que falta ou falhou rebaixa a recomendação da IA."
+
+msgid "no API credential yet"
+msgstr "ainda sem credencial de API"
+
+msgid "turn this bureau on below first"
+msgstr "ligue este bureau mais abaixo primeiro"
+
+msgid "Each partner with a full CPF"
+msgstr "Cada sócio com CPF completo"
+
+msgid "Reuse queries made up to how many days ago (0 = always query again)"
+msgstr "Reaproveitar consultas feitas há até quantos dias (0 = sempre consultar de novo)"
+
+msgid "Save package"
+msgstr "Salvar pacote"
+
+msgid "as per your contract"
+msgstr "conforme o contrato"
+
+msgid "About {0} per company at list price, billed by the provider on your account."
+msgstr "Cerca de {0} por empresa pelo preço de tabela, cobrado pelo provedor na sua conta."
+
+msgid "Plus {0} for each partner with a CPF."
+msgstr "Mais {0} por sócio com CPF."
+
+msgid "Minimum package saved."
+msgstr "Pacote mínimo salvo."
+
+msgid "Could not save the minimum package."
+msgstr "Não foi possível salvar o pacote mínimo."
