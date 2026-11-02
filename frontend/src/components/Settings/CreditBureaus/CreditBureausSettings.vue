@@ -74,6 +74,82 @@
           </Button>
         </div>
 
+        <!-- Credit policy the AI follows (credtech#316): methodology text + parameters, versioned -->
+        <div
+          class="p-5 bg-surface-white rounded-lg border border-outline-gray-2 space-y-3"
+        >
+          <div class="flex items-center justify-between">
+            <span class="text-lg-semibold text-ink-gray-9">{{
+              __('Credit policy (AI opinion)')
+            }}</span>
+            <span v-if="policyDoc" class="text-p-sm text-ink-gray-5">
+              {{
+                policyDoc.version
+                  ? __('Version {0}', [policyDoc.version])
+                  : __('Default policy')
+              }}
+            </span>
+          </div>
+          <p class="text-p-sm text-ink-gray-6">
+            {{
+              __(
+                'The AI writes the credit opinion following this methodology. The parameters become automatic alerts in the opinion; they never reject on their own (0 = no limit). Each save creates a new version, and every opinion keeps the version it used.',
+              )
+            }}
+          </p>
+          <template v-if="policyDoc">
+            <FormControl
+              v-model="policyDoc.methodology"
+              type="textarea"
+              :rows="14"
+              :label="__('Methodology')"
+            />
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormControl
+                v-model.number="policyDoc.parameters.min_company_age_months"
+                type="number"
+                :label="__('Minimum company age (months, 0 = no limit)')"
+              />
+              <FormControl
+                v-model.number="policyDoc.parameters.max_scr_overdue_percent"
+                type="number"
+                :label="
+                  __('Maximum overdue bank debt in the SCR (%, 0 = no limit)')
+                "
+              />
+            </div>
+            <Checkbox
+              v-model="policyDoc.parameters.alert_partner_restrictions"
+              :label="__('Alert when a partner has restrictions')"
+            />
+            <div class="flex items-center gap-2">
+              <Button
+                variant="solid"
+                :loading="savingPolicy"
+                @click="savePolicy"
+              >
+                {{ __('Save policy') }}
+              </Button>
+              <Button variant="subtle" @click="restoreDefaultPolicy">
+                {{ __('Restore the default text') }}
+              </Button>
+            </div>
+          </template>
+          <div class="pt-3 mt-3 border-t border-outline-gray-2 space-y-1">
+            <Checkbox
+              v-model="settingsDoc.allow_paid_extra_opinions"
+              :label="__('Allow paid extra opinions')"
+            />
+            <p class="text-p-sm text-ink-gray-5">
+              {{
+                __(
+                  'Each company has 30 AI opinions per month included. With this on, from the 31st on each opinion costs R$ 3,00 from the credit wallet, confirmed before it runs. Off, the opinion stops until the next month. Save the settings to apply.',
+                )
+              }}
+            </p>
+          </div>
+        </div>
+
         <!-- Master Enable Switch -->
         <div
           class="flex items-center justify-between p-4 bg-surface-gray-2 rounded-lg border border-outline-gray-2"
@@ -572,6 +648,7 @@ const settingsDoc = ref({
   boavista_risco_enabled: false,
   dossie_quod_enabled: false,
   scr_bacen_enabled: false,
+  allow_paid_extra_opinions: false,
 })
 
 const directdBureaus = [
@@ -591,6 +668,57 @@ const directdBureaus = [
     label: 'SCR Analítico - Resumo BACEN',
   },
 ]
+
+const policyDoc = ref(null)
+const savingPolicy = ref(false)
+let defaultMethodology = ''
+
+async function loadPolicy() {
+  try {
+    const res = await call('cred_hub.credit_check.api.get_credit_policy')
+    defaultMethodology = res.default_methodology
+    policyDoc.value = {
+      version: res.version,
+      methodology: res.methodology,
+      parameters: {
+        ...res.parameters,
+        alert_partner_restrictions: Boolean(
+          res.parameters.alert_partner_restrictions,
+        ),
+      },
+    }
+  } catch {
+    policyDoc.value = null
+  }
+}
+
+async function savePolicy() {
+  savingPolicy.value = true
+  try {
+    const res = await call('cred_hub.credit_check.api.save_credit_policy', {
+      methodology: policyDoc.value.methodology,
+      parameters: JSON.stringify({
+        ...policyDoc.value.parameters,
+        alert_partner_restrictions: policyDoc.value.parameters
+          .alert_partner_restrictions
+          ? 1
+          : 0,
+      }),
+    })
+    policyDoc.value.version = res.version
+    toast.success(__('Credit policy saved (version {0}).', [res.version]))
+  } catch (err) {
+    toast.error(err?.messages?.[0] || __('Could not save the credit policy.'))
+  } finally {
+    savingPolicy.value = false
+  }
+}
+
+function restoreDefaultPolicy() {
+  if (policyDoc.value && defaultMethodology) {
+    policyDoc.value.methodology = defaultMethodology
+  }
+}
 
 const template = createResource({
   url: 'cred_hub.credit_check.api.get_credit_template_status',
@@ -744,5 +872,6 @@ async function runTest(provider, token, cnpj) {
 
 onMounted(() => {
   loadSettings()
+  loadPolicy()
 })
 </script>

@@ -13712,3 +13712,105 @@ msgstr "Dossiês gerados"
 
 msgid "Dossier generated. Some queries only had a summary saved: run the analysis again for the complete return."
 msgstr "Dossiê gerado. Algumas consultas só tinham o resumo guardado: rode a análise de novo para ter o retorno completo."
+
+msgid "Credit opinion (AI)"
+msgstr "Parecer de crédito (IA)"
+
+msgid "{0} of {1} opinions used this month"
+msgstr "{0} de {1} pareceres usados este mês"
+
+msgid "The AI reads every query return, the card and the partners, follows the company credit policy and writes a recommendation (approve, approve with reservations or reject) with the risks and strengths, each citing the field and value it came from. It is only a recommendation: the analyst decides."
+msgstr "A IA lê o retorno de todas as consultas, o card e os sócios, segue a política de crédito da empresa e escreve uma recomendação (aprovar, aprovar com ressalvas ou recusar) com os riscos e os pontos fortes, cada um citando o campo e o valor de onde veio. É só uma recomendação: quem decide é o analista."
+
+msgid "The credit opinion AI is not configured on this site yet."
+msgstr "A IA do parecer de crédito ainda não está configurada neste site."
+
+msgid "The opinions included this month are used up. An admin can allow paid extra opinions (R$ {0} each) in the Credit settings."
+msgstr "Os pareceres incluídos neste mês acabaram. Um administrador pode permitir pareceres extras pagos (R$ {0} cada) nas configurações de Crédito."
+
+msgid "Generate opinion (AI)"
+msgstr "Gerar parecer (IA)"
+
+msgid "Extra opinion: R$ {0} from the credit wallet."
+msgstr "Parecer extra: R$ {0} da carteira de créditos."
+
+msgid "extra"
+msgstr "extra"
+
+msgid "Open PDF"
+msgstr "Abrir PDF"
+
+msgid "Extra credit opinion"
+msgstr "Parecer de crédito extra"
+
+msgid "The opinions included this month are used up. This one costs R$ {0} from the credit wallet (current balance R$ {1})."
+msgstr "Os pareceres incluídos neste mês acabaram. Este custa R$ {0} da carteira de créditos (saldo atual R$ {1})."
+
+msgid "Confirm paid opinion"
+msgstr "Confirmar parecer pago"
+
+msgid "Generating the opinion. It takes about a minute."
+msgstr "Gerando o parecer. Leva cerca de um minuto."
+
+msgid "Could not request the opinion."
+msgstr "Não foi possível pedir o parecer."
+
+msgid "Credit policy (AI opinion)"
+msgstr "Política de crédito (parecer da IA)"
+
+msgid "Version {0}"
+msgstr "Versão {0}"
+
+msgid "Default policy"
+msgstr "Política padrão"
+
+msgid "The AI writes the credit opinion following this methodology. The parameters become automatic alerts in the opinion; they never reject on their own (0 = no limit). Each save creates a new version, and every opinion keeps the version it used."
+msgstr "A IA escreve o parecer de crédito seguindo esta metodologia. Os parâmetros viram alertas automáticos no parecer e nunca reprovam sozinhos (0 = sem limite). Cada vez que você salva nasce uma versão nova, e cada parecer guarda a versão que usou."
+
+msgid "Methodology"
+msgstr "Metodologia"
+
+msgid "Minimum company age (months, 0 = no limit)"
+msgstr "Idade mínima da empresa (meses, 0 = sem limite)"
+
+msgid "Maximum overdue bank debt in the SCR (%, 0 = no limit)"
+msgstr "Máximo de dívida bancária vencida no SCR (%, 0 = sem limite)"
+
+msgid "Alert when a partner has restrictions"
+msgstr "Alertar quando um sócio tiver restrições"
+
+msgid "Save policy"
+msgstr "Salvar política"
+
+msgid "Restore the default text"
+msgstr "Voltar ao texto padrão"
+
+msgid "Allow paid extra opinions"
+msgstr "Permitir pareceres extras pagos"
+
+msgid "Each company has 30 AI opinions per month included. With this on, from the 31st on each opinion costs R$ 3,00 from the credit wallet, confirmed before it runs. Off, the opinion stops until the next month. Save the settings to apply."
+msgstr "Cada empresa tem 30 pareceres da IA por mês incluídos. Com isto ligado, a partir do 31º cada parecer custa R$ 3,00 da carteira de créditos, com confirmação antes. Desligado, o parecer para até o mês seguinte. Salve as configurações para valer."
+
+msgid "Credit policy saved (version {0})."
+msgstr "Política de crédito salva (versão {0})."
+
+msgid "Could not save the credit policy."
+msgstr "Não foi possível salvar a política de crédito."
+
+msgid "Approve"
+msgstr "Aprovar"
+
+msgid "Approve with reservations"
+msgstr "Aprovar com ressalvas"
+
+msgid "Generating…"
+msgstr "Gerando…"
+
+msgid "Recommendation: approve"
+msgstr "Recomendação: aprovar"
+
+msgid "Recommendation: approve with reservations"
+msgstr "Recomendação: aprovar com ressalvas"
+
+msgid "Recommendation: reject"
+msgstr "Recomendação: recusar"
