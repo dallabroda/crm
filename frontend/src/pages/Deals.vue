@@ -56,6 +56,8 @@
       getRoute: (row) => getRoute(row.name),
       onNewClick: (column) => onNewClick(column),
       fixedColumns: Boolean(pipelineName),
+      // the owner goes to the card footer (Figma 'Card de Kanban')
+      footerField: 'deal_owner',
     }"
     @update="(data) => viewControls.updateKanbanSettings(data)"
     @loadMore="(columnName) => viewControls.loadMoreKanban(columnName)"
@@ -198,17 +200,30 @@
       </div>
     </template>
 
+    <template #activity="{ itemName }">
+      <KanbanActivityCounts
+        :route="getRoute(itemName)"
+        :counts="{
+          emails: getRow(itemName, '_email_count').label,
+          notes: getRow(itemName, '_note_count').label,
+          tasks: getRow(itemName, '_task_count').label,
+          comments: getRow(itemName, '_comment_count').label,
+        }"
+      />
+    </template>
     <template #actions="{ itemName }">
+      <!-- Figma "Card de Kanban", "Rodapé": owner (avatar + name) and the "+" menu -->
       <div class="flex gap-2 items-center justify-between">
-        <KanbanActivityCounts
-          :route="getRoute(itemName)"
-          :counts="{
-            emails: getRow(itemName, '_email_count').label,
-            notes: getRow(itemName, '_note_count').label,
-            tasks: getRow(itemName, '_task_count').label,
-            comments: getRow(itemName, '_comment_count').label,
-          }"
-        />
+        <div
+          v-if="cardOwner(itemName)?.full_name"
+          class="flex min-w-0 items-center gap-2"
+        >
+          <UserAvatar :user="cardOwner(itemName).name" size="md" hideStatus />
+          <span class="truncate text-xs text-ink-gray-6">
+            {{ cardOwner(itemName).full_name }}
+          </span>
+        </div>
+        <div v-else />
         <Dropdown
           class="flex items-center gap-2"
           :options="actions(itemName)"
@@ -415,6 +430,13 @@ const loadMore = ref(1)
 const triggerResize = ref(1)
 const updatedPageCount = ref(20)
 const viewControls = ref(null)
+
+// Kanban card footer owner: shown when the owner is one of the card fields
+// picked in the Kanban settings
+function cardOwner(itemName) {
+  if (!deals.value?.data?.kanban_fields?.includes('deal_owner')) return null
+  return getRow(itemName, 'deal_owner')
+}
 
 function getRow(name, field) {
   function getValue(value) {

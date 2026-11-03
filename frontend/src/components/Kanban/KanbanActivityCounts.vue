@@ -1,27 +1,23 @@
 <template>
-  <div class="text-ink-gray-5 flex items-center gap-1.5">
-    <template v-for="(item, index) in items" :key="item.tab">
-      <span v-if="index" class="text-4xl leading-[0]"> &middot; </span>
-      <Tooltip :text="item.tooltip">
-        <button
-          type="button"
-          class="flex items-center gap-1.5 rounded bg-transparent p-0 cursor-pointer hover:text-ink-gray-8 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-outline-gray-4 focus-visible:ring-offset-1"
-          :aria-label="item.tooltip"
-          @click.stop.prevent="openTab(item.tab)"
-        >
-          <component :is="item.icon" class="h-4 w-4" />
-          <span v-if="item.count">{{ item.count }}</span>
-        </button>
-      </Tooltip>
-    </template>
+  <!-- Figma "Card de Kanban" (1215:1371), "Atividades": icon 14px + count 12px,
+       12px between items; blue when there is activity, tertiary gray at zero -->
+  <div class="flex items-center gap-3 text-xs leading-4">
+    <Tooltip v-for="item in items" :key="item.tab" :text="item.tooltip">
+      <button
+        type="button"
+        class="flex items-center gap-1 rounded bg-transparent p-0 cursor-pointer hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-outline-gray-4 focus-visible:ring-offset-1"
+        :class="item.count ? 'text-[var(--ct-text-accent)]' : 'text-ink-gray-4'"
+        :aria-label="item.tooltip"
+        @click.stop.prevent="openTab(item.tab)"
+      >
+        <span :class="item.icon" class="size-3.5 shrink-0" aria-hidden="true" />
+        <span>{{ item.count }}</span>
+      </button>
+    </Tooltip>
   </div>
 </template>
 
 <script setup>
-import EmailAtIcon from '@/components/Icons/EmailAtIcon.vue'
-import NoteIcon from '@/components/Icons/NoteIcon.vue'
-import TaskIcon from '@/components/Icons/TaskIcon.vue'
-import CommentIcon from '@/components/Icons/CommentIcon.vue'
 import { Tooltip } from 'frappe-ui'
 import { useRouter } from 'vue-router'
 import { computed } from 'vue'
@@ -42,12 +38,12 @@ const router = useRouter()
 
 const items = computed(() =>
   [
-    { tab: 'emails', icon: EmailAtIcon, label: __('Emails') },
-    { tab: 'notes', icon: NoteIcon, label: __('Notes') },
-    { tab: 'tasks', icon: TaskIcon, label: __('Tasks') },
-    { tab: 'comments', icon: CommentIcon, label: __('Comments') },
+    { tab: 'emails', icon: 'lucide-mail', label: __('Emails') },
+    { tab: 'notes', icon: 'lucide-file-text', label: __('Notes') },
+    { tab: 'tasks', icon: 'lucide-circle-check', label: __('Tasks') },
+    { tab: 'comments', icon: 'lucide-message-circle', label: __('Comments') },
   ].map((item) => {
-    let count = props.counts[item.tab] || 0
+    let count = Number(props.counts[item.tab]) || 0
     return {
       ...item,
       count,
