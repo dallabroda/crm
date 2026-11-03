@@ -102,6 +102,7 @@
             <div>
               <Button
                 variant="outline"
+                class="ct-btn-accent-text"
                 :label="__('Test connection')"
                 icon-left="lucide-plug"
                 :loading="testing === 'assertiva'"
@@ -133,16 +134,15 @@
           </div>
           <template v-if="settings.doc.cenprot_enabled">
             <!-- IEPTB only answers registered IPs: the client registers ours in their contract -->
-            <div
-              class="flex flex-col gap-2.5 rounded-lg bg-[var(--ct-warning-soft)] px-4 py-3"
-            >
-              <span class="text-base leading-5 text-ink-gray-9">
+            <!-- Style Guide "Aviso" (960:402), then the IP to copy -->
+            <div class="flex flex-col gap-3">
+              <CtAlert type="warning">
                 {{
                   __(
                     'Before the first title, register this HubTech server IP in your IEPTB contract (CENPROT only answers registered IPs):',
                   )
                 }}
-              </span>
+              </CtAlert>
               <div class="flex items-center gap-2">
                 <TextInput
                   class="ct-field-48 w-60"
@@ -152,6 +152,7 @@
                 />
                 <Button
                   variant="outline"
+                  class="ct-btn-accent-text"
                   :label="__('Copy')"
                   icon-left="lucide-copy"
                   :disabled="!serverIp"
@@ -355,6 +356,7 @@
             <div>
               <Button
                 variant="outline"
+                class="ct-btn-accent-text"
                 :label="__('Test connection')"
                 icon-left="lucide-plug"
                 :loading="testing === 'cenprot'"
@@ -377,6 +379,7 @@
 <script setup>
 import '../fieldOutline.css'
 import SettingsDivider from '@/components/Settings/SettingsDivider.vue'
+import CtAlert from '@/components/CtAlert.vue'
 import { useDocument } from '@/data/document'
 import { pipelinesStore } from '@/stores/pipelines'
 import { FormControl, Switch, TextInput, call, toast } from 'frappe-ui'

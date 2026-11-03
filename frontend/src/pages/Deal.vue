@@ -67,18 +67,19 @@
       <!-- Status do card (credtech#315): em andamento, ganho ou perdido, separado da etapa -->
       <template v-if="doc.name && doc.outcome">
         <template v-if="doc.outcome === 'In progress'">
+          <!-- Figma card top bar: "Ganho" outline, icon black like the text
+               (designer comment 1992553654) -->
           <Button
             :label="__('Won')"
-            theme="green"
-            variant="subtle"
-            iconLeft="lucide-thumbs-up"
+            variant="outline"
+            iconLeft="lucide-circle-check"
             @click="setOutcome('Won')"
           />
           <Button
             :label="__('Lost')"
             theme="red"
             variant="subtle"
-            iconLeft="lucide-thumbs-down"
+            iconLeft="lucide-circle-x"
             @click="setOutcome('Lost')"
           />
         </template>

@@ -1,6 +1,7 @@
 <template>
   <!-- Figma "Card de Kanban" (1215:1371), "Atividades": icon 14px + count 12px,
-       12px between items; blue when there is activity, tertiary gray at zero -->
+       12px between items; blue with the count when there is activity,
+       tertiary gray icon with no number at zero -->
   <div class="flex items-center gap-3 text-xs leading-4">
     <Tooltip v-for="item in items" :key="item.tab" :text="item.tooltip">
       <button
@@ -11,7 +12,7 @@
         @click.stop.prevent="openTab(item.tab)"
       >
         <span :class="item.icon" class="size-3.5 shrink-0" aria-hidden="true" />
-        <span>{{ item.count }}</span>
+        <span v-if="item.count">{{ item.count }}</span>
       </button>
     </Tooltip>
   </div>

@@ -110,8 +110,9 @@
             autocomplete="off"
           />
         </div>
+        <!-- Figma "Origens": primary button (designer comment 1992544263) -->
         <Button
-          variant="outline"
+          variant="solid"
           :label="__('Connect')"
           :disabled="!accountId || !accessToken.trim()"
           :loading="busy"

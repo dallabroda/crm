@@ -20,6 +20,7 @@
             <template #default="{ openFileSelector, uploading }">
               <Button
                 variant="outline"
+                class="ct-btn-accent-text"
                 :loading="uploading"
                 :label="file ? __('Change file') : __('Choose file')"
                 iconLeft="lucide-file-spreadsheet"
@@ -58,7 +59,8 @@
           class="flex flex-col gap-3 rounded-[var(--ct-radius-md)] bg-[var(--ct-bg-soft)] p-4"
         >
           <div class="text-base font-semibold text-ink-gray-9">{{ __('Preview (nothing saved yet)') }}</div>
-          <div class="grid max-w-[456px] grid-cols-2 gap-x-3 gap-y-2">
+          <!-- Figma "Números": 222px items, 42px between columns, 8px between rows -->
+          <div class="grid max-w-[486px] grid-cols-2 gap-x-[42px] gap-y-2">
             <div
               v-for="stat in previewStats"
               :key="stat.label"
@@ -69,11 +71,13 @@
             </div>
           </div>
           <template v-if="result.problem_count">
-            <div class="text-base font-semibold text-[color:var(--ct-text-error)]">
+            <!-- Figma "Linhas de fora" (designer update): black title, white
+                 box with the lines in secondary gray -->
+            <div class="text-base font-semibold text-ink-gray-9">
               {{ __('{0} lines will be left out:', [result.problem_count]) }}
             </div>
             <div
-              class="flex max-h-36 flex-col gap-1 overflow-y-auto rounded-[var(--ct-radius-sm)] bg-surface-base px-3 py-2 text-xs text-[color:var(--ct-text-error)]"
+              class="flex max-h-36 flex-col gap-1 overflow-y-auto rounded-[var(--ct-radius-sm)] bg-surface-base px-3 py-2 text-xs leading-4 text-ink-gray-6"
             >
               <div v-for="problem in result.problems" :key="problem.line">
                 {{ __('Line {0}: {1}', [problem.line, problem.message]) }}
@@ -88,9 +92,10 @@
       <div
         class="-mx-4 -mb-7 -mt-4 flex justify-end gap-3 bg-[var(--ct-bg-soft)] px-4 py-4 sm:-mx-6 sm:px-6"
       >
+        <!-- Figma "Botão" Destrutivo suave -->
         <Button
-          class="!border-[var(--ct-border-strong)]"
-          variant="outline"
+          variant="subtle"
+          theme="red"
           :label="__('Cancel')"
           @click="show = false"
         />

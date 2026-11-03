@@ -31,22 +31,19 @@
     </div>
     <div v-if="selectedService" class="flex flex-col gap-4">
       <!-- email service provider info -->
-      <div
-        class="flex items-center gap-2 rounded-lg bg-[var(--ct-bg-soft)] px-3.5 py-2.5 text-ink-gray-9"
-      >
-        <CircleAlert class="size-4 shrink-0" />
-        <div class="text-base text-wrap">
-          {{ selectedService.info }}
+      <!-- Style Guide "Aviso" (960:402), with its small action button -->
+      <CtAlert type="warning">
+        {{ providerInfo }}
+        <template #action>
           <a
             :href="selectedService.link"
             target="_blank"
-            class="text-[color:var(--ct-text-accent)] underline"
+            class="flex h-6 shrink-0 items-center rounded-[var(--ct-radius-sm)] bg-surface-base px-3 text-xs font-medium hover:bg-surface-gray-2"
           >
-            {{ __('here') }}
+            {{ __('Learn more here') }}
           </a>
-          .
-        </div>
-      </div>
+        </template>
+      </CtAlert>
       <!-- service provider fields -->
       <div class="flex flex-col gap-6">
         <div class="ct-field-48 grid grid-cols-2 gap-4">
@@ -124,7 +121,7 @@ import { computed, reactive, ref } from 'vue'
 import { createResource, toast } from 'frappe-ui'
 import { useTelemetry } from '@framework/ui/telemetry'
 import { useCrmOnboarding } from '@/composables/onboarding'
-import CircleAlert from '~icons/lucide/circle-alert'
+import CtAlert from '@/components/CtAlert.vue'
 import {
   customProviderFields,
   popularProviderFields,
@@ -162,6 +159,15 @@ const { capture } = useTelemetry()
 const { completeStep } = useCrmOnboarding()
 
 const selectedService = ref(null)
+
+// the provider text ends with "Read more"; the alert has its own
+// "Learn more here" button, so that tail is dropped
+const providerInfo = computed(() =>
+  String(selectedService.value?.info || '').replace(
+    /\s*(Read more|Saiba mais)\.?\s*$/i,
+    '',
+  ),
+)
 const fields = computed(() =>
   selectedService.value.custom ? customProviderFields : popularProviderFields,
 )
