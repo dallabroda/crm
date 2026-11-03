@@ -122,6 +122,11 @@ class CRMDeal(Document):
 		if getattr(self, "titles", None):
 			self.deal_value = sum(balance_of(t) for t in self.titles)
 			self.annual_budget = self.deal_value
+		elif not self.is_new():
+			before = self.get_doc_before_save()
+			if before and getattr(before, "titles", None):
+				self.deal_value = 0.0
+				self.annual_budget = 0.0
 		if self.organization and (self.is_new() or self.has_value_changed("organization")):
 			self.copy_enrichment_from_organization()
 
@@ -338,7 +343,7 @@ class CRMDeal(Document):
 		self.update_closed_date()
 		self.update_deal_value_from_products()
 		if frappe.db.get_single_value("FCRM Settings", "enable_forecasting"):
-			if not self.deal_value:
+			if not self.deal_value and not getattr(self, "titles", None):
 				frappe.throw(_("Deal value is required."), frappe.MandatoryError)
 			if not self.expected_closure_date:
 				frappe.throw(_("Expected closure date is required."), frappe.MandatoryError)

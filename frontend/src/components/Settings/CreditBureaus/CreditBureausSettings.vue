@@ -939,18 +939,15 @@ async function loadSettings() {
 async function saveSettings() {
   saving.value = true
   try {
-    await createResource({
-      url: 'frappe.client.set_value',
-      params: {
-        doctype: 'Cred Hub Credit Settings',
-        name: 'Cred Hub Credit Settings',
-        fieldname: settingsDoc.value,
-      },
-    }).submit()
+    await call('frappe.client.set_value', {
+      doctype: 'Cred Hub Credit Settings',
+      name: 'Cred Hub Credit Settings',
+      fieldname: settingsDoc.value,
+    })
     originalDoc.value = JSON.parse(JSON.stringify(settingsDoc.value))
     toast.success(__('Credit settings saved successfully!'))
-  } catch {
-    toast.error(__('Failed to save credit settings.'))
+  } catch (err) {
+    toast.error(err?.messages?.[0] || __('Failed to save credit settings.'))
   } finally {
     saving.value = false
   }

@@ -18,7 +18,7 @@ def balance_of(title) -> float:
 class CRMDealTitle(Document):
 	def validate(self):
 		# Espécies que exigem anexo obrigatório na CENPROT
-		attachment_species = {"CCB", "CH", "NP", "CD", "CPS", "CA", "CL", "CM", "TA"}
-		self.requires_attachment = 1 if self.species in attachment_species else 0
+		attachment_species = {"CCB", "CH", "NP", "CD", "CPS", "CA", "CL", "CM", "TA", "CT", "DM", "DS"}
+		self.requires_attachment = 1 if (self.species or "").upper() in attachment_species else 0
 		if not self.updated_amount and not flt(self.paid_amount):
 			self.updated_amount = self.original_amount
