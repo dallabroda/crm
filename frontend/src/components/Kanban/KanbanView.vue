@@ -119,10 +119,10 @@
                     </slot>
                   </div>
                   <div
-                    v-if="column.fields?.length"
+                    v-if="cardFields(column).length"
                     class="relative pointer-events-none [&_[data-slot=trigger]]:pointer-events-auto flex flex-col gap-3"
                   >
-                    <template v-for="value in column.fields" :key="value">
+                    <template v-for="value in cardFields(column)" :key="value">
                       <slot
                         name="fields"
                         v-bind="{
@@ -136,6 +136,13 @@
                         </div>
                       </slot>
                     </template>
+                  </div>
+                  <!-- Figma "Card de Kanban": activity counters (e-mails, notes, tasks, comments) above the divider -->
+                  <div
+                    v-if="$slots.activity"
+                    class="relative z-10 pointer-events-none [&_button]:pointer-events-auto"
+                  >
+                    <slot name="activity" v-bind="{ itemName: fields.name }" />
                   </div>
                   <div class="border-b border-outline-gray-2 h-px" />
                   <div
@@ -202,7 +209,7 @@ import Draggable from 'vuedraggable'
 import { Combobox, Dropdown, Popover } from 'frappe-ui'
 import { computed } from 'vue'
 
-defineProps({
+const props = defineProps({
   options: {
     type: Object,
     default: () => ({
@@ -211,6 +218,8 @@ defineProps({
       onNewClick: null,
       // funnel stages: no reordering, recolouring, hiding or adding columns here
       fixedColumns: false,
+      // card field the page shows in the card footer instead of the field list
+      footerField: null,
     }),
   },
 })
@@ -245,6 +254,10 @@ const deletedColumns = computed(() => {
       return { label: col.name, value: col.name }
     })
 })
+
+function cardFields(column) {
+  return (column.fields || []).filter((f) => f !== props.options.footerField)
+}
 
 function actions(column) {
   return [
