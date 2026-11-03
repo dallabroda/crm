@@ -5,13 +5,17 @@
   >
     <template #default="{ progress, uploading, openFileSelector }">
       <div class="flex items-end space-x-1">
+        <!-- Figma "Configurações · Marca": white button, blue text (comment
+             1992551960, applied to every upload button of the settings) -->
         <Button
+          variant="outline"
+          class="ct-btn-accent-text"
           :iconLeft="uploading ? 'lucide-cloud-upload' : ImageUpIcon"
           :label="
             uploading
               ? __('Uploading {0}%', [progress])
               : image_url
-                ? __('Change')
+                ? __('Change image')
                 : __('Upload')
           "
           @click="openFileSelector"

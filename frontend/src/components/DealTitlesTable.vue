@@ -1,7 +1,9 @@
 <template>
-  <div class="flex flex-col gap-4 p-5 bg-surface-white rounded-lg border border-outline-gray-2">
+  <!-- Figma "Card · Títulos" (1324:17539): no box around the table, it uses
+       the whole width of the tab (designer comment 1992558696) -->
+  <div class="flex flex-col gap-4 pb-5 bg-surface-white">
     <!-- Header com resumo e botão de adicionar -->
-    <div class="flex items-center justify-between pb-3 border-b border-outline-gray-2">
+    <div class="flex items-center justify-between p-4 border-b border-outline-gray-2">
       <div class="flex items-center gap-3">
         <span class="text-lg-semibold text-ink-gray-9">
           {{ __('Títulos e Duplicatas Vencidas') }}
@@ -29,7 +31,7 @@
     <!-- Todos os títulos pagos: o sistema avisa, quem encerra o card é o operador (credtech#315) -->
     <div
       v-if="allPaid && deal.outcome === 'In progress'"
-      class="flex items-center justify-between gap-3 rounded border border-outline-green-2 bg-surface-green-1 p-3 text-sm text-ink-green-3"
+      class="mx-4 flex items-center justify-between gap-3 rounded border border-outline-green-2 bg-surface-green-1 p-3 text-sm text-ink-green-3"
     >
       <span>{{ __('Every title of this card is paid.') }}</span>
       <Button variant="subtle" theme="green" :label="__('Mark card as Won')" @click="emit('setOutcome', 'Won')" />
@@ -153,22 +155,22 @@
               </div>
 
               <!-- Se requer anexo obrigatório e está sem anexo -->
+              <!-- Figma: only the "Anexar" button, with "*Obrigatório" in red below -->
               <div
                 v-else-if="requiresAttachment(title.species)"
-                class="p-1.5 border border-red-500 rounded bg-red-50/50 flex flex-col items-center gap-1"
+                class="flex flex-col items-start gap-1"
               >
-                <span class="text-[11px] text-red-600 font-medium">
-                  {{ `Obrigatório para ${title.species}` }}
-                </span>
                 <Button
-                  size="sm"
-                  variant="subtle"
-                  class="!h-6 !text-xs !px-2 bg-white border border-red-200 hover:bg-red-50"
+                  variant="outline"
+                  iconLeft="lucide-upload"
                   :loading="uploadingTitle === title.name"
                   @click="openUploadDialog(title)"
                 >
                   {{ __('Anexar') }}
                 </Button>
+                <span class="text-xs text-[color:var(--ct-danger)]">
+                  {{ __('*Obrigatório') }}
+                </span>
               </div>
 
               <!-- Dispensado / Sem necessidade -->
@@ -183,14 +185,14 @@
                 <!-- PROTESTADO -->
                 <Badge
                   v-if="(title.protest_status || '').toUpperCase() === 'PROTESTADO'"
-                  label="PROTESTADO"
+                  :label="statusLabel('PROTESTADO')"
                   theme="red"
                   variant="subtle"
                 />
 
                 <!-- DEVOLVIDO -->
                 <template v-else-if="(title.protest_status || '').toUpperCase() === 'DEVOLVIDO'">
-                  <Badge label="DEVOLVIDO" theme="red" variant="subtle" />
+                  <Badge :label="statusLabel('DEVOLVIDO')" theme="red" variant="subtle" />
                   <span class="text-[11px] text-ink-gray-5">{{ __('See the reason in the card activity.') }}</span>
                   <Button
                     size="sm"
@@ -204,7 +206,7 @@
 
                 <!-- Na CENPROT / no cartório (status oficiais do manual v2.2) -->
                 <template v-else-if="IN_PROGRESS.includes(statusOf(title))">
-                  <Badge :label="statusOf(title)" :theme="statusOf(title) === 'CONFIRMADO' ? 'orange' : 'blue'" variant="subtle" />
+                  <Badge :label="statusLabel(statusOf(title))" :theme="statusOf(title) === 'CONFIRMADO' ? 'orange' : 'blue'" variant="subtle" />
                   <span v-if="title.sent_at" class="text-[10px] text-ink-gray-5">
                     {{ __('Sent on {0}', [formatBrazilianDate(String(title.sent_at).slice(0, 10))]) }}
                   </span>
@@ -213,7 +215,7 @@
                 <!-- PAGO -->
                 <Badge
                   v-else-if="(title.protest_status || '').toUpperCase() === 'PAGO'"
-                  label="PAGO"
+                  :label="statusLabel('PAGO')"
                   theme="green"
                   variant="subtle"
                 />
@@ -221,7 +223,7 @@
                 <!-- PENDENTE / EM ABERTO -->
                 <Badge
                   v-else
-                  :label="title.protest_status || 'Pendente'"
+                  :label="statusLabel(title.protest_status) || 'Pendente'"
                   theme="gray"
                   variant="subtle"
                 />
@@ -241,9 +243,10 @@
                 <div class="flex items-center gap-1.5">
                   <!-- Botão 2ª Via WhatsApp -->
                   <Tooltip :text="__('Copiar linha digitável / 2ª via')">
+                    <!-- Figma (designer update, 1992652768): outline buttons -->
                     <Button
                       size="sm"
-                      variant="subtle"
+                      variant="outline"
                       iconLeft="lucide-copy"
                       @click="sendSecondCopy(title)"
                     >
@@ -254,7 +257,7 @@
                   <!-- Pagamentos, promessa e acordo do título -->
                   <Button
                     size="sm"
-                    variant="subtle"
+                    variant="outline"
                     iconLeft="lucide-handshake"
                     @click="openNegotiation(title)"
                   >
@@ -264,8 +267,8 @@
                   <!-- Botão Enviar / Protestar -->
                   <Button
                     size="sm"
-                    variant="solid"
-                    theme="blue"
+                    variant="outline"
+                    class="ct-btn-accent-text"
                     :loading="loadingProtest === title.name"
                     :disabled="
                       loadingProtest === title.name ||
@@ -306,12 +309,6 @@
                 >
                   Selecione o título cartório
                 </span>
-                <span
-                  v-else-if="requiresAttachment(title.species) && !title.attachment"
-                  class="text-[11px] text-red-600 font-medium"
-                >
-                  {{ `Anexo obrigatório para ${title.species}` }}
-                </span>
               </div>
             </td>
           </tr>
@@ -322,7 +319,7 @@
     <!-- Empty State -->
     <div
       v-else
-      class="flex flex-col items-center justify-center py-8 text-center border border-dashed border-outline-gray-3 rounded-lg"
+      class="mx-4 flex flex-col items-center justify-center py-8 text-center border border-dashed border-outline-gray-3 rounded-lg"
     >
       <Icon icon="lucide-file-text" class="size-8 text-ink-gray-4 mb-2" />
       <span class="text-p-base font-medium text-ink-gray-8">
@@ -356,20 +353,21 @@
             }}
           </div>
 
-          <div v-if="preview.problems.length" class="rounded border border-outline-gray-2 p-3">
-            <div class="text-sm-medium text-ink-red-4">{{ __('Fix before sending:') }}</div>
-            <ul class="list-disc pl-5 text-p-sm text-ink-gray-8">
+          <!-- Style Guide "Aviso" (960:402): Erro and Aviso types -->
+          <CtAlert v-if="preview.problems.length" type="error">
+            <div class="font-medium">{{ __('Fix before sending:') }}</div>
+            <ul class="list-disc pl-5">
               <li v-for="problem in preview.problems" :key="problem">{{ problem }}</li>
             </ul>
-          </div>
-          <div v-if="preview.notes.length" class="rounded border border-outline-gray-2 p-3">
-            <div class="text-sm-medium text-ink-gray-8">
+          </CtAlert>
+          <CtAlert v-if="preview.notes.length" type="warning">
+            <div class="font-medium">
               {{ __('Notes (they do not block the send):') }}
             </div>
-            <ul class="list-disc pl-5 text-p-sm text-ink-gray-7">
+            <ul class="list-disc pl-5">
               <li v-for="note in preview.notes" :key="note">{{ note }}</li>
             </ul>
-          </div>
+          </CtAlert>
 
           <div class="flex flex-col gap-2">
             <div class="text-base-medium text-ink-gray-8">
@@ -422,10 +420,21 @@
                     <template v-if="c.share != null"> · {{ c.share }}%</template>
                   </span>
                 </div>
-                <div v-if="c.missing.length" class="text-p-xs text-ink-red-4">
-                  {{ __('Missing: {0}', [c.missing.join(', ')]) }}
+                <!-- status and "Open contact" right after it, no empty gap
+                     on the right of the row (designer comment 1992559674) -->
+                <div class="flex flex-wrap items-center gap-x-2">
+                  <span v-if="c.missing.length" class="text-p-xs text-ink-red-4">
+                    {{ __('Missing: {0}', [c.missing.join(', ')]) }}
+                  </span>
+                  <span v-else class="text-p-xs text-ink-green-3">{{ __('Ready to go') }}</span>
+                  <router-link
+                    :to="{ name: 'Contact', params: { contactId: c.contact } }"
+                    target="_blank"
+                    class="text-p-xs text-[color:var(--ct-text-accent)] underline"
+                  >
+                    {{ __('Open contact') }}
+                  </router-link>
                 </div>
-                <div v-else class="text-p-xs text-ink-green-3">{{ __('Ready to go') }}</div>
                 <div
                   v-if="c.address_from === 'company' && !c.missing.length"
                   class="text-p-xs text-ink-gray-5"
@@ -433,13 +442,6 @@
                   {{ __('Goes with the company address') }}
                 </div>
               </div>
-              <router-link
-                :to="{ name: 'Contact', params: { contactId: c.contact } }"
-                target="_blank"
-                class="text-p-xs text-ink-blue-3 hover:underline"
-              >
-                {{ __('Open contact') }}
-              </router-link>
             </div>
             <div v-if="preview.codebtors.length" class="text-sm text-ink-gray-7">
               {{ __('{0} ready to go, {1} with data missing', [readyCount, incompleteCount]) }}
@@ -455,16 +457,29 @@
               <LocalizeContacts
                 v-if="preview.organization"
                 :organization="preview.organization"
+                accent
                 @done="loadPreview"
               />
-              <Button :label="__('Check again')" @click="loadPreview" />
+              <Button
+                variant="outline"
+                class="ct-btn-accent-text"
+                iconLeft="lucide-refresh-cw"
+                :label="__('Check again')"
+                @click="loadPreview"
+              />
             </div>
           </div>
         </div>
       </template>
       <template #actions>
         <div class="flex justify-end gap-2">
-          <Button :label="__('Cancel')" @click="showSend = false" />
+          <!-- Figma "Botão" Destrutivo (designer update, 1992654194) -->
+          <Button
+            variant="solid"
+            theme="red"
+            :label="__('Cancel')"
+            @click="showSend = false"
+          />
           <Button
             variant="solid"
             :label="confirmLabel"
@@ -566,6 +581,7 @@ import { Badge, Button, Dialog, FormControl, Tooltip, call, toast } from 'frappe
 import { createDialog } from '@/utils/dialogs'
 import Icon from '@/components/Icon.vue'
 import LocalizeContacts from '@/components/LocalizeContacts.vue'
+import CtAlert from '@/components/CtAlert.vue'
 import TitleNegotiation from '@/components/TitleNegotiation.vue'
 
 const props = defineProps({
@@ -687,6 +703,13 @@ const WITHDRAW_LABEL = {
   GERADO: 'Cancel sending',
   CONFIRMADO: 'Withdraw from the registry',
   PROTESTADO: 'Cancel the protest',
+}
+
+// Status pills in sentence case, never all caps (designer comment 1992556870):
+// the CENPROT codes stay uppercase in the data, only the label changes.
+function statusLabel(status) {
+  const s = String(status || '').trim()
+  return s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : ''
 }
 
 function statusOf(title) {

@@ -248,3 +248,10 @@
   --outline-red-1: #fbd0cb;
   --outline-red-3: #b42318;
 }
+
+/* Figma "Botão" Contorno cinza with label and icon in Uso/Texto/Destaque
+   (991:7): white button, blue text. Use with variant="outline". */
+.ct-btn-accent-text,
+.ct-btn-accent-text svg {
+  color: var(--ct-text-accent) !important;
+}

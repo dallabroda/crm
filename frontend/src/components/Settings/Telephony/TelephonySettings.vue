@@ -365,6 +365,18 @@
       </div>
       <TelephonyRequestModal v-model="showTelephonyRequest" />
     </div>
+    <!-- Figma "Configurações · Telefonia" (883:2): the "Estado vazio" module
+         when there is nothing to show (designer comment 1992545445) -->
+    <SettingsEmptyState
+      v-else-if="!telephonyAgent.get?.loading"
+      :icon="PhoneIcon"
+      :title="__('No telephony configured')"
+      :description="
+        __(
+          'Connect a telephony company to call your customers straight from the card and record the calls.',
+        )
+      "
+    />
     <ErrorMessage
       :message="isNewDoc ? insertResource.error : telephonyAgent.save?.error"
     />
@@ -372,6 +384,8 @@
 </template>
 <script setup>
 import SettingsPageHeader from '@/components/Settings/SettingsPageHeader.vue'
+import SettingsEmptyState from '@/components/Settings/SettingsEmptyState.vue'
+import PhoneIcon from '~icons/lucide/phone'
 import {
   FormControl,
   Badge,

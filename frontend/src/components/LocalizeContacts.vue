@@ -18,6 +18,7 @@
     <Button
       v-else-if="status.can_write"
       variant="outline"
+      :class="{ 'ct-btn-accent-text': accent }"
       :label="running ? __('Finding contacts…') : __('Find contacts')"
       :tooltip="
         __(
@@ -86,6 +87,8 @@ const API = 'cred_hub.integrations.localize.'
 const props = defineProps({
   organization: { type: String, required: true },
   cnpj: { type: String, default: '' },
+  // blue label and icon (Figma "Enviar a protesto" modal, comment 1992559997)
+  accent: { type: Boolean, default: false },
 })
 const emit = defineEmits(['done'])
 

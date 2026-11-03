@@ -23,7 +23,7 @@ function mountCounts(counts) {
   return { root, app }
 }
 
-it('shows every counter with its number, zero included', () => {
+it('shows every icon, with the number only when there is activity', () => {
   const { root, app } = mountCounts({
     emails: 3,
     notes: 0,
@@ -31,8 +31,10 @@ it('shows every counter with its number, zero included', () => {
     comments: 2,
   })
   const buttons = [...root.querySelectorAll('button')]
-  expect(buttons.map((b) => b.textContent.trim())).toEqual(['3', '0', '0', '2'])
-  // blue when there is activity, gray at zero (Figma "Card de Kanban")
+  expect(buttons).toHaveLength(4)
+  expect(buttons.map((b) => b.textContent.trim())).toEqual(['3', '', '', '2'])
+  // blue with the number when there is activity, gray icon alone at zero
+  // (Figma "Card de Kanban", designer comment on 791:2)
   expect(buttons[0].className).toContain('--ct-text-accent')
   expect(buttons[1].className).toContain('text-ink-gray-4')
   app.unmount()

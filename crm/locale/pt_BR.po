@@ -14282,3 +14282,15 @@ msgstr "Análise de crédito"
 
 msgid "When someone mentions you or assigns you a deal or a task, the notice shows up here."
 msgstr "Quando alguém mencionar você ou atribuir um card ou uma tarefa a você, o aviso aparece aqui."
+
+msgid "Learn more here"
+msgstr "Saiba mais aqui"
+
+msgid "No telephony configured"
+msgstr "Nenhuma telefonia configurada"
+
+msgid "Connect a telephony company to call your customers straight from the card and record the calls."
+msgstr "Conecte uma empresa de telefonia para ligar para os clientes direto do card e gravar as chamadas."
+
+msgid "Change image"
+msgstr "Trocar"
