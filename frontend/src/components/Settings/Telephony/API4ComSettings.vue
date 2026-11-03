@@ -73,12 +73,12 @@
 
           <!-- Webhook: registered at API4Com by the CRM itself -->
           <template v-if="api4com.originalDoc?.enabled">
-            <div class="h-px border-t border-outline-elevation-2" />
+            <div class="h-px border-t border-outline-gray-2" />
             <div class="flex flex-col gap-2">
-              <div class="text-base-medium text-ink-gray-8">
+              <div class="text-base font-medium leading-5 text-ink-gray-9">
                 {{ __('Call webhook') }}
               </div>
-              <span class="text-p-sm text-ink-gray-6">
+              <span class="text-base leading-5 text-ink-gray-6">
                 {{
                   __(
                     'Registered at API4Com automatically when the token is saved. Only needed by hand if API4Com support asks for it.',
@@ -131,7 +131,7 @@
             </div>
 
             <!-- Extension of each salesperson -->
-            <div class="h-px border-t border-outline-elevation-2" />
+            <div class="h-px border-t border-outline-gray-2" />
             <TelephonyExtensions
               operator="api4com"
               :description="
@@ -149,11 +149,11 @@
             :style="{ top: '35%' }"
           >
             <div class="flex flex-col items-center gap-1.5 text-center">
-              <PhoneIcon class="size-7.5 text-ink-gray-7" />
-              <span class="text-lg-medium text-ink-gray-8">
+              <PhoneIcon class="size-7.5 text-ink-gray-9" />
+              <span class="text-lg font-medium leading-6 text-ink-gray-9">
                 {{ __('API4Com Integration Disabled') }}
               </span>
-              <span class="text-center text-p-base text-ink-gray-6">
+              <span class="text-center text-base leading-5 text-ink-gray-6">
                 {{
                   __(
                     'Enable API4Com to record the calls of your API4Com account on the timeline of your deals',

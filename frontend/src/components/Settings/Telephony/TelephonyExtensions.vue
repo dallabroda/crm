@@ -1,9 +1,9 @@
 <template>
   <div class="flex flex-col gap-2">
-    <div class="text-base-medium text-ink-gray-8">
+    <div class="text-base font-medium leading-5 text-ink-gray-9">
       {{ __('Extensions') }}
     </div>
-    <span class="text-p-sm text-ink-gray-6">
+    <span class="text-base leading-5 text-ink-gray-6">
       {{ description }}
     </span>
     <ul class="flex flex-col divide-y divide-outline-elevation-2">

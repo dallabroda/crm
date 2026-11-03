@@ -9,31 +9,26 @@
     "
   >
     <template #content>
-      <div>
-        <div class="flex items-center justify-between">
-          <div class="flex gap-2 items-center">
-            <div class="text-base-semibold text-ink-gray-9">
-              {{ __('Appearance') }}
-            </div>
-          </div>
+      <!-- Figma "Configurações · Preferências" (825:2): "Aparência" with the
+           theme cards, divider, "Idioma e horário" rows with Filtro selects -->
+      <div class="flex flex-col gap-6">
+        <div class="text-lg font-medium leading-6 text-ink-gray-9">
+          {{ __('Appearance') }}
         </div>
-        <div class="flex flex-col gap-4 my-6">
-          <div class="flex flex-col gap-1">
-            <span class="text-base-medium text-ink-gray-8">
-              {{ __('Theme') }}
-            </span>
-            <span class="text-p-sm text-ink-gray-6">
-              {{ __('Switch between light, dark, or system theme') }}
-            </span>
-          </div>
+        <div class="flex flex-col gap-3">
+          <SettingsRow
+            :label="__('Theme')"
+            :description="__('Switch between light, dark, or system theme')"
+          />
           <ThemeSwitcher
             :logo="brand.logo || CRMLogo"
             :name="brand.name || 'HubTech CRM'"
           />
         </div>
+        <SettingsDivider />
         <div class="flex items-center justify-between">
-          <div class="flex gap-2 items-center h-7">
-            <div class="text-base-semibold text-ink-gray-9">
+          <div class="flex h-7 items-center gap-2">
+            <div class="text-lg font-medium leading-6 text-ink-gray-9">
               {{ __('Language & Time') }}
             </div>
             <Badge
@@ -46,37 +41,34 @@
           </div>
           <Button
             v-if="isDirty"
+            variant="solid"
             :label="__('Save')"
             :loading="user.save.loading"
             @click="save()"
           />
         </div>
-        <div class="flex items-center justify-between mt-6">
-          <div class="flex flex-col gap-1">
-            <span class="text-base-medium text-ink-gray-8">
-              {{ __('Language') }}
-            </span>
-            <span class="text-p-sm text-ink-gray-6">
-              {{ __('Change language of the application.') }}
-            </span>
-          </div>
-          <Link v-model="user.doc.language" doctype="Language" class="w-40" />
-        </div>
-        <div class="flex items-center justify-between mt-6">
-          <div class="flex flex-col gap-1">
-            <span class="text-base-medium text-ink-gray-8">
-              {{ __('Timezone') }}
-            </span>
-            <span class="text-p-sm text-ink-gray-6">
-              {{ __('Change timezone of the application.') }}
-            </span>
-          </div>
+        <SettingsRow
+          :label="__('Language')"
+          :description="__('Change language of the application.')"
+        >
+          <Link
+            v-model="user.doc.language"
+            doctype="Language"
+            variant="outline"
+            class="w-44"
+          />
+        </SettingsRow>
+        <SettingsRow
+          :label="__('Timezone')"
+          :description="__('Change timezone of the application.')"
+        >
           <Combobox
             v-model="user.doc.time_zone"
-            class="w-40"
+            variant="outline"
+            class="w-44"
             :options="getTimezoneOptions()"
           />
-        </div>
+        </SettingsRow>
       </div>
     </template>
   </SettingsLayoutBase>
@@ -87,6 +79,8 @@ import CRMLogo from '@/components/Icons/CRMLogo.vue'
 import ThemeSwitcher from '@/components/Settings/ThemeSwitcher.vue'
 import SettingsLayoutBase from '@/components/Layouts/SettingsLayoutBase.vue'
 import Link from '@/components/Controls/Link.vue'
+import SettingsRow from '@/components/Settings/SettingsRow.vue'
+import SettingsDivider from '@/components/Settings/SettingsDivider.vue'
 import { useKeyboardShortcuts } from '@/composables/useKeyboardShortcuts'
 import { getSettings } from '@/stores/settings'
 import {

@@ -39,7 +39,7 @@
     <template #content>
       <div v-if="twilio.doc" class="h-full">
         <div v-if="twilio.doc.enabled" class="space-y-4">
-          <div class="grid grid-cols-2 gap-4">
+          <div class="ct-field-48 grid grid-cols-2 gap-4">
             <FormControl
               v-model="twilio.doc.account_sid"
               :label="__('Account SID')"
@@ -57,17 +57,19 @@
           </div>
           <div
             v-if="twilio.originalDoc?.account_sid && twilioApps.length > 0"
-            class="h-px border-t border-outline-elevation-2"
+            class="h-px border-t border-outline-gray-2"
           />
           <div
             v-if="twilio.originalDoc?.account_sid && twilioApps.length > 0"
             class="flex items-center justify-between gap-8"
           >
             <div class="flex flex-col">
-              <div class="text-p-base-medium text-ink-gray-7 truncate">
+              <div
+                class="truncate text-base font-medium leading-5 text-ink-gray-9"
+              >
                 {{ __('Twilio App Name') }}
               </div>
-              <div class="text-p-sm text-ink-gray-5">
+              <div class="text-base leading-5 text-ink-gray-6">
                 {{ __('Select a Twilio app for your CRM') }}
               </div>
             </div>
@@ -89,10 +91,12 @@
           </div>
           <div class="flex items-center justify-between">
             <div class="flex flex-col">
-              <div class="text-p-base-medium text-ink-gray-7 truncate">
+              <div
+                class="truncate text-base font-medium leading-5 text-ink-gray-9"
+              >
                 {{ __('Record Calls') }}
               </div>
-              <div class="text-p-sm text-ink-gray-5 truncate">
+              <div class="truncate text-base leading-5 text-ink-gray-6">
                 {{
                   __('Enable call recording for incoming and outgoing calls')
                 }}
@@ -110,11 +114,11 @@
             :style="{ top: '35%' }"
           >
             <div class="flex flex-col items-center gap-1.5 text-center">
-              <PhoneIcon class="size-7.5 text-ink-gray-7" />
-              <span class="text-lg-medium text-ink-gray-8">
+              <PhoneIcon class="size-7.5 text-ink-gray-9" />
+              <span class="text-lg font-medium leading-6 text-ink-gray-9">
                 {{ __('Twilio Integration Disabled') }}
               </span>
-              <span class="text-center text-p-base text-ink-gray-6">
+              <span class="text-center text-base leading-5 text-ink-gray-6">
                 {{
                   __(
                     'Enable Twilio integration to make and receive calls directly from your CRM',

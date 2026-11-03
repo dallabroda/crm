@@ -1,7 +1,8 @@
 <template>
-  <div class="flex flex-col gap-2">
+  <!-- Figma "Últimos contatos recebidos": 16/500 title, bordered list -->
+  <div class="flex flex-col gap-3">
     <div class="flex items-center justify-between">
-      <div class="text-base-semibold text-ink-gray-9">
+      <div class="text-lg font-medium leading-6 text-ink-gray-9">
         {{ __('Latest leads') }}
       </div>
       <Button
@@ -19,11 +20,14 @@
         )
       }}
     </p>
-    <ul v-else class="flex flex-col">
+    <ul
+      v-else
+      class="flex flex-col overflow-hidden rounded-lg border border-[var(--ct-border-soft)]"
+    >
       <li
         v-for="(item, i) in items"
         :key="i"
-        class="flex items-center gap-3 border-b border-outline-gray-1 px-1 py-2 text-sm last:border-b-0"
+        class="flex items-center gap-3 border-b border-[var(--ct-border-soft)] px-4 py-2.5 text-base last:border-b-0"
         :class="item.card && 'cursor-pointer hover:bg-surface-gray-2'"
         @click="openCard(item)"
       >
@@ -33,10 +37,10 @@
           variant="subtle"
         />
         <div class="flex min-w-0 flex-1 flex-col">
-          <span class="truncate text-ink-gray-8">
+          <span class="truncate font-medium text-ink-gray-9">
             {{ item.lead_name || __('Lead without name') }}
           </span>
-          <span class="truncate text-p-xs text-ink-gray-5">
+          <span class="truncate text-ink-gray-6">
             <template v-if="item.status === 'Failed'">{{
               item.error
             }}</template>
@@ -88,7 +92,7 @@
           </span>
         </Tooltip>
         <Tooltip :text="formatDate(item.time)">
-          <span class="shrink-0 text-p-xs text-ink-gray-5">
+          <span class="shrink-0 text-xs text-ink-gray-4">
             {{ timeAgo(item.time) }}
           </span>
         </Tooltip>

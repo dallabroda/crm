@@ -51,7 +51,7 @@
               )
             }}
           </p>
-          <div class="grid grid-cols-2 gap-4">
+          <div class="ct-field-48 grid grid-cols-2 gap-4">
             <Password
               v-model="zenvia.doc.access_token"
               :label="__('Zenvia access token')"
@@ -77,12 +77,12 @@
 
           <template v-if="zenvia.originalDoc?.enabled">
             <!-- Webhooks: Zenvia has no API to register them, so they are pasted in its panel -->
-            <div class="h-px border-t border-outline-elevation-2" />
+            <div class="h-px border-t border-outline-gray-2" />
             <div class="flex flex-col gap-2">
-              <div class="text-base-medium text-ink-gray-8">
+              <div class="text-base font-medium leading-5 text-ink-gray-9">
                 {{ __('Call webhooks') }}
               </div>
-              <span class="text-p-sm text-ink-gray-6">
+              <span class="text-base leading-5 text-ink-gray-6">
                 {{
                   __(
                     'Paste each address in the Zenvia voice panel, under Desenvolvedores > Configurações da API. Zenvia may take up to 20 minutes to start sending.',
@@ -142,7 +142,7 @@
             </div>
 
             <!-- Extension of each salesperson -->
-            <div class="h-px border-t border-outline-elevation-2" />
+            <div class="h-px border-t border-outline-gray-2" />
             <TelephonyExtensions
               operator="zenvia"
               :description="
@@ -160,11 +160,11 @@
             :style="{ top: '35%' }"
           >
             <div class="flex flex-col items-center gap-1.5 text-center">
-              <PhoneIcon class="size-7.5 text-ink-gray-7" />
-              <span class="text-lg-medium text-ink-gray-8">
+              <PhoneIcon class="size-7.5 text-ink-gray-9" />
+              <span class="text-lg font-medium leading-6 text-ink-gray-9">
                 {{ __('Zenvia Integration Disabled') }}
               </span>
-              <span class="text-center text-p-base text-ink-gray-6">
+              <span class="text-center text-base leading-5 text-ink-gray-6">
                 {{
                   __(
                     'Enable Zenvia to call your customers from a card and record the calls on the timeline of your deals',
@@ -211,8 +211,16 @@ const confirmRegenerate = ref(false)
 const webhooks = computed(() => {
   const urls = zenvia.webhookUrls?.data || {}
   return [
-    { key: 'chamada_fim', label: __('Chamada - Fim'), url: urls.chamada_fim || '' },
-    { key: 'did_fim', label: __('DID - Fim de Chamada'), url: urls.did_fim || '' },
+    {
+      key: 'chamada_fim',
+      label: __('Chamada - Fim'),
+      url: urls.chamada_fim || '',
+    },
+    {
+      key: 'did_fim',
+      label: __('DID - Fim de Chamada'),
+      url: urls.did_fim || '',
+    },
   ]
 })
 
@@ -239,7 +247,9 @@ function regenerate() {
       confirmRegenerate.value = false
       zenvia.reload()
       zenvia.webhookUrls.submit()
-      toast.success(__('New secret generated: paste the new addresses in the Zenvia panel'))
+      toast.success(
+        __('New secret generated: paste the new addresses in the Zenvia panel'),
+      )
     },
     onError: (err) => toast.error(err.messages?.[0] || err.message),
   })

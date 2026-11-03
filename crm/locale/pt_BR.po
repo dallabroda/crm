@@ -8757,6 +8757,9 @@ msgstr "Meio de telefonia"
 msgid "Telephony Settings"
 msgstr "Configurações de telefonia"
 
+msgid "WhatsApp Settings"
+msgstr "Configurações do WhatsApp"
+
 #: frontend/src/components/Settings/EmailTemplate/EmailTemplates.vue:82
 msgid "Template Name"
 msgstr "Nome do modelo"

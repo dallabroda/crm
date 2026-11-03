@@ -51,7 +51,7 @@
               )
             }}
           </p>
-          <div class="grid grid-cols-2 gap-4">
+          <div class="ct-field-48 grid grid-cols-2 gap-4">
             <FormControl
               v-model="nvoip.doc.numbersip"
               :label="__('Nvoip numbersip')"
@@ -77,7 +77,7 @@
 
           <!-- Extension of each salesperson -->
           <template v-if="nvoip.originalDoc?.enabled">
-            <div class="h-px border-t border-outline-elevation-2" />
+            <div class="h-px border-t border-outline-gray-2" />
             <TelephonyExtensions
               operator="nvoip"
               :description="
@@ -95,11 +95,11 @@
             :style="{ top: '35%' }"
           >
             <div class="flex flex-col items-center gap-1.5 text-center">
-              <PhoneIcon class="size-7.5 text-ink-gray-7" />
-              <span class="text-lg-medium text-ink-gray-8">
+              <PhoneIcon class="size-7.5 text-ink-gray-9" />
+              <span class="text-lg font-medium leading-6 text-ink-gray-9">
                 {{ __('Nvoip Integration Disabled') }}
               </span>
-              <span class="text-center text-p-base text-ink-gray-6">
+              <span class="text-center text-base leading-5 text-ink-gray-6">
                 {{
                   __(
                     'Enable Nvoip to record the calls of your Nvoip account on the timeline of your deals',
@@ -129,7 +129,10 @@ import { computed, ref } from 'vue'
 
 const emit = defineEmits(['updateStep'])
 
-const { document: nvoip } = useDocument('CRM Nvoip Settings', 'CRM Nvoip Settings')
+const { document: nvoip } = useDocument(
+  'CRM Nvoip Settings',
+  'CRM Nvoip Settings',
+)
 
 const saveError = ref('')
 

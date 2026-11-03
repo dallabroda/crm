@@ -19,10 +19,7 @@
       </div>
     </template>
     <template #header-actions>
-      <div
-        v-if="wavix.doc?.enabled && !wavix.get.loading"
-        class="flex gap-2"
-      >
+      <div v-if="wavix.doc?.enabled && !wavix.get.loading" class="flex gap-2">
         <Button
           v-if="isDirty"
           :label="__('Discard Changes')"
@@ -73,12 +70,12 @@
 
           <!-- Webhook: registered at Wavix by the CRM itself -->
           <template v-if="wavix.originalDoc?.enabled">
-            <div class="h-px border-t border-outline-elevation-2" />
+            <div class="h-px border-t border-outline-gray-2" />
             <div class="flex flex-col gap-2">
-              <div class="text-base-medium text-ink-gray-8">
+              <div class="text-base font-medium leading-5 text-ink-gray-9">
                 {{ __('Call webhook') }}
               </div>
-              <span class="text-p-sm text-ink-gray-6">
+              <span class="text-base leading-5 text-ink-gray-6">
                 {{
                   __(
                     'Registered at Wavix automatically when the key is saved. Only needed by hand if Wavix support asks for it.',
@@ -138,11 +135,11 @@
             :style="{ top: '35%' }"
           >
             <div class="flex flex-col items-center gap-1.5 text-center">
-              <PhoneIcon class="size-7.5 text-ink-gray-7" />
-              <span class="text-lg-medium text-ink-gray-8">
+              <PhoneIcon class="size-7.5 text-ink-gray-9" />
+              <span class="text-lg font-medium leading-6 text-ink-gray-9">
                 {{ __('Wavix Integration Disabled') }}
               </span>
-              <span class="text-center text-p-base text-ink-gray-6">
+              <span class="text-center text-base leading-5 text-ink-gray-6">
                 {{
                   __(
                     'Enable Wavix to record the calls of your Wavix account on the timeline of your deals',

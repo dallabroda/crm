@@ -31,17 +31,19 @@
       </div>
     </template>
     <template #content>
-      <div v-if="settings.doc" class="flex flex-col gap-8">
+      <!-- Figma "Configurações · Cartório & Localização" (1334:19485):
+           16/600 section titles, 48px fields, 24px rhythm -->
+      <div v-if="settings.doc" class="ct-bureaus flex flex-col gap-6">
         <ErrorMessage :message="saveError" />
 
         <!-- Assertiva Localize: partners and their WhatsApp (credtech#290, module 1) -->
-        <section class="flex flex-col gap-4">
+        <section class="flex flex-col gap-6">
           <div class="flex items-start justify-between gap-4">
             <div class="flex flex-col gap-1">
-              <div class="text-lg-semibold text-ink-gray-8">
+              <div class="text-lg font-semibold leading-6 text-ink-gray-9">
                 Assertiva Localize
               </div>
-              <span class="text-p-sm text-ink-gray-6">
+              <span class="text-base leading-5 text-ink-gray-6">
                 {{
                   __(
                     'The Find contacts button of the organization brings each partner as a contact, with CPF, phones (WhatsApp first) and e-mails.',
@@ -52,7 +54,7 @@
             <Switch v-model="assertivaEnabled" />
           </div>
           <template v-if="settings.doc.assertiva_enabled">
-            <div class="grid grid-cols-2 gap-4">
+            <div class="ct-field-48 grid grid-cols-2 gap-4">
               <FormControl
                 v-model="settings.doc.assertiva_client_id"
                 :label="__('Client ID')"
@@ -99,6 +101,7 @@
             />
             <div>
               <Button
+                variant="outline"
                 :label="__('Test connection')"
                 icon-left="lucide-plug"
                 :loading="testing === 'assertiva'"
@@ -109,16 +112,16 @@
           </template>
         </section>
 
-        <div class="h-px border-t border-outline-elevation-2" />
+        <SettingsDivider />
 
         <!-- CENPROT: protest at the registry from the collection pipeline (module 2) -->
-        <section class="flex flex-col gap-4">
+        <section class="flex flex-col gap-6">
           <div class="flex items-start justify-between gap-4">
             <div class="flex flex-col gap-1">
-              <div class="text-lg-semibold text-ink-gray-8">
+              <div class="text-lg font-semibold leading-6 text-ink-gray-9">
                 {{ __('CENPROT (protest at the registry)') }}
               </div>
-              <span class="text-p-sm text-ink-gray-6">
+              <span class="text-base leading-5 text-ink-gray-6">
                 {{
                   __(
                     "Sends overdue titles of the collection pipeline to protest and follows them at the registry every day. Your company's own IEPTB contract; the server IP must be registered at IEPTB.",
@@ -131,9 +134,9 @@
           <template v-if="settings.doc.cenprot_enabled">
             <!-- IEPTB only answers registered IPs: the client registers ours in their contract -->
             <div
-              class="flex flex-col gap-2 rounded-lg border border-outline-amber-2 bg-surface-amber-1 p-3"
+              class="flex flex-col gap-2.5 rounded-lg bg-[var(--ct-warning-soft)] px-4 py-3"
             >
-              <span class="text-p-sm text-ink-gray-8">
+              <span class="text-base leading-5 text-ink-gray-9">
                 {{
                   __(
                     'Before the first title, register this HubTech server IP in your IEPTB contract (CENPROT only answers registered IPs):',
@@ -142,12 +145,13 @@
               </span>
               <div class="flex items-center gap-2">
                 <TextInput
-                  class="w-48"
+                  class="ct-field-48 w-60"
                   :model-value="serverIp"
                   readonly
                   @focus="$event.target.select()"
                 />
                 <Button
+                  variant="outline"
                   :label="__('Copy')"
                   icon-left="lucide-copy"
                   :disabled="!serverIp"
@@ -155,7 +159,7 @@
                 />
               </div>
             </div>
-            <div class="grid grid-cols-2 gap-4">
+            <div class="ct-field-48 grid grid-cols-2 gap-4">
               <FormControl
                 v-model="settings.doc.cenprot_environment"
                 type="select"
@@ -194,10 +198,10 @@
               />
             </div>
 
-            <div class="text-base-medium text-ink-gray-8">
+            <div class="text-lg font-semibold leading-6 text-ink-gray-9">
               {{ __('Creditor (who protests)') }}
             </div>
-            <div class="grid grid-cols-3 gap-4">
+            <div class="ct-field-48 grid grid-cols-3 gap-4">
               <FormControl
                 v-model="settings.doc.creditor_name"
                 class="col-span-2"
@@ -256,11 +260,11 @@
               />
             </div>
 
-            <div class="text-base-medium text-ink-gray-8">
+            <div class="text-lg font-semibold leading-6 text-ink-gray-9">
               {{ __('Title defaults') }}
             </div>
             <!-- Sem tipo de título padrão: a espécie é escolhida em cada título (dono, 02/11/2026) -->
-            <div class="grid grid-cols-2 gap-4">
+            <div class="ct-field-48 grid grid-cols-2 gap-4">
               <FormControl
                 v-model="settings.doc.default_endorsement"
                 type="select"
@@ -276,14 +280,14 @@
 
             <template v-if="pipeline">
               <div class="flex flex-col gap-1">
-                <div class="text-base-medium text-ink-gray-8">
+                <div class="text-lg font-semibold leading-6 text-ink-gray-9">
                   {{
                     __('Collection pipeline: {0}', [
                       __(pipeline.pipeline_name),
                     ])
                   }}
                 </div>
-                <span class="text-p-sm text-ink-gray-6">
+                <span class="text-base leading-5 text-ink-gray-6">
                   {{
                     __(
                       'When the registry status changes, the card moves to the stage chosen below and the owner gets a notification.',
@@ -291,17 +295,19 @@
                   }}
                 </span>
               </div>
-              <FormControl
-                v-model="settings.doc.collection_grouping"
-                type="select"
-                :label="__('Group the cards by')"
-                :options="groupingOptions"
-                :description="
-                  __(
-                    'Used by the spreadsheet import. The cedente is kept on each title either way.',
-                  )
-                "
-              />
+              <div class="ct-field-48 grid grid-cols-2 gap-4">
+                <FormControl
+                  v-model="settings.doc.collection_grouping"
+                  type="select"
+                  :label="__('Group the cards by')"
+                  :options="groupingOptions"
+                  :description="
+                    __(
+                      'Used by the spreadsheet import. The cedente is kept on each title either way.',
+                    )
+                  "
+                />
+              </div>
               <FormControl
                 v-model="settings.doc.auto_send_on_stage"
                 type="checkbox"
@@ -328,7 +334,7 @@
                   )
                 "
               />
-              <div class="grid grid-cols-2 gap-4">
+              <div class="ct-field-48 grid grid-cols-2 gap-4">
                 <FormControl
                   v-for="stage in stageFields"
                   :key="stage.field"
@@ -348,6 +354,7 @@
             </span>
             <div>
               <Button
+                variant="outline"
                 :label="__('Test connection')"
                 icon-left="lucide-plug"
                 :loading="testing === 'cenprot'"
@@ -368,6 +375,8 @@
   </SettingsLayoutBase>
 </template>
 <script setup>
+import '../fieldOutline.css'
+import SettingsDivider from '@/components/Settings/SettingsDivider.vue'
 import { useDocument } from '@/data/document'
 import { pipelinesStore } from '@/stores/pipelines'
 import { FormControl, Switch, TextInput, call, toast } from 'frappe-ui'
