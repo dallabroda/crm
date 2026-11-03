@@ -16,6 +16,10 @@
           {{ __('Cards are grouped by: {0}.', [groupingLabel]) }}
         </p>
         <div class="flex items-center gap-3">
+          <!-- Figma (designer update, 1992647574): file name first, button after it -->
+          <div v-if="file" class="min-w-0 truncate text-base text-ink-gray-6">
+            {{ file.file_name }} · {{ __('{0} lines', [columns?.rows || 0]) }}
+          </div>
           <FileUploader file-types=".xlsx,.csv" :validate-file="validateFile" @success="onUploaded">
             <template #default="{ openFileSelector, uploading }">
               <Button
@@ -28,9 +32,6 @@
               />
             </template>
           </FileUploader>
-          <div v-if="file" class="min-w-0 truncate text-base text-ink-gray-6">
-            {{ file.file_name }} · {{ __('{0} lines', [columns?.rows || 0]) }}
-          </div>
         </div>
 
         <!-- 2. Colunas -->
@@ -92,9 +93,9 @@
       <div
         class="-mx-4 -mb-7 -mt-4 flex justify-end gap-3 bg-[var(--ct-bg-soft)] px-4 py-4 sm:-mx-6 sm:px-6"
       >
-        <!-- Figma "Botão" Destrutivo suave -->
+        <!-- Figma "Botão" Destrutivo (designer update, 1992648471) -->
         <Button
-          variant="subtle"
+          variant="solid"
           theme="red"
           :label="__('Cancel')"
           @click="show = false"

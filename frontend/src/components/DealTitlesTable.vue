@@ -243,9 +243,10 @@
                 <div class="flex items-center gap-1.5">
                   <!-- Botão 2ª Via WhatsApp -->
                   <Tooltip :text="__('Copiar linha digitável / 2ª via')">
+                    <!-- Figma (designer update, 1992652768): outline buttons -->
                     <Button
                       size="sm"
-                      variant="subtle"
+                      variant="outline"
                       iconLeft="lucide-copy"
                       @click="sendSecondCopy(title)"
                     >
@@ -256,7 +257,7 @@
                   <!-- Pagamentos, promessa e acordo do título -->
                   <Button
                     size="sm"
-                    variant="subtle"
+                    variant="outline"
                     iconLeft="lucide-handshake"
                     @click="openNegotiation(title)"
                   >
@@ -266,8 +267,8 @@
                   <!-- Botão Enviar / Protestar -->
                   <Button
                     size="sm"
-                    variant="solid"
-                    theme="blue"
+                    variant="outline"
+                    class="ct-btn-accent-text"
                     :loading="loadingProtest === title.name"
                     :disabled="
                       loadingProtest === title.name ||
@@ -472,9 +473,9 @@
       </template>
       <template #actions>
         <div class="flex justify-end gap-2">
-          <!-- Figma "Botão" Destrutivo suave -->
+          <!-- Figma "Botão" Destrutivo (designer update, 1992654194) -->
           <Button
-            variant="subtle"
+            variant="solid"
             theme="red"
             :label="__('Cancel')"
             @click="showSend = false"
