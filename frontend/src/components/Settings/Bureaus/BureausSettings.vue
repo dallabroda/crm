@@ -129,6 +129,15 @@
                   )
                 }}
               </span>
+              <router-link
+                :to="{
+                  name: 'Settings',
+                  params: { section: 'credit-compliance' },
+                }"
+                class="text-p-sm text-[color:var(--ct-accent-text)] hover:underline"
+              >
+                {{ __('See the Credit PJ funnel and compliance policies →') }}
+              </router-link>
             </div>
             <Switch v-model="cenprotEnabled" />
           </div>
@@ -283,9 +292,7 @@
               <div class="flex flex-col gap-1">
                 <div class="text-lg font-semibold leading-6 text-ink-gray-9">
                   {{
-                    __('Collection pipeline: {0}', [
-                      __(pipeline.pipeline_name),
-                    ])
+                    __('Collection pipeline: {0}', [__(pipeline.pipeline_name)])
                   }}
                 </div>
                 <span class="text-base leading-5 text-ink-gray-6">
@@ -401,7 +408,9 @@ watch(
   async (enabled) => {
     if (!enabled || serverIp.value) return
     try {
-      serverIp.value = (await call('cred_hub.integrations.protest.server_ip')).ip
+      serverIp.value = (
+        await call('cred_hub.integrations.protest.server_ip')
+      ).ip
     } catch {
       serverIp.value = ''
     }
@@ -484,7 +493,10 @@ const environmentOptions = [
   { label: __('Production'), value: 'Production' },
 ]
 const groupingOptions = [
-  { label: __('Debtor and cedente (one card per pair)'), value: 'Debtor and cedente' },
+  {
+    label: __('Debtor and cedente (one card per pair)'),
+    value: 'Debtor and cedente',
+  },
   { label: __('Debtor (one card per debtor)'), value: 'Debtor' },
 ]
 const endorsementOptions = [
