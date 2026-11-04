@@ -42,41 +42,112 @@
           </span>
         </div>
 
-        <!-- Credit PJ funnel template (credtech#316) -->
-        <div
-          class="space-y-3 rounded-lg border border-[var(--ct-border)] bg-surface-white px-5 py-4"
-        >
-          <span class="text-lg-semibold text-ink-gray-9">{{
-            __('Credit PJ funnel')
-          }}</span>
-          <p class="text-p-xs text-ink-gray-6">
+        <!-- Funnel templates, side by side (credtech#316 + credtech#315): Credit PJ installs here,
+             Debt Collection is only read here (the real toggle lives on the Bureaus page) -->
+        <div class="flex flex-col gap-1">
+          <span class="text-lg font-semibold leading-6 text-ink-gray-9">
+            {{ __('Funnel templates') }}
+          </span>
+          <span class="text-base leading-5 text-ink-gray-6">
             {{
               __(
-                'A ready funnel to prospect and analyze credit for companies. It is only a starting point: you edit stages, fields and rules like in any funnel. Nothing is required by stage and it costs nothing.',
+                'Ready funnels to start from: you edit stages, fields and rules afterwards like in any funnel.',
               )
             }}
-          </p>
-          <p v-if="template.data" class="text-base font-medium text-ink-gray-9">
-            {{ template.data.stages.join(' → ') }}
-          </p>
+          </span>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div
-            v-if="template.data?.installed"
-            class="text-base text-[color:var(--ct-success)]"
+            class="space-y-3 rounded-lg border border-[var(--ct-border)] bg-surface-white px-5 py-4"
           >
-            {{
-              __('Installed: {0}. Edit its stages in the funnel settings.', [
-                template.data.pipeline,
-              ])
-            }}
+            <span class="text-lg-semibold text-ink-gray-9">{{
+              __('Credit PJ funnel')
+            }}</span>
+            <p class="text-p-xs text-ink-gray-6">
+              {{
+                __(
+                  'A ready funnel to prospect and analyze credit for companies. Nothing is required by stage and it costs nothing.',
+                )
+              }}
+            </p>
+            <p
+              v-if="template.data"
+              class="text-base font-medium text-ink-gray-9"
+            >
+              {{ template.data.stages.join(' → ') }}
+            </p>
+            <div
+              v-if="template.data?.installed"
+              class="text-base text-[color:var(--ct-success)]"
+            >
+              {{
+                __('Installed: {0}. Edit its stages in the funnel settings.', [
+                  template.data.pipeline,
+                ])
+              }}
+            </div>
+            <Button
+              v-else
+              variant="outline"
+              :loading="installing"
+              @click="installTemplate"
+            >
+              {{ __('Install the Credit PJ funnel') }}
+            </Button>
           </div>
-          <Button
-            v-else
-            variant="outline"
-            :loading="installing"
-            @click="installTemplate"
+
+          <div
+            class="space-y-3 rounded-lg border border-[var(--ct-border)] bg-surface-white px-5 py-4"
           >
-            {{ __('Install the Credit PJ funnel') }}
-          </Button>
+            <span class="text-lg-semibold text-ink-gray-9">{{
+              __('Debt Collection funnel')
+            }}</span>
+            <p class="text-p-xs text-ink-gray-6">
+              {{
+                __(
+                  'Sends overdue titles to protest at the notary (CENPROT) and follows them at the registry every day.',
+                )
+              }}
+            </p>
+            <p
+              v-if="collectionStatus.data?.stages"
+              class="text-base font-medium text-ink-gray-9"
+            >
+              {{ collectionStatus.data.stages.join(' → ') }}
+            </p>
+            <div
+              v-if="collectionStatus.data?.installed"
+              class="text-base text-[color:var(--ct-success)]"
+            >
+              {{
+                __('Installed: {0}. Edit its stages in the funnel settings.', [
+                  collectionStatus.data.pipeline,
+                ])
+              }}
+            </div>
+            <router-link
+              v-else
+              :to="{ name: 'Settings', params: { section: 'bureaus' } }"
+            >
+              <Button variant="outline">
+                {{ __('Activate in Notary & Location') }}
+              </Button>
+            </router-link>
+          </div>
+        </div>
+
+        <SettingsDivider />
+        <div class="flex flex-col gap-1">
+          <span class="text-lg font-semibold leading-6 text-ink-gray-9">
+            {{ __('Dossier & AI opinion') }}
+          </span>
+          <span class="text-base leading-5 text-ink-gray-6">
+            {{
+              __(
+                'What the AI follows to write the opinion, and the queries every dossier needs.',
+              )
+            }}
+          </span>
         </div>
 
         <!-- Credit policy the AI follows (credtech#316): methodology text + parameters, versioned -->
@@ -229,6 +300,18 @@
               {{ __('Save package') }}
             </Button>
           </template>
+        </div>
+
+        <SettingsDivider />
+        <div class="flex flex-col gap-1">
+          <span class="text-lg font-semibold leading-6 text-ink-gray-9">
+            {{ __('Connections & checks') }}
+          </span>
+          <span class="text-base leading-5 text-ink-gray-6">
+            {{
+              __('Bureaus, blocks and the automation that triggers the check.')
+            }}
+          </span>
         </div>
 
         <!-- Master Enable Switch -->
@@ -664,6 +747,7 @@ import {
   createResource,
 } from 'frappe-ui'
 import SettingsLayoutBase from '@/components/Layouts/SettingsLayoutBase.vue'
+import SettingsDivider from '@/components/Settings/SettingsDivider.vue'
 import { createDialog } from '@/utils/dialogs'
 
 // Small inline control: CNPJ for the test + "Test connection" button.
@@ -879,6 +963,12 @@ const template = createResource({
   auto: true,
 })
 const installing = ref(false)
+
+// Debt Collection funnel status (credtech#315): read-only here, the toggle lives on the Bureaus page
+const collectionStatus = createResource({
+  url: 'cred_hub.integrations.protest.collection_funnel_status',
+  auto: true,
+})
 
 async function installTemplate() {
   installing.value = true
