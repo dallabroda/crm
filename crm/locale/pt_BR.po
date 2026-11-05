@@ -13677,6 +13677,9 @@ msgstr "(cerca de {0} no total, a preço de tabela)."
 msgid "{0} of {1} queries requested."
 msgstr "{0} de {1} consultas pedidas."
 
+msgid "Credit PJ"
+msgstr "Crédito PJ"
+
 msgid "Credit PJ funnel"
 msgstr "Funil Crédito PJ"
 

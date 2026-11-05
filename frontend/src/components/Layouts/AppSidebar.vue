@@ -17,13 +17,17 @@
       class="ct-sidebar border-r border-[var(--ct-border-soft)] !bg-surface-base"
     >
       <div
-        class="flex h-full flex-col pb-3 transition-[padding] duration-300 ease-in-out"
+        class="flex h-full flex-col pb-2 transition-[padding] duration-300 ease-in-out"
         :class="isCollapsed ? 'px-[18px]' : 'px-3'"
       >
         <!-- Header: company logo + name, collapse button -->
         <div
-          class="flex h-[47px] shrink-0 items-center gap-2.5 border-b border-surface-gray-3"
-          :class="isCollapsed ? 'justify-center border-transparent' : 'pl-1.5'"
+          class="flex shrink-0 items-center gap-2.5 border-b border-surface-gray-3"
+          :class="
+            isCollapsed
+              ? 'justify-center border-b-0 pt-[11px]'
+              : 'h-[47px] pl-1.5'
+          "
         >
           <BrandLogo
             v-model="brand"
@@ -31,7 +35,7 @@
           />
           <span
             v-if="!isCollapsed"
-            class="min-w-0 flex-1 truncate text-sm font-medium text-ink-gray-9"
+            class="min-w-0 flex-1 truncate text-[14px] font-medium leading-5 tracking-normal text-ink-gray-9"
           >
             {{ brand.name || 'HubTech CRM' }}
           </span>
@@ -47,7 +51,12 @@
         </div>
 
         <!-- Search opens the command palette; collapsed, the slot holds the expand button -->
-        <div class="flex h-12 shrink-0 items-center justify-center pb-1 pt-3">
+        <!-- Figma "Busca": 4px below the header, 12px above and 4px below the
+             32px field. Collapsed: the expand button, 16px under the logo. -->
+        <div
+          class="flex shrink-0 items-center justify-center"
+          :class="isCollapsed ? 'pt-4' : 'mt-1 h-12 pb-1 pt-3'"
+        >
           <Tooltip v-if="isCollapsed" :text="__('Expand')" side="right">
             <button
               type="button"
@@ -61,7 +70,7 @@
           <button
             v-else
             type="button"
-            class="flex h-8 w-full items-center gap-2 rounded-[var(--ct-radius-md)] bg-[var(--ct-bg-soft)] px-2.5 text-left text-sm text-ink-gray-4 transition-colors hover:bg-[var(--ct-action-light-hover)]"
+            class="ct-sidebar-icons flex h-8 w-full items-center gap-2 rounded-[var(--ct-radius-md)] bg-[var(--ct-bg-soft)] px-2.5 text-left text-[14px] font-normal leading-5 tracking-normal text-ink-gray-4 transition-colors hover:bg-[var(--ct-action-light-hover)]"
             @click="openCommandPalette()"
           >
             <SearchIcon class="size-4 shrink-0" />
@@ -72,21 +81,24 @@
         <!-- overflow-y-auto forces overflow-x to clip too; widen the scroll box
              to the sidebar edges and pad the content back in. -->
         <div
-          class="flex flex-1 flex-col overflow-y-auto"
+          class="flex flex-1 flex-col gap-1 overflow-y-auto pt-1"
           :class="isCollapsed ? '-mx-[18px] px-[18px]' : '-mx-3 px-3'"
         >
           <CollapsibleSection
-            v-for="section in allViews"
+            v-for="(section, index) in allViews"
             :key="section.name"
             :label="section.name"
             :opened="section.opened"
           >
             <template #header="{ opened, toggle }">
               <div class="group relative">
-                <!-- collapsed rail: a short line separates the groups -->
+                <!-- collapsed rail: a short line separates the groups, 17px under
+                     the last icon box and 20px above the next (40px under the
+                     expand button for the first one) -->
                 <div
                   v-if="isCollapsed"
-                  class="flex h-[34px] items-center justify-center"
+                  class="flex h-[30px] items-start justify-center pt-[13px]"
+                  :class="{ 'mt-[23px]': index === 0 }"
                   aria-hidden="true"
                 >
                   <span class="h-px w-7 bg-surface-gray-3" />
@@ -126,7 +138,7 @@
                 </Tooltip>
               </div>
             </template>
-            <nav class="flex flex-col gap-1">
+            <nav class="ct-sidebar-icons flex flex-col gap-1 pt-1">
               <template v-for="link in section.views" :key="link.key">
                 <SidebarItem
                   v-if="link.key === 'Notifications'"
@@ -142,13 +154,13 @@
                       <BellIcon class="size-4" />
                       <span
                         v-if="isCollapsed && unreadNotificationsCount"
-                        class="absolute -right-1 -top-[3px] size-2 rounded-full bg-[var(--ct-counter-alert)]"
+                        class="absolute -right-[3px] -top-[3px] size-2 rounded-full bg-[var(--ct-counter-alert)]"
                       />
                     </span>
                   </template>
                   <!-- Not in #suffix: that slot sits outside the button, so a
                        click on the count would not toggle the panel. -->
-                  <span class="ml-0.5 flex-1 truncate text-sm">
+                  <span class="ct-sidebar-label ml-0.5 flex-1 truncate">
                     {{ __('Notifications') }}
                   </span>
                   <span
@@ -175,7 +187,7 @@
                     :hoverDelay="1500"
                     :disabled="isCollapsed"
                   >
-                    <span class="ml-0.5 truncate text-sm">{{
+                    <span class="ct-sidebar-label ml-0.5 truncate">{{
                       __(link.label)
                     }}</span>
                   </Tooltip>
@@ -214,10 +226,12 @@
             </template>
           </SidebarItem>
           <!-- Footer: the signed-in user opens the account menu -->
+          <!-- Figma: 32px avatar 16px above the bottom edge; text 12px
+               under the divider -->
           <div
-            class="border-t pt-3"
+            class="border-t pt-2"
             :class="
-              isCollapsed ? 'border-transparent' : 'border-surface-gray-3'
+              isCollapsed ? 'border-transparent pb-2' : 'border-surface-gray-3'
             "
           >
             <UserDropdown :isCollapsed="isCollapsed" />
@@ -336,10 +350,17 @@ const isCollapsed = computed(() => isSidebarCollapsed.value && !props.mobile)
 
 const { brand } = getSettings()
 
-// Figma "Item da barra lateral": 36px row, 10px inner padding, hover and
-// active on #f5f5f7, active text #2a2b30 Medium. Icons follow the text color.
-const itemClass =
-  '!h-9 text-ink-gray-6 hover:!bg-[var(--ct-bg-soft)] data-[state=active]:!bg-[var(--ct-bg-soft)] data-[state=active]:!text-ink-gray-7 data-[state=active]:font-medium [&>a]:!pl-2.5 [&>button]:!pl-2.5'
+// Figma "Item da barra lateral": 36px row, 10px inner padding, text Inter 14
+// Regular, hover and active on #f5f5f7, active text #2a2b30 Medium. Icons
+// follow the text color; on the collapsed rail they are #8e8e93 and the
+// active one black, as in "Barra lateral · HubTech" (1073:13444).
+const ITEM_BASE =
+  '!h-9 font-normal hover:!bg-[var(--ct-bg-soft)] data-[state=active]:!bg-[var(--ct-bg-soft)] data-[state=active]:font-medium [&>a]:!pl-2.5 [&>button]:!pl-2.5'
+const itemClass = computed(() =>
+  isCollapsed.value
+    ? `${ITEM_BASE} text-[#8e8e93] data-[state=active]:!text-ink-gray-9`
+    : `${ITEM_BASE} text-ink-gray-6 data-[state=active]:!text-ink-gray-7`,
+)
 
 // Figma uses Lucide line icons in the menu; the routes keep their own icons
 // everywhere else (command palette, mobile tabs).
@@ -724,6 +745,19 @@ const articles = ref([])
 </script>
 
 <style scoped>
+/* Figma Lucide icons: 16px with a 1.4px line. frappe-ui draws Lucide at
+   stroke-width 1.5 of 24 (1px at 16px), which looked thin; 2.1 of 24 = 1.4px. */
+.ct-sidebar-icons :deep(svg),
+.ct-sidebar-toggle :deep(svg) {
+  stroke-width: 2.1;
+}
+/* Figma item text: Inter 14/20 Regular, no extra tracking (frappe-ui text-sm
+   is 13px with 0.26px tracking) */
+.ct-sidebar-label {
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: 0;
+}
 /* Figma "Botão recolher" / "Botão expandir": 28px circle with a light border */
 .ct-sidebar-toggle {
   display: grid;

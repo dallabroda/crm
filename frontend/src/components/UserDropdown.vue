@@ -19,10 +19,14 @@
           class="shrink-0"
         />
         <div v-if="!isCollapsed" class="flex min-w-0 flex-1 flex-col">
-          <span class="truncate text-sm font-medium leading-5 text-ink-gray-9">
+          <span
+            class="truncate text-[14px] font-medium leading-5 tracking-normal text-ink-gray-9"
+          >
             {{ user.full_name }}
           </span>
-          <span class="truncate text-sm leading-5 text-ink-gray-6">
+          <span
+            class="truncate text-[14px] font-normal leading-5 tracking-normal text-ink-gray-6"
+          >
             {{ user.email || user.name }}
           </span>
         </div>
