@@ -1572,6 +1572,11 @@ const pkg = createResource({
     deal_name: props.dealId || null,
   },
   auto: true,
+  onSuccess(data) {
+    if (data?.deal_amount && (!requestedAmount.value || requestedAmount.value <= 0)) {
+      requestedAmount.value = Number(data.deal_amount)
+    }
+  },
 })
 const startingPackage = ref(false)
 const packageStarted = ref(false)
