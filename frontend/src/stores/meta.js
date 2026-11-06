@@ -5,31 +5,35 @@ import { computed, reactive } from 'vue'
 
 const doctypesMeta = reactive({})
 const userSettings = reactive({})
+const metaResources = {}
 
 export function getMeta(doctype) {
-  const meta = createResource({
-    url: 'frappe.desk.form.load.getdoctype',
-    params: {
-      doctype: doctype,
-      with_parent: 1,
-      cached_timestamp: null,
-    },
-    cache: ['Meta', doctype],
-    onSuccess: (res) => {
-      let dtMetas = res.docs
-      for (let dtMeta of dtMetas) {
-        doctypesMeta[dtMeta.name] = dtMeta
-      }
+  if (!metaResources[doctype]) {
+    const res = createResource({
+      url: 'frappe.desk.form.load.getdoctype',
+      params: {
+        doctype: doctype,
+        with_parent: 1,
+        cached_timestamp: null,
+      },
+      cache: ['Meta', doctype],
+      onSuccess: (res) => {
+        let dtMetas = res.docs
+        for (let dtMeta of dtMetas) {
+          doctypesMeta[dtMeta.name] = dtMeta
+        }
 
-      userSettings[doctype] = JSON.parse(res.user_settings)
-    },
-  })
+        userSettings[doctype] = JSON.parse(res.user_settings)
+      },
+    })
+    metaResources[doctype] = res
+    if (!doctypesMeta[doctype] && !res.loading) {
+      res.fetch()
+    }
+  }
+  const meta = metaResources[doctype]
 
   const doctypeMeta = computed(() => doctypesMeta[doctype] || null)
-
-  if (!doctypesMeta[doctype] && !meta.loading) {
-    meta.fetch()
-  }
 
   function getFormattedPercent(fieldname, doc) {
     let value = getFormattedFloat(fieldname, doc)

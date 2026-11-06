@@ -8,6 +8,7 @@ import { reactive } from 'vue'
 import router from '@/router'
 
 const doctypeScripts = reactive({})
+const scriptResources = {}
 const fileScriptModules = import.meta.glob('../doctypes/*/*.js')
 const fileScriptCache = {}
 
@@ -35,30 +36,34 @@ async function loadFileScript(doctype, view) {
 }
 
 export function getScript(doctype, view = 'Form') {
-  const scripts = createListResource({
-    doctype: 'CRM Form Script',
-    cache: ['Form Scripts', doctype, view],
-    fields: ['name', 'dt', 'view', 'script'],
-    filters: { view, dt: doctype, enabled: 1 },
-    onSuccess: (_scripts) => {
-      for (let script of _scripts) {
+  const key = `${doctype}:${view}`
+  if (!scriptResources[key]) {
+    const res = createListResource({
+      doctype: 'CRM Form Script',
+      cache: ['Form Scripts', doctype, view],
+      fields: ['name', 'dt', 'view', 'script'],
+      filters: { view, dt: doctype, enabled: 1 },
+      onSuccess: (_scripts) => {
         if (!doctypeScripts[doctype]) {
           doctypeScripts[doctype] = {}
         }
-        doctypeScripts[doctype][script.name] = script || {}
-      }
-    },
-    onError: (err) => {
-      console.error(
-        `Error loading CRM Form Scripts for ${doctype} (view: ${view}):`,
-        err,
-      )
-    },
-  })
-
-  if (!doctypeScripts[doctype] && !scripts.loading) {
-    scripts.fetch()
+        for (let script of _scripts) {
+          doctypeScripts[doctype][script.name] = script || {}
+        }
+      },
+      onError: (err) => {
+        console.error(
+          `Error loading CRM Form Scripts for ${doctype} (view: ${view}):`,
+          err,
+        )
+      },
+    })
+    scriptResources[key] = res
+    if (!doctypeScripts[doctype] && !res.loading) {
+      res.fetch()
+    }
   }
+  const scripts = scriptResources[key]
 
   async function setupScript(document, helpers = {}) {
     const [fileModule] = await Promise.all([

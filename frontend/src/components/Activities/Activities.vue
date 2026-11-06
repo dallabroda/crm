@@ -1,6 +1,7 @@
 <template>
   <ActivityHeader
     v-model="activeTab"
+    v-model:activityFilter="activityFilter"
     v-model:showWhatsappTemplates="showWhatsappTemplates"
     v-model:showFilesUploader="showFilesUploader"
     v-model:emailBox="emailBox"
@@ -480,7 +481,7 @@
     />
   </div>
   <WhatsappTemplateSelectorModal
-    v-if="whatsappEnabled"
+    v-if="whatsappEnabled && showWhatsappTemplates"
     v-model="showWhatsappTemplates"
     :doctype="doctype"
     @send="(t) => sendTemplate(t)"
@@ -604,14 +605,29 @@ const modalRef = ref(null)
 const showFilesUploader = ref(false)
 const fieldLayoutTabIndex = ref(0)
 const fieldLayoutTabName = ref('')
+const activityFilter = ref('Activity')
 
-const title = computed(
-  () =>
+const title = computed(() => {
+  const tabName =
     props.tabs?.find((tab) => tab.value === activeTab.value)?.name ||
-    'Activity',
-)
+    'Activity'
+  return tabName === 'Activity' ? activityFilter.value : tabName
+})
 
 const changeTabTo = (tabName) => {
+  const subMap = {
+    emails: 'Emails',
+    comments: 'Comments',
+    calls: 'Calls',
+    tasks: 'Tasks',
+    attachments: 'Attachments',
+    notes: 'Comments',
+  }
+  if (subMap[tabName]) {
+    activeTab.value = 'activity'
+    activityFilter.value = subMap[tabName]
+    return
+  }
   if (!props.tabs?.some((tab) => tab.value === tabName)) return
   activeTab.value = tabName
 }

@@ -28,7 +28,7 @@
         variant="solid"
         :label="__('Create')"
         iconLeft="lucide-plus"
-        @click="showDealModal = true"
+        @click="openCreateModal"
       />
     </template>
   </LayoutHeader>
@@ -270,7 +270,7 @@
     "
     :filtered="!!Object.keys(deals.params?.filters || {}).length"
     importDoctype="CRM Deal"
-    @create="showDealModal = true"
+    @create="openCreateModal"
   />
   <DealModal
     v-if="showDealModal"
@@ -628,6 +628,14 @@ function parseRows(rows, columns = []) {
     _rows['_comment_count'] = deal._comment_count
     return _rows
   })
+}
+
+function openCreateModal() {
+  delete defaults.status
+  if (pipelineName.value) {
+    defaults.pipeline = pipelineName.value
+  }
+  showDealModal.value = true
 }
 
 function onNewClick(column) {

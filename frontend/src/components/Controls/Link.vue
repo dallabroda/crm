@@ -136,10 +136,11 @@ watchDebounced(
 
 watchDebounced(
   () => props.filters,
-  () => {
+  (newVal, oldVal) => {
+    if (JSON.stringify(newVal) === JSON.stringify(oldVal)) return
     reload('', true)
   },
-  { debounce: 300, immediate: true },
+  { debounce: 300 },
 )
 
 const options = createResource({

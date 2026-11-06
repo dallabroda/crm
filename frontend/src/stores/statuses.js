@@ -14,7 +14,7 @@ export const statusesStore = defineStore('crm-statuses', () => {
 
   const leadStatuses = createListResource({
     doctype: 'CRM Lead Status',
-    fields: ['name', 'deal_status', 'color', 'position', 'type'],
+    fields: ['name', 'lead_status', 'color', 'position', 'type'],
     orderBy: 'position asc',
     cache: 'lead-statuses',
     initialData: [],
@@ -60,7 +60,7 @@ export const statusesStore = defineStore('crm-statuses', () => {
 
   function getLeadStatus(name) {
     if (!name) {
-      name = leadStatuses.data[0].name
+      name = leadStatuses.data[0]?.name
     }
     return leadStatusesByName[name]
   }

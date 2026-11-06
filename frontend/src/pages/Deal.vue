@@ -27,7 +27,7 @@
             :iconRight="open ? 'lucide-chevron-up' : 'lucide-chevron-down'"
           >
             <template #prefix>
-              <IndicatorIcon :class="getDealStatus(doc.status).color" />
+              <IndicatorIcon :class="getDealStatus(doc.status)?.color" />
             </template>
           </Button>
         </template>
@@ -227,7 +227,6 @@
         @updateField="updateField"
       />
       <ProbableCompany :deal="doc" @changed="onProbableCompany" />
-      <OrganizationRegistry :organization="organization" />
       <div
         v-if="sections.data"
         class="flex flex-1 flex-col justify-between overflow-hidden"
@@ -382,6 +381,11 @@
               :deal="dealId"
               :version="`${doc.organization}|${doc.second_organization}|${doc.contacts_from}`"
               @sent="reloadActivities"
+            />
+            <OrganizationRegistry
+              v-else-if="section.name == 'organization_registry'"
+              :organization="organization"
+              embedded
             />
           </template>
         </SidePanelLayout>
@@ -642,9 +646,14 @@ watch(
 const organizationDocument = ref(null)
 
 watch(
-  () => doc.value.organization,
-  (org) => {
-    if (org && !organizationDocument.value?.doc) {
+  () => [doc.value.organization, document.loading],
+  ([org, loading]) => {
+    if (loading) return
+    if (!org) {
+      organizationDocument.value = null
+      return
+    }
+    if (organizationDocument.value?.name !== org) {
       let { document: _organizationDocument } = useDocument(
         'CRM Organization',
         org,
@@ -914,68 +923,72 @@ usePageMeta(() => {
   }
 })
 
+// Declared before isCollectionFunnel / isCreditFunnel / tabs to avoid TDZ ReferenceError during immediate watch on tabs.
+const assignableUsers = ref(null)
+const fieldSetup = ref(null)
+
+const isCollectionFunnel = computed(() => {
+  const pName = (
+    pipelineStore.getPipeline(doc.value?.pipeline)?.pipeline_name || ''
+  ).toLowerCase()
+  if (
+    pName.includes('collection') ||
+    pName.includes('cobrança') ||
+    pName.includes('cobranca') ||
+    pName.includes('recupera')
+  ) {
+    return true
+  }
+  const used = fieldSetup.value?.used || []
+  return used.some((f) => String(f).startsWith('protest_'))
+})
+
+const isCreditFunnel = computed(() => {
+  const pName = (
+    pipelineStore.getPipeline(doc.value?.pipeline)?.pipeline_name || ''
+  ).toLowerCase()
+  if (
+    pName.includes('credit') ||
+    pName.includes('crédito') ||
+    pName.includes('credito') ||
+    pName.includes('securitiz') ||
+    pName.includes('fidc') ||
+    pName.includes('factoring')
+  ) {
+    return true
+  }
+  const used = fieldSetup.value?.used || []
+  return used.some((f) => String(f).startsWith('credit_'))
+})
+
 const tabs = computed(() => {
   let tabOptions = [
+    {
+      name: 'Activity',
+      value: 'activity',
+      label: __('Atividades'),
+      iconLeft: ActivityIcon,
+    },
+    {
+      name: 'Data',
+      value: 'data',
+      label: __('Dados'),
+      iconLeft: DetailsIcon,
+    },
     {
       name: 'Titles',
       value: 'titles',
       label: __('Títulos'),
       iconLeft: MoneyIcon,
+      condition: () => isCollectionFunnel.value,
     },
     {
       name: 'Credit',
       value: 'credit',
-      label: __('Credit analysis'),
+      label: __('Análise de crédito'),
       iconLeft: MoneyIcon,
-      condition: () => Boolean(doc.value?.organization),
-    },
-    {
-      name: 'Activity',
-      value: 'activity',
-      label: __('Activity'),
-      iconLeft: ActivityIcon,
-    },
-    {
-      name: 'Emails',
-      value: 'emails',
-      label: __('Emails'),
-      iconLeft: EmailIcon,
-    },
-    {
-      name: 'Comments',
-      value: 'comments',
-      label: __('Comments'),
-      iconLeft: CommentIcon,
-    },
-    {
-      name: 'Data',
-      value: 'data',
-      label: __('Data'),
-      iconLeft: DetailsIcon,
-    },
-    {
-      name: 'Calls',
-      value: 'calls',
-      label: __('Calls'),
-      iconLeft: PhoneIcon,
-    },
-    {
-      name: 'Tasks',
-      value: 'tasks',
-      label: __('Tasks'),
-      iconLeft: TaskIcon,
-    },
-    {
-      name: 'Notes',
-      value: 'notes',
-      label: __('Notes'),
-      iconLeft: NoteIcon,
-    },
-    {
-      name: 'Attachments',
-      value: 'attachments',
-      label: __('Attachments'),
-      iconLeft: AttachmentIcon,
+      condition: () =>
+        isCreditFunnel.value && Boolean(doc.value?.organization),
     },
     {
       name: 'WhatsApp',
@@ -996,6 +1009,19 @@ const tabs = computed(() => {
 })
 
 const { activeTab, changeTabTo } = useActiveTabManager(tabs, 'lastDealTab')
+
+watch(
+  tabs,
+  (currentTabs) => {
+    if (
+      currentTabs.length &&
+      !currentTabs.some((t) => t.value === activeTab.value)
+    ) {
+      activeTab.value = currentTabs[0].value
+    }
+  },
+  { immediate: true },
+)
 
 // keep the active tab visible — later tabs (e.g. Quotations) otherwise stay
 // scrolled out of view behind the right panel
@@ -1156,17 +1182,26 @@ function reloadActivities() {
 const cardBlocks = createResource({
   url: 'crm.api.forms.get_card_blocks',
   makeParams: () => ({ deal: props.dealId }),
-  auto: true,
+  auto: false,
 })
+let lastCardBlocksKey = ''
 watch(
-  () =>
-    [
-      doc.value?.status,
-      doc.value?.organization,
-      doc.value?.second_organization,
-      (dealContacts.data || []).map((c) => `${c.name}:${c.is_primary}`),
-    ].join('|'),
-  () => cardBlocks.reload(),
+  () => {
+    if (!doc.value?.name) return ''
+    return [
+      props.dealId,
+      doc.value?.status || '',
+      doc.value?.organization || '',
+      doc.value?.second_organization || '',
+      (dealContacts.data || []).map((c) => `${c.name}:${c.is_primary}`).join(','),
+    ].join('|')
+  },
+  (key) => {
+    if (!key || key === lastCardBlocksKey) return
+    lastCardBlocksKey = key
+    cardBlocks.reload()
+  },
+  { immediate: true },
 )
 
 function blockSections(b) {
@@ -1291,11 +1326,10 @@ watch(
 
 // Owner and assignees must take part in the card's funnel (#68): members + admins.
 // Fields: only the catalog fields the funnel uses (#69).
-const assignableUsers = ref(null)
-const fieldSetup = ref(null)
 watch(
   () => doc.value.pipeline,
   async (pipeline) => {
+    if (!pipeline) return
     let [users, setup] = await Promise.allSettled([
       pipelineStore.assignableUsers(pipeline),
       pipelineStore.fieldSetup(pipeline),
@@ -1357,8 +1391,66 @@ const visibleSections = computed(() => {
       fieldSetup.value || {},
     )
   }
-  return withOrganizationContacts(restrictOwner(base, assignableUsers.value))
+  // Merge leftover card fields from the misnamed "organization_section" ("Detalhes da organização")
+  // into the main card fields section so there is no redundant "Detalhes da organização" box at the bottom
+  let merged = mergeOrganizationSectionIntoCard(base)
+  return withOrganizationRegistry(
+    withOrganizationContacts(restrictOwner(merged, assignableUsers.value)),
+  )
 })
+
+function mergeOrganizationSectionIntoCard(sections) {
+  if (!sections?.length) return []
+  let orgSec = sections.find((s) => s.name === 'organization_section')
+  if (!orgSec?.columns?.[0]?.fields?.length) {
+    return sections.filter((s) => s.name !== 'organization_section')
+  }
+  let extraFields = orgSec.columns[0].fields.filter(
+    (f) => f && f.fieldname !== 'company_description',
+  )
+  let rest = sections.filter((s) => s.name !== 'organization_section')
+  let targetIdx = rest.findIndex(
+    (s) => s.name === 'funnel_fields' || s.columns?.[0]?.fields?.length,
+  )
+  if (targetIdx >= 0 && extraFields.length) {
+    let target = rest[targetIdx]
+    let existingNames = new Set(
+      (target.columns?.[0]?.fields || []).map((f) => f?.fieldname || f),
+    )
+    let toAdd = extraFields.filter(
+      (f) => !existingNames.has(f?.fieldname || f),
+    )
+    rest[targetIdx] = {
+      ...target,
+      columns: [
+        {
+          ...target.columns[0],
+          fields: [...(target.columns[0].fields || []), ...toAdd],
+        },
+      ],
+    }
+  }
+  return rest
+}
+
+function withOrganizationRegistry(sections) {
+  if (!doc.value?.organization || !organization.value?.name) return sections
+  let section = {
+    name: 'organization_registry',
+    label: __('Organização'),
+    opened: true,
+    notInLayout: true,
+    columns: [{ name: 'organization_registry_column', fields: [] }],
+  }
+  let contactsIdx = sections.findIndex((s) => s.name === 'contacts_section')
+  return contactsIdx < 0
+    ? [...sections, section]
+    : [
+        ...sections.slice(0, contactsIdx),
+        section,
+        ...sections.slice(contactsIdx),
+      ]
+}
 
 // A card with two organizations shows whose contacts it uses, after the card's
 // own contacts (credtech#195); with one organization nothing changes
@@ -1479,7 +1571,7 @@ watch(showLostReasonModal, (open) => {
 
 function setLostReason() {
   if (
-    getDealStatus(document.doc.status).type !== 'Lost' ||
+    getDealStatus(document.doc.status)?.type !== 'Lost' ||
     (document.doc.lost_reason && document.doc.lost_reason !== 'Other') ||
     (document.doc.lost_reason === 'Other' && document.doc.lost_notes)
   ) {
@@ -1495,7 +1587,7 @@ function setLostReason() {
 function beforeStatusChange(data) {
   if (
     Object.hasOwn(data ?? {}, 'status') &&
-    getDealStatus(data.status).type == 'Lost'
+    getDealStatus(data.status)?.type == 'Lost'
   ) {
     setLostReason()
   } else {
@@ -1518,7 +1610,7 @@ function reloadResources(data) {
   }
   if (
     Object.hasOwn(data ?? {}, 'status') &&
-    getDealStatus(data.status).type != 'Lost'
+    getDealStatus(data.status)?.type != 'Lost'
   ) {
     sections.reload()
   }

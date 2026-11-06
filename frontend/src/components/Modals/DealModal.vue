@@ -176,7 +176,7 @@ const tabs = createResource({
             if (field.fieldname == 'status') {
               field.fieldtype = 'Select'
               field.options = dealStatuses.value
-              field.prefix = getDealStatus(deal.doc.status).color
+              field.prefix = getDealStatus(deal.doc.status)?.color
             }
 
             if (field.fieldtype === 'Table') {
@@ -258,8 +258,26 @@ watch([usePipelines, () => tabs.data], ([inUse]) => {
 // the funnel order, created fields included; the required ones are marked and
 // the server refuses the card without them. Those the quick entry already has
 // are filled there.
+const stageSchemaCache = new Map()
 const stageRequired = ref([])
 let stageRequest = 0
+
+function mapSchemaToStageFields(schema) {
+  return (schema?.fields || [])
+    // the card's name is locked (always shown) and asked here (credtech#182)
+    .filter((f) => f.visible && (!f.locked || f.fieldname === 'deal_name'))
+    .map((f) => ({
+      fieldname: f.fieldname,
+      label: f.label,
+      fieldtype: f.fieldtype,
+      // StageFields takes the options as text, one per line
+      options: Array.isArray(f.options)
+        ? f.options.map((o) => o.value).join('\n')
+        : f.options || '',
+      required: f.required ? 1 : 0,
+    }))
+}
+
 watch(
   () => [deal.doc.pipeline, deal.doc.status],
   async ([pipeline, stage]) => {
@@ -268,31 +286,28 @@ watch(
       stageRequired.value = []
       return
     }
+    const cacheKey = `${pipeline}:${stage}`
+    if (stageSchemaCache.has(cacheKey)) {
+      stageRequired.value = stageSchemaCache.get(cacheKey)
+    }
     try {
       let schema = await call('crm.api.forms.get_form_schema', {
         doctype: 'CRM Deal',
         pipeline,
         stage,
       })
+      const mapped = mapSchemaToStageFields(schema)
+      stageSchemaCache.set(cacheKey, mapped)
       if (request !== stageRequest) return
-      stageRequired.value = (schema?.fields || [])
-        // the card's name is locked (always shown) and asked here (credtech#182)
-        .filter((f) => f.visible && (!f.locked || f.fieldname === 'deal_name'))
-        .map((f) => ({
-          fieldname: f.fieldname,
-          label: f.label,
-          fieldtype: f.fieldtype,
-          // StageFields takes the options as text, one per line
-          options: Array.isArray(f.options)
-            ? f.options.map((o) => o.value).join('\n')
-            : f.options || '',
-          required: f.required ? 1 : 0,
-        }))
+      stageRequired.value = mapped
     } catch (e) {
-      if (request === stageRequest) stageRequired.value = []
+      if (request === stageRequest && !stageSchemaCache.has(cacheKey)) {
+        stageRequired.value = []
+      }
       console.error('[pipelines] could not load the stage rules', e)
     }
   },
+  { immediate: true },
 )
 
 const quickEntryFieldnames = computed(() => {
@@ -425,6 +440,9 @@ function openQuickEntryModal() {
 }
 
 onMounted(async () => {
+  for (const key of Object.keys(deal.doc)) {
+    delete deal.doc[key]
+  }
   deal.doc.no_of_employees = '1-10'
   Object.assign(deal.doc, props.defaults)
   chooseExistingOrganization.value = Boolean(props.defaults.organization)
@@ -432,6 +450,16 @@ onMounted(async () => {
 
   if (!deal.doc.deal_owner) {
     deal.doc.deal_owner = getUser().name
+  }
+  if (usePipelines.value) {
+    let pipeline = pipelineStore.getPipeline(deal.doc.pipeline)
+      ? deal.doc.pipeline
+      : pipelines.value[0].name
+    let stageInPipeline = pipelineStore
+      .getPipeline(pipeline)
+      .stages.some((s) => s.name === deal.doc.status)
+    deal.doc.pipeline = pipeline
+    if (!stageInPipeline) deal.doc.status = firstStage(pipeline)
   }
   await nextTick()
   clearContactWhenOrganizationChanges()
