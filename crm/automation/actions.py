@@ -206,10 +206,30 @@ class ConvertLeadToDeal(AutomationAction):
 		}
 
 
+def _deal_contact_email(doc) -> str | None:
+	"""Resolve email from a CRM Deal's linked contacts or organization when doc.email is empty."""
+	if not doc or doc.doctype != "CRM Deal":
+		return None
+	contacts = doc.get("contacts") or []
+	ordered = sorted(contacts, key=lambda r: 0 if getattr(r, "is_primary", 0) else 1)
+	for row in ordered:
+		contact_name = getattr(row, "contact", None)
+		if not contact_name:
+			continue
+		email = frappe.db.get_value("Contact", contact_name, "email_id")
+		if email:
+			return email
+	if doc.get("organization"):
+		org_email = frappe.db.get_value("CRM Organization", doc.get("organization"), "email")
+		if org_email:
+			return org_email
+	return None
+
+
 class SendEmailToRecord(AutomationAction):
 	action_type = "SendCRMEmail"
-	label = "Email the Lead or Deal"
-	description = "Send an email to the record's own address."
+	label = "Email the Card"
+	description = "Send an email to the card's contact address."
 	applicable_doctypes: ClassVar[list] = ["CRM Lead", "CRM Deal"]
 	output_schema: ClassVar[dict] = {"communication": {"doctype": "Communication"}}
 	params_schema: ClassVar[list] = [
@@ -241,7 +261,7 @@ class SendEmailToRecord(AutomationAction):
 		from frappe.core.doctype.communication.email import make
 
 		require_doctype(doc and doc.doctype, self.applicable_doctypes, self.label)
-		recipient = doc.get("email") if doc else None
+		recipient = (doc.get("email") if doc else None) or _deal_contact_email(doc)
 		if not recipient:
 			raise AutomationParamError(_("{0} has no email address").format(doc.doctype if doc else ""))
 		subject, message = self._content(doc, params)

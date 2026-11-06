@@ -1,81 +1,99 @@
 <template>
   <div
     v-if="title !== 'Data'"
-    class="mx-3 my-3 flex items-center justify-between text-lg-medium sm:mx-6 sm:mb-4 sm:mt-6"
+    class="mx-3 my-3 flex flex-col gap-2.5 sm:mx-6 sm:mb-4 sm:mt-5"
   >
-    <!-- Figma "Card · Atividade": section title 18 Semi Bold, blue "Novo" -->
-    <div
-      class="flex h-8 items-center text-[18px] font-semibold leading-6 text-ink-gray-9"
-    >
-      {{ __(title) }}
-    </div>
-    <Button
-      v-if="title == 'Emails'"
-      variant="solid"
-      :label="__('New Email')"
-      iconLeft="lucide-plus"
-      @click="emailBox.openEmailBox()"
-    />
-    <Button
-      v-else-if="title == 'Comments'"
-      variant="solid"
-      :label="__('New Comment')"
-      iconLeft="lucide-plus"
-      @click="emailBox.openCommentBox()"
-    />
-    <MultiActionButton
-      v-else-if="title == 'Calls'"
-      variant="solid"
-      :options="callActions"
-    />
-    <Button
-      v-else-if="title == 'Notes'"
-      variant="solid"
-      :label="__('New Note')"
-      iconLeft="lucide-plus"
-      @click="modalRef.showNote()"
-    />
-    <Button
-      v-else-if="title == 'Tasks'"
-      variant="solid"
-      :label="__('New Task')"
-      iconLeft="lucide-plus"
-      @click="modalRef.showTask()"
-    />
-    <Button
-      v-else-if="title == 'Attachments'"
-      variant="solid"
-      :label="__('Upload Attachment')"
-      iconLeft="lucide-plus"
-      @click="showFilesUploader = true"
-    />
-    <div v-else-if="title == 'WhatsApp'" class="flex gap-2 shrink-0">
-      <Button
-        :label="__('Send Template')"
-        @click="showWhatsappTemplates = true"
-      />
-      <Button
-        variant="solid"
-        :label="__('New Message')"
-        iconLeft="lucide-plus"
-        @click="whatsappBox.show()"
-      />
-    </div>
-    <Dropdown
-      v-else-if="title != 'Quotations'"
-      :options="defaultActions"
-      @click.stop
-    >
-      <template #default="{ open }">
+    <div class="flex items-center justify-between text-lg-medium">
+      <!-- Figma "Card · Atividade": section title 18 Semi Bold, blue "Novo" -->
+      <div
+        class="flex h-8 items-center text-[18px] font-semibold leading-6 text-ink-gray-9"
+      >
+        {{ title === 'Activity' ? __('Atividades') : __(title) }}
+      </div>
+      <div class="flex items-center gap-2">
         <Button
+          v-if="title == 'Emails'"
           variant="solid"
-          class="flex items-center gap-1"
-          :label="__('New')"
+          :label="__('New Email')"
           iconLeft="lucide-plus"
-          :iconRight="open ? 'lucide-chevron-up' : 'lucide-chevron-down'"
+          @click="emailBox.openEmailBox()"
         />
-      </template>
-    </Dropdown>
+        <Button
+          v-else-if="title == 'Comments'"
+          variant="solid"
+          :label="__('Novo comentário')"
+          iconLeft="lucide-plus"
+          @click="emailBox.openCommentBox()"
+        />
+        <MultiActionButton
+          v-else-if="title == 'Calls'"
+          variant="solid"
+          :options="callActions"
+        />
+        <Button
+          v-else-if="title == 'Tasks'"
+          variant="solid"
+          :label="__('New Task')"
+          iconLeft="lucide-plus"
+          @click="modalRef.showTask()"
+        />
+        <Button
+          v-else-if="title == 'Attachments'"
+          variant="solid"
+          :label="__('Upload Attachment')"
+          iconLeft="lucide-plus"
+          @click="showFilesUploader = true"
+        />
+        <div v-else-if="title == 'WhatsApp'" class="flex gap-2 shrink-0">
+          <Button
+            :label="__('Send Template')"
+            @click="showWhatsappTemplates = true"
+          />
+          <Button
+            variant="solid"
+            :label="__('New Message')"
+            iconLeft="lucide-plus"
+            @click="whatsappBox.show()"
+          />
+        </div>
+        <Dropdown
+          v-if="!['Quotations', 'WhatsApp'].includes(title)"
+          :options="defaultActions"
+          @click.stop
+        >
+          <template #default="{ open }">
+            <Button
+              :variant="title === 'Activity' ? 'solid' : 'outline'"
+              class="flex items-center gap-1"
+              :label="__('New')"
+              iconLeft="lucide-plus"
+              :iconRight="open ? 'lucide-chevron-up' : 'lucide-chevron-down'"
+            />
+          </template>
+        </Dropdown>
+      </div>
+    </div>
+
+    <!-- Filtros rápidos dentro de Atividades (unifica Comentários, E-mails, Ligações, Tarefas e Anexos) -->
+    <div
+      v-if="activeTab === 'activity'"
+      class="flex flex-wrap items-center gap-1.5 border-b border-[var(--ct-border-soft)] pb-2.5"
+    >
+      <button
+        v-for="pill in filterPills"
+        :key="pill.value"
+        type="button"
+        class="rounded-md px-2.5 py-1 text-xs font-medium transition-colors"
+        :class="
+          activityFilter === pill.value
+            ? 'bg-ink-gray-9 text-surface-white'
+            : 'bg-surface-gray-2 text-ink-gray-7 hover:bg-surface-gray-3'
+        "
+        @click="activityFilter = pill.value"
+      >
+        {{ pill.label }}
+      </button>
+    </div>
   </div>
 </template>
 <script setup>
@@ -108,23 +126,36 @@ const dealName = () =>
   props.doctype === 'CRM Deal' ? props.doc.name || null : null
 
 const activeTab = defineModel({ type: String })
+const activityFilter = defineModel('activityFilter', {
+  type: String,
+  default: 'Activity',
+})
 const showWhatsappTemplates = defineModel('showWhatsappTemplates', {
   type: Boolean,
 })
 const showFilesUploader = defineModel('showFilesUploader', { type: Boolean })
 const emailBox = defineModel('emailBox', { type: Object, default: () => ({}) })
 
+const filterPills = computed(() => [
+  { value: 'Activity', label: __('Tudo') },
+  { value: 'Comments', label: __('Comentários') },
+  { value: 'Emails', label: __('E-mails') },
+  { value: 'Calls', label: __('Ligações') },
+  { value: 'Tasks', label: __('Tarefas') },
+  { value: 'Attachments', label: __('Anexos') },
+])
+
 const defaultActions = computed(() => {
   let actions = [
+    {
+      icon: h(CommentIcon, { class: 'h-4 w-4' }),
+      label: __('Comentário'),
+      onClick: () => emailBox.value.openCommentBox(),
+    },
     {
       icon: h(Email2Icon, { class: 'h-4 w-4' }),
       label: __('Email'),
       onClick: () => emailBox.value.openEmailBox(),
-    },
-    {
-      icon: h(CommentIcon, { class: 'h-4 w-4' }),
-      label: __('Comment'),
-      onClick: () => emailBox.value.openCommentBox(),
     },
     {
       icon: h(PhoneIcon, { class: 'h-4 w-4' }),
@@ -136,11 +167,6 @@ const defaultActions = computed(() => {
       label: __('Make a Call'),
       onClick: () => makeCall(props.doc.mobile_no, dealName()),
       condition: () => callEnabled.value,
-    },
-    {
-      icon: h(NoteIcon, { class: 'h-4 w-4' }),
-      label: __('Note'),
-      onClick: () => props.modalRef.showNote(),
     },
     {
       icon: h(TaskIcon, { class: 'h-4 w-4' }),

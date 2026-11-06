@@ -181,7 +181,7 @@ automation_actions = [
 MESSAGE_CORRELATIONS = [
 	{"label": "This email thread", "value": "{{ doc.message_id or doc.name }}"},
 	{
-		"label": "This lead or deal",
+		"label": "This card",
 		"value": "{{ doc.reference_doctype }}:{{ doc.reference_name }}",
 	},
 ]
@@ -193,7 +193,7 @@ RECORD_CORRELATION = [{"label": "This record", "value": "{{ doc.name }}"}]
 REFERENCE_SUBJECT = {
 	"doctype_key": "reference_doctype",
 	"name_key": "reference_name",
-	"doctypes": ["CRM Lead", "CRM Deal"],
+	"doctypes": ["CRM Deal"],
 }
 LEAD_SUBJECT = {"doctype": "CRM Lead", "name_key": "lead"}
 DEAL_SUBJECT = {"doctype": "CRM Deal", "name_key": "deal"}
@@ -210,24 +210,18 @@ automation_events = [
 			"subject": REFERENCE_SUBJECT,
 			"correlation_options": MESSAGE_CORRELATIONS,
 		},
-		"crm.lead_qualified": {"label": "Lead was qualified", "subject": LEAD_SUBJECT},
-		"crm.lead_converted": {
-			"label": "Lead became a deal",
-			"subject": LEAD_SUBJECT,
-			"correlation_options": RECORD_CORRELATION,
-		},
 		"crm.deal_stage_changed": {
-			"label": "Deal changed stage",
+			"label": "Card changed stage",
 			"subject": DEAL_SUBJECT,
 			"correlation_options": RECORD_CORRELATION,
 		},
 		"crm.deal_won": {
-			"label": "Deal was won",
+			"label": "Card was won",
 			"subject": DEAL_SUBJECT,
 			"correlation_options": RECORD_CORRELATION,
 		},
 		"crm.deal_lost": {
-			"label": "Deal was lost",
+			"label": "Card was lost",
 			"subject": DEAL_SUBJECT,
 			"correlation_options": RECORD_CORRELATION,
 		},

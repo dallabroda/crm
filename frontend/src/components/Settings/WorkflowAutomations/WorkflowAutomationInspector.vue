@@ -27,12 +27,12 @@
         @update:model-value="pickTrigger"
       />
       <template v-else>
-        <Link
+        <FormControl
           :model-value="doc.document_type"
-          label="DocType"
+          type="select"
+          :label="__('Document Type')"
           variant="outline"
-          doctype="DocType"
-          :filters="docTypeFilters"
+          :options="docTypeOptions"
           @update:model-value="patch({ document_type: $event })"
         />
         <div>
@@ -140,7 +140,15 @@ const props = defineProps({
 
 const emit = defineEmits(['update'])
 
-const docTypeFilters = { istable: 0 }
+const docTypeOptions = [
+  { label: __('Card'), value: 'CRM Deal' },
+  { label: __('Organization'), value: 'CRM Organization' },
+  { label: __('Contact'), value: 'Contact' },
+  { label: __('Task'), value: 'CRM Task' },
+  { label: __('Communication'), value: 'Communication' },
+  { label: __('Item da Pasta Digital'), value: 'Cred Hub Checklist Item' },
+  { label: __('Relatório de Visita'), value: 'Cred Hub Visit Report' },
+]
 const triggerSections = computed(() => triggerGroups(props.doc.document_type))
 const selectedTrigger = computed(() => triggerValue(props.doc))
 const currentTrigger = computed(() => triggerDefinition(props.doc))

@@ -114,9 +114,9 @@ DEFINITIONS: dict[str, list[dict]] = {
 	"Communication": [
 		{
 			"name": "reference",
-			"label": "Linked Lead or Deal",
+			"label": "Linked Card",
 			"cardinality": "one",
-			"target_doctypes": COMMUNICATION_REFERENCE_DOCTYPES,
+			"target_doctypes": ["CRM Deal"],
 			"resolve": _communication_reference,
 		}
 	],

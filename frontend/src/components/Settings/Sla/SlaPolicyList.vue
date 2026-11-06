@@ -61,12 +61,11 @@
         />
         <div v-else class="-ml-2">
           <div
-            class="grid grid-cols-7 items-center gap-3 text-sm text-ink-gray-5 ml-2"
+            class="grid grid-cols-6 items-center gap-3 text-sm text-ink-gray-5 ml-2"
           >
             <div class="col-span-5">
               {{ __('Policy Name') }}
             </div>
-            <div class="col-span-1">{{ __('Apply On') }}</div>
             <div class="col-span-1">{{ __('Enabled') }}</div>
           </div>
           <hr class="mt-2 mx-2 border-outline-gray-2" />
@@ -75,7 +74,7 @@
             :key="sla.name"
           >
             <div
-              class="grid grid-cols-7 items-center gap-4 cursor-pointer hover:bg-surface-sidebar rounded-4"
+              class="grid grid-cols-6 items-center gap-4 cursor-pointer hover:bg-surface-sidebar rounded-4"
             >
               <div
                 class="w-full pl-2 col-span-5 flex items-center h-14 gap-2"
@@ -84,10 +83,9 @@
                 <div class="text-base-medium text-ink-gray-7 truncate">
                   {{ sla.name }}
                 </div>
-                <Badge v-if="sla.default" color="gray" size="sm">Default</Badge>
-              </div>
-              <div class="col-span-1 text-ink-gray-8 text-sm">
-                {{ sla.apply_on == 'CRM Lead' ? 'Lead' : 'Deal' }}
+                <Badge v-if="sla.default" color="gray" size="sm">{{
+                  __('Default')
+                }}</Badge>
               </div>
               <div class="flex justify-between items-center w-full pr-2">
                 <div>

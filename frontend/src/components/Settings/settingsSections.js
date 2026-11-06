@@ -163,6 +163,7 @@ function allSections() {
         item('Lead capture forms', LucideTextCursorInput, FormsSettings),
         item('Enrichment', LucideZap, EnrichmentSettings, {
           title: 'Enrichment Settings',
+          condition: () => false,
         }),
       ],
     },

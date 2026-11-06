@@ -45,8 +45,7 @@
         <div
           class="flex h-10 items-center gap-4 border-b border-outline-gray-1 bg-surface-gray-2 px-4 text-xs font-medium text-ink-gray-6"
         >
-          <div class="w-6/12">{{ __('Form') }}</div>
-          <div class="w-3/12">{{ __('Maps to') }}</div>
+          <div class="w-9/12">{{ __('Form') }}</div>
           <div class="w-3/12">{{ __('Status') }}</div>
         </div>
         <template v-for="(form, i) in forms.data" :key="form.name">
@@ -54,7 +53,7 @@
             class="flex min-h-14 w-full items-center gap-4 px-4 py-2 hover:bg-surface-gray-2"
           >
             <div
-              class="w-6/12 min-w-0 cursor-pointer"
+              class="w-9/12 min-w-0 cursor-pointer"
               @click="$emit('open', form.name)"
             >
               <div class="truncate text-base text-ink-gray-9">
@@ -63,12 +62,6 @@
               <div class="mt-0.5 truncate text-p-base text-ink-gray-5">
                 /crm-form/{{ form.route }}
               </div>
-            </div>
-            <div
-              class="w-3/12 cursor-pointer text-base text-ink-gray-7"
-              @click="$emit('open', form.name)"
-            >
-              {{ docLabel(form.document_type) }}
             </div>
             <div class="flex w-3/12 items-center justify-between">
               <Badge
@@ -105,12 +98,6 @@
           :label="__('Title')"
           :placeholder="__('Contact sales')"
           @input="onTitleInput"
-        />
-        <FormControl
-          v-model="draft.document_type"
-          type="select"
-          :label="__('Maps to')"
-          :options="targetOptions"
         />
         <div>
           <div class="mb-1.5 text-sm text-ink-gray-5">{{ __('Route') }}</div>
@@ -183,7 +170,7 @@ const forms = createResource({
 const showCreate = ref(false)
 const creating = ref(false)
 const createError = ref('')
-const draft = reactive({ title: '', route: '', document_type: 'CRM Lead' })
+const draft = reactive({ title: '', route: '', document_type: 'CRM Deal' })
 let routeEdited = false
 
 function slugify(v) {
@@ -197,7 +184,7 @@ function slugify(v) {
 function openCreate() {
   draft.title = ''
   draft.route = ''
-  draft.document_type = 'CRM Lead'
+  draft.document_type = 'CRM Deal'
   routeEdited = false
   createError.value = ''
   showCreate.value = true

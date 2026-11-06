@@ -53,7 +53,7 @@
       </div>
       <div v-if="!getSlaResource.loading">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <div>
+          <div class="md:col-span-2">
             <FormControl
               v-model="slaData.sla_name"
               :type="'text'"
@@ -67,23 +67,7 @@
             />
             <ErrorMessage :message="slaDataErrors.sla_name" class="mt-2" />
           </div>
-          <div class="space-y-1.5">
-            <FormLabel :label="__('Apply On')" required />
-            <Select
-              v-model="slaData.apply_on"
-              :options="[
-                {
-                  label: 'Lead',
-                  value: 'CRM Lead',
-                },
-                {
-                  label: 'Deal',
-                  value: 'CRM Deal',
-                },
-              ]"
-            />
-          </div>
-          <div class="space-y-0.5">
+          <div class="space-y-0.5 md:col-span-2">
             <Checkbox
               v-model="slaData.rolling_responses"
               :label="__('Rolling Responses')"
@@ -299,6 +283,7 @@ const getSlaResource = createResource({
 
     const newData = {
       ...data,
+      apply_on: 'CRM Deal',
       enabled: Boolean(data.enabled),
       default: Boolean(data.default),
       rolling_responses: Boolean(data.rolling_responses),

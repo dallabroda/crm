@@ -1,9 +1,9 @@
 <template>
   <div class="flex flex-col gap-4 p-5" data-testid="record-notes">
     <div class="flex items-center justify-between">
-      <span class="text-lg-medium text-ink-gray-8">{{ __('Notes') }}</span>
+      <span class="text-lg-medium text-ink-gray-8">{{ __('Comentários') }}</span>
       <Button
-        :label="__('New Note')"
+        :label="__('Novo comentário')"
         icon-left="lucide-plus"
         variant="solid"
         @click="showNote()"
@@ -64,8 +64,8 @@
     <EmptyState
       v-else-if="!notes.loading"
       :icon="NoteIcon"
-      :name="__('Notes')"
-      :description="__('Use New Note to write something about this record.')"
+      :name="__('Comentários')"
+      :description="__('Use Novo comentário para registrar observações sobre este cadastro.')"
     />
   </div>
 </template>

@@ -169,6 +169,7 @@ def get_deal_activities(name: str):
 		}
 		activities.append(activity)
 
+	comment_attachments = get_attachments_map("Comment", [c.name for c in docinfo.comments])
 	for comment in docinfo.comments:
 		activity = {
 			"name": comment.name,
@@ -176,12 +177,14 @@ def get_deal_activities(name: str):
 			"creation": comment.creation,
 			"owner": comment.owner,
 			"content": comment.content,
-			"attachments": get_attachments("Comment", comment.name),
+			"attachments": comment_attachments.get(comment.name, []),
 			"is_lead": False,
 		}
 		activities.append(activity)
 
-	for communication in docinfo.communications + docinfo.automated_messages:
+	all_comms = docinfo.communications + docinfo.automated_messages
+	comm_attachments = get_attachments_map("Communication", [c.name for c in all_comms])
+	for communication in all_comms:
 		activity = {
 			"activity_type": "communication",
 			"communication_type": communication.communication_type,
@@ -195,7 +198,7 @@ def get_deal_activities(name: str):
 				"recipients": communication.recipients,
 				"cc": communication.cc,
 				"bcc": communication.bcc,
-				"attachments": get_attachments("Communication", communication.name),
+				"attachments": comm_attachments.get(communication.name, []),
 				"read_by_recipient": communication.read_by_recipient,
 				"delivery_status": communication.delivery_status,
 			},
@@ -374,6 +377,33 @@ def get_lead_activities(name: str):
 	activities = group_note_activities(activities)
 
 	return activities, calls, notes, tasks, attachments
+
+
+def get_attachments_map(doctype: str, names: list[str]) -> dict[str, list[dict]]:
+	if not names:
+		return {}
+	rows = frappe.db.get_all(
+		"File",
+		filters={"attached_to_doctype": doctype, "attached_to_name": ["in", list(set(names))]},
+		fields=[
+			"name",
+			"attached_to_name",
+			"file_name",
+			"file_type",
+			"file_url",
+			"file_size",
+			"is_private",
+			"modified",
+			"creation",
+			"owner",
+		],
+	)
+	by_doc: dict[str, list[dict]] = {}
+	for row in rows or []:
+		target = row.pop("attached_to_name", None)
+		if target:
+			by_doc.setdefault(target, []).append(row)
+	return by_doc
 
 
 def get_attachments(doctype: str, name: str):

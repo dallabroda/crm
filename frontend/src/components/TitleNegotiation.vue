@@ -20,7 +20,7 @@
 
         <div
           v-if="registryWarning"
-          class="rounded border border-outline-amber-2 bg-surface-amber-1 p-3 text-sm text-ink-amber-3"
+          class="rounded border border-outline-amber-2 bg-surface-amber-1 p-3 text-sm text-[color:var(--ct-warning)] font-medium"
         >
           {{ registryWarning }}
         </div>

@@ -67,7 +67,12 @@ const running = ref(false)
 const showWithdraw = ref(false)
 const justification = ref('')
 
+let lastProtestKey = ''
 async function loadStatus() {
+  if (!props.deal || !props.pipeline) return
+  const key = `${props.deal}::${props.pipeline}`
+  if (key === lastProtestKey && status.value !== null) return
+  lastProtestKey = key
   try {
     status.value = await call(API + 'get_status', { deal: props.deal })
   } catch {
@@ -75,8 +80,7 @@ async function loadStatus() {
   }
 }
 
-onMounted(loadStatus)
-watch(() => [props.deal, props.pipeline], loadStatus)
+watch(() => [props.deal, props.pipeline], loadStatus, { immediate: true })
 
 const visible = computed(
   () =>

@@ -621,7 +621,11 @@ function parsedSection(section, editButtonAdded) {
 
   // sections drawn by the page (no layout fields): always shown, no pencil
   let isContactSection =
-    ['contacts_section', 'organization_contacts'].includes(section.name) ||
+    [
+      'contacts_section',
+      'organization_contacts',
+      'organization_registry',
+    ].includes(section.name) ||
     // fields of the card's linked records (credtech#196): set in the funnel
     String(section.name).startsWith('card_block_')
   // the funnel's section (credtech#179) is not in the layout: its pencil would
@@ -767,12 +771,5 @@ function checkChange(value, df) {
 /* Link chevrons line up with the Select chevrons. */
 :deep(.form-control .lucide-chevron-down.absolute) {
   right: 3px;
-}
-
-.sections .section .column {
-  max-height: 300px;
-}
-.sections .section:last-of-type .column {
-  max-height: none;
 }
 </style>

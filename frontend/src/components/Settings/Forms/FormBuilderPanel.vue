@@ -327,12 +327,6 @@
                       </div>
                     </div>
                     <FormControl
-                      v-model="doctypeModel"
-                      type="select"
-                      :label="__('Maps to')"
-                      :options="targetOptions"
-                    />
-                    <FormControl
                       v-model="form.submit_button_label"
                       type="text"
                       :label="__('Submit button label')"
@@ -982,9 +976,9 @@ const form = reactive({
   name: props.name,
   title: '',
   route: '',
-  document_type: 'CRM Lead',
+  document_type: 'CRM Deal',
   description: '',
-  submit_button_label: 'Submit',
+  submit_button_label: __('Submit'),
   success_message: '',
   redirect_url: '',
   allowed_embedding_domains: '',

@@ -74,7 +74,7 @@
             </ListCell>
             <ListCell>
               <span class="truncate text-sm">
-                {{ row.document_type || __('Any document') }}
+                {{ formatDocType(row.document_type) }}
               </span>
             </ListCell>
 
@@ -227,6 +227,20 @@ const filteredAutomations = computed(() => {
   const matches = search.value ? rows.filter((row) => matchesSearch(row)) : rows
   return sortByNewestCreated(matches)
 })
+
+const DOC_TYPE_LABELS = {
+  'CRM Deal': () => __('Card'),
+  'CRM Lead': () => __('Card'),
+  'CRM Organization': () => __('Organization'),
+  Contact: () => __('Contact'),
+  'CRM Task': () => __('Task'),
+  Communication: () => __('Communication'),
+}
+
+function formatDocType(doctype) {
+  if (!doctype) return __('Any document')
+  return DOC_TYPE_LABELS[doctype] ? DOC_TYPE_LABELS[doctype]() : __(doctype)
+}
 
 function matchesSearch(row) {
   const query = search.value.toLowerCase()

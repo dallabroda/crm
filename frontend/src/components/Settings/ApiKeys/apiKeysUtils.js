@@ -17,8 +17,31 @@ export const SCOPE_ROWS = [
     writeLabel: 'Create',
   },
   { label: 'Funnels', read: 'pipelines_read', write: null },
+  {
+    label: 'Files and Documents',
+    read: 'files_read',
+    write: 'files_write',
+  },
+  { label: 'Notes', read: 'notes_read', write: 'notes_write' },
+  {
+    label: 'Timeline comments',
+    read: 'comments_read',
+    write: 'comments_write',
+  },
+  { label: 'Tasks', read: 'tasks_read', write: 'tasks_write' },
+  {
+    label: 'Incremental sync (deletions)',
+    read: 'sync_deletes',
+    write: null,
+  },
+  {
+    label: 'Credit & Digital Folder',
+    read: 'credit_read',
+    write: 'credit_write',
+  },
 ]
 export const ADMIN_SCOPE = 'fields_admin'
+export const DELETE_SCOPE = 'allow_delete'
 
 // Cards (and the fields and rules of the funnels) only exist inside funnels
 export function needsPipelines(scopes) {
@@ -38,6 +61,8 @@ export function scopeSummary(scopes, t = (text) => __(text)) {
   }).filter(Boolean)
   if (scopes.includes(ADMIN_SCOPE))
     parts.push(t('Fields and rules of the stages (admin)'))
+  if (scopes.includes(DELETE_SCOPE))
+    parts.push(t('Allow DELETE of records'))
   return parts.join(', ')
 }
 

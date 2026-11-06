@@ -403,7 +403,7 @@ const tabs = [
   // the contact's own notes (credtech#214)
   {
     value: 'notes',
-    label: 'Notes',
+    label: __('Comments'),
     iconLeft: FileTextIcon,
     count: computed(() => notesCount.value),
   },

@@ -457,6 +457,8 @@ def save_form(name: str | None, form: dict | str) -> dict:
 	if isinstance(form, str):
 		form = json.loads(form or "{}")
 
+	if not form.get("document_type"):
+		form["document_type"] = "CRM Deal"
 	if form.get("document_type") not in ALLOWED_DOCTYPES:
 		frappe.throw(_("Forms can only map to: {0}").format(", ".join(ALLOWED_DOCTYPES)))
 
@@ -466,7 +468,7 @@ def save_form(name: str | None, form: dict | str) -> dict:
 	doc.route = form.get("route")
 	doc.doc_type = form.get("document_type")
 	doc.introduction_text = form.get("description")
-	doc.button_label = form.get("submit_button_label") or "Submit"
+	doc.button_label = form.get("submit_button_label") or _("Submit")
 	doc.success_message = form.get("success_message")
 	# redirect visitors here after a successful submission (native Web Form field);
 	# blank falls back to showing the success message

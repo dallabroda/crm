@@ -14297,3 +14297,76 @@ msgstr "Conecte uma empresa de telefonia para ligar para os clientes direto do c
 
 msgid "Change image"
 msgstr "Trocar"
+
+msgid "Debt Collection funnel"
+msgstr "Funil de Cobrança"
+
+msgid "Install the Debt Collection funnel"
+msgstr "Instalar o funil de Cobrança"
+
+msgid "Debt Collection funnel installed: {0}."
+msgstr "Funil de Cobrança instalado: {0}."
+
+msgid "Tolerance of overdue bank debt in the SCR (%)"
+msgstr "Tolerância de dívida bancária vencida no SCR (%)"
+
+msgid "turn this bureau on in section 2 above"
+msgstr "ligue este bureau na seção 2 acima"
+
+msgid "Each company has 30 AI opinions per month included. With this on, from the 31st on each opinion costs R$ 3,00 from the credit wallet, confirmed before it runs. Off, the opinion stops until the next month."
+msgstr "Cada empresa tem 30 pareceres da IA por mês incluídos. Com isto ligado, a partir do 31º cada parecer custa R$ 3,00 da carteira de créditos, com confirmação antes. Desligado, o parecer para até o mês seguinte."
+
+
+msgid "Choose which {0} are affected by this assignment rule."
+msgstr "Escolha quais {0} são afetados por esta regra de atribuição."
+
+msgid "Low-Medium"
+msgstr "Baixa-Média"
+
+msgid "Medium-High"
+msgstr "Média-Alta"
+
+msgid "This card"
+msgstr "Este card"
+
+msgid "Email the Card"
+msgstr "Enviar e-mail para o Card"
+
+msgid "Send an email to the card's contact address."
+msgstr "Enviar um e-mail para o endereço de contato do card."
+
+msgid "Card changed stage"
+msgstr "Card mudou de etapa"
+
+msgid "Card was won"
+msgstr "Card ganho"
+
+msgid "Card was lost"
+msgstr "Card perdido"
+
+msgid "Linked Card"
+msgstr "Card vinculado"
+
+msgid "Files and Documents"
+msgstr "Arquivos e Documentos"
+
+msgid "Timeline comments"
+msgstr "Comentários na linha do tempo"
+
+msgid "Incremental sync (deletions)"
+msgstr "Sincronização incremental (exclusões)"
+
+msgid "Allow DELETE of records"
+msgstr "Permitir exclusão de registros (DELETE)"
+
+msgid "Allow DELETE of records (Cards, Contacts, Organizations, Files, Notes, Tasks)"
+msgstr "Permitir exclusão de registros (DELETE em Cards, Contatos, Organizações, Arquivos, Notas e Tarefas)"
+
+msgid "Credit & Digital Folder"
+msgstr "Crédito PJ e Pasta Digital"
+
+msgid "Credit & Digital Folder: read"
+msgstr "Crédito PJ e Pasta Digital: ler"
+
+msgid "Credit & Digital Folder: write"
+msgstr "Crédito PJ e Pasta Digital: gravar"

@@ -285,7 +285,7 @@ function defaultDoc() {
   return {
     doctype: 'Automation Flow',
     title: '',
-    document_type: 'CRM Lead',
+    document_type: 'CRM Deal',
     enabled: 0,
     trigger_type: '',
     trigger_field: '',

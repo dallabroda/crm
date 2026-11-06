@@ -167,11 +167,26 @@ def get_user_info(users: str | list):
 def get_organizations():
 	get_session_role_flags()
 
-	organizations = frappe.qb.get_query(
-		"CRM Organization",
-		fields=["*"],
-		order_by="name asc",
-		distinct=True,
-	).run(as_dict=1)
+	fields = [
+		"name",
+		"organization_name",
+		"organization_logo",
+		"website",
+		"annual_revenue",
+		"territory",
+		"industry",
+		"no_of_employees",
+		"currency",
+		"address",
+	]
+	meta = frappe.get_meta("CRM Organization")
+	for extra in ("cnpj", "credit_verdict"):
+		if meta.has_field(extra):
+			fields.append(extra)
 
-	return organizations
+	return frappe.get_list(
+		"CRM Organization",
+		fields=fields,
+		order_by="name asc",
+		limit_page_length=0,
+	)

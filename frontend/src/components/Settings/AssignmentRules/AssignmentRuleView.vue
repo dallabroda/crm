@@ -109,7 +109,7 @@
             </template>
           </Popover>
         </div>
-        <div>
+        <div class="col-span-2">
           <FormControl
             v-model="assignmentRuleData.description"
             :type="'textarea'"
@@ -124,22 +124,6 @@
           <ErrorMessage
             :message="assignmentRuleErrors.description"
             class="mt-2"
-          />
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <FormLabel :label="__('Apply On')" />
-          <Select
-            v-model="assignmentRuleData.documentType"
-            :options="[
-              {
-                label: 'Lead',
-                value: 'CRM Lead',
-              },
-              {
-                label: 'Deal',
-                value: 'CRM Deal',
-              },
-            ]"
           />
         </div>
       </div>
@@ -351,11 +335,7 @@ const { $dialog } = globalStore()
 
 const useNewUI = ref(true)
 const isOldSla = ref(false)
-const documentType = computed(() =>
-  assignmentRuleData.value.documentType == 'CRM Lead'
-    ? __('leads')
-    : __('deals'),
-)
+const documentType = computed(() => __('cards'))
 const deskUrl = `${window.location.origin}/app/assignment-rule/${step.value.data?.name}`
 
 const defaultAssignmentDays = [
@@ -381,7 +361,7 @@ const assignmentRuleData = ref({
   name: '',
   assignmentRuleName: '',
   assignmentDays: defaultAssignmentDays,
-  documentType: 'CRM Lead',
+  documentType: 'CRM Deal',
 })
 
 const validateAssignmentRule = (key, skipConditionCheck = false) => {
@@ -475,7 +455,7 @@ const resetAssignmentRuleData = () => {
     name: '',
     assignmentRuleName: '',
     assignmentDays: defaultAssignmentDays,
-    documentType: 'CRM Lead',
+    documentType: 'CRM Deal',
   }
 }
 
@@ -522,7 +502,7 @@ const getAssignmentRuleData = createResource({
       name: data.name,
       assignmentRuleName: data.name,
       assignmentDays: data.assignment_days.map((day) => day.day),
-      documentType: data.document_type,
+      documentType: 'CRM Deal',
     }
 
     initialData.value = JSON.stringify(assignmentRuleData.value)
@@ -681,11 +661,11 @@ const createAssignmentRule = () => {
 }
 
 const priorityOptions = [
-  { label: 'Low', value: '0' },
-  { label: 'Low-Medium', value: '1' },
-  { label: 'Medium', value: '2' },
-  { label: 'Medium-High', value: '3' },
-  { label: 'High', value: '4' },
+  { label: __('Low'), value: '0' },
+  { label: __('Low-Medium'), value: '1' },
+  { label: __('Medium'), value: '2' },
+  { label: __('Medium-High'), value: '3' },
+  { label: __('High'), value: '4' },
 ]
 
 const updateAssignmentRule = async () => {
