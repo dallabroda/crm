@@ -36,6 +36,14 @@
       <div v-if="settings.doc" class="ct-bureaus flex flex-col gap-6">
         <ErrorMessage :message="saveError" />
 
+        <CtAlert type="info">
+          {{
+            __(
+              'Aviso importante: O HubTech CRM fornece exclusivamente a integração técnica com os provedores abaixo. A contratação, o faturamento por consulta e a responsabilidade pelos dados e serviços são diretos entre a sua empresa e cada plataforma (Assertiva ou CENPROT/IEPTB), sem intermediação ou responsabilidade da HubTech.',
+            )
+          }}
+        </CtAlert>
+
         <!-- Assertiva Localize: partners and their WhatsApp (credtech#290, module 1) -->
         <section class="flex flex-col gap-6">
           <div class="flex items-start justify-between gap-4">
@@ -50,6 +58,14 @@
                   )
                 }}
               </span>
+              <a
+                href="https://assertivasolucoes.com.br"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-p-sm text-[color:var(--ct-accent-text)] hover:underline w-fit"
+              >
+                {{ __('Acessar site oficial da Assertiva Soluções (contratação e suporte) ↗') }}
+              </a>
             </div>
             <Switch v-model="assertivaEnabled" />
           </div>
@@ -129,15 +145,25 @@
                   )
                 }}
               </span>
-              <router-link
-                :to="{
-                  name: 'Settings',
-                  params: { section: 'credit-compliance' },
-                }"
-                class="text-p-sm text-[color:var(--ct-accent-text)] hover:underline"
-              >
-                {{ __('See the Credit PJ funnel and compliance policies →') }}
-              </router-link>
+              <div class="flex flex-wrap items-center gap-4 pt-0.5">
+                <a
+                  href="https://www.pesquisaprotesto.com.br"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-p-sm text-[color:var(--ct-accent-text)] hover:underline"
+                >
+                  {{ __('Acessar portal oficial CENPROT / IEPTB (contratação e suporte) ↗') }}
+                </a>
+                <router-link
+                  :to="{
+                    name: 'Settings',
+                    params: { section: 'credit-compliance' },
+                  }"
+                  class="text-p-sm text-[color:var(--ct-accent-text)] hover:underline"
+                >
+                  {{ __('Ver o funil Crédito PJ e políticas de compliance →') }}
+                </router-link>
+              </div>
             </div>
             <Switch v-model="cenprotEnabled" />
           </div>

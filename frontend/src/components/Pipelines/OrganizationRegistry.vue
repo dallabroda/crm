@@ -1,26 +1,29 @@
 <template>
   <div
     v-if="organization?.name && section.columns && (rows.length || !hasCnpj)"
-    class="border-b px-4 py-3"
+    :class="embedded ? 'px-3 py-2' : 'border-b px-4 py-3'"
     data-testid="organization-registry"
   >
     <div class="mb-2 flex items-center justify-between">
-      <div class="text-base-medium text-ink-gray-8">
+      <div v-if="!embedded" class="text-base-medium text-ink-gray-8">
         {{ __(section.label) }}
       </div>
+      <span v-else class="text-xs font-medium text-ink-gray-6">
+        {{ organization.name }}
+      </span>
       <router-link
-        class="text-sm text-ink-gray-5 hover:text-ink-gray-8"
+        class="text-sm text-ink-blue-3 hover:underline"
         :to="{
           name: 'Organization',
           params: { organizationId: organization.name },
         }"
       >
-        {{ __('Edit in the organization') }}
+        {{ __('Abrir organização ↗') }}
       </router-link>
     </div>
     <p v-if="!hasCnpj" class="text-p-sm text-ink-gray-5">
       {{
-        __('No CNPJ yet: add it in the organization to fetch the Receita data.')
+        __('Sem CNPJ: preencha na organização para buscar os dados da Receita.')
       }}
     </p>
     <div v-else class="flex flex-col gap-1.5">
@@ -52,6 +55,7 @@ const SECTION = 'cred_hub_cnpj_section'
 const props = defineProps({
   // the card's Organization document (doc of useDocument)
   organization: { type: Object, default: null },
+  embedded: { type: Boolean, default: false },
 })
 
 const sections = createResource({
@@ -88,7 +92,7 @@ function display(field, value) {
 const rows = computed(() => {
   let fields = (section.value.columns || []).flatMap((c) => c.fields || [])
   return fields
-    .filter((f) => f && typeof f === 'object')
+    .filter((f) => f && typeof f === 'object' && f.fieldname !== 'cnpj_checked_on')
     .map((f) => ({
       fieldname: f.fieldname,
       label: f.label,

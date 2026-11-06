@@ -75,96 +75,56 @@
       class="flex h-full flex-col overflow-hidden border-r border-[var(--ct-border-soft)]"
     >
       <div class="border-b border-[var(--ct-border-soft)]">
-        <FileUploader
-          :validateFile="validateIsImageFile"
-          @success="changeOrganizationImage"
-        >
-          <template #default="{ openFileSelector, error }">
-            <!-- Figma side panel header: 62px avatar, 20 Semi Bold name and
-                 the site, then 32px actions -->
-            <div
-              class="flex flex-col items-start justify-start gap-4 px-6 py-5"
-            >
-              <div class="flex w-full min-w-0 items-center gap-4">
-                <div class="group relative h-15.5 w-15.5 shrink-0">
-                  <Avatar
-                    size="3xl"
-                    class="h-15.5 w-15.5 [&>div]:text-[20px] [&>div]:font-semibold"
-                    :label="organization.doc.organization_name"
-                    :image="organization.doc.organization_logo"
-                  />
-                  <component
-                    :is="organization.doc.organization_logo ? Dropdown : 'div'"
-                    v-bind="
-                      organization.doc.organization_logo
-                        ? {
-                            options: [
-                              {
-                                icon: 'lucide-upload',
-                                label: organization.doc.organization_logo
-                                  ? __('Change Image')
-                                  : __('Upload Image'),
-                                onClick: openFileSelector,
-                              },
-                              {
-                                icon: 'lucide-trash-2',
-                                label: __('Remove Image'),
-                                onClick: () => changeOrganizationImage(''),
-                              },
-                            ],
-                          }
-                        : { onClick: openFileSelector }
-                    "
-                    class="!absolute bottom-0 left-0 right-0"
-                  >
-                    <div
-                      class="z-1 absolute bottom-0 left-0 right-0 flex h-14 cursor-pointer items-center justify-center rounded-b-full bg-black bg-opacity-40 pt-5 opacity-0 duration-300 ease-in-out group-hover:opacity-100"
-                      style="
-                        -webkit-clip-path: inset(22px 0 0 0);
-                        clip-path: inset(22px 0 0 0);
-                      "
-                    >
-                      <CameraIcon class="h-6 w-6 cursor-pointer text-white" />
-                    </div>
-                  </component>
-                </div>
-                <div class="flex flex-col gap-2 truncate">
-                  <div
-                    class="truncate text-[20px] font-semibold leading-7 text-ink-gray-9"
-                  >
-                    <span>{{ organization.doc.name }}</span>
-                  </div>
-                  <div
-                    v-if="organization.doc.website"
-                    class="flex items-center gap-1.5 text-base text-ink-gray-9"
-                  >
-                    <WebsiteIcon class="size-4" />
-                    <span>{{ website(organization.doc.website) }}</span>
-                  </div>
-                  <ErrorMessage :message="__(error)" />
-                </div>
+        <div class="flex flex-col items-start justify-start gap-4 px-6 py-5">
+          <div class="flex w-full min-w-0 items-center gap-4">
+            <div class="h-15.5 w-15.5 shrink-0">
+              <Avatar
+                size="3xl"
+                class="h-15.5 w-15.5 [&>div]:text-[20px] [&>div]:font-semibold"
+                :label="organization.doc.organization_name"
+              />
+            </div>
+            <div class="flex flex-col gap-2 truncate">
+              <div
+                class="truncate text-[20px] font-semibold leading-7 text-ink-gray-9"
+              >
+                <span>{{ organization.doc.name }}</span>
               </div>
-              <div class="flex gap-2">
-                <Button
-                  v-if="canDelete"
-                  size="md"
-                  :label="__('Delete')"
-                  theme="red"
-                  variant="subtle"
-                  iconLeft="lucide-trash-2"
-                  @click="deleteOrganization()"
-                />
-                <Button
-                  size="md"
-                  variant="outline"
-                  :tooltip="__('Open Website')"
-                  icon="lucide-link"
-                  @click="openWebsite"
-                />
+              <div
+                v-if="organization.doc.website"
+                class="flex items-center gap-1.5 text-base text-ink-gray-9"
+              >
+                <WebsiteIcon class="size-4" />
+                <span>{{ website(organization.doc.website) }}</span>
               </div>
             </div>
-          </template>
-        </FileUploader>
+          </div>
+          <div class="flex gap-2">
+            <Button
+              v-if="canDelete"
+              size="md"
+              :label="__('Delete')"
+              theme="red"
+              variant="subtle"
+              iconLeft="lucide-trash-2"
+              @click="deleteOrganization()"
+            />
+            <Button
+              size="md"
+              variant="outline"
+              :tooltip="__('Open Website')"
+              icon="lucide-link"
+              @click="openWebsite"
+            />
+            <Button
+              size="md"
+              variant="outline"
+              :tooltip="__('Anexar arquivo')"
+              :icon="AttachmentIcon"
+              @click="showFilesUploader = true"
+            />
+          </div>
+        </div>
       </div>
       <div
         v-if="sections.data"
@@ -210,12 +170,45 @@
           :docname="docName"
           @count="(n) => (notesCount = n)"
         />
+        <div
+          v-if="tab.value === 'attachments' && docName"
+          class="flex flex-col gap-4 p-5"
+        >
+          <div class="flex items-center justify-between">
+            <span class="text-lg-medium text-ink-gray-8">{{
+              __('Anexos')
+            }}</span>
+            <Button
+              :label="__('Enviar anexo')"
+              icon-left="lucide-plus"
+              variant="solid"
+              @click="showFilesUploader = true"
+            />
+          </div>
+          <AttachmentArea
+            v-if="orgAttachments.data?.length"
+            :attachments="orgAttachments.data"
+            @reload="orgAttachments.reload()"
+          />
+          <EmptyState
+            v-else-if="!orgAttachments.loading"
+            :icon="AttachmentIcon"
+            :name="__('Anexos')"
+            :title="__('Nenhum anexo encontrado')"
+            :description="
+              __('Clique em Enviar anexo para anexar arquivos nesta organização.')
+            "
+          />
+        </div>
         <OrganizationCreditDossie
           v-if="tab.value === 'credit' && docName"
           :organization-id="docName"
         />
         <EmptyState
-          v-if="tab.value !== 'notes' && tab.value !== 'credit' && !rows.length"
+          v-if="
+            !['notes', 'credit', 'attachments'].includes(tab.value) &&
+            !rows.length
+          "
           :icon="tab.iconLeft"
           :name="__(tab.label)"
           :title="
@@ -255,10 +248,24 @@
     v-model="showDealModal"
     :defaults="{ organization: props.organizationId }"
   />
+  <FilesUploader
+    v-model="showFilesUploader"
+    doctype="CRM Organization"
+    :docname="props.organizationId"
+    @after="
+      () => {
+        orgAttachments.reload()
+        activeTab = 'attachments'
+      }
+    "
+  />
 </template>
 
 <script setup>
 import RecordNotes from '@/components/RecordNotes.vue'
+import AttachmentArea from '@/components/Activities/AttachmentArea.vue'
+import FilesUploader from '@/components/FilesUploader/FilesUploader.vue'
+import AttachmentIcon from '@/components/Icons/AttachmentIcon.vue'
 import OrganizationCreditDossie from '@/components/CreditCheck/OrganizationCreditDossie.vue'
 import FileTextIcon from '~icons/lucide/file-text'
 import TabCounter from '@/components/TabCounter.vue'
@@ -463,14 +470,81 @@ const formSchema = createResource({
   auto: true,
 })
 
-const panelSections = computed(() =>
-  getParsedSections(
-    globalFormSections(sections.data, formSchema.data, {
-      form: __('Organization fields'),
-      created: __('Created fields'),
-    }),
-  ),
-)
+const panelSections = computed(() => {
+  const base = globalFormSections(sections.data, formSchema.data, {
+    form: __('Organization fields'),
+    created: __('Created fields'),
+  })
+  // Unify all organization & Receita Federal fields into a single "Campos da organização" section,
+  // ensuring all standard and Receita fields are visible and dropping cnpj_checked_on ("CNPJ consultado em")
+  const allFieldsMap = new Map()
+  for (const sec of sections.data || []) {
+    for (const col of sec.columns || []) {
+      for (const f of col.fields || []) {
+        if (f && typeof f === 'object' && f.fieldname && f.fieldname !== 'cnpj_checked_on') {
+          allFieldsMap.set(f.fieldname, { ...f, visible: 1 })
+        }
+      }
+    }
+  }
+  for (const f of formSchema.data?.fields || []) {
+    if (f && f.fieldname && f.fieldname !== 'cnpj_checked_on' && !f.locked) {
+      const prev = allFieldsMap.get(f.fieldname) || {}
+      allFieldsMap.set(f.fieldname, {
+        ...prev,
+        ...f,
+        visible: 1,
+        read_only: f.fieldname === 'years_in_business' ? 1 : 0,
+      })
+    }
+  }
+  const preferredOrder = [
+    'cnpj',
+    'registration_status',
+    'activity_start_date',
+    'years_in_business',
+    'main_cnae',
+    'legal_nature',
+    'company_size',
+    'is_mei',
+    'share_capital',
+    'annual_revenue',
+    'industry',
+    'no_of_employees',
+    'registry_phone',
+    'registry_email',
+    'website',
+    'linkedin',
+    'address',
+    'neighborhood',
+    'city',
+    'state',
+  ]
+  const ordered = []
+  const seen = new Set()
+  for (const name of preferredOrder) {
+    if (allFieldsMap.has(name)) {
+      ordered.push(allFieldsMap.get(name))
+      seen.add(name)
+    }
+  }
+  for (const [name, f] of allFieldsMap.entries()) {
+    if (!seen.has(name)) {
+      ordered.push(f)
+      seen.add(name)
+    }
+  }
+  if (!ordered.length) return getParsedSections(base)
+  return getParsedSections([
+    {
+      name: 'form_fields',
+      label: __('Campos da organização'),
+      opened: true,
+      notInLayout: true,
+      columns: [{ name: 'form_fields_col', fields: ordered }],
+    },
+  ])
+})
 
 // Returns new objects: panelSections runs it inside a computed, and changing
 // sections.data there made the computed run again forever (the page froze)
@@ -497,6 +571,30 @@ function getParsedSections(_sections) {
   }))
 }
 
+const showFilesUploader = ref(false)
+const orgAttachments = createResource({
+  url: 'frappe.client.get_list',
+  makeParams: () => ({
+    doctype: 'File',
+    filters: {
+      attached_to_doctype: 'CRM Organization',
+      attached_to_name: props.organizationId,
+    },
+    fields: [
+      'name',
+      'file_name',
+      'file_url',
+      'file_size',
+      'file_type',
+      'is_private',
+      'creation',
+    ],
+    order_by: 'creation desc',
+    limit_page_length: 0,
+  }),
+  auto: true,
+})
+
 const activeTab = ref('deals')
 const tabs = [
   {
@@ -511,12 +609,18 @@ const tabs = [
     iconLeft: ContactIcon,
     count: computed(() => contacts.data?.length),
   },
-  // the organization's own notes (credtech#214)
+  // the organization's own comments/notes (credtech#214)
   {
     value: 'notes',
-    label: 'Notes',
+    label: 'Comentários',
     iconLeft: FileTextIcon,
     count: computed(() => notesCount.value),
+  },
+  {
+    value: 'attachments',
+    label: 'Anexos',
+    iconLeft: AttachmentIcon,
+    count: computed(() => orgAttachments.data?.length),
   },
   // credit/legal pre-screening dossier for this organization (credtech#302)
   {

@@ -2,33 +2,53 @@
   <div class="flex flex-col gap-6 p-5 max-w-3xl">
     <!-- Verdict + actions -->
     <div
-      class="flex items-center justify-between p-4 bg-surface-gray-2 rounded-lg border border-outline-gray-2"
+      class="flex flex-col gap-3 p-4 bg-surface-gray-2 rounded-lg border border-outline-gray-2"
     >
-      <div class="flex items-center gap-3">
-        <Badge :theme="verdictTheme" variant="solid" size="lg">
-          {{ verdictLabel }}
-        </Badge>
-        <span v-if="org.data?.credit_verdict" class="text-p-sm text-ink-gray-6">
-          {{ __('CNPJ') }} {{ org.data?.cnpj || '—' }}
-        </span>
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div class="space-y-1">
+          <div class="flex items-center gap-3">
+            <span class="text-base font-semibold text-ink-gray-9">
+              {{ __('Triagem Jurídica & Fiscal (Pré-Filtro)') }}
+            </span>
+            <Badge :theme="verdictTheme" variant="solid" size="lg">
+              {{ verdictLabel }}
+            </Badge>
+            <span v-if="org.data?.cnpj" class="text-p-sm text-ink-gray-6">
+              {{ __('CNPJ') }} {{ org.data?.cnpj }}
+            </span>
+          </div>
+          <p class="text-p-xs text-ink-gray-6">
+            {{
+              __(
+                'Checagem rápida de Sanções Públicas CEIS/CNEP (CGU · Grátis), Processos Judiciais, Dívida Ativa PGFN, Protestos e FGTS antes de gerar o Dossiê Completo.',
+              )
+            }}
+          </p>
+        </div>
+        <div class="flex gap-2">
+          <Button variant="outline" :loading="checking" @click="runCheck(false)">
+            {{ __('Executar Triagem Rápida') }}
+          </Button>
+          <Button
+            v-if="org.data?.credit_report"
+            variant="outline"
+            :loading="checking"
+            @click="runCheck(true)"
+          >
+            {{ __('Refazer Triagem') }}
+          </Button>
+        </div>
       </div>
-      <div class="flex gap-2">
-        <Button variant="outline" :loading="checking" @click="runCheck(false)">
-          {{ __('Check Credit') }}
-        </Button>
-        <Button
-          v-if="org.data?.credit_report"
-          variant="outline"
-          :loading="checking"
-          @click="runCheck(true)"
-        >
-          {{ __('Force New Check') }}
-        </Button>
+      <div
+        v-if="report.data?.verdict_summary"
+        class="text-p-xs text-ink-gray-7 bg-surface-white px-3 py-2 rounded border border-outline-gray-1"
+      >
+        {{ report.data.verdict_summary }}
       </div>
     </div>
 
     <p v-if="!org.data?.credit_report" class="text-p-sm text-ink-gray-5">
-      {{ __('No credit analysis has run for this organization yet.') }}
+      {{ __('Nenhuma triagem jurídica/fiscal foi executada para esta organização ainda.') }}
     </p>
 
     <template v-if="report.data">
@@ -36,28 +56,30 @@
       <div class="grid grid-cols-2 gap-4">
         <div class="p-4 border border-outline-gray-2 rounded-lg space-y-1">
           <div class="text-p-sm text-ink-gray-5">
-            {{ __('CEIS/CNEP Sanctions') }}
+            {{ __('Sanções CEIS/CNEP (CGU)') }}
           </div>
           <div
             class="text-base-medium"
             :class="
-              report.data.ceis_cnep_sanctioned
-                ? 'text-ink-red-3'
-                : 'text-ink-green-3'
+              !report.data.ceis_cnep_verified
+                ? 'text-ink-gray-6'
+                : report.data.ceis_cnep_sanctioned
+                  ? 'text-ink-red-3'
+                  : 'text-ink-green-3'
             "
           >
             {{
               report.data.ceis_cnep_verified
                 ? report.data.ceis_cnep_sanctioned
-                  ? __('Sanctioned')
-                  : __('None')
-                : __('Not checked')
+                  ? __('Sancionado')
+                  : __('Nenhuma')
+                : __('Não verificado')
             }}
           </div>
         </div>
         <div class="p-4 border border-outline-gray-2 rounded-lg space-y-1">
           <div class="text-p-sm text-ink-gray-5">
-            {{ __('Lawsuits (as defendant)') }}
+            {{ __('Processos (como réu)') }}
           </div>
           <div class="text-base-medium">
             {{ report.data.lawsuits_defendant ?? '—' }} /
@@ -66,7 +88,7 @@
         </div>
         <div class="p-4 border border-outline-gray-2 rounded-lg space-y-1">
           <div class="text-p-sm text-ink-gray-5">
-            {{ __('PGFN Active Debt') }}
+            {{ __('Dívida ativa na PGFN') }}
           </div>
           <div class="text-base-medium">
             {{ report.data.pgfn_status || '—' }}
@@ -74,7 +96,7 @@
         </div>
         <div class="p-4 border border-outline-gray-2 rounded-lg space-y-1">
           <div class="text-p-sm text-ink-gray-5">
-            {{ __('Notary Protests (CENPROT)') }}
+            {{ __('Protestos em cartório (CENPROT)') }}
           </div>
           <div
             class="text-base-medium"
@@ -86,8 +108,8 @@
           >
             {{
               report.data.cenprot_has_protests
-                ? __('{0} found', [report.data.cenprot_protests_count])
-                : __('None')
+                ? __('{0} encontrado(s)', [report.data.cenprot_protests_count])
+                : __('Nenhuma')
             }}
           </div>
         </div>
@@ -102,7 +124,7 @@
           class="p-4 border border-outline-gray-2 rounded-lg space-y-1"
         >
           <div class="text-p-sm text-ink-gray-5">
-            {{ __('Credit Score (DirectD/QUOD)') }}
+            {{ __('Score de Crédito (DirectD/QUOD)') }}
           </div>
           <div class="text-base-medium">
             {{ report.data.directd_score }} —
@@ -112,6 +134,12 @@
       </div>
     </template>
 
+    <!-- Pasta Digital (Checklist de Documentos) e Relatório de Visita Técnica/Comercial -->
+    <CreditOnboardingPanel
+      :organization-id="props.organizationId"
+      :deal-id="props.dealId"
+    />
+
     <!-- Credit dossier (credtech#316): the minimum package of queries, then PDF 1 (every return) and PDF 2 (AI opinion) -->
     <div
       v-if="pkg.data"
@@ -119,26 +147,25 @@
     >
       <div class="flex items-center justify-between">
         <span class="text-lg-semibold text-ink-gray-9">{{
-          __('Credit dossier')
+          __('Dossiê de Crédito Completo (Bureaus + Parecer IA)')
         }}</span>
         <Badge
           v-if="pkgRunning"
           theme="blue"
           variant="subtle"
-          :label="__('Generating…')"
+          :label="__('Gerando…')"
         />
       </div>
       <p class="text-p-sm text-ink-gray-6">
         {{
-          __(
-            'Generating the dossier makes the queries of the minimum package that are missing, with your own keys, and then creates PDF 1, with every field each provider returned and the original JSON, and PDF 2, the credit opinion written by the AI. Queries made in the last {0} days are reused and not paid again.',
+          __('Gerar o dossiê executa as consultas do pacote mínimo que faltam usando suas credenciais e gera o PDF 1 (com todos os dados retornados por cada bureau) e o PDF 2 (parecer de crédito redigido pela IA). Consultas feitas nos últimos {0} dias são reaproveitadas sem novo custo.',
             [pkg.data.reuse_days],
           )
         }}
       </p>
       <div class="space-y-1">
         <div class="text-p-sm text-ink-gray-5">
-          {{ __('Minimum package') }}
+          {{ __('Pacote mínimo configurado') }}
         </div>
         <div
           v-for="entry in pkg.data.items"
@@ -151,7 +178,7 @@
                 ? 'text-ink-green-3'
                 : entry.state === 'unavailable'
                   ? 'text-ink-red-3'
-                  : 'text-ink-amber-3'
+                  : 'text-[color:var(--ct-warning)] font-medium'
             "
             >{{ entry.state === 'reused' ? '✓' : '•' }}</span
           >
@@ -163,7 +190,7 @@
               — {{ packageEntryText(entry) }}</span
             >
             <div v-if="entry.last_error" class="text-ink-red-3">
-              {{ __('Last attempt failed: {0}', [entry.last_error]) }}
+              {{ __('Última tentativa falhou: {0}', [entry.last_error]) }}
             </div>
           </div>
         </div>
@@ -172,7 +199,7 @@
           class="text-p-sm text-ink-gray-5"
         >
           {{
-            __('Partners without CPF stay out of the package: {0}.', [
+            __('Sócios sem CPF completo ficam de fora do pacote: {0}.', [
               pkg.data.partners_without_cpf.join(', '),
             ])
           }}
@@ -181,12 +208,11 @@
       <div class="text-p-sm text-ink-gray-7">{{ packageSummary }}</div>
       <div v-if="pkg.data.unavailable.length" class="text-p-sm text-ink-red-3">
         {{
-          __(
-            'An admin needs to turn these bureaus on or take them out of the package in Settings › Integrations › Credit Bureaus.',
+          __('Um administrador precisa habilitar e configurar o token destes bureaus ou retirá-los do pacote mínimo em Políticas de Crédito & Compliance.',
           )
         }}
       </div>
-      <div v-if="opinionNote" class="text-p-sm text-ink-amber-3">
+      <div v-if="opinionNote" class="text-p-sm text-[color:var(--ct-warning)] font-medium">
         {{ opinionNote }}
       </div>
       <div class="flex items-center gap-2">
@@ -196,12 +222,12 @@
           :disabled="!canGeneratePackage"
           @click="askPackage"
         >
-          {{ __('Generate dossier (PDF 1 + AI opinion)') }}
+          {{ __('Gerar Dossiê Completo (PDF 1 + Parecer IA)') }}
         </Button>
       </div>
       <div v-if="dossiers.data && dossiers.data.length" class="space-y-1 pt-2">
         <div class="text-p-sm text-ink-gray-5">
-          {{ __('Generated dossiers') }}
+          {{ __('Dossiês gerados') }}
         </div>
         <div
           v-for="file in dossiers.data"
@@ -227,11 +253,11 @@
     >
       <div class="flex items-center justify-between">
         <span class="text-lg-semibold text-ink-gray-9">{{
-          __('Credit opinion (AI)')
+          __('Parecer de Crédito (IA)')
         }}</span>
         <span v-if="opinionStatus.data" class="text-p-sm text-ink-gray-5">
           {{
-            __('{0} of {1} opinions used this month', [
+            __('{0} de {1} pareceres usados neste mês', [
               opinionStatus.data.used,
               opinionStatus.data.included,
             ])
@@ -240,27 +266,25 @@
       </div>
       <p class="text-p-sm text-ink-gray-6">
         {{
-          __(
-            'The AI reads every query return, the card and the partners, follows the company credit policy and writes a recommendation (approve, approve with reservations or reject) with the risks and strengths, each citing the field and value it came from. It is only a recommendation: the analyst decides.',
+          __('A IA lê todos os retornos dos bureaus, os documentos da Pasta Digital, o Relatório de Visita, o card e os sócios, segue a Política de Crédito da empresa e redige a recomendação fundamentada (aprovar, aprovar com ressalvas ou reprovar). É uma recomendação técnica: a decisão final é do analista/comitê.',
           )
         }}
       </p>
       <div
         v-if="opinionStatus.data && !opinionStatus.data.configured"
-        class="text-p-sm text-ink-amber-3"
+        class="text-p-sm text-[color:var(--ct-warning)] font-medium"
       >
-        {{ __('The credit opinion AI is not configured on this site yet.') }}
+        {{ __('A IA de parecer de crédito ainda não está configurada neste ambiente.') }}
       </div>
       <div
         v-else-if="
           opinionStatus.data?.next_is_extra &&
           !opinionStatus.data?.extra_allowed
         "
-        class="text-p-sm text-ink-amber-3"
+        class="text-p-sm text-[color:var(--ct-warning)] font-medium"
       >
         {{
-          __(
-            'The opinions included this month are used up. An admin can allow paid extra opinions (R$ {0} each) in the Credit settings.',
+          __('Os pareceres incluídos neste mês acabaram. Um administrador pode liberar pareceres extras pagos (R$ {0} cada) nas Configurações de Crédito.',
             [formatPrice(opinionStatus.data.extra_price)],
           )
         }}
@@ -282,9 +306,9 @@
               v-else-if="item.status === 'Queued'"
               theme="blue"
               variant="subtle"
-              :label="__('Generating…')"
+              :label="__('Gerando…')"
             />
-            <Badge v-else theme="red" variant="subtle" :label="__('Failed')" />
+            <Badge v-else theme="red" variant="subtle" :label="__('Falhou')" />
             <span class="text-p-sm text-ink-gray-5">
               {{ formatDate(item.requested_on) }} · {{ item.requested_by }}
             </span>
@@ -297,7 +321,7 @@
               target="_blank"
               class="text-p-sm text-ink-blue-3 underline"
             >
-              {{ __('Open PDF') }}
+              {{ __('Abrir PDF') }}
             </a>
           </div>
           <div v-if="item.status === 'Done'" class="text-p-sm text-ink-gray-7">
@@ -315,11 +339,10 @@
       v-if="partners.data && partners.data.length"
       class="p-5 bg-surface-white rounded-lg border border-outline-gray-2 space-y-3"
     >
-      <span class="text-lg-semibold text-ink-gray-9">{{ __('Partners') }}</span>
+      <span class="text-lg-semibold text-ink-gray-9">{{ __('Quadros Societário (Sócios para Consulta)') }}</span>
       <p class="text-p-sm text-ink-gray-6">
         {{
-          __(
-            'Tick the partners to include in the next query. Every partner query is paid on your provider account. The Receita shows only a masked CPF: use "Find contacts" (Assertiva) or type the CPF.',
+          __('Marque os sócios para incluir na próxima consulta avulsa. A Receita Federal fornece apenas o CPF mascarado: use "Buscar contatos (Localize)" no topo da Organização ou digite o CPF completo.',
           )
         }}
       </p>
@@ -352,7 +375,7 @@
             v-model="cpfDraft[partner.contact]"
             type="text"
             class="w-40"
-            :placeholder="__('Full CPF')"
+            :placeholder="__('CPF completo')"
           />
           <Button
             variant="outline"
@@ -361,7 +384,7 @@
             :disabled="!cpfDraft[partner.contact]"
             @click="saveCpf(partner)"
           >
-            {{ __('Save CPF') }}
+            {{ __('Salvar CPF') }}
           </Button>
         </div>
       </div>
@@ -374,29 +397,28 @@
     >
       <div class="flex items-center justify-between">
         <span class="text-lg-semibold text-ink-gray-9">{{
-          __('Final Bureaus (On-Demand)')
+          __('Consultas Avulsas nos Bureaus (Sob Demanda)')
         }}</span>
       </div>
       <p class="text-p-sm text-ink-gray-6">
         {{
-          __(
-            'Each query is billed by the provider on your own account. CredTech charges nothing.',
+          __('Cada consulta avulsa utiliza a conta da sua empresa no provedor. A CredTech não cobra taxa adicional.',
           )
         }}
       </p>
       <div
         v-if="options.data.needs_acknowledgement"
-        class="p-3 rounded border border-outline-amber-2 bg-surface-amber-1 text-p-sm text-ink-amber-3 space-y-1"
+        class="p-3 rounded border border-outline-amber-2 bg-surface-amber-1 text-p-sm text-[color:var(--ct-warning)] font-medium space-y-1"
       >
         <div class="font-medium">
-          {{ __('Pre-filter: {0}', [verdictText(options.data.verdict)]) }}
+          {{ __('Triagem rápida: {0}', [verdictText(options.data.verdict)]) }}
         </div>
         <div v-if="options.data.verdict_summary">
           {{ options.data.verdict_summary }}
         </div>
         <div>
           {{
-            __('You can still query. You will be asked to confirm the alert.')
+            __('Você ainda pode consultar normalmente (será solicitada confirmação do alerta).')
           }}
         </div>
       </div>
@@ -409,8 +431,8 @@
           <div>
             <div class="text-base-medium">{{ bureau.label }}</div>
             <div class="text-p-sm text-ink-gray-5">{{ priceText(bureau) }}</div>
-            <div v-if="!bureau.configured" class="text-p-sm text-ink-amber-3">
-              {{ __('Credential missing in the Credit settings.') }}
+            <div v-if="!bureau.configured" class="text-p-sm text-[color:var(--ct-warning)] font-medium">
+              {{ __('Credencial/token ausente nas Configurações de Crédito.') }}
             </div>
           </div>
           <div class="flex items-center gap-2">
@@ -422,7 +444,7 @@
               :disabled="!options.data.can_request || !bureau.configured"
               @click="askPremiumBureau(bureau, selectedPartners)"
             >
-              {{ __('Request for {0} partner(s)', [selectedPartners.length]) }}
+              {{ __('Consultar {0} sócio(s)', [selectedPartners.length]) }}
             </Button>
             <Button
               variant="outline"
@@ -431,7 +453,7 @@
               :disabled="!options.data.can_request || !bureau.configured"
               @click="askPremiumBureau(bureau)"
             >
-              {{ __('Request') }}
+              {{ __('Consultar empresa') }}
             </Button>
           </div>
         </div>
@@ -444,7 +466,7 @@
       class="p-5 bg-surface-white rounded-lg border border-outline-gray-2 space-y-3"
     >
       <span class="text-lg-semibold text-ink-gray-9">{{
-        __('Queries made')
+        __('Histórico de Consultas Realizadas')
       }}</span>
       <div
         v-for="row in results.data"
@@ -454,24 +476,24 @@
         <div class="min-w-0">
           <div class="text-base-medium">{{ row.bureau_label }}</div>
           <div class="text-p-sm text-ink-gray-6 truncate">
-            {{ row.subject_name || __('Company') }} · {{ row.document }}
+            {{ row.subject_name || __('Empresa') }} · {{ row.document }}
           </div>
           <div class="text-p-sm text-ink-gray-5">
             {{ row.requested_on }} · {{ row.requested_by }}
           </div>
           <div
             v-if="row.warning_acknowledged"
-            class="text-p-sm text-ink-amber-3"
+            class="text-p-sm text-[color:var(--ct-warning)] font-medium"
           >
             {{
-              __('Queried with the pre-filter alert: {0}', [
+              __('Consultado com alerta de triagem: {0}', [
                 verdictText(row.pre_filter_verdict),
               ])
             }}
           </div>
         </div>
         <Button variant="outline" size="sm" @click="openResult(row)">
-          {{ __('View return') }}
+          {{ __('Ver retorno bruto') }}
         </Button>
       </div>
     </div>
@@ -480,8 +502,7 @@
       <template #default>
         <p class="text-p-sm text-ink-gray-6 mb-2">
           {{
-            __(
-              'Complete return, exactly as the provider sent it. Nothing is left out.',
+            __('Retorno completo exatamente como enviado pelo provedor.',
             )
           }}
         </p>
@@ -506,6 +527,7 @@ import {
 } from 'frappe-ui'
 import { computed, onBeforeUnmount, reactive, ref, watch } from 'vue'
 import { createDialog } from '@/utils/dialogs'
+import CreditOnboardingPanel from '@/components/CreditCheck/CreditOnboardingPanel.vue'
 
 const props = defineProps({
   organizationId: { type: String, required: true },
@@ -596,9 +618,9 @@ async function saveCpf(partner) {
     })
     delete cpfDraft[partner.contact]
     partners.reload()
-    toast.success(__('CPF saved.'))
+    toast.success(__('CPF salvo com sucesso.'))
   } catch (err) {
-    toast.error(err?.messages?.[0] || __('Could not save the CPF.'))
+    toast.error(err?.messages?.[0] || __('Não foi possível salvar o CPF.'))
   } finally {
     savingCpf.value = ''
   }
@@ -613,12 +635,16 @@ async function openResult(row) {
     resultText.value = JSON.stringify(res.raw, null, 2)
     showResult.value = true
   } catch (err) {
-    toast.error(err?.messages?.[0] || __('Could not open the return.'))
+    toast.error(err?.messages?.[0] || __('Não foi possível abrir o retorno.'))
   }
 }
 
 function verdictText(v) {
-  if (!v || v === 'Not Checked') return __('Not Checked')
+  if (!v || v === 'Not Checked') return __('Não verificado')
+  if (v === 'Pre-Approved') return __('Pré-Aprovado')
+  if (v === 'Warning') return __('Atenção')
+  if (v === 'Rejected') return __('Reprovado')
+  if (v === 'Error') return __('Provedores de triagem não configurados')
   return __(v)
 }
 
@@ -640,12 +666,12 @@ function formatMoney(value) {
 
 function priceText(bureau) {
   if (bureau.price_reference) {
-    return __('List price {0}, billed by {1} on your account', [
+    return __('Preço de tabela {0}, cobrado por {1} na sua conta', [
       formatMoney(bureau.price_reference),
       bureau.provider,
     ])
   }
-  return __('Billed by {0} on your account, as per your contract', [
+  return __('Cobrado por {0} na sua conta, conforme seu contrato', [
     bureau.provider,
   ])
 }
@@ -659,10 +685,10 @@ async function runCheck(force) {
       force,
     })
     toast.success(
-      __('Credit analysis queued. Refresh in a moment to see the result.'),
+      __('Triagem enviada para execução. Atualize em instantes para ver o resultado.'),
     )
   } catch (err) {
-    toast.error(err?.messages?.[0] || __('Could not start the analysis.'))
+    toast.error(err?.messages?.[0] || __('Não foi possível iniciar a triagem.'))
   } finally {
     checking.value = false
   }
@@ -690,9 +716,9 @@ let pollRounds = 0
 
 // Own texts, not bare "Approve"/"Reject": those words already have other global translations
 function resultLabel(result) {
-  if (result === 'Approve') return __('Recommendation: approve')
-  if (result === 'Reject') return __('Recommendation: reject')
-  return __('Recommendation: approve with reservations')
+  if (result === 'Approve') return __('Recomendação: Aprovar')
+  if (result === 'Reject') return __('Recomendação: Reprovar')
+  return __('Recomendação: Aprovar com ressalvas')
 }
 
 function resultTheme(result) {
@@ -768,15 +794,15 @@ const canGeneratePackage = computed(() => {
 
 function packageEntryText(entry) {
   if (entry.state === 'reused')
-    return __('queried on {0}', [formatDate(entry.last_on)])
+    return __('consultado em {0}', [formatDate(entry.last_on)])
   if (entry.state === 'unavailable')
-    return __('not available: {0}', [entry.reason])
+    return __('indisponível: {0}', [entry.reason])
   return entry.price_reference
-    ? __('missing · list price {0}, billed by {1} on your account', [
+    ? __('pendente · preço de tabela {0}, cobrado por {1} na sua conta', [
         formatMoney(entry.price_reference),
         entry.provider,
       ])
-    : __('missing · billed by {0} on your account, as per your contract', [
+    : __('pendente · cobrado por {0} na sua conta, conforme seu contrato', [
         entry.provider,
       ])
 }
@@ -785,15 +811,13 @@ const packageSummary = computed(() => {
   const data = pkg.data
   if (!data) return ''
   if (!data.missing.length)
-    return __(
-      'All queries of the minimum package are done. Generating does not cost queries.',
+    return __('Todas as consultas do pacote mínimo já estão em dia. Gerar o dossiê não consumirá novas consultas.',
     )
-  let text = __(
-    'To generate: {0} paid queries, about {1} at list price, billed by the provider on your account. CredTech charges nothing for queries.',
+  let text = __('Para gerar: {0} consulta(s) paga(s), cerca de {1} pelo preço de tabela, cobrado pelo provedor na sua conta.',
     [data.missing.length, formatMoney(data.missing_cost)],
   )
   if (data.missing_has_contract_price)
-    text += ' ' + __('Serasa is billed as per your contract.')
+    text += ' ' + __('A Serasa é cobrada conforme o seu contrato.')
   return text
 })
 
@@ -801,17 +825,14 @@ const opinionNote = computed(() => {
   const opinion = pkg.data?.opinion
   if (!opinion) return ''
   if (!opinion.configured)
-    return __(
-      'The dossier will come without the AI opinion: the credit opinion AI is not configured on this site yet.',
+    return __('O dossiê será gerado sem o parecer da IA (IA ainda não configurada neste site).',
     )
   if (opinion.next_is_extra && !opinion.extra_allowed)
-    return __(
-      'The dossier will come without the AI opinion: the opinions included this month are used up. An admin can allow paid extra opinions (R$ {0} each) in the Credit settings.',
+    return __('O dossiê será gerado sem o parecer da IA: a franquia mensal acabou. Um administrador pode liberar pareceres extras (R$ {0} cada) nas Configurações.',
       [formatPrice(opinion.extra_price)],
     )
   if (opinion.next_is_extra)
-    return __(
-      'The AI opinion is an extra this month: R$ {0} from the credit wallet.',
+    return __('O parecer da IA será avulso neste mês: R$ {0} da carteira de créditos.',
       [formatPrice(opinion.extra_price)],
     )
   return ''
@@ -856,8 +877,7 @@ function askPackage() {
   const lines = []
   if (data.missing.length) {
     lines.push(
-      __(
-        'Paid queries, billed by the provider on your account (CredTech charges nothing): {0}.',
+      __('Consultas pagas, cobradas pelo provedor na sua conta: {0}.',
         [
           data.missing
             .map((entry) => `${entry.label} (${entry.subject_name})`)
@@ -865,36 +885,35 @@ function askPackage() {
         ],
       ),
     )
-    lines.push(__('About {0} at list price.', [formatMoney(data.missing_cost)]))
+    lines.push(__('Cerca de {0} pelo preço de tabela.', [formatMoney(data.missing_cost)]))
   }
   if (needsAck) {
     lines.push(
-      __('Alert: the pre-filter result for this organization is {0}.', [
+      __('Alerta: o resultado da triagem rápida para esta organização é {0}.', [
         verdictText(data.verdict),
       ]) +
         (data.verdict_summary ? ' ' + data.verdict_summary : '') +
         ' ' +
-        __('The query will be recorded as made with the alert.'),
+        __('A consulta ficará registrada como realizada sob alerta.'),
     )
   }
   if (extraOpinion) {
     lines.push(
-      __(
-        'The opinions included this month are used up. This one costs R$ {0} from the credit wallet (current balance R$ {1}).',
+      __('Os pareceres incluídos no mês acabaram. Este parecer custa R$ {0} da carteira de créditos (saldo atual R$ {1}).',
         [formatPrice(opinion.extra_price), formatPrice(opinion.balance)],
       ),
     )
   }
   createDialog({
-    title: __('Generate credit dossier'),
+    title: __('Gerar dossiê de crédito'),
     message: lines.join(' '),
     size: 'lg',
     actions: [
-      { label: __('Cancel'), onClick: ({ close }) => close() },
+      { label: __('Cancelar'), onClick: ({ close }) => close() },
       {
         label: needsAck
-          ? __('Query anyway and generate')
-          : __('Confirm and generate'),
+          ? __('Consultar mesmo assim e gerar')
+          : __('Confirmar e gerar'),
         variant: 'solid',
         theme: needsAck ? 'red' : 'gray',
         onClick: ({ close }) => {
@@ -922,21 +941,20 @@ async function generatePackage(acknowledged, confirmExtra) {
     packageStarted.value = true
     if (res?.opinion_skipped) {
       toast.warning(
-        __('Generating the dossier without the AI opinion: {0}', [
+        __('Gerando dossiê sem o parecer da IA: {0}', [
           res.opinion_skipped,
         ]),
       )
     } else {
       toast.success(
-        __(
-          'Generating the dossier: the queries, PDF 1 and the AI opinion take a few minutes.',
+        __('Gerando o dossiê: as consultas, o PDF 1 e o parecer da IA levam alguns instantes.',
         ),
       )
     }
     opinions.reload()
     startPackagePolling()
   } catch (err) {
-    toast.error(err?.messages?.[0] || __('Could not generate the dossier.'))
+    toast.error(err?.messages?.[0] || __('Não foi possível gerar o dossiê.'))
     pkg.reload()
   } finally {
     startingPackage.value = false
@@ -950,24 +968,22 @@ function askPremiumBureau(bureau, partnerList = []) {
   const needsAck = Boolean(data?.needs_acknowledgement)
   const count = partnerList.length || 1
   let message = bureau.price_reference
-    ? __(
-        'This query is paid and billed by {0} on your account (list price {1}). CredTech charges nothing.',
+    ? __('Esta consulta é paga e cobrada por {0} na sua conta (preço de tabela {1}).',
         [bureau.provider, formatMoney(bureau.price_reference)],
       )
-    : __(
-        'This query is paid and billed by {0} on your account, as per your contract. CredTech charges nothing.',
+    : __('Esta consulta é paga e cobrada por {0} na sua conta, conforme seu contrato.',
         [bureau.provider],
       )
   if (partnerList.length) {
     message +=
       ' ' +
-      __('Partners: {0}. {1} queries', [
+      __('Sócios: {0}. {1} consulta(s)', [
         partnerList.map((partner) => partner.name).join(', '),
         count,
       ]) +
       (bureau.price_reference
         ? ' ' +
-          __('(about {0} in total at list price).', [
+          __('(cerca de {0} no total pelo preço de tabela).', [
             formatMoney(bureau.price_reference * count),
           ])
         : '.')
@@ -975,12 +991,12 @@ function askPremiumBureau(bureau, partnerList = []) {
   if (needsAck) {
     message +=
       ' ' +
-      __('Alert: the pre-filter result for this organization is {0}.', [
+      __('Alerta: o resultado da triagem rápida para esta organização é {0}.', [
         verdictText(data.verdict),
       ]) +
       (data.verdict_summary ? ' ' + data.verdict_summary : '') +
       ' ' +
-      __('The query will be recorded as made with the alert.')
+      __('A consulta ficará registrada como realizada sob alerta.')
   }
   createDialog({
     title: bureau.label,
@@ -988,11 +1004,11 @@ function askPremiumBureau(bureau, partnerList = []) {
     size: 'lg',
     actions: [
       {
-        label: __('Cancel'),
+        label: __('Cancelar'),
         onClick: ({ close }) => close(),
       },
       {
-        label: needsAck ? __('Query anyway (paid)') : __('Confirm paid query'),
+        label: needsAck ? __('Consultar mesmo assim (pago)') : __('Confirmar consulta paga'),
         variant: 'solid',
         theme: needsAck ? 'red' : 'gray',
         onClick: ({ close }) => {
@@ -1030,15 +1046,15 @@ async function requestPremiumBureau(bureau, acknowledged, contacts = []) {
       failures.push(
         err?.messages?.[0] ||
           err?.message ||
-          __('Could not request the query.'),
+          __('Não foi possível solicitar a consulta.'),
       )
     }
   }
   if (done) {
     toast.success(
       targets.length > 1
-        ? __('{0} of {1} queries requested.', [done, targets.length])
-        : __('Query requested.'),
+        ? __('{0} de {1} consultas solicitadas.', [done, targets.length])
+        : __('Consulta realizada com sucesso.'),
     )
   }
   failures.forEach((message) => toast.error(message))
