@@ -347,50 +347,115 @@
               />
             </div>
 
-            <!-- Sub-bloco A: Relatórios Completos para o Dossiê (Sob Demanda / Pacote Mínimo) -->
+            <!-- Sub-bloco A: Relatórios Completos para o Dossiê (Níveis 1, 2 e 3) -->
             <div class="pt-3 border-t border-outline-gray-2 space-y-2.5">
               <div class="text-p-sm font-semibold text-ink-gray-9">
                 {{
                   __(
-                    'Relatórios Completos para Dossiê (usados no Pacote Mínimo e consultas avulsas):',
+                    'Relatórios de Bureaus na DirectD por Nível de Profundidade (Pacote Mínimo e Avulsas):',
                   )
                 }}
               </div>
               <div
                 v-for="bureau in directdBureaus"
                 :key="bureau.field"
-                class="flex items-center justify-between"
+                class="flex flex-wrap items-center justify-between gap-2 py-1"
               >
-                <Checkbox
-                  v-model="settingsDoc[bureau.field]"
-                  :label="bureau.label"
-                />
+                <div class="flex items-center gap-2">
+                  <Checkbox
+                    v-model="settingsDoc[bureau.field]"
+                    :label="bureau.label"
+                  />
+                  <Badge
+                    :label="bureau.tierLabel"
+                    :theme="bureau.tierTheme"
+                    variant="subtle"
+                  />
+                </div>
                 <span v-if="prices" class="text-p-sm text-ink-gray-6">
                   {{ __('Preço de tabela {0}', [formatMoney(prices[bureau.key])]) }}
                 </span>
               </div>
             </div>
 
-            <!-- Sub-bloco B: Consultas do Pré-Filtro Automático via DirectD -->
+            <!-- Sub-bloco B: Consultas de Nível 1 (Triagem Cadastral & Fiscal Barata via DirectD) -->
             <div class="pt-3 border-t border-outline-gray-2 space-y-3">
               <div class="flex items-center justify-between">
                 <div>
-                  <div class="text-p-sm font-semibold text-ink-gray-9">
+                  <div class="flex items-center gap-2">
+                    <span class="text-p-sm font-semibold text-ink-gray-9">
+                      {{
+                        __(
+                          'Nível 1 (Triagem Inicial Barata): Regularidade Fiscal & Estadual',
+                        )
+                      }}
+                    </span>
+                    <Badge
+                      :label="__('Nível 1 · R$ 0,36 a R$ 0,72')"
+                      theme="green"
+                      variant="subtle"
+                    />
+                  </div>
+                  <p class="text-p-xs text-ink-gray-6">
                     {{
                       __(
-                        'Incluir DirectD no Pré-Filtro Rápido (Score QUOD + Protestos IEPTB + Processos)',
+                        'Consultas ultrabásicas e baratas para rodar junto com Receita Federal/QSA e CGU CEIS/CNEP (Grátis) antes de gastar com Bureaus de Nível 2 ou 3.',
+                      )
+                    }}
+                  </p>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+                <div class="flex items-center justify-between p-2.5 rounded border border-outline-gray-2 bg-surface-gray-1">
+                  <Checkbox
+                    v-model="settingsDoc.directd_fgts_enabled"
+                    :label="__('Regularidade do FGTS / CRF (Caixa)')"
+                  />
+                  <span v-if="prices" class="text-p-xs font-medium text-ink-gray-7">
+                    {{ formatMoney(prices.directd_fgts) }}
+                  </span>
+                </div>
+                <div class="flex items-center justify-between p-2.5 rounded border border-outline-gray-2 bg-surface-gray-1">
+                  <Checkbox
+                    v-model="settingsDoc.directd_sintegra_enabled"
+                    :label="__('Sintegra / CCC por UF (Inscrição Estadual)')"
+                  />
+                  <span v-if="prices" class="text-p-xs font-medium text-ink-gray-7">
+                    {{ formatMoney(prices.directd_sintegra) }}
+                  </span>
+                </div>
+              </div>
+
+              <div class="rounded-md border border-[#0088FF]/25 bg-[#E5F1FF] px-3.5 py-2.5 text-p-xs text-[#1E1F23] space-y-1">
+                <div class="font-semibold text-[#0070E0]">
+                  {{ __('💡 Proteção Anti-Redundância (Economia de R$ 6,43 por consulta)') }}
+                </div>
+                <div>
+                  {{
+                    __(
+                      'O Dossiê QUOD (Nível 2) e o Boa Vista Risco Positivo PJ (Nível 3) já incluem Score, Protestos Detalhados e Ações Judiciais. Por isso, recomendamos manter o pacote legado de Score/Protestos Básicos abaixo desligado na Triagem Nível 1.',
+                    )
+                  }}
+                </div>
+              </div>
+
+              <div class="flex items-center justify-between pt-1">
+                <div>
+                  <div class="text-p-xs font-medium text-ink-gray-7">
+                    {{
+                      __(
+                        'Opcional Legado: Rodar também Score QUOD Avulso + Protestos Básica + Processos Simplificada no Pré-Filtro',
                       )
                     }}
                   </div>
-                  <p v-if="prices" class="text-p-xs text-ink-gray-6">
+                  <p v-if="prices" class="text-p-xs text-ink-gray-5">
                     {{
-                      __('Preço de tabela por consulta: score {0}, protestos {1}, processos {2}; FGTS {3} e Sintegra {4} quando ligados. Cobrado pela DirectD na sua conta.',
+                      __('Adiciona score ({0}) + protestos básica ({1}) + processos ({2}) na triagem inicial.',
                         [
                           formatMoney(prices.directd_score),
                           formatMoney(prices.directd_protestos),
                           formatMoney(prices.directd_processos),
-                          formatMoney(prices.directd_fgts),
-                          formatMoney(prices.directd_sintegra),
                         ],
                       )
                     }}
@@ -405,16 +470,6 @@
                   type="number"
                   :label="__('Score mínimo (0 = nunca reprovar por score)')"
                 />
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
-                  <Checkbox
-                    v-model="settingsDoc.directd_fgts_enabled"
-                    :label="__('Consultar regularidade do FGTS (CRF)')"
-                  />
-                  <Checkbox
-                    v-model="settingsDoc.directd_sintegra_enabled"
-                    :label="__('Consultar Sintegra / CCC (inscrição estadual)')"
-                  />
-                </div>
               </div>
             </div>
 
@@ -665,18 +720,51 @@
           <div
             class="space-y-3 rounded-lg border border-[var(--ct-border)] bg-surface-white px-5 py-4"
           >
-            <span class="text-lg-semibold text-ink-gray-9">{{
-              __('Pacote mínimo do dossiê')
-            }}</span>
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <span class="text-lg-semibold text-ink-gray-9">{{
+                __('Pacote mínimo do dossiê (Padrão Nível 2 ou Nível 3)')
+              }}</span>
+              <div class="flex flex-wrap items-center gap-2">
+                <Button
+                  variant="subtle"
+                  size="sm"
+                  @click="applyPackagePreset('tier_2')"
+                >
+                  {{ __('Preset Nível 2 · Médio (R$ 10,89)') }}
+                </Button>
+                <Button
+                  variant="subtle"
+                  size="sm"
+                  @click="applyPackagePreset('tier_3_boavista')"
+                >
+                  {{ __('Preset Nível 3 · Profundo Boa Vista') }}
+                </Button>
+                <Button
+                  variant="subtle"
+                  size="sm"
+                  @click="applyPackagePreset('tier_3_serasa')"
+                >
+                  {{ __('Preset Nível 3 · Profundo Serasa') }}
+                </Button>
+              </div>
+            </div>
             <p class="text-p-xs text-ink-gray-6">
               {{
-                __('As consultas que todo dossiê de crédito precisa ter. O botão "Gerar dossiê" mostra o que falta e o preço de tabela, faz as consultas que faltam com as suas chaves depois da confirmação e cria o PDF 1 e o parecer da IA. Só uma consulta deste pacote que falta ou falhou rebaixa a recomendação da IA.',
+                __('As consultas padrão que o Dossiê de Crédito executa ao clicar em "Gerar Dossiê". Na tela da empresa/card, o analista também pode escolher em 1 clique entre rodar o Nível 2 (Médio · Dossiê QUOD + SCR Bacen) ou pular direto para o Nível 3 (Profundo · Boa Vista Positivo PJ ou Serasa + SCR + Processos c/ Penhoras + Sócios PF).',
                 )
               }}
             </p>
+            <div class="rounded-md border border-[#0088FF]/25 bg-[#E5F1FF] px-3.5 py-2 text-p-xs text-[#1E1F23]">
+              <span class="font-semibold text-[#0070E0]">{{ __('Regra Anti-Redundância Nível 3:') }}</span>
+              {{
+                __(
+                  ' No Nível 3 (Profundo), escolha Boa Vista Risco Positivo PJ OU Serasa Relatório Avançado PJ — nunca ambos juntos, pois retornam o mesmo bloco de Score, Faturamento Presumido e Restrições.',
+                )
+              }}
+            </div>
             <template v-if="packageDoc">
               <div class="text-base font-semibold text-ink-gray-9">
-                {{ __('Empresa') }}
+                {{ __('Empresa (PJ)') }}
               </div>
               <div
                 v-for="opt in packageOptions('company')"
@@ -684,8 +772,21 @@
                 class="flex flex-wrap items-center gap-2"
               >
                 <Checkbox
-                  v-model="packageDoc.selected[opt.item]"
+                  :model-value="packageDoc.selected[opt.item]"
                   :label="packageOptionLabel(opt)"
+                  @update:model-value="(val) => togglePackageItem(opt.item, val)"
+                />
+                <Badge
+                  v-if="opt.item === 'company:dossie_quod' || opt.item === 'company:scr_bacen'"
+                  :label="__('Nível 2 · Médio')"
+                  theme="blue"
+                  variant="subtle"
+                />
+                <Badge
+                  v-else
+                  :label="__('Nível 3 · Profundo')"
+                  theme="amber"
+                  variant="subtle"
                 />
                 <span
                   v-if="!isOptionConfigured(opt)"
@@ -699,7 +800,7 @@
                 </span>
               </div>
               <div class="pt-2 text-base font-semibold text-ink-gray-9">
-                {{ __('Cada sócio com CPF completo') }}
+                {{ __('Sócios / Avalistas (PF — por padrão pré-seleciona apenas o Sócio-Administrador)') }}
               </div>
               <div
                 v-for="opt in packageOptions('partners')"
@@ -707,8 +808,27 @@
                 class="flex flex-wrap items-center gap-2"
               >
                 <Checkbox
-                  v-model="packageDoc.selected[opt.item]"
+                  :model-value="packageDoc.selected[opt.item]"
                   :label="packageOptionLabel(opt)"
+                  @update:model-value="(val) => togglePackageItem(opt.item, val)"
+                />
+                <Badge
+                  v-if="opt.item === 'partners:nivel_socioeconomico'"
+                  :label="__('Nível 1 · Inicial')"
+                  theme="green"
+                  variant="subtle"
+                />
+                <Badge
+                  v-else-if="opt.item === 'partners:dossie_quod'"
+                  :label="__('Nível 2 · Médio')"
+                  theme="blue"
+                  variant="subtle"
+                />
+                <Badge
+                  v-else
+                  :label="__('Nível 3 · Profundo')"
+                  theme="amber"
+                  variant="subtle"
                 />
                 <span
                   v-if="!isOptionConfigured(opt)"
@@ -833,6 +953,164 @@
                 </Button>
               </div>
             </template>
+          </div>
+
+          <!-- Metodologia Configurável do Rating Interno (AA–E) & Calculadora de Limite Sugerido -->
+          <div
+            v-if="ratingPolicyDoc"
+            class="space-y-4 rounded-lg border border-[var(--ct-border)] bg-surface-white px-5 py-4"
+          >
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div class="flex items-center gap-2">
+                <span class="text-lg-semibold text-ink-gray-9">
+                  {{ __('Rating Interno (AA–E) & Calculadora de Limite Sugerido') }}
+                </span>
+                <Badge
+                  :label="
+                    ratingPolicyDoc.is_default
+                      ? __('Padrão de Mercado')
+                      : __('Customizado')
+                  "
+                  :theme="ratingPolicyDoc.is_default ? 'blue' : 'green'"
+                  variant="subtle"
+                />
+              </div>
+            </div>
+            <p class="text-p-xs text-ink-gray-6">
+              {{
+                __(
+                  'Defina as notas de corte (0–1000 pts), o multiplicador sobre o Faturamento Médio Mensal (%) e o limite máximo de concentração por sacado (%) de cada faixa de Rating, além dos tetos de alçada da Mesa de Comitê.',
+                )
+              }}
+            </p>
+
+            <!-- Tabela das Faixas AA a D -->
+            <div class="overflow-x-auto border border-outline-gray-2 rounded-lg">
+              <table class="w-full text-left text-p-sm">
+                <thead class="bg-surface-gray-1 text-xs font-semibold text-ink-gray-7 border-b border-outline-gray-2">
+                  <tr>
+                    <th class="px-3 py-2">{{ __('Faixa') }}</th>
+                    <th class="px-3 py-2">{{ __('Score Mínimo (0–1000)') }}</th>
+                    <th class="px-3 py-2">{{ __('% s/ Faturamento Mensal') }}</th>
+                    <th class="px-3 py-2">{{ __('% Máx. por Sacado') }}</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-outline-gray-1">
+                  <tr>
+                    <td class="px-3 py-2 font-semibold text-ink-green-3">Rating AA · Risco Mínimo</td>
+                    <td class="px-3 py-2">
+                      <FormControl v-model.number="ratingPolicyDoc.aa_min_score" type="number" />
+                    </td>
+                    <td class="px-3 py-2">
+                      <FormControl v-model.number="ratingPolicyDoc.aa_revenue_pct" type="number" />
+                    </td>
+                    <td class="px-3 py-2">
+                      <FormControl v-model.number="ratingPolicyDoc.aa_sacado_pct" type="number" />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="px-3 py-2 font-semibold text-ink-green-3">Rating A · Risco Baixo</td>
+                    <td class="px-3 py-2">
+                      <FormControl v-model.number="ratingPolicyDoc.a_min_score" type="number" />
+                    </td>
+                    <td class="px-3 py-2">
+                      <FormControl v-model.number="ratingPolicyDoc.a_revenue_pct" type="number" />
+                    </td>
+                    <td class="px-3 py-2">
+                      <FormControl v-model.number="ratingPolicyDoc.a_sacado_pct" type="number" />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="px-3 py-2 font-semibold text-ink-blue-3">Rating B · Risco Moderado</td>
+                    <td class="px-3 py-2">
+                      <FormControl v-model.number="ratingPolicyDoc.b_min_score" type="number" />
+                    </td>
+                    <td class="px-3 py-2">
+                      <FormControl v-model.number="ratingPolicyDoc.b_revenue_pct" type="number" />
+                    </td>
+                    <td class="px-3 py-2">
+                      <FormControl v-model.number="ratingPolicyDoc.b_sacado_pct" type="number" />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="px-3 py-2 font-semibold text-ink-amber-4">Rating C · Exige Garantias</td>
+                    <td class="px-3 py-2">
+                      <FormControl v-model.number="ratingPolicyDoc.c_min_score" type="number" />
+                    </td>
+                    <td class="px-3 py-2">
+                      <FormControl v-model.number="ratingPolicyDoc.c_revenue_pct" type="number" />
+                    </td>
+                    <td class="px-3 py-2">
+                      <FormControl v-model.number="ratingPolicyDoc.c_sacado_pct" type="number" />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="px-3 py-2 font-semibold text-ink-red-3">Rating D · Risco Elevado</td>
+                    <td class="px-3 py-2">
+                      <FormControl v-model.number="ratingPolicyDoc.d_min_score" type="number" />
+                    </td>
+                    <td class="px-3 py-2">
+                      <FormControl v-model.number="ratingPolicyDoc.d_revenue_pct" type="number" />
+                    </td>
+                    <td class="px-3 py-2">
+                      <FormControl v-model.number="ratingPolicyDoc.d_sacado_pct" type="number" />
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Tetos e Alçadas do Comitê -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-3 pt-1">
+              <FormControl
+                v-model.number="ratingPolicyDoc.max_global_limit"
+                type="number"
+                :label="__('Teto Global de Limite (R$, 0 = sem teto)')"
+              />
+              <FormControl
+                v-model.number="ratingPolicyDoc.tier_1_max_limit"
+                type="number"
+                :label="__('Teto Alçada 1 · 1 Voto (R$)')"
+              />
+              <FormControl
+                v-model.number="ratingPolicyDoc.tier_2_max_limit"
+                type="number"
+                :label="__('Teto Alçada 2 · 2 Votos (R$)')"
+              />
+              <FormControl
+                v-model.number="ratingPolicyDoc.default_validity_days"
+                type="number"
+                :label="__('Vigência Padrão do Limite (dias)')"
+              />
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+              <Checkbox
+                v-model="ratingPolicyDoc.hard_stop_ceis_cnep"
+                :label="__('Travar automaticamente em Rating E (R$ 0) se houver Sanção CEIS/CNEP')"
+              />
+              <Checkbox
+                v-model="ratingPolicyDoc.hard_stop_rj_falencia"
+                :label="__('Travar automaticamente em Rating E (R$ 0) em caso de Recuperação Judicial / Falência')"
+              />
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2 pt-2">
+              <Button
+                variant="solid"
+                :loading="savingRatingPolicy"
+                @click="saveRatingPolicy(false)"
+              >
+                {{ __('Salvar metodologia de Rating & Limite') }}
+              </Button>
+              <Button
+                variant="subtle"
+                :loading="savingRatingPolicy"
+                @click="saveRatingPolicy(true)"
+              >
+                {{ __('Restaurar Padrão (30% / 22% / 15% / 8% / 3%)') }}
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -1048,8 +1326,11 @@ const settingsDoc = ref({
   serasa_environment: 'Production',
   serasa_report_name: 'RELATORIO_AVANCADO_PJ_PME',
   boavista_risco_enabled: false,
+  boavista_acerta_pf_enabled: false,
   dossie_quod_enabled: false,
   scr_bacen_enabled: false,
+  processos_completa_enabled: false,
+  nivel_socioeconomico_enabled: false,
   allow_paid_extra_opinions: false,
   enforce_checklist_on_stage_gate: false,
   require_verified_checklist_on_committee: false,
@@ -1060,17 +1341,44 @@ const directdBureaus = [
   {
     key: 'dossie_quod',
     field: 'dossie_quod_enabled',
-    label: 'Dossiê QUOD - Completo',
+    label: 'Dossiê QUOD - Completo (Score + Protestos + Negativações + Ações + Cheques)',
+    tierLabel: 'Nível 2 · Médio',
+    tierTheme: 'blue',
   },
   {
     key: 'scr_bacen',
     field: 'scr_bacen_enabled',
-    label: 'SCR Analítico - Resumo BACEN',
+    label: 'SCR Analítico - Resumo BACEN (Endividamento Bancário)',
+    tierLabel: 'Nível 2 / 3',
+    tierTheme: 'blue',
   },
   {
     key: 'boavista_risco',
     field: 'boavista_risco_enabled',
-    label: 'Boa Vista - Risco Positivo PJ',
+    label: 'Boa Vista - Risco Positivo PJ (Score Positivo + Faturamento Presumido + Limite)',
+    tierLabel: 'Nível 3 · Profundo',
+    tierTheme: 'amber',
+  },
+  {
+    key: 'processos_completa',
+    field: 'processos_completa_enabled',
+    label: 'Processos Judiciais - Completa (com Penhoras e Julgamentos)',
+    tierLabel: 'Nível 3 · Profundo',
+    tierTheme: 'amber',
+  },
+  {
+    key: 'boavista_acerta_pf',
+    field: 'boavista_acerta_pf_enabled',
+    label: 'Boa Vista - Acerta Completo Positivo PF (Sócios / Avalistas)',
+    tierLabel: 'Nível 3 · Sócios PF',
+    tierTheme: 'amber',
+  },
+  {
+    key: 'nivel_socioeconomico',
+    field: 'nivel_socioeconomico_enabled',
+    label: 'Nível Socioeconômico PF (Faixa de Renda — Triagem Inicial)',
+    tierLabel: 'Nível 1 · Inicial',
+    tierTheme: 'green',
   },
 ]
 
@@ -1083,6 +1391,12 @@ function isOptionEnabled(opt) {
     return Boolean(settingsDoc.value.scr_bacen_enabled)
   if (opt.bureau === 'boavista_risco')
     return Boolean(settingsDoc.value.boavista_risco_enabled)
+  if (opt.bureau === 'boavista_acerta_pf')
+    return Boolean(settingsDoc.value.boavista_acerta_pf_enabled)
+  if (opt.bureau === 'processos_completa')
+    return Boolean(settingsDoc.value.processos_completa_enabled)
+  if (opt.bureau === 'nivel_socioeconomico')
+    return Boolean(settingsDoc.value.nivel_socioeconomico_enabled)
   return Boolean(opt.enabled)
 }
 
@@ -1221,6 +1535,57 @@ function restoreDefaultPolicy() {
   }
 }
 
+// Configurable Rating (AA–E) & Suggested Limit Calculator Policy
+const ratingPolicyDoc = ref(null)
+const originalRatingPolicyJson = ref('')
+const savingRatingPolicy = ref(false)
+
+async function loadRatingPolicy() {
+  try {
+    const res = await call('cred_hub.credit_check.api.get_rating_policy')
+    if (res) {
+      ratingPolicyDoc.value = {
+        ...res,
+        hard_stop_ceis_cnep: Boolean(res.hard_stop_ceis_cnep),
+        hard_stop_rj_falencia: Boolean(res.hard_stop_rj_falencia),
+      }
+      originalRatingPolicyJson.value = JSON.stringify(ratingPolicyDoc.value)
+    }
+  } catch {
+    ratingPolicyDoc.value = null
+  }
+}
+
+async function saveRatingPolicy(resetDefault = false) {
+  savingRatingPolicy.value = true
+  try {
+    const res = await call('cred_hub.credit_check.api.save_rating_policy', {
+      policy: resetDefault ? null : JSON.stringify(ratingPolicyDoc.value),
+      reset_default: resetDefault ? 1 : 0,
+    })
+    if (res) {
+      ratingPolicyDoc.value = {
+        ...res,
+        hard_stop_ceis_cnep: Boolean(res.hard_stop_ceis_cnep),
+        hard_stop_rj_falencia: Boolean(res.hard_stop_rj_falencia),
+      }
+      originalRatingPolicyJson.value = JSON.stringify(ratingPolicyDoc.value)
+    }
+    toast.success(
+      resetDefault
+        ? __('Metodologia de Rating restaurada para o padrão!')
+        : __('Metodologia de Rating & Limite salva com sucesso!'),
+    )
+  } catch (err) {
+    toast.error(
+      err?.messages?.[0] ||
+        __('Não foi possível salvar a metodologia de Rating.'),
+    )
+  } finally {
+    savingRatingPolicy.value = false
+  }
+}
+
 // Minimum package of the dossier (credtech#316): default Dossiê QUOD + SCR Bacen of the company, 30 days of reuse
 const packageDoc = ref(null)
 const originalPackageJson = ref('')
@@ -1254,6 +1619,40 @@ function packageOptionLabel(opt) {
   return opt.price_reference
     ? `${opt.label} — ${formatMoney(opt.price_reference)}`
     : `${opt.label} — ${__('conforme o seu contrato')}`
+}
+
+function togglePackageItem(item, val) {
+  if (!packageDoc.value) return
+  packageDoc.value.selected[item] = Boolean(val)
+  // Mutual exclusion in Nível 3: Boa Vista Risco Positivo PJ OR Serasa Relatório Avançado PJ
+  if (val && item === 'company:boavista_risco') {
+    packageDoc.value.selected['company:serasa'] = false
+  } else if (val && item === 'company:serasa') {
+    packageDoc.value.selected['company:boavista_risco'] = false
+  }
+}
+
+function applyPackagePreset(presetKey) {
+  if (!packageDoc.value) return
+  const presets = {
+    tier_2: ['company:dossie_quod', 'company:scr_bacen'],
+    tier_3_boavista: [
+      'company:boavista_risco',
+      'company:scr_bacen',
+      'company:processos_completa',
+      'partners:boavista_acerta_pf',
+    ],
+    tier_3_serasa: [
+      'company:serasa',
+      'company:scr_bacen',
+      'company:processos_completa',
+      'partners:boavista_acerta_pf',
+    ],
+  }
+  const items = presets[presetKey] || presets.tier_2
+  for (const key of Object.keys(packageDoc.value.selected)) {
+    packageDoc.value.selected[key] = items.includes(key)
+  }
 }
 
 const packageCostText = computed(() => {
@@ -1348,6 +1747,8 @@ const testCnpj = ref({ escavador: '', infosimples: '', directd: '' })
 const usesDirectd = computed(
   () =>
     settingsDoc.value.directd_enabled ||
+    settingsDoc.value.directd_fgts_enabled ||
+    settingsDoc.value.directd_sintegra_enabled ||
     directdBureaus.some((bureau) => settingsDoc.value[bureau.field]),
 )
 
@@ -1535,6 +1936,7 @@ async function runTest(provider, token, cnpj) {
 onMounted(() => {
   loadSettings()
   loadPolicy()
+  loadRatingPolicy()
   loadPackage()
   loadChecklist()
 })
