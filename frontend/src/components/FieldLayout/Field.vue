@@ -49,7 +49,7 @@
       type="text"
       :placeholder="getPlaceholder(field)"
       :disabled="true"
-      :description="field.description"
+      :description="field.description && __(field.description)"
     />
     <Grid
       v-else-if="field.fieldtype === 'Table'"
@@ -66,7 +66,7 @@
       :options="field.options"
       :placeholder="getPlaceholder(field)"
       :disabled="Boolean(field.disabled)"
-      :description="field.description"
+      :description="field.description && __(field.description)"
       @update:modelValue="(e) => fieldChange(e, field)"
     />
     <FormControl
@@ -78,7 +78,7 @@
       :options="field.options"
       :placeholder="getPlaceholder(field)"
       :disabled="Boolean(field.disabled)"
-      :description="field.description"
+      :description="field.description && __(field.description)"
       @update:modelValue="(e) => fieldChange(e, field)"
     >
       <template v-if="field.prefix" #prefix>
@@ -216,7 +216,7 @@
       :value="data[field.fieldname]"
       :placeholder="getPlaceholder(field)"
       :disabled="Boolean(field.disabled)"
-      :description="field.description"
+      :description="field.description && __(field.description)"
       @change="fieldChange($event.target.value, field)"
     />
     <Password
@@ -224,7 +224,7 @@
       :value="data[field.fieldname]"
       :placeholder="getPlaceholder(field)"
       :disabled="Boolean(field.disabled)"
-      :description="field.description"
+      :description="field.description && __(field.description)"
       @change="fieldChange($event.target.value, field)"
     />
     <FormattedInput
@@ -233,7 +233,7 @@
       :placeholder="getPlaceholder(field)"
       :value="data[field.fieldname] || '0'"
       :disabled="Boolean(field.disabled)"
-      :description="field.description"
+      :description="field.description && __(field.description)"
       @change="fieldChange($event.target.value, field)"
     />
     <FormattedInput
@@ -242,7 +242,7 @@
       :value="getFormattedPercent(field.fieldname, data)"
       :placeholder="getPlaceholder(field)"
       :disabled="Boolean(field.disabled)"
-      :description="field.description"
+      :description="field.description && __(field.description)"
       @change="fieldChange(flt($event.target.value), field)"
     />
     <FormattedInput
@@ -251,7 +251,7 @@
       :value="getFormattedFloat(field.fieldname, data)"
       :placeholder="getPlaceholder(field)"
       :disabled="Boolean(field.disabled)"
-      :description="field.description"
+      :description="field.description && __(field.description)"
       @change="fieldChange(flt($event.target.value), field)"
     />
     <FormattedInput
@@ -260,7 +260,7 @@
       :value="getFormattedCurrency(field.fieldname, data, parentDoc)"
       :placeholder="getPlaceholder(field)"
       :disabled="Boolean(field.disabled)"
-      :description="field.description"
+      :description="field.description && __(field.description)"
       @change="fieldChange(flt($event.target.value), field)"
     />
     <DurationInput
@@ -268,7 +268,7 @@
       :value="data[field.fieldname]"
       :placeholder="getPlaceholder(field)"
       :disabled="Boolean(field.disabled)"
-      :description="field.description"
+      :description="field.description && __(field.description)"
       @change="(v) => fieldChange(v, field)"
     />
     <RatingInput
@@ -320,7 +320,7 @@
       :placeholder="getPlaceholder(field)"
       :value="data[field.fieldname]"
       :disabled="Boolean(field.disabled)"
-      :description="field.description"
+      :description="field.description && __(field.description)"
       :error="
         Boolean(data[field.fieldname]) && !validatePhone(data[field.fieldname])
           ? __('Enter a valid phone number')
@@ -335,7 +335,7 @@
         :placeholder="getPlaceholder(field)"
         :value="data[field.fieldname]"
         :disabled="Boolean(field.disabled)"
-        :description="field.description"
+        :description="field.description && __(field.description)"
         @change="fieldChange($event.target.value, field)"
       />
       <ArrowUpRightIcon
