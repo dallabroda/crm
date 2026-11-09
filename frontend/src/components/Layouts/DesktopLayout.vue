@@ -1,6 +1,9 @@
 <template>
   <div class="flex h-screen w-screen">
     <AppSidebar />
+    <!-- a page's own full-height column ("Barra lateral secundária", e.g. the
+         settings menu) teleports here, between the sidebar and the header -->
+    <div id="app-secondary-sidebar" class="contents"></div>
     <div class="flex-1 flex flex-col h-full overflow-auto bg-surface-base">
       <AppHeader />
       <slot />
