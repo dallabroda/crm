@@ -14398,3 +14398,9 @@ msgstr "Próxima página"
 #: frontend/src/components/ListViews/ListFooter.vue
 msgid "Last page"
 msgstr "Última página"
+
+msgid "Expand panel"
+msgstr "Expandir painel"
+
+msgid "Collapse panel"
+msgstr "Recolher painel"

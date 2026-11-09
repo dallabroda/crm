@@ -118,13 +118,15 @@
           :key="activity.name"
           class="activity px-3 sm:px-6"
           :class="
-            ['Activity', 'Emails'].includes(title)
+            title === 'Emails'
               ? 'grid grid-cols-[30px_minmax(auto,_1fr)] gap-2 sm:gap-4'
               : ''
           "
         >
+          <!-- Figma "Card · Atividade": the activity list has no icon rail
+               (kept on the e-mails list) -->
           <div
-            v-if="['Activity', 'Emails'].includes(title)"
+            v-if="title === 'Emails'"
             class="z-0 relative flex justify-center before:absolute before:left-[50%] before:-z-[1] before:top-0 before:border-l before:border-outline-elevation-2"
             :class="[
               i != activities.length - 1 ? 'before:h-full' : 'before:h-4',

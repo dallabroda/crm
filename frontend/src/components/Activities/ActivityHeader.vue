@@ -56,6 +56,24 @@
             @click="whatsappBox.show()"
           />
         </div>
+        <!-- Figma "Card · Atividades": one "Filtro" select ("Todas as
+             atividades ˅") next to "Novo" instead of the row of pills -->
+        <Dropdown
+          v-if="activeTab === 'activity'"
+          :options="filterOptions"
+          align="end"
+        >
+          <template #default="{ open }">
+            <button type="button" class="ct-filter">
+              <span class="truncate">{{ activeFilterLabel }}</span>
+              <span
+                class="size-4 shrink-0"
+                :class="open ? 'lucide-chevron-up' : 'lucide-chevron-down'"
+                aria-hidden="true"
+              />
+            </button>
+          </template>
+        </Dropdown>
         <Dropdown
           v-if="!['Quotations', 'WhatsApp'].includes(title)"
           :options="defaultActions"
@@ -74,26 +92,6 @@
       </div>
     </div>
 
-    <!-- Filtros rápidos dentro de Atividades (unifica Comentários, E-mails, Ligações, Tarefas e Anexos) -->
-    <div
-      v-if="activeTab === 'activity'"
-      class="flex flex-wrap items-center gap-1.5 border-b border-[var(--ct-border-soft)] pb-2.5"
-    >
-      <button
-        v-for="pill in filterPills"
-        :key="pill.value"
-        type="button"
-        class="rounded-md px-2.5 py-1 text-xs font-medium transition-colors"
-        :class="
-          activityFilter === pill.value
-            ? 'bg-ink-gray-9 text-surface-white'
-            : 'bg-surface-gray-2 text-ink-gray-7 hover:bg-surface-gray-3'
-        "
-        @click="activityFilter = pill.value"
-      >
-        {{ pill.label }}
-      </button>
-    </div>
   </div>
 </template>
 <script setup>
@@ -137,13 +135,25 @@ const showFilesUploader = defineModel('showFilesUploader', { type: Boolean })
 const emailBox = defineModel('emailBox', { type: Object, default: () => ({}) })
 
 const filterPills = computed(() => [
-  { value: 'Activity', label: __('Tudo') },
+  { value: 'Activity', label: __('Todas as atividades') },
   { value: 'Comments', label: __('Comentários') },
   { value: 'Emails', label: __('E-mails') },
   { value: 'Calls', label: __('Ligações') },
   { value: 'Tasks', label: __('Tarefas') },
   { value: 'Attachments', label: __('Anexos') },
 ])
+
+const filterOptions = computed(() =>
+  filterPills.value.map((pill) => ({
+    label: pill.label,
+    onClick: () => (activityFilter.value = pill.value),
+  })),
+)
+const activeFilterLabel = computed(
+  () =>
+    filterPills.value.find((pill) => pill.value === activityFilter.value)
+      ?.label || filterPills.value[0].label,
+)
 
 const defaultActions = computed(() => {
   let actions = [

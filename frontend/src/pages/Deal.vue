@@ -20,16 +20,15 @@
     <template v-if="!errorTitle" #right-header>
       <Dropdown v-if="doc && document.statuses" :options="statuses" align="end">
         <template #default="{ open }">
-          <Button
-            v-if="doc.status"
-            variant="outline"
-            :label="statusLabel(doc.status)"
-            :iconRight="open ? 'lucide-chevron-up' : 'lucide-chevron-down'"
-          >
-            <template #prefix>
-              <IndicatorIcon :class="getDealStatus(doc.status)?.color" />
-            </template>
-          </Button>
+          <!-- Figma "Card · Atividades": the stage is a "Filtro" (no colour dot) -->
+          <button v-if="doc.status" type="button" class="ct-filter">
+            <span class="truncate">{{ statusLabel(doc.status) }}</span>
+            <span
+              class="size-4 shrink-0"
+              :class="open ? 'lucide-chevron-up' : 'lucide-chevron-down'"
+              aria-hidden="true"
+            />
+          </button>
         </template>
       </Dropdown>
       <CustomActions
@@ -105,7 +104,7 @@
       ref="dealTabsRef"
       v-model="activeTab"
       as="div"
-      :tabs="tabs"
+      :tabs="tabLabels"
       class="flex flex-1 overflow-hidden flex-col [&_[role='tab']]:px-1 [&_[role='tab']]:shrink-0 [&_[role='tablist']]:px-6 [&_[role='tablist']::-webkit-scrollbar]:h-0 [&_[role='tablist']]:min-h-[45px] [&_[role='tablist']]:gap-4 [&_[role='tablist']]:border-[var(--ct-border-soft)] [&>[role='tabpanel']:not([hidden])]:flex [&>[role='tabpanel']:not([hidden])]:grow [&>[data-slot=tab-list]]:overflow-x-auto [&_[data-slot=tab-indicator]]:translate-y-0 [&>[data-slot=tab-panel]]:min-h-0 [&>[data-slot=tab-panel]]:flex-col [&>[data-slot=tab-panel]]:overflow-auto"
     >
       <template #tab-panel>
@@ -133,17 +132,60 @@
         />
       </template>
     </Tabs>
+    <!-- Figma "Card · Títulos · painel recolhido": the panel folds into a
+         56px rail with the expand button, the avatar and quick icons -->
+    <div
+      v-if="panelCollapsed"
+      class="flex w-14 shrink-0 flex-col items-center gap-3 border-l border-[var(--ct-border-soft)] py-2.5"
+    >
+      <button
+        type="button"
+        class="ct-panel-toggle"
+        :aria-label="__('Expand panel')"
+        :title="__('Expand panel')"
+        @click="panelCollapsed = false"
+      >
+        <span class="lucide-chevron-left size-4" aria-hidden="true" />
+      </button>
+      <Avatar
+        size="lg"
+        :label="title"
+        :image="doc.organization_logo || organization?.organization_logo"
+      />
+      <button
+        v-for="quick in panelQuickIcons"
+        :key="quick.icon"
+        type="button"
+        class="grid size-8 place-items-center rounded-[var(--ct-radius-sm)] text-ink-gray-8 hover:bg-surface-gray-2"
+        :aria-label="quick.label"
+        :title="quick.label"
+        @click="panelCollapsed = false"
+      >
+        <span :class="quick.icon" class="size-4" aria-hidden="true" />
+      </button>
+    </div>
     <Resizer
+      v-else
       side="right"
       class="flex flex-col justify-between border-l border-[var(--ct-border-soft)]"
     >
-      <!-- Figma side panel: card id (16 Medium), then avatar, name and
-           outline icon buttons -->
+      <!-- Figma side panel: collapse button and card id (16 Medium), then
+           avatar, name and outline icon buttons -->
       <div
-        class="flex h-[45px] cursor-copy items-center border-b border-[var(--ct-border-soft)] px-5 py-2.5 text-lg font-medium text-ink-gray-9"
-        @click="copyToClipboard(dealId)"
+        class="flex h-[45px] items-center gap-3 border-b border-[var(--ct-border-soft)] px-5 py-2.5 text-lg font-medium text-ink-gray-9"
       >
-        {{ __(dealId) }}
+        <button
+          type="button"
+          class="ct-panel-toggle"
+          :aria-label="__('Collapse panel')"
+          :title="__('Collapse panel')"
+          @click="panelCollapsed = true"
+        >
+          <span class="lucide-chevron-right size-4" aria-hidden="true" />
+        </button>
+        <span class="cursor-copy truncate" @click="copyToClipboard(dealId)">
+          {{ __(dealId) }}
+        </span>
       </div>
       <div
         class="flex items-center justify-start gap-5 border-b border-[var(--ct-border-soft)] p-5"
@@ -216,6 +258,7 @@
               :tooltip="__('Delete')"
               variant="outline"
               icon="lucide-trash-2"
+              class="ct-btn-danger-icon"
               @click="deleteDeal"
             />
           </div>
@@ -1615,4 +1658,34 @@ function reloadResources(data) {
     sections.reload()
   }
 }
+
+// Figma "Card · Atividades": tab labels without icons (the icons stay in
+// `tabs` for the activity empty states)
+const tabLabels = computed(() =>
+  (tabs.value || tabs).map((tab) => ({ ...tab, iconLeft: undefined, icon: undefined })),
+)
+
+// Figma "Botão recolher painel": each person's choice is kept in the browser
+const PANEL_KEY = 'crm:deal-panel-collapsed'
+function readPanelCollapsed() {
+  try {
+    return localStorage.getItem(PANEL_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+const panelCollapsed = ref(readPanelCollapsed())
+watch(panelCollapsed, (value) => {
+  try {
+    localStorage.setItem(PANEL_KEY, value ? '1' : '0')
+  } catch {
+    // private window / blocked storage: the choice lasts until reload
+  }
+})
+const panelQuickIcons = computed(() => [
+  { icon: 'lucide-user', label: __('Contacts') },
+  { icon: 'lucide-building-2', label: __('Organization') },
+  { icon: 'lucide-phone', label: __('Phone') },
+  { icon: 'lucide-mail', label: __('Email') },
+])
 </script>
