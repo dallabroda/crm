@@ -24,8 +24,8 @@
       :placement="attrs.placement"
       :filterable="false"
     >
-      <template #target="{ open, togglePopover }">
-        <slot name="target" v-bind="{ open, togglePopover }" />
+      <template #target="targetProps">
+        <slot name="target" v-bind="targetProps" />
       </template>
 
       <template #prefix>

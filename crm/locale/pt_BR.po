@@ -14370,3 +14370,31 @@ msgstr "Crédito PJ e Pasta Digital: ler"
 
 msgid "Credit & Digital Folder: write"
 msgstr "Crédito PJ e Pasta Digital: gravar"
+
+#: frontend/src/components/ListViews/ListFooter.vue
+msgid "Showing {0}–{1} of {2} {3}"
+msgstr "Mostrando {0}–{1} de {2} {3}"
+
+#: frontend/src/components/ListViews/ListFooter.vue
+msgid "of {0} page"
+msgstr "de {0} página"
+
+#: frontend/src/components/ListViews/ListFooter.vue
+msgid "of {0} pages"
+msgstr "de {0} páginas"
+
+#: frontend/src/components/ListViews/ListFooter.vue
+msgid "First page"
+msgstr "Primeira página"
+
+#: frontend/src/components/ListViews/ListFooter.vue
+msgid "Previous page"
+msgstr "Página anterior"
+
+#: frontend/src/components/ListViews/ListFooter.vue
+msgid "Next page"
+msgstr "Próxima página"
+
+#: frontend/src/components/ListViews/ListFooter.vue
+msgid "Last page"
+msgstr "Última página"

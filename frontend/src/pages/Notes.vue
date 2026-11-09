@@ -1,9 +1,10 @@
 <template>
   <LayoutHeader>
     <template #left-header>
-      <ViewBreadcrumbs v-model="viewControls" routeName="Notes" />
+      <ViewBreadcrumbs routeName="Notes" />
     </template>
     <template #right-header>
+      <ViewSwitcher v-model="viewControls" />
       <Button
         variant="solid"
         :label="__('Create')"
@@ -103,13 +104,9 @@
   </div>
   <ListFooter
     v-if="notes.data?.data?.length"
-    v-model="notes.data.page_length_count"
-    class="border-t border-[var(--ct-border-soft)] px-3 py-2 sm:px-6"
-    :options="{
-      rowCount: notes.data.row_count,
-      totalCount: notes.data.total_count,
-    }"
-    @loadMore="() => loadMore++"
+    class="border-t border-[var(--ct-border-soft)] px-3 sm:px-6"
+    :list="notes"
+    :itemLabel="__('Notes').toLowerCase()"
   />
   <EmptyState
     v-else
@@ -128,6 +125,7 @@
 
 <script setup>
 import ViewBreadcrumbs from '@/components/ViewBreadcrumbs.vue'
+import ViewSwitcher from '@/components/ViewSwitcher.vue'
 import LayoutHeader from '@/components/LayoutHeader.vue'
 import UserAvatar from '@/components/UserAvatar.vue'
 import NoteIcon from '@/components/Icons/NoteIcon.vue'

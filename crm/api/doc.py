@@ -273,6 +273,7 @@ def get_data(
 	order_by: str,
 	page_length: int = 20,
 	page_length_count: int = 20,
+	start: int = 0,
 	column_field: str | None = None,
 	title_field: str | None = None,
 	columns: str | list | None = None,
@@ -384,6 +385,8 @@ def get_data(
 				fields=rows,
 				filters=filters,
 				order_by=order_by,
+				# list footer pagination: page N starts at (N - 1) * page size
+				limit_start=start,
 				page_length=page_length,
 			)
 			or []
@@ -550,6 +553,7 @@ def get_data(
 		"group_by_field": group_by_field,
 		"page_length": page_length,
 		"page_length_count": page_length_count,
+		"start": start,
 		"is_default": is_default,
 		"views": get_views(doctype),
 		"total_count": frappe.get_list(doctype, filters=filters, fields=[COUNT_NAME])[0].total_count,

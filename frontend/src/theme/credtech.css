@@ -260,3 +260,86 @@
 .ct-btn-accent-text svg {
   color: var(--ct-text-accent) !important;
 }
+
+/* Figma "Filtro" (1165:20747): list filter / view switch in the top bars.
+   White, grey border, 14 Medium black text and a 16px chevron, 32px high. */
+.ct-filter {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  max-width: 240px;
+  padding: 0 10px 0 12px;
+  border: 1px solid var(--ct-border);
+  border-radius: var(--ct-radius-sm);
+  background: var(--ct-bg-page);
+  color: var(--ct-text-primary);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  white-space: nowrap;
+  transition: background-color 0.15s;
+}
+.ct-filter:hover {
+  background: var(--ct-bg-soft);
+}
+.ct-filter:focus-visible {
+  outline: var(--focus-outline-default);
+  outline-offset: 1px;
+}
+
+/* Figma "Campo de busca" (1143:28339): grey field with a 16px magnifier,
+   14 Regular text, 32px high, 8px radius. */
+.ct-search {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 8px;
+  width: 200px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: var(--ct-radius-md);
+  background: var(--ct-bg-soft);
+  color: var(--ct-text-tertiary);
+}
+.ct-search:focus-within {
+  outline: var(--focus-outline-default);
+  outline-offset: 1px;
+}
+.ct-search input {
+  min-width: 0;
+  flex: 1;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ct-text-primary);
+  font-size: 14px;
+  line-height: 20px;
+  box-shadow: none;
+  outline: none;
+}
+.ct-search input::placeholder {
+  color: var(--ct-text-tertiary);
+}
+
+/* Figma "Paginação" (1143:26666) arrows: 32x24, 16px icon, 8px radius;
+   50% opacity when there is no page in that direction. */
+.ct-page-nav {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 24px;
+  border-radius: var(--ct-radius-md);
+  color: var(--ct-text-primary);
+  transition: background-color 0.15s;
+}
+.ct-page-nav:hover:not(:disabled) {
+  background: var(--ct-bg-soft);
+}
+.ct-page-nav:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
