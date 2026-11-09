@@ -342,7 +342,24 @@ const { capture } = useTelemetry()
 const { clearDemoData, isDemoDataCreated } = useDemoData()
 const { send } = useBroadcast()
 
-const isSidebarCollapsed = useStorage('isSidebarCollapsed', false)
+const storedCollapsed = useStorage('isSidebarCollapsed', false)
+
+// Figma "Configurações": the settings pages open with the icon rail (their own
+// "Barra lateral secundária" sits beside it). Expanding it there lasts until
+// the person leaves the settings; the stored choice is left alone.
+const onSettings = computed(() => route.name === 'Settings')
+const expandedOnSettings = ref(false)
+watch(onSettings, (value) => {
+  if (value) expandedOnSettings.value = false
+})
+const isSidebarCollapsed = computed({
+  get: () =>
+    onSettings.value ? !expandedOnSettings.value : storedCollapsed.value,
+  set: (value) => {
+    if (onSettings.value) expandedOnSettings.value = !value
+    else storedCollapsed.value = value
+  },
+})
 
 // The mobile drawer pins the sidebar open, so it is never visually collapsed
 // even when the stored rail state says otherwise.
