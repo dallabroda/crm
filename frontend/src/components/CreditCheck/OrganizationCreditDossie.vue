@@ -53,24 +53,39 @@
       <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
         <!-- Nível 1 -->
         <div
-          class="p-3 rounded-lg border transition-colors"
+          class="p-3.5 rounded-lg border transition-colors bg-surface-white"
           :class="
-            report.data
-              ? 'border-[#1F7A3D]/30 bg-[#E7F6EC]/40'
-              : 'border-[#E6E7EB] bg-[#F5F5F7]/60'
+            isReportSuccess
+              ? 'border-outline-gray-2'
+              : isReportError
+                ? 'border-[#FECDCA] bg-[#FEF3F2]/30'
+                : 'border-outline-gray-2'
           "
         >
-          <div class="flex items-center justify-between gap-2 mb-1">
-            <span class="text-xs font-bold uppercase tracking-wider text-[#1E1F23]">
+          <div class="flex items-center justify-between gap-2 mb-1.5">
+            <span class="text-xs font-semibold uppercase tracking-wider text-[#1E1F23]">
               {{ __('1. Nível Inicial · Triagem') }}
             </span>
             <Badge
-              :label="report.data ? __('Concluído') : __('R$ 0,00 a R$ 0,72')"
-              :theme="report.data ? 'green' : 'gray'"
+              v-if="isReportSuccess"
+              :label="__('Concluído')"
+              theme="green"
+              variant="subtle"
+            />
+            <Badge
+              v-else-if="isReportError"
+              :label="__('Falha na triagem')"
+              theme="red"
+              variant="subtle"
+            />
+            <Badge
+              v-else
+              :label="__('Pendente')"
+              theme="gray"
               variant="subtle"
             />
           </div>
-          <p class="text-p-xs text-[#5E6068]">
+          <p class="text-p-xs text-[#5E6068] leading-relaxed">
             {{
               __(
                 'Receita Federal/QSA + CGU CEIS/CNEP (Grátis) + Sintegra UF (R$ 0,36) + FGTS (R$ 0,36). Elimina empresas inaptas ou sancionadas na largada.',
@@ -81,16 +96,16 @@
 
         <!-- Nível 2 -->
         <div
-          class="p-3 rounded-lg border transition-colors cursor-pointer"
+          class="p-3.5 rounded-lg border transition-colors cursor-pointer bg-surface-white"
           :class="
             selectedTierMode === 'tier_2'
-              ? 'border-[#0088FF] bg-[#E5F1FF]/50'
-              : 'border-[#E6E7EB] bg-[#F5F5F7]/60 hover:border-[#DCDDE2]'
+              ? 'border-[#0088FF] ring-1 ring-[#0088FF]/30 bg-[#F5F9FF]'
+              : 'border-outline-gray-2 hover:border-[#DCDDE2]'
           "
           @click="selectTierMode('tier_2')"
         >
-          <div class="flex items-center justify-between gap-2 mb-1">
-            <span class="text-xs font-bold uppercase tracking-wider text-[#1E1F23]">
+          <div class="flex items-center justify-between gap-2 mb-1.5">
+            <span class="text-xs font-semibold uppercase tracking-wider text-[#1E1F23]">
               {{ __('2. Nível Médio · Dossiê Base') }}
             </span>
             <Badge
@@ -99,7 +114,7 @@
               variant="subtle"
             />
           </div>
-          <p class="text-p-xs text-[#5E6068]">
+          <p class="text-p-xs text-[#5E6068] leading-relaxed">
             {{
               __(
                 'Dossiê QUOD Completo (Score + Protestos + Ações + Cheques) + SCR Bacen. Ideal para tickets pequenos e médios.',
@@ -110,25 +125,25 @@
 
         <!-- Nível 3 -->
         <div
-          class="p-3 rounded-lg border transition-colors cursor-pointer"
+          class="p-3.5 rounded-lg border transition-colors cursor-pointer bg-surface-white"
           :class="
             selectedTierMode.startsWith('tier_3')
-              ? 'border-[#0088FF] bg-[#E5F1FF]/50'
-              : 'border-[#E6E7EB] bg-[#F5F5F7]/60 hover:border-[#DCDDE2]'
+              ? 'border-[#0088FF] ring-1 ring-[#0088FF]/30 bg-[#F5F9FF]'
+              : 'border-outline-gray-2 hover:border-[#DCDDE2]'
           "
           @click="selectTierMode('tier_3_boavista')"
         >
-          <div class="flex items-center justify-between gap-2 mb-1">
-            <span class="text-xs font-bold uppercase tracking-wider text-[#1E1F23]">
+          <div class="flex items-center justify-between gap-2 mb-1.5">
+            <span class="text-xs font-semibold uppercase tracking-wider text-[#1E1F23]">
               {{ __('3. Nível Profundo · Alto Ticket') }}
             </span>
             <Badge
               :label="__('Positivo + Penhoras + Sócios')"
-              theme="amber"
+              theme="gray"
               variant="subtle"
             />
           </div>
-          <p class="text-p-xs text-[#5E6068]">
+          <p class="text-p-xs text-[#5E6068] leading-relaxed">
             {{
               __(
                 'Boa Vista Risco Positivo PJ (ou Serasa) + SCR Bacen + Processos c/ Penhoras + Sócios PF. Pule direto do Nível 1 para cá em operações maiores.',
@@ -143,25 +158,25 @@
     <!-- NÍVEL 1: TRIAGEM JURÍDICA, CADASTRAL & FISCAL (PRÉ-FILTRO BARATO)     -->
     <!-- ===================================================================== -->
     <div
-      class="flex flex-col gap-3 p-4 bg-surface-gray-2 rounded-lg border border-outline-gray-2"
+      class="flex flex-col gap-3 p-4 bg-surface-white rounded-xl border border-outline-gray-2 shadow-sm"
     >
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div class="space-y-1">
-          <div class="flex items-center gap-3">
+          <div class="flex items-center gap-2.5">
             <span class="text-base font-semibold text-ink-gray-9">
               {{ __('Nível 1 · Triagem Cadastral, Fiscal & Compliance') }}
             </span>
-            <Badge :theme="verdictTheme" variant="solid" size="lg">
+            <Badge :theme="verdictTheme" variant="subtle" size="md">
               {{ verdictLabel }}
             </Badge>
-            <span v-if="org.data?.cnpj" class="text-p-sm text-ink-gray-6">
+            <span v-if="org.data?.cnpj" class="text-p-xs font-medium text-ink-gray-6">
               {{ __('CNPJ') }} {{ org.data?.cnpj }}
             </span>
           </div>
           <p class="text-p-xs text-ink-gray-6">
             {{
               __(
-                'Checagem imediata de Situação Cadastral/QSA, Sanções Públicas CEIS/CNEP (CGU · Grátis), Sintegra/CCC por UF, Regularidade FGTS e Dívida Ativa PGFN antes de consultar bureaus de crédito.',
+                'Checagem de Situação Cadastral/QSA, Sanções Públicas CEIS/CNEP (CGU · Grátis), Sintegra/CCC por UF, Regularidade FGTS e Dívida Ativa PGFN antes de consultar bureaus de crédito.',
               )
             }}
           </p>
@@ -185,24 +200,41 @@
           </Button>
         </div>
       </div>
+
+      <!-- Alerta de Sucesso com prazo de validade (apenas quando não for erro) -->
       <div
-        v-if="report.data?.checked_on"
-        class="flex flex-wrap items-center justify-between gap-2 text-p-xs text-ink-green-3 bg-surface-white px-3 py-1.5 rounded border border-outline-gray-1"
+        v-if="isReportSuccess && report.data?.checked_on"
+        class="flex flex-wrap items-center justify-between gap-2 text-p-xs text-[#1F7A3D] bg-[#E7F6EC]/70 px-3.5 py-2 rounded-lg border border-[#A6F4C5]"
       >
         <span>
-          ✓ {{ __('Triagem já realizada em {0} · Prazo para nova consulta: {1} dias (válido até {2})', [
+          ✓ {{ __('Triagem realizada em {0} · Prazo para nova consulta: {1} dias (válido até {2})', [
             report.data.checked_on,
             pkg.data?.reuse_days ?? 30,
             report.data.valid_until || '—',
           ]) }}
         </span>
-        <span class="text-ink-gray-5">
-          {{ __('Prazo alterável em Configurações > Bureaus e Crédito') }}
+        <span class="text-[#5E6068]">
+          {{ __('Prazo configurável em Configurações > Bureaus e Crédito') }}
         </span>
       </div>
+
+      <!-- Alerta de Falha/Erro na triagem -->
       <div
-        v-if="report.data?.verdict_summary"
-        class="text-p-xs text-ink-gray-7 bg-surface-white px-3 py-2 rounded border border-outline-gray-1"
+        v-if="isReportError"
+        class="flex flex-col gap-1.5 p-3.5 rounded-lg bg-[#FEF3F2] border border-[#FECDCA] text-[#B42318] text-p-xs"
+      >
+        <div class="flex items-center gap-2 font-semibold text-sm">
+          <span>⚠️ {{ __('Falha na checagem da triagem inicial') }}</span>
+        </div>
+        <p class="text-ink-gray-8 leading-relaxed">
+          {{ report.data?.verdict_summary || __('Ocorreu uma falha na consulta aos serviços externos. Nenhum parecer foi emitido.') }}
+        </p>
+      </div>
+
+      <!-- Resumo do veredito quando a checagem foi realizada com sucesso -->
+      <div
+        v-else-if="report.data?.verdict_summary"
+        class="text-p-xs text-ink-gray-8 bg-surface-gray-2 px-3.5 py-2.5 rounded-lg border border-outline-gray-1 leading-relaxed"
       >
         {{ report.data.verdict_summary }}
       </div>
@@ -947,8 +979,16 @@
                   v-if="sec.findings?.length"
                   class="list-disc pl-4 space-y-1 text-p-xs text-[#2A2B30]"
                 >
-                  <li v-for="(f, fIdx) in sec.findings" :key="fIdx">
-                    {{ f }}
+                  <li v-for="(f, fIdx) in sec.findings" :key="fIdx" class="leading-relaxed">
+                    <span v-if="formatFinding(f).title" class="font-semibold text-[#1E1F23]">
+                      {{ formatFinding(f).title }}:
+                    </span>
+                    <span class="text-[#2A2B30]">
+                      {{ formatFinding(f).detail }}
+                    </span>
+                    <span v-if="formatFinding(f).source" class="text-[11px] text-[#5E6068] ml-1">
+                      ({{ formatFinding(f).source }})
+                    </span>
                   </li>
                 </ul>
                 <div
@@ -995,11 +1035,29 @@
       </div>
     </div>
 
-    <!-- Pasta Digital (Checklist de Documentos) e Relatório de Visita Técnica/Comercial -->
-    <CreditOnboardingPanel
-      :organization-id="props.organizationId"
-      :deal-id="props.dealId"
-    />
+    <!-- Pasta Digital (Checklist de Documentos) centralizada na aba Anexos -->
+    <div
+      class="p-4 rounded-lg border border-[#E6E7EB] bg-white flex flex-wrap items-center justify-between gap-3 text-p-sm"
+    >
+      <div class="flex items-center gap-2.5">
+        <span class="text-xl">📁</span>
+        <div>
+          <span class="font-semibold text-ink-gray-9">
+            {{ __('Pasta Digital & Checklist de Documentos') }}
+          </span>
+          <p class="text-xs text-ink-gray-6 mt-0.5">
+            {{ __('O checklist de documentos (Contrato Social, Sócios, Faturamento, Balanço, etc.) e o Link Seguro para envio pelo cliente estão centralizados na aba Anexos.') }}
+          </p>
+        </div>
+      </div>
+      <Button
+        variant="outline"
+        size="sm"
+        @click="emit('switch-tab', 'attachments')"
+      >
+        {{ __('Ir para aba Anexos ↗') }}
+      </Button>
+    </div>
 
     <!-- ===================================================================== -->
     <!-- CONSULTAS AVULSAS NOS BUREAUS (SOB DEMANDA)                           -->
@@ -1185,7 +1243,8 @@ import {
 } from 'frappe-ui'
 import { computed, onBeforeUnmount, reactive, ref, watch } from 'vue'
 import { createDialog } from '@/utils/dialogs'
-import CreditOnboardingPanel from '@/components/CreditCheck/CreditOnboardingPanel.vue'
+
+const emit = defineEmits(['switch-tab'])
 
 const props = defineProps({
   organizationId: { type: String, required: true },
@@ -1226,12 +1285,28 @@ const org = createResource({
   url: 'frappe.client.get_value',
   params: {
     doctype: 'CRM Organization',
-    filters: props.organizationId,
+    filters: { name: props.organizationId },
     fieldname: ['credit_verdict', 'credit_report', 'cnpj'],
   },
   auto: true,
   transform: (d) => d?.message || d,
 })
+
+watch(
+  () => props.organizationId,
+  (newId) => {
+    if (newId) {
+      org.update({
+        params: {
+          doctype: 'CRM Organization',
+          filters: { name: newId },
+          fieldname: ['credit_verdict', 'credit_report', 'cnpj'],
+        },
+      })
+      org.fetch()
+    }
+  },
+)
 
 const report = createResource({
   url: 'cred_hub.credit_check.api.get_report_details',
@@ -1375,20 +1450,30 @@ async function openResult(row) {
   }
 }
 
+const isReportError = computed(() => {
+  const v = report.data?.verdict || org.data?.credit_verdict
+  return v === 'Error'
+})
+
+const isReportSuccess = computed(() => {
+  const v = report.data?.verdict || org.data?.credit_verdict
+  return Boolean(v && !['Error', 'Not Checked'].includes(v))
+})
+
 function verdictText(v) {
   if (!v || v === 'Not Checked') return __('Não verificado')
   if (v === 'Pre-Approved') return __('Pré-Aprovado')
   if (v === 'Warning') return __('Atenção')
   if (v === 'Rejected') return __('Reprovado')
-  if (v === 'Error') return __('Provedores de triagem não configurados')
+  if (v === 'Error') return __('Falha na checagem')
   return __(v)
 }
 
-const verdictLabel = computed(() => verdictText(org.data?.credit_verdict))
+const verdictLabel = computed(() => verdictText(org.data?.credit_verdict || report.data?.verdict))
 
 const verdictTheme = computed(() => {
-  const v = org.data?.credit_verdict
-  if (v === 'Rejected') return 'red'
+  const v = org.data?.credit_verdict || report.data?.verdict
+  if (v === 'Rejected' || v === 'Error') return 'red'
   if (v === 'Warning') return 'amber'
   if (v === 'Pre-Approved') return 'green'
   return 'gray'
@@ -1412,6 +1497,29 @@ function formatMoney(value) {
   return `R$ ${Number(value || 0)
     .toFixed(2)
     .replace('.', ',')}`
+}
+
+function formatFinding(f) {
+  if (!f) return { title: '', detail: '', source: '' }
+  if (typeof f === 'string') {
+    const trimmed = f.trim()
+    if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
+      try {
+        const parsed = JSON.parse(trimmed)
+        return {
+          title: parsed.title || parsed.label || '',
+          detail: parsed.detail || parsed.description || parsed.value || '',
+          source: parsed.source || '',
+        }
+      } catch (e) {}
+    }
+    return { title: '', detail: f, source: '' }
+  }
+  return {
+    title: f.title || f.label || '',
+    detail: f.detail || f.description || f.value || '',
+    source: f.source || '',
+  }
 }
 
 function priceText(bureau) {
@@ -1753,11 +1861,11 @@ function askPackage() {
         'Todas as consultas selecionadas para esta empresa já foram realizadas recentemente. O prazo configurado para novas consultas na API do provedor é de {0} dias. Nenhuma nova consulta paga será disparada no provedor.',
         [data.reuse_days || 30],
       ),
-      size: 'lg',
+      size: 'xl',
       actions: [
         { label: __('Cancelar'), onClick: ({ close }) => close() },
         {
-          label: __('Apenas Gerar / Reprocessar Parecer IA'),
+          label: __('Reprocessar Parecer IA'),
           variant: 'outline',
           onClick: ({ close }) => {
             close()
@@ -1765,7 +1873,7 @@ function askPackage() {
           },
         },
         {
-          label: __('Atualizar PDF do Dossiê (Sem Custo de API)'),
+          label: __('Atualizar Dossiê PDF'),
           variant: 'solid',
           onClick: ({ close }) => {
             close()

@@ -68,6 +68,29 @@
       </Link>
     </template>
   </LayoutHeader>
+
+  <!-- Banner de Enriquecimento de CNPJ em segundo plano -->
+  <div
+    v-if="organization.doc?.cnpj && !organization.doc?.cnpj_checked_on"
+    class="flex items-center justify-between gap-3 px-6 py-2 bg-[#F5F5F7] border-b border-[#E6E7EB] text-xs text-[#1E1F23]"
+  >
+    <div class="flex items-center gap-2.5">
+      <span class="inline-block size-3.5 animate-spin rounded-full border-2 border-solid border-[#0088FF] border-r-transparent" />
+      <span class="font-medium text-[#1E1F23]">
+        {{ __('Consultando dados da empresa na Receita Federal...') }}
+      </span>
+      <span class="text-[#5E6068]">
+        {{ __('Identificando razão social, situação cadastral, CNAE, endereço e sócios.') }}
+      </span>
+    </div>
+    <Button
+      size="sm"
+      variant="ghost"
+      :label="__('Atualizar')"
+      @click="organization.reload?.()"
+    />
+  </div>
+
   <div v-if="organization.doc" ref="parentRef" class="flex h-full">
     <Resizer
       v-if="organization.doc"
@@ -172,37 +195,51 @@
         />
         <div
           v-if="tab.value === 'attachments' && docName"
-          class="flex flex-col gap-4 p-5"
+          class="flex flex-col gap-6 p-5"
         >
-          <div class="flex items-center justify-between">
-            <span class="text-lg-medium text-ink-gray-8">{{
-              __('Anexos')
-            }}</span>
-            <Button
-              :label="__('Enviar anexo')"
-              icon-left="lucide-plus"
-              variant="solid"
-              @click="showFilesUploader = true"
+          <!-- Pasta Digital · Checklist de Documentos & Link Seguro (LGPD) -->
+          <CreditOnboardingPanel
+            :organization-id="docName"
+          />
+
+          <!-- Outros Anexos Gerais / Avulsos -->
+          <div class="mt-2 pt-5 border-t border-[#E6E7EB] flex flex-col gap-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <span class="text-base font-semibold text-ink-gray-9">
+                  {{ __('Outros Anexos Gerais') }}
+                </span>
+                <p class="text-xs text-ink-gray-6 mt-0.5">
+                  {{ __('Arquivos avulsos anexados diretamente ao cadastro da organização fora do checklist.') }}
+                </p>
+              </div>
+              <Button
+                :label="__('Enviar anexo avulso')"
+                icon-left="lucide-plus"
+                variant="outline"
+                @click="showFilesUploader = true"
+              />
+            </div>
+            <AttachmentArea
+              v-if="orgAttachments.data?.length"
+              :attachments="orgAttachments.data"
+              @reload="orgAttachments.reload()"
+            />
+            <EmptyState
+              v-else-if="!orgAttachments.loading"
+              :icon="AttachmentIcon"
+              :name="__('Anexos')"
+              :title="__('Nenhum anexo avulso encontrado')"
+              :description="
+                __('Use Enviar anexo avulso se precisar guardar arquivos extras que não fazem parte do checklist da pasta digital.')
+              "
             />
           </div>
-          <AttachmentArea
-            v-if="orgAttachments.data?.length"
-            :attachments="orgAttachments.data"
-            @reload="orgAttachments.reload()"
-          />
-          <EmptyState
-            v-else-if="!orgAttachments.loading"
-            :icon="AttachmentIcon"
-            :name="__('Anexos')"
-            :title="__('Nenhum anexo encontrado')"
-            :description="
-              __('Clique em Enviar anexo para anexar arquivos nesta organização.')
-            "
-          />
         </div>
         <OrganizationCreditDossie
           v-if="tab.value === 'credit' && docName"
           :organization-id="docName"
+          @switch-tab="activeTab = $event"
         />
         <EmptyState
           v-if="
@@ -266,6 +303,7 @@ import RecordNotes from '@/components/RecordNotes.vue'
 import AttachmentArea from '@/components/Activities/AttachmentArea.vue'
 import FilesUploader from '@/components/FilesUploader/FilesUploader.vue'
 import AttachmentIcon from '@/components/Icons/AttachmentIcon.vue'
+import CreditOnboardingPanel from '@/components/CreditCheck/CreditOnboardingPanel.vue'
 import OrganizationCreditDossie from '@/components/CreditCheck/OrganizationCreditDossie.vue'
 import FileTextIcon from '~icons/lucide/file-text'
 import TabCounter from '@/components/TabCounter.vue'
@@ -346,6 +384,77 @@ const {
   scripts,
   triggerOnRender,
 } = useDocument('CRM Organization', props.organizationId)
+
+// Intercepta quando a organização não for encontrada (ex: renomeada pela razão social da Receita)
+watch(
+  () => organization.error,
+  async (err) => {
+    if (err) {
+      try {
+        const res = await call('cred_hub.cnpj.enrich.resolve_organization', {
+          org_name: props.organizationId,
+        })
+        if (res && res.exists && res.name && res.name !== props.organizationId) {
+          router.replace({
+            name: 'Organization',
+            params: { organizationId: res.name },
+            query: route.query,
+          })
+          return
+        }
+      } catch (e) {
+        // fallback
+      }
+      errorTitle.value = __('Organização não encontrada')
+      errorMessage.value = __('A organização "{0}" não foi encontrada.', [
+        props.organizationId,
+      ])
+    }
+  },
+  { immediate: true },
+)
+
+// Polling suave enquanto o CNPJ estiver sendo consultado em segundo plano
+let enrichPollInterval = null
+watch(
+  () => [organization.doc?.cnpj, organization.doc?.cnpj_checked_on],
+  ([cnpj, checkedOn]) => {
+    if (cnpj && !checkedOn) {
+      if (!enrichPollInterval) {
+        enrichPollInterval = setInterval(async () => {
+          try {
+            const res = await call(
+              'cred_hub.cnpj.enrich.resolve_organization',
+              {
+                org_name: props.organizationId,
+              },
+            )
+            if (
+              res &&
+              res.exists &&
+              res.name &&
+              res.name !== props.organizationId
+            ) {
+              clearInterval(enrichPollInterval)
+              enrichPollInterval = null
+              router.replace({
+                name: 'Organization',
+                params: { organizationId: res.name },
+                query: route.query,
+              })
+              return
+            }
+          } catch (e) {}
+          organization.reload?.()
+        }, 3000)
+      }
+    } else if (enrichPollInterval) {
+      clearInterval(enrichPollInterval)
+      enrichPollInterval = null
+    }
+  },
+  { immediate: true },
+)
 
 const canDelete = computed(() => permissions.data?.permissions?.delete || false)
 
