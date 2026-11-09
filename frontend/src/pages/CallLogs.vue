@@ -1,9 +1,10 @@
 <template>
   <LayoutHeader>
     <template #left-header>
-      <ViewBreadcrumbs v-model="viewControls" routeName="Call Logs" />
+      <ViewBreadcrumbs routeName="Call Logs" />
     </template>
     <template #right-header>
+      <ViewSwitcher v-model="viewControls" />
       <CustomActions
         v-if="callLogsListView?.customListActions"
         :actions="callLogsListView.customListActions"
@@ -71,6 +72,7 @@
 
 <script setup>
 import ViewBreadcrumbs from '@/components/ViewBreadcrumbs.vue'
+import ViewSwitcher from '@/components/ViewSwitcher.vue'
 import CustomActions from '@/components/CustomActions.vue'
 import PhoneIcon from '@/components/Icons/PhoneIcon.vue'
 import LayoutHeader from '@/components/LayoutHeader.vue'

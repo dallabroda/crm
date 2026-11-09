@@ -1,9 +1,10 @@
 <template>
   <LayoutHeader>
     <template #left-header>
-      <ViewBreadcrumbs v-model="viewControls" routeName="Leads" />
+      <ViewBreadcrumbs routeName="Leads" />
     </template>
     <template #right-header>
+      <ViewSwitcher v-model="viewControls" />
       <CustomActions
         v-if="leadsListView?.customListActions"
         :actions="leadsListView.customListActions"
@@ -276,6 +277,7 @@
 <script setup>
 import UserAvatar from '@/components/UserAvatar.vue'
 import ViewBreadcrumbs from '@/components/ViewBreadcrumbs.vue'
+import ViewSwitcher from '@/components/ViewSwitcher.vue'
 import MultipleAvatar from '@/components/MultipleAvatar.vue'
 import CustomActions from '@/components/CustomActions.vue'
 import PhoneIcon from '@/components/Icons/PhoneIcon.vue'

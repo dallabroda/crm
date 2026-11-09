@@ -1,9 +1,10 @@
 <template>
   <LayoutHeader>
     <template #left-header>
-      <ViewBreadcrumbs v-model="viewControls" routeName="Organizations" />
+      <ViewBreadcrumbs routeName="Organizations" />
     </template>
     <template #right-header>
+      <ViewSwitcher v-model="viewControls" />
       <CustomActions
         v-if="organizationsListView?.customListActions"
         :actions="organizationsListView.customListActions"
@@ -66,6 +67,7 @@
 </template>
 <script setup>
 import ViewBreadcrumbs from '@/components/ViewBreadcrumbs.vue'
+import ViewSwitcher from '@/components/ViewSwitcher.vue'
 import CustomActions from '@/components/CustomActions.vue'
 import OrganizationsIcon from '@/components/Icons/OrganizationsIcon.vue'
 import LayoutHeader from '@/components/LayoutHeader.vue'

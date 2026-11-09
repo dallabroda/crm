@@ -2,12 +2,12 @@
   <LayoutHeader>
     <template #left-header>
       <ViewBreadcrumbs
-        v-model="viewControls"
         routeName="Deals"
         :title="pipeline?.pipeline_name || ''"
       />
     </template>
     <template #right-header>
+      <ViewSwitcher v-model="viewControls" />
       <CustomActions
         v-if="dealsListView?.customListActions"
         :actions="dealsListView.customListActions"
@@ -282,6 +282,7 @@
 <script setup>
 import UserAvatar from '@/components/UserAvatar.vue'
 import ViewBreadcrumbs from '@/components/ViewBreadcrumbs.vue'
+import ViewSwitcher from '@/components/ViewSwitcher.vue'
 import MultipleAvatar from '@/components/MultipleAvatar.vue'
 import CustomActions from '@/components/CustomActions.vue'
 import CollectionImport from '@/components/CollectionImport.vue'

@@ -6,25 +6,44 @@
     type="checkbox"
     @change.stop="updateFilter(filter, $event.target.checked)"
   />
-  <FormControl
+  <!-- Figma "Filtros rápidos" (1185:15589): select and link filters are a
+       "Filtro" (white, grey border, black text, chevron), the text ones a
+       "Campo de busca". -->
+  <Dropdown
     v-else-if="filter.fieldtype === 'Select'"
-    v-model="filter.value"
-    class="form-control cursor-pointer [&_select]:cursor-pointer"
-    type="select"
-    variant="outline"
-    :options="filter.options"
-    :placeholder="filter.label"
-    side="bottom"
-    @update:modelValue="updateFilter(filter, $event)"
-  />
+    :options="selectOptions"
+  >
+    <template #default="{ open }">
+      <button type="button" class="ct-filter">
+        <span class="truncate">{{ selectLabel || filter.label }}</span>
+        <span
+          class="size-4 shrink-0"
+          :class="open ? 'lucide-chevron-up' : 'lucide-chevron-down'"
+          aria-hidden="true"
+        />
+      </button>
+    </template>
+  </Dropdown>
   <Link
     v-else-if="filter.fieldtype === 'Link'"
-    variant="outline"
     :value="filter.value"
     :doctype="filter.options"
     :placeholder="filter.label"
     @change="(data) => updateFilter(filter, data)"
-  />
+  >
+    <template #target="{ togglePopover, isOpen, selectedValue, displayValue }">
+      <button type="button" class="ct-filter" @click="togglePopover()">
+        <span class="truncate">
+          {{ selectedValue ? displayValue(selectedValue) : filter.label }}
+        </span>
+        <span
+          class="size-4 shrink-0"
+          :class="isOpen ? 'lucide-chevron-up' : 'lucide-chevron-down'"
+          aria-hidden="true"
+        />
+      </button>
+    </template>
+  </Link>
   <component
     :is="filter.fieldtype === 'Date' ? DatePicker : DateTimePicker"
     v-else-if="['Date', 'Datetime'].includes(filter.fieldtype)"
@@ -38,20 +57,22 @@
     "
     @change="(v) => updateFilter(filter, v)"
   />
-  <FormControl
-    v-else
-    v-model="filter.value"
-    type="text"
-    :placeholder="filter.label"
-    @input.stop="debouncedFn(filter, $event.target.value)"
-  />
+  <label v-else class="ct-search">
+    <span class="lucide-search size-4 shrink-0" aria-hidden="true" />
+    <input
+      v-model="filter.value"
+      type="text"
+      :placeholder="filter.label"
+      @input.stop="debouncedFn(filter, $event.target.value)"
+    />
+  </label>
 </template>
 <script setup>
 import Link from '@/components/Controls/Link.vue'
-import { FormControl, DatePicker, DateTimePicker } from 'frappe-ui'
+import { Dropdown, FormControl, DatePicker, DateTimePicker } from 'frappe-ui'
 import { getFormat } from '@/utils'
 import { useDebounceFn } from '@vueuse/core'
-import { reactive, watch } from 'vue'
+import { computed, reactive, watch } from 'vue'
 
 const props = defineProps({
   filter: { type: Object, required: true },
@@ -65,6 +86,23 @@ watch(
   () => props.filter,
   (newFilter) => Object.assign(filter, newFilter),
   { deep: true },
+)
+
+const selectLabel = computed(
+  () =>
+    filter.value &&
+    (filter.options || []).find((o) => o.value === filter.value)?.label,
+)
+
+// The empty option clears the filter, shown as "Todos"
+const selectOptions = computed(() =>
+  (filter.options || []).map((option) => ({
+    label: option.value ? option.label : __('All'),
+    onClick: () => {
+      filter.value = option.value
+      updateFilter(filter, option.value)
+    },
+  })),
 )
 
 const debouncedFn = useDebounceFn((f, value) => {

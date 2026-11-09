@@ -165,13 +165,10 @@
     </ListSelectBanner>
   </ListView>
   <ListFooter
-    v-model="pageLengthCount"
-    class="border-t border-surface-gray-3 px-3 py-3 sm:px-6"
-    :options="{
-      rowCount: options.rowCount,
-      totalCount: options.totalCount,
-    }"
-    @loadMore="emit('loadMore')"
+    v-if="list?.data"
+    class="border-t border-surface-gray-3 px-3 sm:px-6"
+    :list="list"
+    :itemLabel="__('Tasks').toLowerCase()"
   />
   <ListBulkActions
     ref="listBulkActionsRef"

@@ -1,9 +1,10 @@
 <template>
   <LayoutHeader>
     <template #left-header>
-      <ViewBreadcrumbs v-model="viewControls" routeName="Tasks" />
+      <ViewBreadcrumbs routeName="Tasks" />
     </template>
     <template #right-header>
+      <ViewSwitcher v-model="viewControls" />
       <CustomActions
         v-if="tasksListView?.customListActions"
         :actions="tasksListView.customListActions"
@@ -210,6 +211,7 @@
 <script setup>
 import UserAvatar from '@/components/UserAvatar.vue'
 import ViewBreadcrumbs from '@/components/ViewBreadcrumbs.vue'
+import ViewSwitcher from '@/components/ViewSwitcher.vue'
 import CustomActions from '@/components/CustomActions.vue'
 import TaskPriorityBadge from '@/components/TaskPriorityBadge.vue'
 import TaskStatusIcon from '@/components/Icons/TaskStatusIcon.vue'
