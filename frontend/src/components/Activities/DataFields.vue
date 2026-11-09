@@ -20,7 +20,7 @@
           @click="showDataFieldsModal = true"
         />
         <Button
-          label="Save"
+          :label="__('Save')"
           :disabled="!document.isDirty || document.enriching"
           variant="solid"
           :loading="document.save.loading"
