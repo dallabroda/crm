@@ -26,7 +26,20 @@ export default {
     '!text-ink-gray-9',
   ],
   theme: {
-    extend: {},
+    extend: {
+      // frappe-ui only ships the numbered radius scale (rounded-0…9), so the
+      // named classes used across the app (rounded, rounded-md, rounded-lg…)
+      // generated nothing and every box had square corners. Map them to the
+      // CredTech Style Guide radii: Raio/Pequeno 6, Médio 8, Grande 12.
+      borderRadius: {
+        sm: '4px',
+        DEFAULT: '6px',
+        md: '6px',
+        lg: '8px',
+        xl: '12px',
+        '2xl': '16px',
+      },
+    },
   },
   plugins: [],
 }

@@ -1,10 +1,7 @@
 <template>
-  <SettingsLayoutBase
-    :title="__('Políticas de Crédito & Compliance')"
-    :description="
-      __('Regras de análise de crédito, prevenção a fraudes e consultas jurídicas.')
-    "
-  >
+  <!-- Figma "Configurações · Políticas de Crédito & Compliance" (1999:53488 …):
+       title "Crédito e Compliance", blue info notice, 4 underlined tabs -->
+  <SettingsLayoutBase :title="__('Crédito e Compliance')">
     <template #header-actions>
       <div v-if="settingsDoc" class="flex items-center gap-2">
         <Button
@@ -24,14 +21,20 @@
       </div>
       <div
         v-else-if="settingsDoc"
-        class="ct-credit space-y-6 pb-12 text-ink-gray-8"
+        class="ct-credit flex flex-col gap-6 pb-12 text-ink-gray-8"
       >
-        <!-- Who pays (credtech#316): every paid query uses the client's own provider account -->
+        <!-- Who pays (credtech#316): every paid query uses the client's own provider account.
+             Figma "Aviso (toast)" · Informação -->
         <div
-          class="flex gap-2.5 rounded-lg bg-[var(--ct-bg-soft)] px-4 py-3 text-p-base text-ink-gray-6"
+          class="flex min-h-11 items-center gap-2.5 rounded-[var(--ct-radius-md)] bg-[var(--ct-accent-soft)] py-2.5 pl-3.5 pr-2.5"
         >
-          <span class="lucide-info mt-0.5 size-4 shrink-0" aria-hidden="true" />
-          <span>
+          <span
+            class="lucide-info size-5 shrink-0 text-[var(--ct-accent)]"
+            aria-hidden="true"
+          />
+          <span
+            class="flex-1 text-[14px] font-medium leading-5 text-[var(--ct-accent)]"
+          >
             {{
               __("Toda consulta paga usa a sua própria conta em cada provedor: o provedor cobra direto de você e a CredTech não cobra nada. Os preços mostrados são os preços de tabela dos provedores, só como referência; o seu contrato pode ser diferente.",
               )
@@ -39,38 +42,48 @@
           </span>
         </div>
 
-        <!-- Quick section navigation pills so the page is clean and easy to present -->
+        <!-- Figma "Aba": 14 Medium, 4px/10px padding, 2px blue line on the active tab -->
         <div
-          class="flex flex-wrap items-center gap-2 border-b border-outline-gray-2 pb-3"
+          class="flex items-start gap-4 border-b border-[var(--ct-border)]"
+          role="tablist"
         >
           <button
             v-for="tab in sectionTabs"
             :key="tab.key"
             type="button"
-            class="px-3.5 py-1.5 rounded-md text-p-sm font-medium transition-colors"
-            :class="
-              activeSection === tab.key
-                ? 'bg-surface-gray-7 text-ink-white'
-                : 'bg-surface-gray-2 text-ink-gray-7 hover:bg-surface-gray-3'
-            "
+            role="tab"
+            :aria-selected="activeSection === tab.key"
+            class="flex flex-col"
             @click="activeSection = tab.key"
           >
-            {{ tab.label }}
+            <span
+              class="px-1 py-2.5 text-[14px] font-medium leading-5"
+              :class="
+                activeSection === tab.key
+                  ? 'text-[var(--ct-accent)]'
+                  : 'text-[var(--ct-text-secondary)] hover:text-[var(--ct-text-primary)]'
+              "
+            >
+              {{ tab.label }}
+            </span>
+            <span
+              class="h-0.5 w-full"
+              :class="activeSection === tab.key ? 'bg-[var(--ct-accent)]' : ''"
+            />
           </button>
         </div>
 
         <!-- ===================================================================== -->
-        <!-- SECTION 1: FUNIS PRONTOS & PASTA DIGITAL DE DOCUMENTOS               -->
+        <!-- TAB 1: FUNIS E DOCUMENTOS (Figma 1999:53539)                          -->
         <!-- ===================================================================== -->
-        <div
-          v-show="activeSection === 'all' || activeSection === 'funnels'"
-          class="space-y-6"
-        >
+        <div v-show="activeSection === 'funnels'" class="flex flex-col gap-6">
           <div class="flex flex-col gap-1">
-            <span class="text-lg font-semibold leading-6 text-ink-gray-9">
-              {{ __('1. Modelos de Funil & Pasta Digital de Documentos') }}
+            <span
+              class="text-[18px] font-semibold leading-6 text-[var(--ct-text-primary)]"
+            >
+              {{ __('Modelos de Funil & Pasta Digital de Documentos') }}
             </span>
-            <span class="text-base leading-5 text-ink-gray-6">
+            <span class="text-[14px] leading-5 text-[var(--ct-text-secondary)]">
               {{
                 __(
                   'Funis prontos para Securitizadoras, FIDCs, Factorings e Cobrança, além do checklist de documentos exigidos na análise.',
@@ -79,36 +92,47 @@
             </span>
           </div>
 
-          <!-- Funnel templates side by side -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Funnel templates: one bordered list, one row per funnel -->
+          <div
+            class="flex flex-col overflow-hidden rounded-[var(--ct-radius-md)] border border-[var(--ct-border)]"
+          >
             <div
-              class="space-y-3 rounded-lg border border-[var(--ct-border)] bg-surface-white px-5 py-4"
+              class="flex items-center gap-4 border-b border-[var(--ct-border)] px-4 py-3.5"
             >
-              <div class="flex items-center justify-between">
-                <span class="text-lg-semibold text-ink-gray-9">{{
-                  __('Funil Crédito PJ')
-                }}</span>
-                <Badge
-                  :label="__('Originação & Crédito')"
-                  theme="blue"
-                  variant="subtle"
-                />
+              <div class="flex min-w-0 flex-1 flex-col gap-1">
+                <div class="flex items-center gap-2">
+                  <span
+                    class="text-[16px] font-semibold leading-6 text-[var(--ct-text-primary)]"
+                  >
+                    {{ __('Funil Crédito PJ') }}
+                  </span>
+                  <span
+                    class="rounded-full bg-[var(--ct-accent-soft)] px-2.5 py-0.5 text-[12px] font-medium leading-4 text-[var(--ct-accent)]"
+                  >
+                    {{ __('Originação & Crédito') }}
+                  </span>
+                </div>
+                <p
+                  class="text-[12px] leading-4 text-[var(--ct-text-secondary)]"
+                >
+                  {{
+                    __(
+                      'Um funil pronto para prospectar e analisar crédito de empresas. É só um ponto de partida: você edita etapas, campos e regras como em qualquer funil. Nada é obrigatório por etapa e não tem custo.',
+                    )
+                  }}
+                </p>
               </div>
-              <p class="text-p-xs text-ink-gray-6">
-                {{
-                  __('Um funil pronto para prospectar e analisar crédito de empresas (Securitizadoras, FIDCs, Factorings). Nada é obrigatório por etapa e não tem custo.',
-                  )
-                }}
-              </p>
-              <p
-                v-if="template.data"
-                class="text-p-sm font-medium text-ink-gray-9"
+              <span
+                v-if="template.data?.installed"
+                class="flex shrink-0 items-center gap-1.5 rounded-full bg-[var(--ct-success-soft)] px-2.5 py-0.5 text-[12px] font-medium leading-4 text-[var(--ct-success)]"
               >
-                {{ template.data.stages.join(' → ') }}
-              </p>
+                <span class="size-1.5 rounded-full bg-[var(--ct-success)]" />
+                {{ __('Instalado') }}
+              </span>
               <Button
-                v-if="template.data && !template.data.installed"
+                v-else-if="template.data"
                 variant="outline"
+                size="md"
                 :loading="installing"
                 @click="installTemplate"
               >
@@ -116,34 +140,41 @@
               </Button>
             </div>
 
-            <div
-              class="space-y-3 rounded-lg border border-[var(--ct-border)] bg-surface-white px-5 py-4"
-            >
-              <div class="flex items-center justify-between">
-                <span class="text-lg-semibold text-ink-gray-9">{{
-                  __('Funil de Cobrança')
-                }}</span>
-                <Badge
-                  :label="__('Recuperação & Cartório')"
-                  theme="amber"
-                  variant="subtle"
-                />
+            <div class="flex items-center gap-4 px-4 py-3.5">
+              <div class="flex min-w-0 flex-1 flex-col gap-1">
+                <div class="flex items-center gap-2">
+                  <span
+                    class="text-[16px] font-semibold leading-6 text-[var(--ct-text-primary)]"
+                  >
+                    {{ __('Funil de Cobrança') }}
+                  </span>
+                  <span
+                    class="rounded-full bg-[var(--ct-bg-panel)] px-2.5 py-0.5 text-[12px] font-medium leading-4 text-[var(--ct-text-primary)]"
+                  >
+                    {{ __('Recuperação & Cartório') }}
+                  </span>
+                </div>
+                <p
+                  class="text-[12px] leading-4 text-[var(--ct-text-secondary)]"
+                >
+                  {{
+                    __(
+                      'Um funil pronto para recuperar títulos vencidos, negociar acordos e enviar a protesto em cartório.',
+                    )
+                  }}
+                </p>
               </div>
-              <p class="text-p-xs text-ink-gray-6">
-                {{
-                  __('Envia títulos vencidos para protesto em cartório (CENPROT), localiza devedores e acompanha a recuperação todos os dias.',
-                  )
-                }}
-              </p>
-              <p
-                v-if="collectionStatus.data?.stages"
-                class="text-p-sm font-medium text-ink-gray-9"
+              <span
+                v-if="collectionStatus.data?.installed"
+                class="flex shrink-0 items-center gap-1.5 rounded-full bg-[var(--ct-success-soft)] px-2.5 py-0.5 text-[12px] font-medium leading-4 text-[var(--ct-success)]"
               >
-                {{ collectionStatus.data.stages.join(' → ') }}
-              </p>
+                <span class="size-1.5 rounded-full bg-[var(--ct-success)]" />
+                {{ __('Instalado') }}
+              </span>
               <Button
-                v-if="collectionStatus.data && !collectionStatus.data.installed"
+                v-else-if="collectionStatus.data"
                 variant="outline"
+                size="md"
                 :loading="installingCollection"
                 @click="installCollectionTemplate"
               >
@@ -152,16 +183,20 @@
             </div>
           </div>
 
-          <!-- Document Checklist Template Configuration -->
+          <!-- Document checklist (Figma 2001:3796) -->
           <div
-            class="space-y-4 rounded-lg border border-[var(--ct-border)] bg-surface-white px-5 py-4"
+            class="flex flex-col gap-4 rounded-[var(--ct-radius-md)] border border-[var(--ct-border)] bg-surface-white px-5 py-4"
           >
-            <div class="flex flex-wrap items-center justify-between gap-2">
-              <div>
-                <span class="text-lg-semibold text-ink-gray-9">
+            <div class="flex items-start gap-4">
+              <div class="flex min-w-0 flex-1 flex-col gap-0.5">
+                <span
+                  class="text-[16px] font-semibold leading-[23px] text-[var(--ct-text-primary)]"
+                >
                   {{ __('Checklist de Documentos da Pasta de Crédito') }}
                 </span>
-                <p class="text-p-xs text-ink-gray-6 mt-0.5">
+                <p
+                  class="max-w-[820px] text-[13px] leading-[19px] text-[var(--ct-text-secondary)]"
+                >
                   {{
                     __(
                       'Defina quais documentos o cedente/cliente precisa entregar na análise (Contrato Social, RG/CNH dos Sócios, Faturamento, Endividamento, etc.). Em cada card ou organização você anexa os arquivos e dá o check de conferência.',
@@ -169,61 +204,63 @@
                   }}
                 </p>
               </div>
-              <Button variant="outline" size="sm" @click="addChecklistItem">
+              <Button
+                variant="outline"
+                size="md"
+                class="ct-btn-accent-text shrink-0"
+                @click="addChecklistItem"
+              >
                 + {{ __('Adicionar documento') }}
               </Button>
             </div>
 
             <div
-              v-if="checklistItems.length"
-              class="divide-y divide-outline-gray-1"
+              v-for="(docItem, idx) in checklistItems"
+              :key="docItem.key || idx"
+              class="flex items-center justify-between gap-4"
             >
-              <div
-                v-for="(docItem, idx) in checklistItems"
-                :key="docItem.key || idx"
-                class="py-2.5 flex flex-wrap items-center justify-between gap-3"
-              >
-                <div class="flex items-center gap-3 flex-1 min-w-[240px]">
-                  <Checkbox v-model="docItem.enabled" />
-                  <input
-                    v-model="docItem.label"
-                    type="text"
-                    class="flex-1 rounded border border-outline-gray-2 px-3 py-1.5 text-p-sm text-ink-gray-9 bg-surface-white"
-                    :placeholder="__('Nome do documento exigido')"
-                  />
-                </div>
-                <div class="flex items-center gap-4">
-                  <select
-                    v-model="docItem.category"
-                    class="rounded border border-outline-gray-2 px-2.5 py-1.5 text-p-sm text-ink-gray-8 bg-surface-white"
-                  >
-                    <option value="Societário">{{ __('Societário') }}</option>
-                    <option value="Cadastral">{{ __('Cadastral') }}</option>
-                    <option value="Financeiro">{{ __('Financeiro') }}</option>
-                    <option value="Contábil">{{ __('Contábil') }}</option>
-                    <option value="Operacional">{{ __('Operacional') }}</option>
-                    <option value="Lastro">{{ __('Lastro / Títulos') }}</option>
-                  </select>
-                  <Checkbox
-                    v-model="docItem.required"
-                    :label="__('Obrigatório')"
-                  />
-                  <button
-                    v-if="checklistItems.length > 1"
-                    type="button"
-                    class="text-ink-red-3 hover:text-ink-red-4 text-xs font-medium px-1"
-                    :title="__('Remover item')"
-                    @click="removeChecklistItem(idx)"
-                  >
-                    ✕
-                  </button>
-                </div>
+              <div class="flex min-w-0 items-center gap-4">
+                <Checkbox v-model="docItem.enabled" />
+                <input
+                  v-model="docItem.label"
+                  type="text"
+                  class="w-[520px] min-w-0 shrink text-[var(--ct-text-primary)]"
+                  :placeholder="__('Nome do documento exigido')"
+                />
+                <select
+                  v-model="docItem.category"
+                  class="w-[200px] shrink-0 text-[var(--ct-text-primary)]"
+                >
+                  <option value="Societário">{{ __('Societário') }}</option>
+                  <option value="Cadastral">{{ __('Cadastral') }}</option>
+                  <option value="Financeiro">{{ __('Financeiro') }}</option>
+                  <option value="Contábil">{{ __('Contábil') }}</option>
+                  <option value="Operacional">{{ __('Operacional') }}</option>
+                  <option value="Lastro">{{ __('Lastro / Títulos') }}</option>
+                </select>
+                <Checkbox
+                  v-model="docItem.required"
+                  class="shrink-0"
+                  :label="__('Obrigatório')"
+                />
               </div>
+              <!-- Style Guide: trash always red (Paleta/Feedback/Erro) -->
+              <button
+                v-if="checklistItems.length > 1"
+                type="button"
+                class="flex size-8 shrink-0 items-center justify-center rounded-[var(--ct-radius-sm)] text-[var(--ct-danger)] hover:bg-[var(--ct-danger-soft)]"
+                :title="__('Remover item')"
+                :aria-label="__('Remover item')"
+                @click="removeChecklistItem(idx)"
+              >
+                <span class="lucide-trash-2 size-4" aria-hidden="true" />
+              </button>
             </div>
 
-            <div class="flex items-center gap-2 pt-2">
+            <div class="flex justify-end">
               <Button
                 variant="solid"
+                size="md"
                 :loading="savingChecklist"
                 @click="saveChecklist"
               >
@@ -232,66 +269,58 @@
             </div>
           </div>
 
-          <!-- Stage Gate / Governance Locks -->
+          <!-- Stage gate (Figma 2001:3929): title and the three checks -->
           <div
-            class="space-y-3 rounded-lg border border-[var(--ct-border)] bg-surface-white px-5 py-4"
+            class="flex flex-col gap-3 rounded-[var(--ct-radius-md)] border border-[var(--ct-border)] bg-surface-white px-5 py-4"
           >
-            <div>
-              <span class="text-lg-semibold text-ink-gray-9">
-                {{ __('Travas de Governança no Funil (Stage Gate)') }}
-              </span>
-              <p class="text-p-xs text-ink-gray-6 mt-0.5">
-                {{
-                  __(
-                    'Impeça que Cards avancem para Análise, Comitê ou Crédito Concedido sem os documentos obrigatórios da Pasta Digital ou sem o Dossiê de Crédito gerado.',
-                  )
-                }}
-              </p>
-            </div>
-            <div class="space-y-2.5 pt-1">
-              <Checkbox
-                v-model="settingsDoc.enforce_checklist_on_stage_gate"
-                :label="
-                  __(
-                    'Exigir todos os documentos obrigatórios anexados antes de avançar para Análise ou Comitê',
-                  )
-                "
-              />
-              <Checkbox
-                v-if="settingsDoc.enforce_checklist_on_stage_gate"
-                v-model="settingsDoc.require_verified_checklist_on_committee"
-                :label="
-                  __(
-                    'Exigir check de Conferido (Verified) pela mesa de crédito antes de avançar para Comitê / Crédito Concedido',
-                  )
-                "
-              />
-              <Checkbox
-                v-model="settingsDoc.enforce_dossier_on_committee"
-                :label="
-                  __(
-                    'Exigir Dossiê / Relatório de Crédito gerado antes de avançar para Comitê / Crédito Concedido',
-                  )
-                "
-              />
-            </div>
+            <span
+              class="text-[16px] font-semibold leading-[23px] text-[var(--ct-text-primary)]"
+            >
+              {{ __('Travas de Governança no Funil (Stage Gate)') }}
+            </span>
+            <Checkbox
+              v-model="settingsDoc.enforce_checklist_on_stage_gate"
+              :label="
+                __(
+                  'Exigir todos os documentos obrigatórios anexados antes de avançar para Análise ou Comitê',
+                )
+              "
+            />
+            <Checkbox
+              v-if="settingsDoc.enforce_checklist_on_stage_gate"
+              v-model="settingsDoc.require_verified_checklist_on_committee"
+              :label="
+                __(
+                  'Exigir check de Conferido (Verified) pela mesa de crédito antes de avançar para Comitê / Crédito Concedido',
+                )
+              "
+            />
+            <Checkbox
+              v-model="settingsDoc.enforce_dossier_on_committee"
+              :label="
+                __(
+                  'Exigir Dossiê / Relatório de Crédito gerado antes de avançar para Comitê / Crédito Concedido',
+                )
+              "
+            />
           </div>
         </div>
 
-        <SettingsDivider v-show="activeSection === 'all'" />
 
         <!-- ===================================================================== -->
         <!-- SECTION 2: BUREAUS DE CRÉDITO & CREDENCIAIS (SEMPRE VISÍVEIS)        -->
         <!-- ===================================================================== -->
         <div
-          v-show="activeSection === 'all' || activeSection === 'bureaus'"
+          v-show="activeSection === 'bureaus'"
           class="space-y-6"
         >
           <div class="flex flex-col gap-1">
-            <span class="text-lg font-semibold leading-6 text-ink-gray-9">
-              {{ __('2. Bureaus de Crédito & Credenciais de API') }}
+            <span
+              class="text-[18px] font-semibold leading-6 text-[var(--ct-text-primary)]"
+            >
+              {{ __('Bureaus de Crédito & Credenciais de API') }}
             </span>
-            <span class="text-base leading-5 text-ink-gray-6">
+            <span class="text-[14px] leading-5 text-[var(--ct-text-secondary)]">
               {{
                 __(
                   'Conecte suas contas nos provedores (DirectD, Serasa Experian, Escavador, Infosimples e CGU) para consultas de Dossiê e Pré-Filtro.',
@@ -302,11 +331,10 @@
 
           <!-- 2.1 DirectD Unificado (Token + Relatórios de Dossiê + Pré-Filtro) -->
           <div
-            class="space-y-4 rounded-lg border border-[var(--ct-border)] bg-surface-white px-5 py-4"
+            class="space-y-4 rounded-[var(--ct-radius-md)] border border-[var(--ct-border)] bg-surface-white px-5 py-4"
           >
             <div class="flex flex-wrap items-center justify-between gap-2">
-              <div class="flex items-center gap-2">
-                <span class="text-lg-semibold text-ink-gray-9">
+              <span class="text-[16px] font-semibold leading-6 text-[var(--ct-text-primary)]">
                   {{
                     __(
                       'DirectD · Dossiê QUOD, SCR Bacen, Boa Vista, Score e Protestos',
@@ -318,7 +346,6 @@
                   theme="blue"
                   variant="subtle"
                 />
-              </div>
             </div>
             <p class="text-p-xs text-ink-gray-6">
               {{
@@ -406,8 +433,8 @@
                 </div>
               </div>
 
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
-                <div class="flex items-center justify-between p-2.5 rounded border border-outline-gray-2 bg-surface-gray-1">
+              <div class="flex flex-col gap-2.5 pt-1">
+                <div class="flex items-center justify-between gap-2 py-1">
                   <Checkbox
                     v-model="settingsDoc.directd_fgts_enabled"
                     :label="__('Regularidade do FGTS / CRF (Caixa)')"
@@ -416,7 +443,7 @@
                     {{ formatMoney(prices.directd_fgts) }}
                   </span>
                 </div>
-                <div class="flex items-center justify-between p-2.5 rounded border border-outline-gray-2 bg-surface-gray-1">
+                <div class="flex items-center justify-between gap-2 py-1">
                   <Checkbox
                     v-model="settingsDoc.directd_sintegra_enabled"
                     :label="__('Sintegra / CCC por UF (Inscrição Estadual)')"
@@ -427,17 +454,26 @@
                 </div>
               </div>
 
-              <div class="rounded-md border border-[#0088FF]/25 bg-[#E5F1FF] px-3.5 py-2.5 text-p-xs text-[#1E1F23] space-y-1">
-                <div class="font-semibold text-[#0070E0]">
-                  {{ __('💡 Proteção Anti-Redundância (Economia de R$ 6,43 por consulta)') }}
-                </div>
-                <div>
+              <!-- Style Guide "Aviso (toast)" · Informação -->
+              <div
+                class="flex min-h-11 items-start gap-2.5 rounded-[var(--ct-radius-md)] bg-[var(--ct-accent-soft)] py-2.5 pl-3.5 pr-2.5"
+              >
+                <span
+                  class="lucide-info mt-px size-5 shrink-0 text-[var(--ct-accent)]"
+                  aria-hidden="true"
+                />
+                <p
+                  class="mb-0 flex-1 text-[14px] font-medium leading-5 text-[var(--ct-accent)]"
+                >
+                  <span class="font-semibold">{{
+                    __('Proteção Anti-Redundância (economia de R$ 6,43 por consulta):')
+                  }}</span>
                   {{
                     __(
                       'O Dossiê QUOD (Nível 2) e o Boa Vista Risco Positivo PJ (Nível 3) já incluem Score, Protestos Detalhados e Ações Judiciais. Por isso, recomendamos manter o pacote legado de Score/Protestos Básicos abaixo desligado na Triagem Nível 1.',
                     )
                   }}
-                </div>
+                </p>
               </div>
 
               <div class="flex items-center justify-between pt-1">
@@ -487,20 +523,20 @@
 
           <!-- 2.2 Serasa Experian (Sempre visível) -->
           <div
-            class="space-y-3 rounded-lg border border-[var(--ct-border)] bg-surface-white px-5 py-4"
+            class="space-y-3 rounded-[var(--ct-radius-md)] border border-[var(--ct-border)] bg-surface-white px-5 py-4"
           >
             <div class="flex items-center justify-between">
-              <div class="flex items-center gap-2">
-                <span class="text-lg-semibold text-ink-gray-9">
+              <span class="text-[16px] font-semibold leading-6 text-[var(--ct-text-primary)]">
                   {{ __('Serasa Experian · Relatório Avançado PJ') }}
                 </span>
+              <div class="flex shrink-0 items-center gap-2">
                 <Badge
                   :label="__('Contrato Próprio')"
                   theme="amber"
                   variant="subtle"
                 />
+                <Switch v-model="settingsDoc.serasa_enabled" />
               </div>
-              <Switch v-model="settingsDoc.serasa_enabled" />
             </div>
             <p class="text-p-xs text-ink-gray-6">
               {{
@@ -561,20 +597,20 @@
             </div>
           </div>
 
-          <!-- 2.3 Escavador + Infosimples + CGU -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- 2.3 Escavador + Infosimples + CGU: one card per row (Figma) -->
+          <div class="flex flex-col gap-6">
             <!-- Escavador -->
             <div
-              class="space-y-3 rounded-lg border border-[var(--ct-border)] bg-surface-white px-5 py-4"
+              class="space-y-3 rounded-[var(--ct-radius-md)] border border-[var(--ct-border)] bg-surface-white px-5 py-4"
             >
               <div class="flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                  <span class="text-lg-semibold text-ink-gray-9">
+                <span class="text-[16px] font-semibold leading-6 text-[var(--ct-text-primary)]">
                     {{ __('Busca unificada de processos (Escavador)') }}
                   </span>
+                <div class="flex shrink-0 items-center gap-2">
                   <Badge :label="__('Processos')" theme="blue" variant="subtle" />
+                  <Switch v-model="settingsDoc.escavador_enabled" />
                 </div>
-                <Switch v-model="settingsDoc.escavador_enabled" />
               </div>
               <p class="text-p-xs text-ink-gray-6">
                 {{
@@ -614,18 +650,18 @@
 
             <!-- Infosimples -->
             <div
-              class="space-y-3 rounded-lg border border-[var(--ct-border)] bg-surface-white px-5 py-4"
+              class="space-y-3 rounded-[var(--ct-radius-md)] border border-[var(--ct-border)] bg-surface-white px-5 py-4"
             >
               <div class="flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                  <span class="text-lg-semibold text-ink-gray-9">
+                <span class="text-[16px] font-semibold leading-6 text-[var(--ct-text-primary)]">
                     {{
                       __('Regularidade fiscal e certidões federais (Infosimples)')
                     }}
                   </span>
+                <div class="flex shrink-0 items-center gap-2">
                   <Badge :label="__('Fiscal')" theme="blue" variant="subtle" />
+                  <Switch v-model="settingsDoc.infosimples_enabled" />
                 </div>
-                <Switch v-model="settingsDoc.infosimples_enabled" />
               </div>
               <p class="text-p-xs text-ink-gray-6">
                 {{
@@ -669,16 +705,16 @@
 
           <!-- 2.4 CGU CEIS/CNEP (Grátis) -->
           <div
-            class="space-y-3 rounded-lg border border-[var(--ct-border)] bg-surface-white px-5 py-4"
+            class="space-y-3 rounded-[var(--ct-radius-md)] border border-[var(--ct-border)] bg-surface-white px-5 py-4"
           >
             <div class="flex items-center justify-between">
-              <div class="flex items-center gap-2">
-                <span class="text-lg-semibold text-ink-gray-9">
+              <span class="text-[16px] font-semibold leading-6 text-[var(--ct-text-primary)]">
                   {{ __('Etapa 0: Sanções CEIS/CNEP (CGU)') }}
                 </span>
+              <div class="flex shrink-0 items-center gap-2">
                 <Badge :label="__('Grátis')" theme="green" variant="subtle" />
+                <Switch v-model="settingsDoc.cgu_enabled" />
               </div>
-              <Switch v-model="settingsDoc.cgu_enabled" />
             </div>
             <p class="text-p-xs text-ink-gray-6">
               {{
@@ -695,20 +731,21 @@
           </div>
         </div>
 
-        <SettingsDivider v-show="activeSection === 'all'" />
 
         <!-- ===================================================================== -->
         <!-- SECTION 3: DOSSIÊ DE CRÉDITO & PARECER DA IA (METODOLOGIA 5 Cs)      -->
         <!-- ===================================================================== -->
         <div
-          v-show="activeSection === 'all' || activeSection === 'policy'"
+          v-show="activeSection === 'policy'"
           class="space-y-6"
         >
           <div class="flex flex-col gap-1">
-            <span class="text-lg font-semibold leading-6 text-ink-gray-9">
-              {{ __('3. Dossiê de Crédito & Parecer da IA') }}
+            <span
+              class="text-[18px] font-semibold leading-6 text-[var(--ct-text-primary)]"
+            >
+              {{ __('Dossiê de Crédito & Parecer da IA') }}
             </span>
-            <span class="text-base leading-5 text-ink-gray-6">
+            <span class="text-[14px] leading-5 text-[var(--ct-text-secondary)]">
               {{
                 __('O que a IA segue para escrever o parecer e as consultas que todo dossiê precisa ter.',
                 )
@@ -718,10 +755,10 @@
 
           <!-- Minimum package of the credit dossier -->
           <div
-            class="space-y-3 rounded-lg border border-[var(--ct-border)] bg-surface-white px-5 py-4"
+            class="space-y-3 rounded-[var(--ct-radius-md)] border border-[var(--ct-border)] bg-surface-white px-5 py-4"
           >
             <div class="flex flex-wrap items-center justify-between gap-2">
-              <span class="text-lg-semibold text-ink-gray-9">{{
+              <span class="text-[16px] font-semibold leading-6 text-[var(--ct-text-primary)]">{{
                 __('Pacote mínimo do dossiê (Padrão Nível 2 ou Nível 3)')
               }}</span>
               <div class="flex flex-wrap items-center gap-2">
@@ -754,13 +791,26 @@
                 )
               }}
             </p>
-            <div class="rounded-md border border-[#0088FF]/25 bg-[#E5F1FF] px-3.5 py-2 text-p-xs text-[#1E1F23]">
-              <span class="font-semibold text-[#0070E0]">{{ __('Regra Anti-Redundância Nível 3:') }}</span>
-              {{
-                __(
-                  ' No Nível 3 (Profundo), escolha Boa Vista Risco Positivo PJ OU Serasa Relatório Avançado PJ — nunca ambos juntos, pois retornam o mesmo bloco de Score, Faturamento Presumido e Restrições.',
-                )
-              }}
+            <!-- Style Guide "Aviso (toast)" · Informação -->
+            <div
+              class="flex min-h-11 items-start gap-2.5 rounded-[var(--ct-radius-md)] bg-[var(--ct-accent-soft)] py-2.5 pl-3.5 pr-2.5"
+            >
+              <span
+                class="lucide-info mt-px size-5 shrink-0 text-[var(--ct-accent)]"
+                aria-hidden="true"
+              />
+              <p
+                class="mb-0 flex-1 text-[14px] font-medium leading-5 text-[var(--ct-accent)]"
+              >
+                <span class="font-semibold">{{
+                  __('Regra Anti-Redundância Nível 3:')
+                }}</span>
+                {{
+                  __(
+                    ' No Nível 3 (Profundo), escolha Boa Vista Risco Positivo PJ OU Serasa Relatório Avançado PJ — nunca ambos juntos, pois retornam o mesmo bloco de Score, Faturamento Presumido e Restrições.',
+                  )
+                }}
+              </p>
             </div>
             <template v-if="packageDoc">
               <div class="text-base font-semibold text-ink-gray-9">
@@ -863,10 +913,10 @@
 
           <!-- Credit policy the AI follows -->
           <div
-            class="space-y-3 rounded-lg border border-[var(--ct-border)] bg-surface-white px-5 py-4"
+            class="space-y-3 rounded-[var(--ct-radius-md)] border border-[var(--ct-border)] bg-surface-white px-5 py-4"
           >
             <div class="flex items-center justify-between">
-              <span class="text-lg-semibold text-ink-gray-9">{{
+              <span class="text-[16px] font-semibold leading-6 text-[var(--ct-text-primary)]">{{
                 __('Política de crédito (parecer da IA)')
               }}</span>
               <span v-if="policyDoc" class="text-xs text-ink-gray-6">
@@ -958,11 +1008,10 @@
           <!-- Metodologia Configurável do Rating Interno (AA–E) & Calculadora de Limite Sugerido -->
           <div
             v-if="ratingPolicyDoc"
-            class="space-y-4 rounded-lg border border-[var(--ct-border)] bg-surface-white px-5 py-4"
+            class="space-y-4 rounded-[var(--ct-radius-md)] border border-[var(--ct-border)] bg-surface-white px-5 py-4"
           >
             <div class="flex flex-wrap items-center justify-between gap-2">
-              <div class="flex items-center gap-2">
-                <span class="text-lg-semibold text-ink-gray-9">
+              <span class="text-[16px] font-semibold leading-6 text-[var(--ct-text-primary)]">
                   {{ __('Rating Interno (AA–E) & Calculadora de Limite Sugerido') }}
                 </span>
                 <Badge
@@ -974,7 +1023,6 @@
                   :theme="ratingPolicyDoc.is_default ? 'blue' : 'green'"
                   variant="subtle"
                 />
-              </div>
             </div>
             <p class="text-p-xs text-ink-gray-6">
               {{
@@ -985,7 +1033,7 @@
             </p>
 
             <!-- Tabela das Faixas AA a D -->
-            <div class="overflow-x-auto border border-outline-gray-2 rounded-lg">
+            <div class="overflow-x-auto border border-outline-gray-2 rounded-[var(--ct-radius-md)]">
               <table class="w-full text-left text-p-sm">
                 <thead class="bg-surface-gray-1 text-xs font-semibold text-ink-gray-7 border-b border-outline-gray-2">
                   <tr>
@@ -1114,20 +1162,21 @@
           </div>
         </div>
 
-        <SettingsDivider v-show="activeSection === 'all'" />
 
         <!-- ===================================================================== -->
         <!-- SECTION 4: ESTEIRA AUTOMÁTICA DE PRÉ-FILTRO & RÉGUA DE CORTE         -->
         <!-- ===================================================================== -->
         <div
-          v-show="activeSection === 'all' || activeSection === 'prefilter'"
+          v-show="activeSection === 'prefilter'"
           class="space-y-6"
         >
           <div class="flex flex-col gap-1">
-            <span class="text-lg font-semibold leading-6 text-ink-gray-9">
-              {{ __('4. Esteira Automática de Pré-Filtro & Régua de Corte') }}
+            <span
+              class="text-[18px] font-semibold leading-6 text-[var(--ct-text-primary)]"
+            >
+              {{ __('Esteira Automática de Pré-Filtro & Régua de Corte') }}
             </span>
-            <span class="text-base leading-5 text-ink-gray-6">
+            <span class="text-[14px] leading-5 text-[var(--ct-text-secondary)]">
               {{
                 __(
                   'Defina quando a triagem rápida roda sozinha no funil e quais limites disparam alerta ou bloqueio imediato.',
@@ -1138,15 +1187,17 @@
 
           <!-- Master Enable Switch -->
           <div
-            class="flex items-center justify-between gap-4 rounded-lg bg-[var(--ct-bg-soft)] px-5 py-4"
+            class="flex items-center justify-between gap-4 rounded-[var(--ct-radius-md)] border border-[var(--ct-border)] bg-surface-white px-5 py-4"
           >
             <div class="flex flex-col gap-1">
-              <span class="text-lg font-semibold leading-6 text-ink-gray-9">
-                {{ __('Habilitar esteira de risco e compliance') }}
+              <span
+                class="text-[16px] font-semibold leading-6 text-[var(--ct-text-primary)]"
+              >
+                {{ __('Ligar a análise de risco e compliance') }}
               </span>
-              <span class="text-base text-ink-gray-6">
+              <span class="text-[14px] leading-5 text-[var(--ct-text-secondary)]">
                 {{
-                  __('Triagem automática de sanções, processos judiciais, dívida ativa federal, certidões e protestos em cartório.',
+                  __('Verificação automática de processos, dívida ativa da União, débitos trabalhistas e protestos em cartório.',
                   )
                 }}
               </span>
@@ -1156,45 +1207,42 @@
 
           <!-- Funnel automation trigger -->
           <div
-            class="space-y-3 rounded-lg border border-[var(--ct-border)] bg-surface-white px-5 py-4"
+            class="space-y-3 rounded-[var(--ct-radius-md)] border border-[var(--ct-border)] bg-surface-white px-5 py-4"
           >
-            <span class="text-lg-semibold text-ink-gray-9">
-              {{ __('Gatilho automático no funil') }}
+            <span class="text-[16px] font-semibold leading-6 text-[var(--ct-text-primary)]">
+              {{ __('Gatilho de automação no funil') }}
             </span>
             <p class="text-p-xs text-ink-gray-6">
               {{
-                __('Executa a triagem automaticamente quando um card entra nesta etapa. Cada triagem automática consome consultas nos provedores habilitados.',
+                __('Roda a verificação automaticamente quando um card entra nesta etapa. Cada verificação automática faz consultas pagas nas suas contas dos provedores.',
                 )
               }}
             </p>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormControl
-                v-model="settingsDoc.auto_trigger_stage"
-                type="text"
-                :label="__('Nome da etapa que dispara a triagem')"
-                placeholder="ex: Consultas"
-              />
-              <div class="flex items-center gap-2 pt-6">
-                <Checkbox
-                  v-model="settingsDoc.check_second_organization"
-                  :label="
-                    __('Também consultar a segunda organização (sacado), se houver')
-                  "
-                />
-              </div>
-            </div>
+            <FormControl
+              v-model="settingsDoc.auto_trigger_stage"
+              type="text"
+              class="max-w-[495px]"
+              :label="__('Nome da etapa do gatilho')"
+              placeholder="ex: Pré-análise"
+            />
+            <Checkbox
+              v-model="settingsDoc.check_second_organization"
+              :label="
+                __('Verificar também a segunda organização (sacado), se houver')
+              "
+            />
           </div>
 
           <!-- Risk tolerance and blocks -->
           <div
-            class="space-y-3 rounded-lg border border-[var(--ct-border)] bg-surface-white px-5 py-4"
+            class="space-y-3 rounded-[var(--ct-radius-md)] border border-[var(--ct-border)] bg-surface-white px-5 py-4"
           >
-            <span class="text-lg-semibold text-ink-gray-9">
-              {{ __('Critérios de risco e bloqueios automáticos') }}
+            <span class="text-[16px] font-semibold leading-6 text-[var(--ct-text-primary)]">
+              {{ __('Critérios de risco e bloqueios') }}
             </span>
             <p class="text-p-xs text-ink-gray-6">
               {{
-                __('Nada reprova sozinho por padrão: o sistema gera alerta e o analista decide. Ligue um bloqueio ou defina limite acima de 0 apenas se sua política reprovar automaticamente.',
+                __('Nada reprova sozinho: o sistema avisa e o operador decide. Ligue um bloqueio, ou defina um limite acima de 0, só se a sua política reprova por isso.',
                 )
               }}
             </p>
@@ -1203,33 +1251,33 @@
                 v-model.number="settingsDoc.max_lawsuits_defendant"
                 type="number"
                 :label="
-                  __('Máximo de processos como réu (0 = sem limite, apenas alerta)')
+                  __('Máximo de processos como réu (0 = sem limite, só avisa)')
                 "
               />
               <FormControl
                 v-model.number="settingsDoc.max_pgfn_debt"
                 type="number"
                 :label="
-                  __('Dívida máxima tolerada na PGFN (R$) (0 = sem limite, apenas alerta)',
+                  __('Máximo tolerado de dívida na PGFN (R$) (0 = sem limite, só avisa)',
                   )
                 "
               />
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+            <div class="flex flex-col gap-3 pt-1">
               <Checkbox
                 v-model="settingsDoc.block_on_bankruptcy"
                 :label="
-                  __('Reprovar imediatamente em caso de recuperação judicial ou falência')
+                  __('Bloquear na hora em caso de recuperação judicial ou falência')
                 "
               />
               <Checkbox
                 v-model="settingsDoc.block_on_protest"
-                :label="__('Reprovar imediatamente se houver protesto em cartório')"
+                :label="__('Bloquear na hora se houver protesto em cartório')"
               />
               <Checkbox
                 v-if="settingsDoc.directd_fgts_enabled"
                 v-model="settingsDoc.block_on_fgts_irregular"
-                :label="__('Reprovar se o FGTS estiver irregular')"
+                :label="__('Bloquear se o FGTS estiver irregular')"
               />
             </div>
           </div>
@@ -1253,7 +1301,6 @@ import {
   createResource,
 } from 'frappe-ui'
 import SettingsLayoutBase from '@/components/Layouts/SettingsLayoutBase.vue'
-import SettingsDivider from '@/components/Settings/SettingsDivider.vue'
 import { createDialog } from '@/utils/dialogs'
 
 // Small inline control: CNPJ for the test + "Test connection" button.
@@ -1262,11 +1309,13 @@ const ProviderTest = {
   emits: ['update:modelValue', 'test'],
   setup(props, { emit }) {
     return () =>
-      h('div', { class: 'flex items-center gap-2' }, [
+      // Figma "CNPJ para o teste": labeled 260px field + 48px grey button
+      h('div', { class: 'flex items-end gap-2' }, [
         h(FormControl, {
           type: 'text',
-          class: 'w-48',
-          placeholder: __('CNPJ para teste'),
+          class: 'w-[260px]',
+          label: __('CNPJ para o teste'),
+          placeholder: '00.000.000/0000-00',
           modelValue: props.modelValue,
           'onUpdate:modelValue': (value) => emit('update:modelValue', value),
         }),
@@ -1274,6 +1323,7 @@ const ProviderTest = {
           Button,
           {
             variant: 'subtle',
+            class: '!h-12 !px-7 !text-[16px] !font-semibold',
             loading: props.loading,
             disabled: props.disabled || !props.modelValue,
             onClick: () => emit('test'),
@@ -1284,13 +1334,13 @@ const ProviderTest = {
   },
 }
 
-const activeSection = ref('all')
+// Figma tabs (no "all" view): one section per tab
+const activeSection = ref('funnels')
 const sectionTabs = computed(() => [
-  { key: 'all', label: __('Visão Geral (Tudo)') },
-  { key: 'funnels', label: __('1. Funis & Documentos') },
-  { key: 'bureaus', label: __('2. Bureaus & Credenciais') },
-  { key: 'policy', label: __('3. Dossiê & Parecer IA') },
-  { key: 'prefilter', label: __('4. Pré-Filtro & Régua') },
+  { key: 'funnels', label: __('Funis e documentos') },
+  { key: 'bureaus', label: __('Bureaus e credenciais') },
+  { key: 'policy', label: __('Dossiê e parecer da IA') },
+  { key: 'prefilter', label: __('Pré-filtro e régua de corte') },
 ])
 
 const loading = ref(true)
@@ -1958,6 +2008,12 @@ onMounted(() => {
   border-color: var(--ct-border);
   font-size: 16px;
   padding: 12px 14px;
+  border-radius: 6px;
+}
+/* Figma "Caixa de seleção": 20px box, 6px radius */
+.ct-credit :deep(input[type='checkbox']) {
+  width: 20px;
+  height: 20px;
   border-radius: 6px;
 }
 .ct-credit :deep(label.block) {
