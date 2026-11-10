@@ -661,7 +661,7 @@ function negotiationOf(title) {
   }
   if (balanceOf(title) <= 0.005) return { label: __('Paid'), theme: 'green' }
   const today = new Date().toLocaleDateString('sv-SE')
-  const open = (props.deal.installments || []).filter((i) => i.title === title.name && !i.paid_on)
+  const open = (props.deal.installments || []).filter((i) => i.title === title.name && !i.paid_on && !i.cancelled_on)
   if (open.length) {
     return open.some((i) => i.due_date < today)
       ? { label: __('Agreement broken'), theme: 'red' }

@@ -25,7 +25,7 @@
         >
           {{
             __(
-              'The balance of this title is controlled by {0}. Payments and settlements come from the synchronization; here you register a promise of payment and an agreement.',
+              'The balance of this title is controlled by {0}. Payments, settlements and installment agreements stay in the ERP; here you register the promise of payment.',
               [erpSource],
             )
           }}
@@ -121,10 +121,10 @@
         </section>
 
         <!-- Acordo: cronograma de parcelas -->
-        <section v-if="!paid || installments.length" class="flex flex-col gap-3">
+        <section v-if="(!paid && !erpSource) || installments.length" class="flex flex-col gap-3">
           <h3 class="text-base font-semibold text-ink-gray-8">{{ __('Agreement') }}</h3>
 
-          <template v-if="openInstallments.length">
+          <template v-if="installments.length">
             <table class="w-full text-left text-p-sm">
               <thead>
                 <tr class="border-b border-outline-gray-2 text-ink-gray-5">
@@ -142,12 +142,13 @@
                   <td class="py-2 pr-3 text-right font-medium">{{ money(slot.amount) }}</td>
                   <td class="py-2 pr-3">
                     <Badge v-if="slot.paid_on" :label="__('Paid on {0}', [date(slot.paid_on)])" theme="green" variant="subtle" />
+                    <Badge v-else-if="slot.cancelled_on" :label="__('Cancelled on {0}', [date(slot.cancelled_on)])" theme="gray" variant="subtle" />
                     <Badge v-else-if="slot.due_date < today" :label="__('Overdue')" theme="red" variant="subtle" />
                     <Badge v-else :label="__('Open')" theme="gray" variant="subtle" />
                   </td>
                   <td class="py-2 text-right">
                     <Button
-                      v-if="!slot.paid_on && !erpSource"
+                      v-if="!slot.paid_on && !slot.cancelled_on && !erpSource"
                       size="sm"
                       :label="__('Mark as paid')"
                       :disabled="Boolean(busy)"
@@ -157,7 +158,7 @@
                 </tr>
               </tbody>
             </table>
-            <div>
+            <div v-if="openInstallments.length">
               <Button
                 variant="subtle"
                 theme="red"
@@ -168,7 +169,8 @@
             </div>
           </template>
 
-          <template v-else-if="!paid">
+          <!-- Novo acordo: só sem parcelas em aberto (o histórico de um acordo cancelado fica acima) e fora do ERP -->
+          <template v-if="!openInstallments.length && !paid && !erpSource">
             <div v-if="!builder.rows.length" class="grid grid-cols-[1fr_1fr_auto] items-end gap-3">
               <FormControl v-model.number="builder.count" type="number" :label="__('Number of installments')" min="1" max="60" />
               <FormControl v-model="builder.first" type="date" :label="__('First due date')" :min="today" />
@@ -263,7 +265,7 @@ const installments = computed(() =>
     .filter((i) => i.title === props.titleName)
     .sort((a, b) => a.number - b.number),
 )
-const openInstallments = computed(() => installments.value.filter((i) => !i.paid_on))
+const openInstallments = computed(() => installments.value.filter((i) => !i.paid_on && !i.cancelled_on))
 
 // Título que veio de um ERP (credtech#367): pagamento, estorno e ajuste de saldo só pela sincronização
 const erpSource = computed(() => (title.value?.erp_title_id ? title.value.erp_source || 'ERP' : ''))
@@ -452,7 +454,7 @@ async function createAgreement() {
 function confirmCancelAgreement() {
   createDialog({
     title: __('Cancel agreement'),
-    message: __('The open installments are removed. The ones already paid stay in the history.'),
+    message: __('The open installments are marked as cancelled. The whole agreement stays in the history.'),
     size: 'md',
     actions: [
       { label: __('Back'), onClick: ({ close }) => close() },

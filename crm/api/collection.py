@@ -84,7 +84,8 @@ def _require_manual_balance(row) -> None:
 
 
 def _open_installments(doc, title: str) -> list:
-	return [i for i in doc.installments if i.title == title and not i.paid_on]
+	"""Installments still to be paid: neither paid nor cancelled."""
+	return [i for i in doc.installments if i.title == title and not i.paid_on and not i.cancelled_on]
 
 
 def _note(doc, text: str) -> None:
@@ -112,6 +113,8 @@ def record_payment(
 			frappe.throw(_("Installment not found on this title."), frappe.DoesNotExistError)
 		if slot.paid_on:
 			frappe.throw(_("Installment {0} is already paid.").format(slot.number))
+		if slot.cancelled_on:
+			frappe.throw(_("Installment {0} was cancelled.").format(slot.number))
 		amount = slot.amount
 	amount = flt(amount, 2)
 	paid_on = getdate(paid_on or nowdate())
@@ -285,13 +288,14 @@ def create_agreement(deal: str, title: str, installments: str | list) -> dict:
 
 @frappe.whitelist()
 def cancel_agreement(deal: str, title: str) -> dict:
-	"""Drop the installments still open. The ones already paid stay in the history."""
+	"""Cancel the installments still open: they stay in the history as cancelled (counting neither as paid nor as
+	open), like the ones already paid."""
 	doc, row = _load(deal, title)
 	open_ones = _open_installments(doc, row.name)
 	if not open_ones:
 		frappe.throw(_("This title has no agreement in progress."))
 	for slot in open_ones:
-		doc.remove(slot)
+		slot.cancelled_on = getdate(nowdate())
 	doc.save()
 	_note(doc, _("Agreement cancelled on title {0}.").format(row.title_number))
 	return _summary(doc, row)

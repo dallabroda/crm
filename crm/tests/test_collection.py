@@ -212,18 +212,24 @@ class TestCollection(FrappeTestCase):
 		self.assertFalse(doc.installments[0].paid_on)
 		self.assertEqual(balance_of(doc.titles[0]), 1000)
 
-	def test_cancel_keeps_the_paid_installments_and_numbering_goes_on(self):
+	def test_cancel_keeps_the_history_and_numbering_goes_on(self):
 		name = self.title().name
 		collection.create_agreement(self.deal, name, self.plan(400, 300, 300))
 		collection.record_payment(self.deal, name, installment=self.doc().installments[0].name)
 		collection.cancel_agreement(self.deal, name)
 		doc = self.doc()
-		self.assertEqual([(i.number, bool(i.paid_on)) for i in doc.installments], [(1, True)])
+		# paid stays paid; the open ones stay in the history as cancelled (neither paid nor open)
+		self.assertEqual(
+			[(i.number, bool(i.paid_on), bool(i.cancelled_on)) for i in doc.installments],
+			[(1, True, False), (2, False, True), (3, False, True)],
+		)
 		self.assertEqual(balance_of(doc.titles[0]), 600)
 		with self.assertRaises(frappe.ValidationError):  # nothing left to cancel
 			collection.cancel_agreement(self.deal, name)
+		with self.assertRaises(frappe.ValidationError):  # a cancelled installment cannot be paid
+			collection.record_payment(self.deal, name, installment=doc.installments[1].name)
 		collection.create_agreement(self.deal, name, self.plan(600))
-		self.assertEqual([i.number for i in self.doc().installments], [1, 2])
+		self.assertEqual([i.number for i in self.doc().installments], [1, 2, 3, 4])
 
 	def test_installments_of_other_titles_do_not_mix(self):
 		first, second = (t.name for t in self.doc().titles)
