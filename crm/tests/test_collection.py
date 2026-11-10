@@ -260,3 +260,8 @@ class TestCollection(FrappeTestCase):
 		with patch.object(collection, "_erp_locked", return_value="Smart Securities"):
 			collection.set_promise(self.deal, name, add_days(nowdate(), 3), 300)
 		self.assertEqual(first["balance"], 900)
+
+	def test_a_title_closed_by_the_erp_has_no_balance(self):
+		# closed (paid or repurchased) with nothing in updated_amount: not "the original amount again"
+		self.assertEqual(balance_of(frappe._dict(closed_reason="Repurchased by cedente", original_amount=900)), 0)
+		self.assertEqual(balance_of(frappe._dict(original_amount=900)), 900)

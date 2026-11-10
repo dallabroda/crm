@@ -9,6 +9,10 @@ def balance_of(title) -> float:
 	"""What is still owed on a title (credtech#315). `updated_amount` is the open balance: it starts as the original
 	amount, the analyst may correct it (interest, discount) and every payment lowers it. A paid title has 0 left, so
 	"updated or original" would bring the original value back: a title with payments keeps its balance as it is."""
+	# A título closed by an ERP synchronization (paid, or repurchased by the cedente) has nothing left to collect
+	# (`closed_reason` is a cred_hub custom field; without it no título is closed this way)
+	if title.get("closed_reason"):
+		return 0.0
 	updated = flt(title.get("updated_amount"))
 	if updated or flt(title.get("paid_amount")):
 		return updated
