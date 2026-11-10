@@ -720,6 +720,12 @@
           {{ __('Consultas incluídas nesta execução') }}
         </div>
         <div
+          v-if="!pkg.data.items?.length"
+          class="text-p-xs text-[#8A8C94] py-1"
+        >
+          {{ __('Nenhuma consulta sob demanda configurada para o nível selecionado.') }}
+        </div>
+        <div
           v-for="entry in pkg.data.items"
           :key="entry.item + (entry.contact || '')"
           class="flex items-start gap-2 text-p-sm"
@@ -950,7 +956,7 @@
               </div>
               <ul class="list-disc pl-5 space-y-1 text-p-sm text-[#1E1F23]">
                 <li v-for="(bullet, bIdx) in item.opinion.summary_bullets" :key="bIdx">
-                  {{ bullet }}
+                  {{ typeof bullet === 'object' && bullet !== null ? (bullet.detail || bullet.title || JSON.stringify(bullet)) : bullet }}
                 </li>
               </ul>
             </div>
@@ -1019,7 +1025,7 @@
                   v-for="(cond, cIdx) in item.opinion.recommended_conditions"
                   :key="cIdx"
                 >
-                  {{ cond }}
+                  {{ typeof cond === 'object' && cond !== null ? (cond.detail || cond.title || JSON.stringify(cond)) : cond }}
                 </li>
               </ul>
             </div>
@@ -1501,24 +1507,36 @@ function formatMoney(value) {
 
 function formatFinding(f) {
   if (!f) return { title: '', detail: '', source: '' }
+  let obj = f
   if (typeof f === 'string') {
     const trimmed = f.trim()
-    if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
+    if ((trimmed.startsWith('{') && trimmed.endsWith('}')) || (trimmed.startsWith('{\\"') && trimmed.endsWith('\\"}'))) {
       try {
-        const parsed = JSON.parse(trimmed)
-        return {
-          title: parsed.title || parsed.label || '',
-          detail: parsed.detail || parsed.description || parsed.value || '',
-          source: parsed.source || '',
+        obj = JSON.parse(trimmed)
+      } catch (e) {
+        try {
+          obj = JSON.parse(JSON.parse(trimmed))
+        } catch (e2) {
+          obj = { detail: f }
         }
-      } catch (e) {}
+      }
+    } else {
+      obj = { detail: f }
     }
-    return { title: '', detail: f, source: '' }
   }
+  if (typeof obj !== 'object' || obj === null) {
+    return { title: '', detail: String(f), source: '' }
+  }
+  const title = obj.title || obj.label || ''
+  let detail = obj.detail || obj.description || obj.summary || obj.value || ''
+  if (typeof detail === 'object' && detail !== null) {
+    detail = JSON.stringify(detail)
+  }
+  const source = obj.source || obj.provider || ''
   return {
-    title: f.title || f.label || '',
-    detail: f.detail || f.description || f.value || '',
-    source: f.source || '',
+    title: String(title),
+    detail: String(detail),
+    source: String(source),
   }
 }
 
