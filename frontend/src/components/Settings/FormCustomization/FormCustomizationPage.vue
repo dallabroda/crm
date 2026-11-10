@@ -33,8 +33,53 @@
       </template>
     </SettingsPageHeader>
 
-    <div>
-      <TabButtons v-model="tab" :options="tabs" />
+    <!-- Figma "Abas e ação" (1189:17766): underlined tabs (14 Medium, 24px
+         apart, active in the accent color with a 2px line) and "Configure
+         form" on the right, over a soft bottom border -->
+    <div
+      class="flex shrink-0 items-center gap-4 border-b border-[var(--ct-border-soft)]"
+    >
+      <div class="flex flex-1 items-start gap-6" role="tablist">
+        <button
+          v-for="option in tabs"
+          :key="option.value"
+          type="button"
+          role="tab"
+          :aria-selected="tab === option.value"
+          class="flex flex-col"
+          @click="tab = option.value"
+        >
+          <span
+            class="px-1 py-2.5 text-[14px] font-medium leading-5"
+            :class="
+              tab === option.value
+                ? 'text-[var(--ct-text-accent)]'
+                : 'text-[var(--ct-text-secondary)] hover:text-[var(--ct-text-primary)]'
+            "
+          >
+            {{ option.label }}
+          </span>
+          <span
+            class="h-0.5 w-full"
+            :class="tab === option.value ? 'bg-[var(--ct-text-accent)]' : ''"
+          />
+        </button>
+      </div>
+      <div class="flex items-center gap-2 pb-2">
+        <Badge
+          v-if="(pipeline || !isCards) && !canManage"
+          :label="__('Read only')"
+          variant="subtle"
+        />
+        <Button
+          v-if="canManage"
+          :label="__('Configure form')"
+          icon-left="lucide-git-branch"
+          variant="outline"
+          :disabled="!schema"
+          @click="showConfig = true"
+        />
+      </div>
     </div>
 
     <div class="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto">
@@ -55,46 +100,44 @@
                 : __('One form for every contact of the company.')
             }}
           </p>
-          <div v-if="isCards" class="w-56">
+          <div v-if="isCards" class="w-[200px] shrink-0">
             <FormControl
               type="select"
+              class="ct-field-48"
+              variant="outline"
+              size="lg"
               :label="__('Funnel')"
               :options="pipelineOptions"
               :model-value="pipeline"
               @update:model-value="(v) => (pipeline = v)"
             />
           </div>
-          <div v-if="isCards" class="w-64">
+          <div v-if="isCards" class="min-w-0 flex-1">
             <FormControl
               type="select"
+              class="ct-field-48"
+              variant="outline"
+              size="lg"
               :label="__('Stage')"
               :options="stageOptions"
               :model-value="stage"
               @update:model-value="(v) => (stage = v)"
             />
           </div>
-          <div v-if="isCards" class="w-56" data-testid="form-block">
+          <div
+            v-if="isCards"
+            class="w-[200px] shrink-0"
+            data-testid="form-block"
+          >
             <FormControl
               type="select"
+              class="ct-field-48"
+              variant="outline"
+              size="lg"
               :label="__('Fields of')"
               :options="blockOptions"
               :model-value="block"
               @update:model-value="(v) => (block = v)"
-            />
-          </div>
-          <div class="flex flex-1 items-center justify-end gap-2">
-            <Badge
-              v-if="(pipeline || !isCards) && !canManage"
-              :label="__('Read only')"
-              variant="subtle"
-            />
-            <Button
-              v-if="canManage"
-              :label="__('Configure form')"
-              icon-left="lucide-settings-2"
-              variant="solid"
-              :disabled="!schema"
-              @click="showConfig = true"
             />
           </div>
         </div>
@@ -259,7 +302,6 @@ import {
   ErrorMessage,
   FormControl,
   LoadingIndicator,
-  TabButtons,
   call,
   toast,
 } from 'frappe-ui'

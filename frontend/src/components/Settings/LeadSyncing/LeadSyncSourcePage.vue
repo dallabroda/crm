@@ -8,12 +8,24 @@
           )
         }}
       </template>
+      <!-- Figma: "Adicionar origem" sits in the top bar; the options come
+           from the "Google Ads, website and other tools" card -->
+      <template #actions>
+        <Dropdown :options="webhooks?.addOptions || []" align="end">
+          <Button
+            variant="solid"
+            :label="__('Add source')"
+            icon-left="lucide-plus"
+            :loading="webhooks?.creating"
+          />
+        </Dropdown>
+      </template>
     </SettingsPageHeader>
     <!-- Figma "Configurações · Origens" (882:2): one bordered card per
          source (8px radius, 20px padding), 24px apart -->
     <div class="ct-sources flex flex-1 flex-col gap-6 overflow-y-auto">
       <MetaLeadsSource @changed="activity?.load()" />
-      <WebhookSources @changed="activity?.load()" />
+      <WebhookSources ref="webhooks" @changed="activity?.load()" />
       <ChatConnection />
       <EmailCompanySetting />
       <LeadActivity ref="activity" />
@@ -31,9 +43,11 @@ import WebhookSources from './WebhookSources.vue'
 import ChatConnection from './ChatConnection.vue'
 import EmailCompanySetting from './EmailCompanySetting.vue'
 import LeadActivity from './LeadActivity.vue'
+import { Button, Dropdown } from 'frappe-ui'
 import { ref } from 'vue'
 
 const activity = ref(null)
+const webhooks = ref(null)
 </script>
 
 <style scoped>

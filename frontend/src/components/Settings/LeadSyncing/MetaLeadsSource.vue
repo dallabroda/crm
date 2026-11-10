@@ -2,7 +2,7 @@
   <div class="flex flex-col gap-4 rounded-lg border border-outline-gray-2 p-4">
     <div class="flex items-start justify-between gap-4">
       <div class="flex items-start gap-3">
-        <FacebookIcon class="mt-0.5 size-6 shrink-0" />
+        <FacebookIcon class="mt-0.5 size-6 shrink-0 text-ink-gray-9" />
         <div class="flex flex-col gap-1">
           <div class="text-base-semibold text-ink-gray-9">
             {{ __('Facebook and Instagram lead ads') }}

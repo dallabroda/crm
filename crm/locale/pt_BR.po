@@ -14404,3 +14404,18 @@ msgstr "Expandir painel"
 
 msgid "Collapse panel"
 msgstr "Recolher painel"
+
+#: frontend/src/components/Layouts/AppSidebar.vue
+msgid "Help"
+msgstr "Ajuda"
+
+#: frontend/src/components/Layouts/AppSidebar.vue
+msgid "Support"
+msgstr "Suporte"
+
+#: frontend/src/components/Layouts/AppSidebar.vue
+msgid "Hi! I am {0} ({1}) from {2} and I need help with HubTech CRM."
+msgstr "Olá! Sou {0} ({1}), da empresa {2}, e preciso de ajuda com o HubTech CRM."
+
+msgid "Start now"
+msgstr "Começar agora"

@@ -13,14 +13,6 @@
           }}
         </p>
       </div>
-      <Dropdown :options="addOptions" align="end">
-        <Button
-          variant="solid"
-          :label="__('Add source')"
-          icon-left="lucide-plus"
-          :loading="creating"
-        />
-      </Dropdown>
     </div>
 
     <!-- name and funnel of the source being added -->
@@ -80,7 +72,7 @@ import {
   sourceType,
   webhookSourcesApi,
 } from './webhookSourcesApi'
-import { Button, Dropdown, FormControl, toast } from 'frappe-ui'
+import { Button, FormControl, toast } from 'frappe-ui'
 import { computed, onMounted, ref } from 'vue'
 
 const emit = defineEmits(['changed'])
@@ -111,6 +103,8 @@ const addOptions = computed(() =>
       }),
   })),
 )
+// the page puts "Add source" in the top bar (Figma) with these options
+defineExpose({ addOptions, creating })
 
 async function load() {
   loading.value = true

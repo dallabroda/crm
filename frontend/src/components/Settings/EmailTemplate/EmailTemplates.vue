@@ -34,7 +34,7 @@
     <!-- Empty State -->
     <SettingsEmptyState
       v-else-if="!templates.loading && !templates.data?.length"
-      :icon="LucideBuilding2"
+      :icon="LucideFileText"
       :title="__('No email templates yet')"
       :description="
         __(
@@ -151,7 +151,7 @@
   </div>
 </template>
 <script setup>
-import LucideBuilding2 from '~icons/lucide/building-2'
+import LucideFileText from '~icons/lucide/file-text'
 import SettingsEmptyState from '@/components/Settings/SettingsEmptyState.vue'
 import SettingsPageHeader from '@/components/Settings/SettingsPageHeader.vue'
 import { useBroadcast } from '@/composables/useBroadcast'
