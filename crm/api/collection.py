@@ -64,6 +64,25 @@ def _summary(doc, row, warning: str | None = None) -> dict:
 	}
 
 
+def _erp_locked(row) -> str | None:
+	"""Name of the ERP that owns the balance of this title (a title synced from an ERP), else None. The custom field
+	`erp_title_id` is added by cred_hub; without it no title is locked."""
+	return (row.get("erp_source") or "ERP") if row.get("erp_title_id") else None
+
+
+def _require_manual_balance(row) -> None:
+	"""The ERP is the source of truth of the balance (credtech#367): payments, settlements and balance changes of its
+	titles come from the synchronization, never by hand, so nothing is counted twice."""
+	erp = _erp_locked(row)
+	if erp:
+		frappe.throw(
+			_(
+				"The balance of title {0} comes from {1}. Payments and settlements are registered by the ERP synchronization, not by hand."
+			).format(row.title_number, erp),
+			frappe.ValidationError,
+		)
+
+
 def _open_installments(doc, title: str) -> list:
 	return [i for i in doc.installments if i.title == title and not i.paid_on]
 
@@ -84,6 +103,7 @@ def record_payment(
 	"""Register a payment: the balance of the title falls by the amount. With `installment` the payment settles that
 	installment of the agreement (its amount)."""
 	doc, row = _load(deal, title)
+	_require_manual_balance(row)
 	balance = balance_of(row)
 	slot = None
 	if installment:
@@ -144,6 +164,7 @@ def reverse_payment(deal: str, payment: str) -> dict:
 	row = next((t for t in doc.titles if t.name == entry.title), None)
 	if not row:
 		frappe.throw(_("Title not found on this card."), frappe.DoesNotExistError)
+	_require_manual_balance(row)
 	back = flt(balance_of(row) + flt(entry.amount), 2)
 	row.paid_amount = max(flt(flt(row.paid_amount) - flt(entry.amount), 2), 0)
 	row.updated_amount = back
@@ -193,6 +214,7 @@ def set_promise(
 def adjust_balance(deal: str, title: str, balance: float, reason: str | None = None) -> dict:
 	"""Correct the open balance (interest, discount). The change stays in the card history."""
 	doc, row = _load(deal, title)
+	_require_manual_balance(row)
 	new = flt(balance, 2)
 	if new <= 0:
 		frappe.throw(_("The balance must be greater than zero. To settle the title, register a payment."))

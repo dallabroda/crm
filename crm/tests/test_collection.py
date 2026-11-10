@@ -1,5 +1,7 @@
 """Payments, promise and agreement schedule per title (credtech#315)."""
 
+from unittest.mock import patch
+
 import frappe
 from frappe.utils import add_days, flt, nowdate
 
@@ -230,3 +232,31 @@ class TestCollection(FrappeTestCase):
 		slot = next(i for i in self.doc().installments if i.title == first)
 		with self.assertRaises(frappe.DoesNotExistError):
 			collection.record_payment(self.deal, second, installment=slot.name)
+
+	# ---- balance owned by an ERP (credtech#367)
+
+	def test_erp_titles_are_locked_and_the_others_are_not(self):
+		self.assertIsNone(collection._erp_locked(self.title()))
+		self.assertEqual(
+			collection._erp_locked(frappe._dict(erp_title_id="188134", erp_source="Smart Securities")), "Smart Securities"
+		)
+		self.assertEqual(collection._erp_locked(frappe._dict(erp_title_id="9", erp_source="")), "ERP")
+
+	def test_the_balance_of_an_erp_title_cannot_be_changed_by_hand(self):
+		name = self.title().name
+		first = self.pay(100)
+		payment = self.doc().payments[0].name
+		with patch.object(collection, "_erp_locked", return_value="Smart Securities"):
+			for call in (
+				lambda: collection.record_payment(self.deal, name, 50),
+				lambda: collection.reverse_payment(self.deal, payment),
+				lambda: collection.adjust_balance(self.deal, name, 800, "interest"),
+			):
+				with self.assertRaises(frappe.ValidationError) as caught:
+					call()
+				self.assertIn("Smart Securities", str(caught.exception))
+		# nothing moved, and a promise (not a balance change) is still allowed
+		self.assertEqual((balance_of(self.title()), len(self.doc().payments)), (900, 1))
+		with patch.object(collection, "_erp_locked", return_value="Smart Securities"):
+			collection.set_promise(self.deal, name, add_days(nowdate(), 3), 300)
+		self.assertEqual(first["balance"], 900)
