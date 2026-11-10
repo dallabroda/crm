@@ -33,7 +33,11 @@
       v-if="allPaid && deal.outcome === 'In progress'"
       class="mx-4 flex items-center justify-between gap-3 rounded border border-outline-green-2 bg-surface-green-1 p-3 text-sm text-ink-green-3"
     >
-      <span>{{ __('Every title of this card is paid.') }}</span>
+      <span>{{
+        anyRepurchased
+          ? __('Every title of this card is closed (some were repurchased by the cedente).')
+          : __('Every title of this card is paid.')
+      }}</span>
       <Button variant="subtle" theme="green" :label="__('Mark card as Won')" @click="emit('setOutcome', 'Won')" />
     </div>
 
@@ -99,6 +103,9 @@
             <!-- Valor Atualizado -->
             <td class="py-3 px-3 text-right">
               <div class="font-semibold text-ink-gray-9">{{ formatMoney(balanceOf(title)) }}</div>
+              <div v-if="title.erp_title_id" class="text-[11px] leading-[14px] text-[#8A8C94]">
+                {{ __('ERP · {0}', [title.erp_source || 'ERP']) }}
+              </div>
               <div v-if="Number(title.paid_amount)" class="text-[11px] text-ink-green-3">
                 {{ __('Paid {0}', [formatMoney(title.paid_amount)]) }}
               </div>
@@ -624,6 +631,8 @@ const titles = computed(() => {
 
 // O que ainda se deve no título: o valor atualizado; quitado fica com 0 (não volta ao valor original)
 function balanceOf(title) {
+  // Fechado pelo ERP (pago ou recomprado): não há mais o que cobrar (credtech#367)
+  if (title.closed_reason) return 0
   const updated = Number(title.updated_amount || 0)
   return updated || Number(title.paid_amount || 0) ? updated : Number(title.original_amount || 0)
 }
@@ -633,6 +642,7 @@ const totalAmount = computed(() => {
 })
 
 const allPaid = computed(() => titles.value.length > 0 && titles.value.every((t) => balanceOf(t) <= 0.005))
+const anyRepurchased = computed(() => titles.value.some((t) => t.closed_reason === 'Repurchased by cedente'))
 
 // Pagamentos, promessa e acordo (credtech#315)
 const showNegotiation = ref(false)
@@ -645,6 +655,10 @@ function openNegotiation(title) {
 
 // Situação da negociação do título, para o selo da tabela
 function negotiationOf(title) {
+  // Motivo do fechamento vindo do ERP: recompra não é pagamento do sacado
+  if (title.closed_reason) {
+    return { label: __(title.closed_reason), theme: title.closed_reason === 'Repurchased by cedente' ? 'blue' : 'green' }
+  }
   if (balanceOf(title) <= 0.005) return { label: __('Paid'), theme: 'green' }
   const today = new Date().toLocaleDateString('sv-SE')
   const open = (props.deal.installments || []).filter((i) => i.title === title.name && !i.paid_on)

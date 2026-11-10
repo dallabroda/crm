@@ -18,6 +18,19 @@
           </div>
         </div>
 
+        <!-- Título do ERP: o saldo é do ERP (credtech#367); só promessa e acordo são feitos aqui -->
+        <div
+          v-if="erpSource"
+          class="rounded-lg bg-[#E5F1FF] px-4 py-3 text-base leading-5 text-[#1E1F23]"
+        >
+          {{
+            __(
+              'The balance of this title is controlled by {0}. Payments and settlements come from the synchronization; here you register a promise of payment and an agreement.',
+              [erpSource],
+            )
+          }}
+        </div>
+
         <div
           v-if="registryWarning"
           class="rounded border border-outline-amber-2 bg-surface-amber-1 p-3 text-sm text-[color:var(--ct-warning)] font-medium"
@@ -31,7 +44,7 @@
           <div v-if="paid" class="text-sm text-ink-green-3">
             {{ __('This title is fully paid.') }}
           </div>
-          <div v-else class="grid grid-cols-[1fr_1fr_2fr_auto] items-end gap-3">
+          <div v-else-if="!erpSource" class="grid grid-cols-[1fr_1fr_2fr_auto] items-end gap-3">
             <FormControl v-model.number="payment.amount" type="number" :label="__('Amount (R$)')" />
             <FormControl v-model="payment.paid_on" type="date" :label="__('Paid on')" :max="today" />
             <FormControl v-model="payment.note" type="text" :label="__('Note')" :placeholder="__('PIX, boleto, bank transfer...')" />
@@ -68,6 +81,7 @@
                 <td class="py-2 pr-3 text-ink-gray-6">{{ entry.registered_by }}</td>
                 <td class="py-2 text-right">
                   <button
+                    v-if="!erpSource"
                     type="button"
                     class="text-xs text-ink-red-4 hover:underline"
                     :disabled="Boolean(busy)"
@@ -133,7 +147,7 @@
                   </td>
                   <td class="py-2 text-right">
                     <Button
-                      v-if="!slot.paid_on"
+                      v-if="!slot.paid_on && !erpSource"
                       size="sm"
                       :label="__('Mark as paid')"
                       :disabled="Boolean(busy)"
@@ -194,7 +208,7 @@
         </section>
 
         <!-- Ajuste de saldo (juros, desconto): fica no histórico do card -->
-        <section v-if="!paid" class="flex flex-col gap-3">
+        <section v-if="!paid && !erpSource" class="flex flex-col gap-3">
           <h3 class="text-base font-semibold text-ink-gray-8">{{ __('Adjust balance') }}</h3>
           <div class="grid grid-cols-[1fr_2fr_auto] items-end gap-3">
             <FormControl v-model.number="adjust.balance" type="number" :label="__('New balance (R$)')" :placeholder="money(balance)" />
@@ -251,10 +265,14 @@ const installments = computed(() =>
 )
 const openInstallments = computed(() => installments.value.filter((i) => !i.paid_on))
 
+// Título que veio de um ERP (credtech#367): pagamento, estorno e ajuste de saldo só pela sincronização
+const erpSource = computed(() => (title.value?.erp_title_id ? title.value.erp_source || 'ERP' : ''))
+
 // Saldo: o valor atualizado é o que ainda se deve; título quitado fica com 0 (não volta ao original)
 const balance = computed(() => {
   const t = title.value
   if (!t) return 0
+  if (t.closed_reason) return 0
   const updated = Number(t.updated_amount || 0)
   return updated || Number(t.paid_amount || 0) ? updated : Number(t.original_amount || 0)
 })
