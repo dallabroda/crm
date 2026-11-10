@@ -32,14 +32,15 @@ def format_e164_number(number: str) -> str:
 	digits = re.sub(r"\D", "", number or "")
 	if not digits:
 		return number or ""
-	if (number or "").strip().startswith("+"):
+	# If Brazilian number starts with trunk 0 (e.g. 048996302275 -> 48996302275)
+	if digits.startswith("0") and len(digits) in (11, 12):
+		digits = digits.lstrip("0")
+	# Brazil with 55 country code already
+	if len(digits) in (12, 13) and digits.startswith("55"):
 		return f"+{digits}"
 	# Brazil: 10 or 11 digits (e.g. 48996302275 or 1133334444)
 	if len(digits) in (10, 11):
 		return f"+55{digits}"
-	# Brazil with 55 country code already
-	if len(digits) in (12, 13) and digits.startswith("55"):
-		return f"+{digits}"
 	return f"+{digits}"
 
 
@@ -123,7 +124,7 @@ def parse_hangup(payload: dict) -> dict:
 		"id": str(payload["id"]),
 		"type": "Outgoing" if payload.get("direction") == "outbound" else "Incoming",
 		"extension": extension,
-		"number": number,
+		"number": format_e164_number(number),
 		"status": call_status(payload),
 		"start_time": to_datetime(payload.get("startedAt")),
 		"end_time": to_datetime(payload.get("endedAt")),

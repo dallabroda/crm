@@ -1412,16 +1412,14 @@ function restrictOwner(sections, allowed) {
 }
 
 const visibleSections = computed(() => {
-  let catalog = fieldSetup.value?.catalog
   let base
-  if (formSchema.value?.fields && catalog) {
-    // the funnel's fields come first, in its order; the layout keeps the rest
+  if (formSchema.value?.fields) {
+    // The funnel's fields come directly from formSchema, in its configured order;
+    // sections.data's legacy organization_section is discarded so removed fields don't leak
     let funnel = funnelSection(formSchema.value.fields, __('Card fields'))
-    let others = withoutFields(sections.data, [
-      ...catalog.filter((name) => !LOCKED_FIELDS.includes(name)),
-      // they are the organization's now: shown in its section, not as card fields
-      ...(fieldSetup.value?.moved || []),
-    ])
+    let others = (sections.data || []).filter(
+      (s) => s.name !== 'organization_section',
+    )
     base = funnel ? [funnel, ...others] : others
   } else {
     base = applyStageRules(
@@ -1429,12 +1427,10 @@ const visibleSections = computed(() => {
       stageRules.value,
       fieldSetup.value || {},
     )
+    base = mergeOrganizationSectionIntoCard(base)
   }
-  // Merge leftover card fields from the misnamed "organization_section" ("Detalhes da organização")
-  // into the main card fields section so there is no redundant "Detalhes da organização" box at the bottom
-  let merged = mergeOrganizationSectionIntoCard(base)
   return withOrganizationRegistry(
-    withOrganizationContacts(restrictOwner(merged, assignableUsers.value)),
+    withOrganizationContacts(restrictOwner(base, assignableUsers.value)),
   )
 })
 

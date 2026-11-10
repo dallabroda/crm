@@ -126,7 +126,9 @@ function applyRule(field, rules) {
 // fieldnames out of the layout sections, so a field is not shown twice, and
 // drops sections left empty.
 export function funnelSection(schemaFields, label) {
-  let fields = (schemaFields || []).filter((f) => f.visible && !f.locked)
+  let fields = (schemaFields || []).filter(
+    (f) => f.visible && (f.fieldname === 'deal_owner' || !f.locked),
+  )
   if (!fields.length) return null
   return {
     name: 'funnel_fields',
