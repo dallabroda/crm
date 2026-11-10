@@ -13239,8 +13239,8 @@ msgstr "Não foi possível iniciar a importação."
 msgid "Group the cards by"
 msgstr "Agrupar os cards por"
 
-msgid "Used by the spreadsheet import. The cedente is kept on each title either way."
-msgstr "Usado pela importação por planilha. O cedente fica guardado em cada título nos dois casos."
+msgid "Used by the spreadsheet import and the ERP synchronization. The cedente is kept on each title either way."
+msgstr "Usado pela importação de planilha e pela sincronização com o ERP. O cedente fica guardado em cada título nos dois casos."
 
 msgid "Debtor and cedente (one card per pair)"
 msgstr "Sacado e cedente (um card por par)"
@@ -14247,8 +14247,8 @@ msgstr "Não foi possível montar o cronograma."
 msgid "Agreement created."
 msgstr "Acordo criado."
 
-msgid "The open installments are removed. The ones already paid stay in the history."
-msgstr "As parcelas em aberto são removidas. As já pagas ficam no histórico."
+msgid "The open installments are marked as cancelled. The whole agreement stays in the history."
+msgstr "As parcelas em aberto ficam marcadas como canceladas. O acordo inteiro continua no histórico."
 
 msgid "Agreement cancelled."
 msgstr "Acordo cancelado."
@@ -14419,3 +14419,31 @@ msgstr "Olá! Sou {0} ({1}), da empresa {2}, e preciso de ajuda com o HubTech CR
 
 msgid "Start now"
 msgstr "Começar agora"
+
+# Saldo controlado pelo ERP (credtech#367)
+msgid "The balance of this title is controlled by {0}. Payments, settlements and installment agreements stay in the ERP; here you register the promise of payment."
+msgstr "O saldo deste título é controlado pela {0}. Pagamentos, liquidações e acordos em parcelas ficam no ERP; aqui você registra a promessa de pagamento."
+
+msgid "ERP · {0}"
+msgstr "ERP · {0}"
+
+msgid "Paid by debtor"
+msgstr "Pago pelo sacado"
+
+msgid "Repurchased by cedente"
+msgstr "Recomprado pelo cedente"
+
+msgid "Every title of this card is closed (some were repurchased by the cedente)."
+msgstr "Todos os títulos deste card estão fechados (alguns foram recomprados pelo cedente)."
+
+msgid "The balance of title {0} comes from {1}. Payments and settlements are registered by the ERP synchronization, not by hand."
+msgstr "O saldo do título {0} vem da {1}. Pagamentos e liquidações são registrados pela sincronização com o ERP, não à mão."
+
+msgid "Cancelled on {0}"
+msgstr "Cancelada em {0}"
+
+msgid "Installment {0} was cancelled."
+msgstr "A parcela {0} foi cancelada."
+
+msgid "Cancelled on"
+msgstr "Cancelada em"

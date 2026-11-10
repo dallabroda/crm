@@ -18,6 +18,19 @@
           </div>
         </div>
 
+        <!-- Título do ERP: o saldo é do ERP (credtech#367); só promessa e acordo são feitos aqui -->
+        <div
+          v-if="erpSource"
+          class="rounded-lg bg-[#E5F1FF] px-4 py-3 text-base leading-5 text-[#1E1F23]"
+        >
+          {{
+            __(
+              'The balance of this title is controlled by {0}. Payments, settlements and installment agreements stay in the ERP; here you register the promise of payment.',
+              [erpSource],
+            )
+          }}
+        </div>
+
         <div
           v-if="registryWarning"
           class="rounded border border-outline-amber-2 bg-surface-amber-1 p-3 text-sm text-[color:var(--ct-warning)] font-medium"
@@ -31,7 +44,7 @@
           <div v-if="paid" class="text-sm text-ink-green-3">
             {{ __('This title is fully paid.') }}
           </div>
-          <div v-else class="grid grid-cols-[1fr_1fr_2fr_auto] items-end gap-3">
+          <div v-else-if="!erpSource" class="grid grid-cols-[1fr_1fr_2fr_auto] items-end gap-3">
             <FormControl v-model.number="payment.amount" type="number" :label="__('Amount (R$)')" />
             <FormControl v-model="payment.paid_on" type="date" :label="__('Paid on')" :max="today" />
             <FormControl v-model="payment.note" type="text" :label="__('Note')" :placeholder="__('PIX, boleto, bank transfer...')" />
@@ -68,6 +81,7 @@
                 <td class="py-2 pr-3 text-ink-gray-6">{{ entry.registered_by }}</td>
                 <td class="py-2 text-right">
                   <button
+                    v-if="!erpSource"
                     type="button"
                     class="text-xs text-ink-red-4 hover:underline"
                     :disabled="Boolean(busy)"
@@ -107,10 +121,10 @@
         </section>
 
         <!-- Acordo: cronograma de parcelas -->
-        <section v-if="!paid || installments.length" class="flex flex-col gap-3">
+        <section v-if="(!paid && !erpSource) || installments.length" class="flex flex-col gap-3">
           <h3 class="text-base font-semibold text-ink-gray-8">{{ __('Agreement') }}</h3>
 
-          <template v-if="openInstallments.length">
+          <template v-if="installments.length">
             <table class="w-full text-left text-p-sm">
               <thead>
                 <tr class="border-b border-outline-gray-2 text-ink-gray-5">
@@ -128,12 +142,13 @@
                   <td class="py-2 pr-3 text-right font-medium">{{ money(slot.amount) }}</td>
                   <td class="py-2 pr-3">
                     <Badge v-if="slot.paid_on" :label="__('Paid on {0}', [date(slot.paid_on)])" theme="green" variant="subtle" />
+                    <Badge v-else-if="slot.cancelled_on" :label="__('Cancelled on {0}', [date(slot.cancelled_on)])" theme="gray" variant="subtle" />
                     <Badge v-else-if="slot.due_date < today" :label="__('Overdue')" theme="red" variant="subtle" />
                     <Badge v-else :label="__('Open')" theme="gray" variant="subtle" />
                   </td>
                   <td class="py-2 text-right">
                     <Button
-                      v-if="!slot.paid_on"
+                      v-if="!slot.paid_on && !slot.cancelled_on && !erpSource"
                       size="sm"
                       :label="__('Mark as paid')"
                       :disabled="Boolean(busy)"
@@ -143,7 +158,7 @@
                 </tr>
               </tbody>
             </table>
-            <div>
+            <div v-if="openInstallments.length">
               <Button
                 variant="subtle"
                 theme="red"
@@ -154,7 +169,8 @@
             </div>
           </template>
 
-          <template v-else-if="!paid">
+          <!-- Novo acordo: só sem parcelas em aberto (o histórico de um acordo cancelado fica acima) e fora do ERP -->
+          <template v-if="!openInstallments.length && !paid && !erpSource">
             <div v-if="!builder.rows.length" class="grid grid-cols-[1fr_1fr_auto] items-end gap-3">
               <FormControl v-model.number="builder.count" type="number" :label="__('Number of installments')" min="1" max="60" />
               <FormControl v-model="builder.first" type="date" :label="__('First due date')" :min="today" />
@@ -194,7 +210,7 @@
         </section>
 
         <!-- Ajuste de saldo (juros, desconto): fica no histórico do card -->
-        <section v-if="!paid" class="flex flex-col gap-3">
+        <section v-if="!paid && !erpSource" class="flex flex-col gap-3">
           <h3 class="text-base font-semibold text-ink-gray-8">{{ __('Adjust balance') }}</h3>
           <div class="grid grid-cols-[1fr_2fr_auto] items-end gap-3">
             <FormControl v-model.number="adjust.balance" type="number" :label="__('New balance (R$)')" :placeholder="money(balance)" />
@@ -249,12 +265,16 @@ const installments = computed(() =>
     .filter((i) => i.title === props.titleName)
     .sort((a, b) => a.number - b.number),
 )
-const openInstallments = computed(() => installments.value.filter((i) => !i.paid_on))
+const openInstallments = computed(() => installments.value.filter((i) => !i.paid_on && !i.cancelled_on))
+
+// Título que veio de um ERP (credtech#367): pagamento, estorno e ajuste de saldo só pela sincronização
+const erpSource = computed(() => (title.value?.erp_title_id ? title.value.erp_source || 'ERP' : ''))
 
 // Saldo: o valor atualizado é o que ainda se deve; título quitado fica com 0 (não volta ao original)
 const balance = computed(() => {
   const t = title.value
   if (!t) return 0
+  if (t.closed_reason) return 0
   const updated = Number(t.updated_amount || 0)
   return updated || Number(t.paid_amount || 0) ? updated : Number(t.original_amount || 0)
 })
@@ -434,7 +454,7 @@ async function createAgreement() {
 function confirmCancelAgreement() {
   createDialog({
     title: __('Cancel agreement'),
-    message: __('The open installments are removed. The ones already paid stay in the history.'),
+    message: __('The open installments are marked as cancelled. The whole agreement stays in the history.'),
     size: 'md',
     actions: [
       { label: __('Back'), onClick: ({ close }) => close() },

@@ -1,5 +1,7 @@
 """Payments, promise and agreement schedule per title (credtech#315)."""
 
+from unittest.mock import patch
+
 import frappe
 from frappe.utils import add_days, flt, nowdate
 
@@ -210,18 +212,24 @@ class TestCollection(FrappeTestCase):
 		self.assertFalse(doc.installments[0].paid_on)
 		self.assertEqual(balance_of(doc.titles[0]), 1000)
 
-	def test_cancel_keeps_the_paid_installments_and_numbering_goes_on(self):
+	def test_cancel_keeps_the_history_and_numbering_goes_on(self):
 		name = self.title().name
 		collection.create_agreement(self.deal, name, self.plan(400, 300, 300))
 		collection.record_payment(self.deal, name, installment=self.doc().installments[0].name)
 		collection.cancel_agreement(self.deal, name)
 		doc = self.doc()
-		self.assertEqual([(i.number, bool(i.paid_on)) for i in doc.installments], [(1, True)])
+		# paid stays paid; the open ones stay in the history as cancelled (neither paid nor open)
+		self.assertEqual(
+			[(i.number, bool(i.paid_on), bool(i.cancelled_on)) for i in doc.installments],
+			[(1, True, False), (2, False, True), (3, False, True)],
+		)
 		self.assertEqual(balance_of(doc.titles[0]), 600)
 		with self.assertRaises(frappe.ValidationError):  # nothing left to cancel
 			collection.cancel_agreement(self.deal, name)
+		with self.assertRaises(frappe.ValidationError):  # a cancelled installment cannot be paid
+			collection.record_payment(self.deal, name, installment=doc.installments[1].name)
 		collection.create_agreement(self.deal, name, self.plan(600))
-		self.assertEqual([i.number for i in self.doc().installments], [1, 2])
+		self.assertEqual([i.number for i in self.doc().installments], [1, 2, 3, 4])
 
 	def test_installments_of_other_titles_do_not_mix(self):
 		first, second = (t.name for t in self.doc().titles)
@@ -230,3 +238,36 @@ class TestCollection(FrappeTestCase):
 		slot = next(i for i in self.doc().installments if i.title == first)
 		with self.assertRaises(frappe.DoesNotExistError):
 			collection.record_payment(self.deal, second, installment=slot.name)
+
+	# ---- balance owned by an ERP (credtech#367)
+
+	def test_erp_titles_are_locked_and_the_others_are_not(self):
+		self.assertIsNone(collection._erp_locked(self.title()))
+		self.assertEqual(
+			collection._erp_locked(frappe._dict(erp_title_id="188134", erp_source="Smart Securities")), "Smart Securities"
+		)
+		self.assertEqual(collection._erp_locked(frappe._dict(erp_title_id="9", erp_source="")), "ERP")
+
+	def test_the_balance_of_an_erp_title_cannot_be_changed_by_hand(self):
+		name = self.title().name
+		first = self.pay(100)
+		payment = self.doc().payments[0].name
+		with patch.object(collection, "_erp_locked", return_value="Smart Securities"):
+			for call in (
+				lambda: collection.record_payment(self.deal, name, 50),
+				lambda: collection.reverse_payment(self.deal, payment),
+				lambda: collection.adjust_balance(self.deal, name, 800, "interest"),
+			):
+				with self.assertRaises(frappe.ValidationError) as caught:
+					call()
+				self.assertIn("Smart Securities", str(caught.exception))
+		# nothing moved, and a promise (not a balance change) is still allowed
+		self.assertEqual((balance_of(self.title()), len(self.doc().payments)), (900, 1))
+		with patch.object(collection, "_erp_locked", return_value="Smart Securities"):
+			collection.set_promise(self.deal, name, add_days(nowdate(), 3), 300)
+		self.assertEqual(first["balance"], 900)
+
+	def test_a_title_closed_by_the_erp_has_no_balance(self):
+		# closed (paid or repurchased) with nothing in updated_amount: not "the original amount again"
+		self.assertEqual(balance_of(frappe._dict(closed_reason="Repurchased by cedente", original_amount=900)), 0)
+		self.assertEqual(balance_of(frappe._dict(original_amount=900)), 900)

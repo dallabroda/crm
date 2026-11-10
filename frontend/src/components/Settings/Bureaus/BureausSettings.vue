@@ -337,7 +337,7 @@
                   :options="groupingOptions"
                   :description="
                     __(
-                      'Used by the spreadsheet import. The cedente is kept on each title either way.',
+                      'Used by the spreadsheet import and the ERP synchronization. The cedente is kept on each title either way.',
                     )
                   "
                 />
