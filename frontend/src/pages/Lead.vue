@@ -25,16 +25,15 @@
       <AssignTo v-model="assignees.data" doctype="CRM Lead" :docname="leadId" />
       <Dropdown v-if="doc && document.statuses" :options="statuses" align="end">
         <template #default="{ open }">
-          <Button
-            v-if="doc.status"
-            variant="outline"
-            :label="statusLabel(doc.status)"
-            :iconRight="open ? 'lucide-chevron-up' : 'lucide-chevron-down'"
-          >
-            <template #prefix>
-              <IndicatorIcon :class="getLeadStatus(doc.status).color" />
-            </template>
-          </Button>
+          <!-- Same as the card: the status is a "Filtro" (no colour dot) -->
+          <button v-if="doc.status" type="button" class="ct-filter">
+            <span class="truncate">{{ statusLabel(doc.status) }}</span>
+            <span
+              class="size-4 shrink-0"
+              :class="open ? 'lucide-chevron-up' : 'lucide-chevron-down'"
+              aria-hidden="true"
+            />
+          </button>
         </template>
       </Dropdown>
       <Tooltip
@@ -55,7 +54,7 @@
   <div v-if="doc.name" class="flex h-full overflow-hidden">
     <Tabs
       v-model="activeTab"
-      :tabs="tabs"
+      :tabs="tabLabels"
       class="flex flex-1 overflow-hidden flex-col [&_[role='tab']]:px-1 [&_[role='tab']]:shrink-0 [&_[role='tablist']]:px-6 [&_[role='tablist']::-webkit-scrollbar]:h-0 [&_[role='tablist']]:min-h-[45px] [&_[role='tablist']]:gap-4 [&>[role='tabpanel']:not([hidden])]:flex [&>[role='tabpanel']:not([hidden])]:grow [&>[data-slot=tab-list]]:overflow-x-auto [&_[data-slot=tab-indicator]]:translate-y-0 [&>[data-slot=tab-panel]]:min-h-0 [&>[data-slot=tab-panel]]:flex-col [&>[data-slot=tab-panel]]:overflow-auto"
     >
       <template #tab-panel>
@@ -180,6 +179,7 @@
                   variant="subtle"
                   theme="red"
                   icon="lucide-trash-2"
+                  class="ct-btn-danger-icon"
                   @click="deleteLead"
                 />
               </div>
@@ -258,7 +258,6 @@ import PhoneIcon from '@/components/Icons/PhoneIcon.vue'
 import TaskIcon from '@/components/Icons/TaskIcon.vue'
 import NoteIcon from '@/components/Icons/NoteIcon.vue'
 import WhatsAppIcon from '@/components/Icons/WhatsAppIcon.vue'
-import IndicatorIcon from '@/components/Icons/IndicatorIcon.vue'
 import CameraIcon from '@/components/Icons/CameraIcon.vue'
 import LinkIcon from '@/components/Icons/LinkIcon.vue'
 import AttachmentIcon from '@/components/Icons/AttachmentIcon.vue'
@@ -718,4 +717,10 @@ function reloadResources(data) {
     sections.reload()
   }
 }
+
+// Figma "Card · Atividades": tab labels without icons (the icons stay in
+// `tabs` for the activity empty states)
+const tabLabels = computed(() =>
+  (tabs.value || tabs).map((tab) => ({ ...tab, iconLeft: undefined, icon: undefined })),
+)
 </script>

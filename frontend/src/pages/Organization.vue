@@ -107,6 +107,7 @@
               theme="red"
               variant="subtle"
               iconLeft="lucide-trash-2"
+              class="ct-btn-danger-icon"
               @click="deleteOrganization()"
             />
             <Button
@@ -142,7 +143,7 @@
     <Tabs
       v-model="activeTab"
       as="div"
-      :tabs="tabs"
+      :tabs="tabLabels"
       class="flex flex-1 overflow-hidden flex-col [&_[role='tab']]:px-1 [&_[role='tab']]:shrink-0 [&_[role='tablist']]:gap-4 [&_[role='tablist']]:px-6 [&_[role='tablist']]:border-[var(--ct-border-soft)] [&_[role='tablist']::-webkit-scrollbar]:h-0 [&_[role='tablist']]:min-h-[45px] [&>[role='tabpanel']:not([hidden])]:flex [&>[role='tabpanel']:not([hidden])]:grow [&>[data-slot=tab-list]]:overflow-x-auto [&_[data-slot=tab-indicator]]:translate-y-0 [&>[data-slot=tab-panel]]:min-h-0 [&>[data-slot=tab-panel]]:flex-col [&>[data-slot=tab-panel]]:overflow-auto"
     >
       <template #tab-label="{ tab }">{{ __(tab.label) }}</template>
@@ -835,5 +836,11 @@ watch(
     }
   },
   { once: true },
+)
+
+// Figma "Card · Atividades": tab labels without icons (the icons stay in
+// `tabs` for the activity empty states)
+const tabLabels = computed(() =>
+  (tabs.value || tabs).map((tab) => ({ ...tab, iconLeft: undefined, icon: undefined })),
 )
 </script>
