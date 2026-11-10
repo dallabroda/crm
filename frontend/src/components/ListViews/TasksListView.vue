@@ -136,6 +136,30 @@
             "
           />
           <div
+            v-else-if="column.key === 'reference_docname' && (label || item)"
+            class="truncate text-base"
+          >
+            <router-link
+              v-if="row.reference_doctype === 'CRM Deal' || String(item || label).startsWith('CRM-DEAL')"
+              :to="{ name: 'Deal', params: { dealId: item || label } }"
+              class="inline-flex items-center gap-1 font-medium text-ink-gray-9 hover:underline hover:text-blue-600"
+              @click.stop
+            >
+              <span class="rounded bg-surface-gray-3 px-1.5 py-0.5 text-xs text-ink-gray-6 font-normal">Card</span>
+              {{ item || label }}
+            </router-link>
+            <router-link
+              v-else-if="row.reference_doctype === 'CRM Lead' || String(item || label).startsWith('CRM-LEAD')"
+              :to="{ name: 'Lead', params: { leadId: item || label } }"
+              class="inline-flex items-center gap-1 font-medium text-ink-gray-9 hover:underline hover:text-blue-600"
+              @click.stop
+            >
+              <span class="rounded bg-surface-gray-3 px-1.5 py-0.5 text-xs text-ink-gray-6 font-normal">Lead</span>
+              {{ item || label }}
+            </router-link>
+            <span v-else>{{ getLabel(label, column) }}</span>
+          </div>
+          <div
             v-else-if="label"
             class="truncate text-base"
             @click="

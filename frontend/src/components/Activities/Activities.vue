@@ -688,12 +688,43 @@ onMounted(() => {
 
   nextTick(() => {
     const hash = route.hash.slice(1) || null
-    let tabNames = props.tabs?.map((tab) => tab.name)
-    if (!tabNames?.includes(hash)) {
-      scroll(hash)
+    const subMap = {
+      emails: 'Emails',
+      comments: 'Comments',
+      calls: 'Calls',
+      tasks: 'Tasks',
+      attachments: 'Attachments',
+      notes: 'Comments',
+    }
+    if (hash && subMap[hash]) {
+      changeTabTo(hash)
+    } else {
+      let tabNames = props.tabs?.map((tab) => tab.name)
+      if (!tabNames?.includes(hash)) {
+        scroll(hash)
+      }
     }
   })
 })
+
+watch(
+  () => route.hash,
+  (newHash) => {
+    const clean = newHash ? newHash.slice(1) : null
+    if (!clean) return
+    const subMap = {
+      emails: 'Emails',
+      comments: 'Comments',
+      calls: 'Calls',
+      tasks: 'Tasks',
+      attachments: 'Attachments',
+      notes: 'Comments',
+    }
+    if (subMap[clean]) {
+      changeTabTo(clean)
+    }
+  },
+)
 
 function handleDocinfoUpdate({ doc, key }) {
   // 'comments' covers comment activity; 'communications' covers new/updated

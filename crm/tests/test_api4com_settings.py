@@ -54,8 +54,9 @@ class TestAPI4ComSettings(FrappeTestCase):
 		self.assertEqual(kwargs["headers"], {"Authorization": TOKEN})
 		body = kwargs["json"]
 		self.assertTrue(body["webhook"])
-		self.assertEqual(body["metadata"]["webhookTypes"], ["channel-hangup"])
-		self.assertEqual(body["metadata"]["webhookVersion"], "v1.4")
+		self.assertEqual(body["metadata"]["webhookTypes"], ["channel-answer", "channel-hangup"])
+		self.assertEqual(body["metadata"]["webhookVersion"], "v1.8")
+		self.assertEqual(body["webhookConstraint"]["metadata"]["gateway"], "cred-hub")
 		self.assertTrue(
 			body["metadata"]["webhookUrl"].endswith(
 				f"/api/method/crm.integrations.voip.webhook.api4com?key={secret}"
@@ -94,10 +95,10 @@ class TestAPI4ComSettings(FrappeTestCase):
 		with self.assertRaises(frappe.ValidationError):
 			self.enable()
 
-	def test_unreachable_api4com_stops_the_save(self):
+	def test_unreachable_api4com_does_not_break_saving(self):
 		self.api4com.side_effect = api4com_settings.requests.ConnectionError
-		with self.assertRaises(frappe.ValidationError):
-			self.enable()
+		settings = self.enable()
+		self.assertEqual(settings.enabled, 1)
 
 	def test_regenerate_secret_changes_the_url_and_registers_again(self):
 		settings = self.enable()

@@ -166,9 +166,9 @@
           </Tooltip>
           <div class="flex gap-2">
             <Button
-              v-if="callEnabled"
+              v-if="callEnabled || hasPhoneToCall"
               variant="outline"
-              :tooltip="__('Make a Call')"
+              :tooltip="callEnabled ? __('Make a Call') : __('Ligar (Telefone)')"
               :icon="PhoneIcon"
               @click="triggerCall"
             />
@@ -350,10 +350,28 @@
                       </div>
                       <div
                         v-if="contact.mobile_no"
-                        class="flex items-center gap-3 p-1 py-1.5 text-ink-gray-8"
+                        class="flex items-center justify-between gap-2 p-1 py-1.5 text-ink-gray-8"
                       >
-                        <PhoneIcon class="h-4 w-4" />
-                        {{ contact.mobile_no }}
+                        <div class="flex items-center gap-2 truncate">
+                          <PhoneIcon class="h-4 w-4 shrink-0" />
+                          <span class="truncate">{{ contact.mobile_no }}</span>
+                        </div>
+                        <div class="flex items-center gap-1 shrink-0">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            :tooltip="callEnabled ? __('Make a Call') : __('Ligar (Telefone)')"
+                            :icon="PhoneIcon"
+                            @click.stop="callNumber(contact.mobile_no)"
+                          />
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            :tooltip="__('Send WhatsApp')"
+                            :icon="WhatsAppIcon"
+                            @click.stop="openWhatsAppFor(contact)"
+                          />
+                        </div>
                       </div>
                       <div
                         v-if="!contact.email && !contact.mobile_no"
@@ -1144,21 +1162,42 @@ const dealContacts = createResource({
 
 if (!dealContacts.data) dealContacts.fetch()
 
+const primaryPhone = computed(() => {
+  let primary = dealContacts.data?.find((c) => c.is_primary)
+  return (
+    primary?.mobile_no ||
+    dealContacts.data?.find((c) => c.mobile_no)?.mobile_no ||
+    doc.value?.mobile_no ||
+    null
+  )
+})
+
+const hasPhoneToCall = computed(() => Boolean(primaryPhone.value))
+
 function triggerCall() {
-  let primaryContact = dealContacts.data?.find((c) => c.is_primary)
-  if (!primaryContact) {
-    toast.error(__('No Primary Contact Set'))
-    return
-  }
-
-  let mobile_no = primaryContact.mobile_no || null
-
+  let mobile_no = primaryPhone.value
   if (!mobile_no) {
     toast.error(__('No Mobile Number Set'))
     return
   }
+  callNumber(mobile_no)
+}
 
-  makeCall(mobile_no, props.dealId)
+function callNumber(mobile_no) {
+  if (callEnabled.value) {
+    makeCall(mobile_no, props.dealId)
+  } else {
+    window.location.href = `tel:${mobile_no}`
+  }
+}
+
+function openWhatsAppFor(contact) {
+  let phone = contact?.mobile_no || contact?.phone
+  if (!phone) {
+    toast.error(__('No Mobile Number Set'))
+    return
+  }
+  whatsapp.value = { phone, name: contact.full_name || contact.name || '' }
 }
 
 // WhatsApp to the primary contact, through the company's SmartChat (credtech#211)

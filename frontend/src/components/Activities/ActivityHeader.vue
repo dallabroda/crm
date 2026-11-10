@@ -159,14 +159,25 @@ const defaultActions = computed(() => {
     },
     {
       icon: h(PhoneIcon, { class: 'h-4 w-4' }),
-      label: __('Log a Call'),
-      onClick: () => props.modalRef.createCallLog(),
+      label: callEnabled.value ? __('Fazer Ligação (Integração)') : __('Ligar (Telefone)'),
+      onClick: () => {
+        let phone = props.doc.mobile_no
+        if (!phone) {
+          toast.error(__('No Mobile Number Set'))
+          return
+        }
+        if (callEnabled.value) {
+          makeCall(phone, dealName())
+        } else {
+          window.location.href = `tel:${phone}`
+        }
+      },
+      condition: () => Boolean(props.doc?.mobile_no),
     },
     {
       icon: h(PhoneIcon, { class: 'h-4 w-4' }),
-      label: __('Make a Call'),
-      onClick: () => makeCall(props.doc.mobile_no, dealName()),
-      condition: () => callEnabled.value,
+      label: __('Registrar Ligação Manual'),
+      onClick: () => props.modalRef.createCallLog(),
     },
     {
       icon: h(TaskIcon, { class: 'h-4 w-4' }),
@@ -193,15 +204,26 @@ const defaultActions = computed(() => {
 const callActions = computed(() => {
   let actions = [
     {
-      label: __('Log a Call'),
-      icon: 'lucide-plus',
-      onClick: () => props.modalRef.createCallLog(),
+      label: callEnabled.value ? __('Fazer Ligação (Integração)') : __('Ligar (Telefone)'),
+      icon: h(PhoneIcon, { class: 'h-4 w-4' }),
+      onClick: () => {
+        let phone = props.doc.mobile_no
+        if (!phone) {
+          toast.error(__('No Mobile Number Set'))
+          return
+        }
+        if (callEnabled.value) {
+          makeCall(phone, dealName())
+        } else {
+          window.location.href = `tel:${phone}`
+        }
+      },
+      condition: () => Boolean(props.doc?.mobile_no),
     },
     {
-      label: __('Make a Call'),
-      icon: h(PhoneIcon, { class: 'h-4 w-4' }),
-      onClick: () => makeCall(props.doc.mobile_no, dealName()),
-      condition: () => callEnabled.value,
+      label: __('Registrar Ligação Manual'),
+      icon: 'lucide-plus',
+      onClick: () => props.modalRef.createCallLog(),
     },
   ]
 

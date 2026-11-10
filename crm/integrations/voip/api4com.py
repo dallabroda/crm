@@ -27,6 +27,22 @@ NO_ANSWER_CAUSES = {
 }
 
 
+def format_e164_number(number: str) -> str:
+	"""API4Com expects international E.164 (+5511987654321)."""
+	digits = re.sub(r"\D", "", number or "")
+	if not digits:
+		return number or ""
+	if (number or "").strip().startswith("+"):
+		return f"+{digits}"
+	# Brazil: 10 or 11 digits (e.g. 48996302275 or 1133334444)
+	if len(digits) in (10, 11):
+		return f"+55{digits}"
+	# Brazil with 55 country code already
+	if len(digits) in (12, 13) and digits.startswith("55"):
+		return f"+{digits}"
+	return f"+{digits}"
+
+
 class API4Com(Operator):
 	key = "api4com"
 	medium = "API4Com"
@@ -40,15 +56,17 @@ class API4Com(Operator):
 
 	def originate_call(self, settings, extension: str, number: str, deal: str | None) -> str | None:
 		"""POST /calls: API4Com rings the salesperson's webphone, then the customer. The deal goes in
-		`metadata.entityId` and comes back in the `channel-hangup`. Not yet run against the real API
-		(test account of credtech#100)."""
+		`metadata.entityId` and comes back in the `channel-hangup`."""
 		metadata = {"gateway": GATEWAY}
 		if deal:
 			metadata["entityId"] = deal
+		clean_ext = (extension or "").strip()
+		clean_called = format_e164_number(number)
+
 		try:
 			response = requests.post(
 				f"{API_URL}/calls",
-				json={"extension": extension, "caller": extension, "called": number, "metadata": metadata},
+				json={"extension": clean_ext, "caller": clean_ext, "called": clean_called, "metadata": metadata},
 				# API4Com takes the raw token, without "Bearer"
 				headers={"Authorization": settings.get_password("api_token")},
 				timeout=90,
@@ -58,18 +76,24 @@ class API4Com(Operator):
 			frappe.log_error(title="API4Com: click-to-call failed")
 			frappe.throw(_("Could not reach API4Com. Please try again in a few minutes."))
 		if response.status_code >= 400:
+			err_detail = ""
+			try:
+				err_data = response.json()
+				err_detail = err_data.get("error", {}).get("message") or err_data.get("message") or ""
+			except Exception:
+				err_detail = response.text[:200]
 			frappe.log_error(
 				title="API4Com: click-to-call refused",
 				message=f"HTTP {response.status_code}: {response.text[:500]}",
 			)
-			frappe.throw(call_error(response.status_code, number))
+			frappe.throw(call_error(response.status_code, number, err_detail))
 		try:
 			return str(response.json().get("id") or "") or None
 		except ValueError:
 			return None
 
 
-def call_error(status: int, number: str) -> str:
+def call_error(status: int, number: str, detail: str = "") -> str:
 	"""What the salesperson reads when API4Com refuses a click-to-call (codes from their doc)."""
 	if status == 401:
 		return _("API4Com refused the token. Check that it was copied whole and has not expired.")
@@ -78,12 +102,18 @@ def call_error(status: int, number: str) -> str:
 	if status == 404:
 		return _("Your extension was not found at API4Com. Check it in the telephony settings.")
 	if status == 422:
-		return _("API4Com did not accept the number {0}.").format(number)
+		msg = _("API4Com did not accept the number {0}.").format(number)
+		if detail:
+			msg += f" ({detail})"
+		return msg
 	if status == 424:
 		return _("Your API4Com webphone is offline. Open it and try again.")
 	if status == 429:
 		return _("Too many calls in a minute. Wait a moment and try again.")
-	return _("API4Com refused the call (HTTP {0}).").format(status)
+	msg = _("API4Com refused the call (HTTP {0}).").format(status)
+	if detail:
+		msg += f" ({detail})"
+	return msg
 
 
 def parse_hangup(payload: dict) -> dict:

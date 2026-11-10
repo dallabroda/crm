@@ -103,6 +103,10 @@ function createCallLog() {
     doctype: 'CRM Call Log',
     title: 'Call Log',
     defaults: {
+      type: 'Outgoing',
+      status: 'Completed',
+      from: 'Manual',
+      to: props.doc?.mobile_no,
       reference_doctype: props.doctype,
       reference_docname: props.doc?.name,
       reference_doc: { ...props.doc },
