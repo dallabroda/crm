@@ -170,6 +170,21 @@
                     {{ unreadNotificationsCount }}
                   </span>
                 </SidebarItem>
+                <!-- Figma "Ajuda › Suporte": opens the CredTech support on
+                     WhatsApp, like Cred Chat's "Suporte" -->
+                <SidebarItem
+                  v-else-if="link.onClick"
+                  :class="itemClass"
+                  :label="__(link.label)"
+                  @click="link.onClick()"
+                >
+                  <template #prefix>
+                    <Icon :icon="link.icon" class="size-4" />
+                  </template>
+                  <span class="ct-sidebar-label ml-0.5 truncate">{{
+                    __(link.label)
+                  }}</span>
+                </SidebarItem>
                 <SidebarItem
                   v-else
                   :class="itemClass"
@@ -272,10 +287,12 @@ import CircleCheckIcon from '~icons/lucide/circle-check'
 import ContactIcon from '~icons/lucide/contact'
 import FileTextIcon from '~icons/lucide/file-text'
 import HandshakeIcon from '~icons/lucide/handshake'
+import HeadsetIcon from '~icons/lucide/headset'
 import LayoutDashboardIcon from '~icons/lucide/layout-dashboard'
 import PhoneLucideIcon from '~icons/lucide/phone'
 import ReceiptIcon from '~icons/lucide/receipt'
 import SearchIcon from '~icons/lucide/search'
+import SettingsIcon from '~icons/lucide/settings'
 import BrandLogo from '@/components/BrandLogo.vue'
 import CRMLogo from '@/components/Icons/CRMLogo.vue'
 import InviteIcon from '@/components/Icons/InviteIcon.vue'
@@ -411,6 +428,22 @@ function openNewPipeline() {
   showSettings.value = true
 }
 
+// Same CredTech support line as Cred Chat's "Suporte", with who is asking
+const SUPPORT_WHATSAPP_NUMBER = '554888692538'
+
+function openSupport() {
+  const me = getUser() || {}
+  const text = __(
+    'Hi! I am {0} ({1}) from {2} and I need help with HubTech CRM.',
+    [me.full_name || '', me.email || user || '', brand.name || ''],
+  )
+  window.open(
+    `https://wa.me/${SUPPORT_WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`,
+    '_blank',
+    'noopener',
+  )
+}
+
 function navLink(link) {
   return {
     label: link.label,
@@ -480,6 +513,27 @@ const allViews = computed(() => {
       name: 'Pinned Views',
       opened: true,
       views: parseView(getPinnedViews()),
+    })
+  }
+  // Figma "Ajuda": Settings and Support close the list (no Settings on mobile)
+  if (!props.mobile) {
+    _views.push({
+      name: 'Help',
+      opened: true,
+      views: [
+        {
+          label: 'Settings',
+          icon: markRaw(SettingsIcon),
+          key: 'Settings',
+          to: { name: 'Settings' },
+        },
+        {
+          label: 'Support',
+          icon: markRaw(HeadsetIcon),
+          key: 'Support',
+          onClick: openSupport,
+        },
+      ],
     })
   }
   return _views
@@ -574,7 +628,7 @@ function onNotificationsClick(event) {
 
 // onboarding
 const { user } = sessionStore()
-const { users, isManager } = usersStore()
+const { users, isManager, getUser } = usersStore()
 const { isOnboardingStepsCompleted, setUp } = useOnboarding('frappecrm')
 const { flushPendingSteps } = useCrmOnboarding()
 

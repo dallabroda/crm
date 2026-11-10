@@ -25,36 +25,47 @@
            soft background). Inline when the layout has no column for it. -->
       <Teleport to="#app-secondary-sidebar" :disabled="!secondaryTarget">
         <nav
-          ref="navRef"
-          class="ct-settings-nav flex w-60 shrink-0 flex-col gap-0.5 overflow-y-auto border-r border-[var(--ct-border-soft)] bg-surface-base px-3 py-5"
+          class="ct-settings-nav flex w-60 shrink-0 flex-col border-r border-[var(--ct-border-soft)] bg-surface-base pt-5"
           :aria-label="__('Settings')"
         >
-          <div class="pb-3 pl-2.5 text-[16px] font-semibold leading-6 text-[var(--ct-text-primary)]">
-            {{ __('Settings') }}
-          </div>
-          <template v-for="section in sections" :key="section.key">
+          <!-- the title stays put; only the list below scrolls -->
+          <div class="shrink-0 px-3 pb-3">
             <div
-              class="pb-1 pl-2.5 pt-3 text-[12px] font-medium uppercase tracking-[1.2px] text-[var(--ct-text-tertiary)]"
+              class="pl-2.5 text-[16px] font-semibold leading-6 text-[var(--ct-text-primary)]"
             >
-              {{ section.label }}
+              {{ __('Settings') }}
             </div>
-            <router-link
-              v-for="item in section.items"
-              :key="item.slug"
-              :to="{ name: 'Settings', params: { section: item.slug } }"
-              :data-page="item.slug"
-              class="flex min-h-9 shrink-0 items-center gap-2.5 rounded-lg px-2.5 py-2 text-[14px] leading-5 transition-colors"
-              :class="
-                item.slug === activeItem?.slug
-                  ? 'bg-[var(--ct-bg-soft)] font-medium text-[var(--ct-text-primary)]'
-                  : 'text-[var(--ct-text-secondary)] hover:bg-[var(--ct-bg-soft)]'
-              "
-              :aria-current="item.slug === activeItem?.slug ? 'page' : undefined"
-            >
-              <Icon :icon="item.icon" class="size-4 shrink-0" />
-              <span>{{ item.label }}</span>
-            </router-link>
-          </template>
+          </div>
+          <div
+            ref="navRef"
+            class="flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto px-3 pb-5"
+          >
+            <template v-for="section in sections" :key="section.key">
+              <div
+                class="pb-1 pl-2.5 pt-3 text-[12px] font-medium uppercase tracking-[1.2px] text-[var(--ct-text-tertiary)]"
+              >
+                {{ section.label }}
+              </div>
+              <router-link
+                v-for="item in section.items"
+                :key="item.slug"
+                :to="{ name: 'Settings', params: { section: item.slug } }"
+                :data-page="item.slug"
+                class="flex min-h-9 shrink-0 items-center gap-2.5 rounded-lg px-2.5 py-2 text-[14px] leading-5 transition-colors"
+                :class="
+                  item.slug === activeItem?.slug
+                    ? 'bg-[var(--ct-bg-soft)] font-medium text-[var(--ct-text-primary)]'
+                    : 'text-[var(--ct-text-secondary)] hover:bg-[var(--ct-bg-soft)]'
+                "
+                :aria-current="
+                  item.slug === activeItem?.slug ? 'page' : undefined
+                "
+              >
+                <Icon :icon="item.icon" class="size-4 shrink-0" />
+                <span>{{ item.label }}</span>
+              </router-link>
+            </template>
+          </div>
         </nav>
       </Teleport>
 
