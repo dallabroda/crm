@@ -17,40 +17,48 @@
       </template>
     </LayoutHeader>
 
-    <div class="flex min-h-0 flex-1 gap-12 px-6">
-      <!-- Settings menu (Figma "Navegação das configurações") -->
-      <nav
-        ref="navRef"
-        class="flex w-56 shrink-0 flex-col gap-0.5 overflow-y-auto pb-8 pt-4"
-        :aria-label="__('Settings')"
-      >
-        <template v-for="(section, i) in sections" :key="section.key">
-          <div
-            class="px-2.5 pb-1 text-xs font-medium uppercase tracking-[0.1em] text-ink-gray-4"
-            :class="i === 0 ? 'pt-1' : 'pt-3'"
-          >
-            {{ section.label }}
+    <div class="flex min-h-0 flex-1 px-6">
+      <!-- Figma "Barra lateral secundária · Configurações HubTech" (2081:26431):
+           240px full-height column beside the icon rail, white, right border,
+           12px sides / 20px top, "Configurações" 16 Semi Bold, groups 12 Medium
+           uppercase, 36px items (14 Regular secondary; active 14 Medium on the
+           soft background). Inline when the layout has no column for it. -->
+      <Teleport to="#app-secondary-sidebar" :disabled="!secondaryTarget">
+        <nav
+          ref="navRef"
+          class="ct-settings-nav flex w-60 shrink-0 flex-col gap-0.5 overflow-y-auto border-r border-[var(--ct-border-soft)] bg-surface-base px-3 py-5"
+          :aria-label="__('Settings')"
+        >
+          <div class="pb-3 pl-2.5 text-[16px] font-semibold leading-6 text-[var(--ct-text-primary)]">
+            {{ __('Settings') }}
           </div>
-          <router-link
-            v-for="item in section.items"
-            :key="item.slug"
-            :to="{ name: 'Settings', params: { section: item.slug } }"
-            :data-page="item.slug"
-            class="flex min-h-9 shrink-0 items-center gap-2.5 rounded-lg px-2.5 py-2 text-base leading-5 transition-colors"
-            :class="
-              item.slug === activeItem?.slug
-                ? 'bg-surface-gray-4 font-medium text-ink-gray-9'
-                : 'text-ink-gray-6 hover:bg-surface-gray-2'
-            "
-            :aria-current="item.slug === activeItem?.slug ? 'page' : undefined"
-          >
-            <Icon :icon="item.icon" class="size-4 shrink-0" />
-            <span>{{ item.label }}</span>
-          </router-link>
-        </template>
-      </nav>
+          <template v-for="section in sections" :key="section.key">
+            <div
+              class="pb-1 pl-2.5 pt-3 text-[12px] font-medium uppercase tracking-[1.2px] text-[var(--ct-text-tertiary)]"
+            >
+              {{ section.label }}
+            </div>
+            <router-link
+              v-for="item in section.items"
+              :key="item.slug"
+              :to="{ name: 'Settings', params: { section: item.slug } }"
+              :data-page="item.slug"
+              class="flex min-h-9 shrink-0 items-center gap-2.5 rounded-lg px-2.5 py-2 text-[14px] leading-5 transition-colors"
+              :class="
+                item.slug === activeItem?.slug
+                  ? 'bg-[var(--ct-bg-soft)] font-medium text-[var(--ct-text-primary)]'
+                  : 'text-[var(--ct-text-secondary)] hover:bg-[var(--ct-bg-soft)]'
+              "
+              :aria-current="item.slug === activeItem?.slug ? 'page' : undefined"
+            >
+              <Icon :icon="item.icon" class="size-4 shrink-0" />
+              <span>{{ item.label }}</span>
+            </router-link>
+          </template>
+        </nav>
+      </Teleport>
 
-      <!-- Active panel -->
+      <!-- Active panel (Figma "Conteúdo": 24px sides, 16px top) -->
       <div class="min-w-0 flex-1 overflow-y-auto pb-8 pt-4">
         <component
           :is="activeItem.component"
@@ -74,7 +82,7 @@ import { apiKeys, loadApiKeys } from '@/components/Settings/ApiKeys/apiKeysApi'
 import { disableSettingModalOutsideClick } from '@/composables/settings'
 import { usersStore } from '@/stores/users'
 import { usePageMeta } from 'frappe-ui'
-import { computed, nextTick, provide, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, provide, ref, watch } from 'vue'
 import { useRoute, useRouter, onBeforeRouteLeave } from 'vue-router'
 
 const route = useRoute()
@@ -161,9 +169,23 @@ usePageMeta(() => ({
     ? `${activeItem.value.label} · ${__('Settings')}`
     : __('Settings'),
 }))
+
+// the desktop layout has a column for the settings menu; elsewhere it stays
+// inline in the page
+const secondaryTarget = ref(false)
+onMounted(() => {
+  secondaryTarget.value = Boolean(
+    document.getElementById('app-secondary-sidebar'),
+  )
+})
 </script>
 
 <style scoped>
+/* Same Lucide line as the main sidebar (Figma 1.4px at 16px): frappe-ui draws
+   them at 1.5 of 24, which reads thinner next to the rail */
+.ct-settings-nav :deep(svg) {
+  stroke-width: 2.1;
+}
 /* Titles teleported by the panels (plain or "back" buttons) use the top bar
    title style: 20px, semibold (Figma "Barra superior"). */
 .settings-title :deep(h1),

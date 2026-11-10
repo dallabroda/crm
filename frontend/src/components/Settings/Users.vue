@@ -75,8 +75,10 @@
         class="divide-y divide-outline-gray-1 overflow-y-auto rounded-lg border border-outline-gray-1"
       >
         <template v-for="user in usersList" :key="user.name">
+          <!-- Figma "Configurações · Usuários" row: 32px avatar, name 14
+               Medium over e-mail 14 Regular, "Filtro" and a ghost "…" -->
           <li class="flex items-center justify-between gap-3 px-4 py-3">
-            <div class="flex items-center">
+            <div class="flex min-w-0 items-center">
               <div class="relative shrink-0">
                 <Avatar
                   :image="user.user_image"
@@ -91,20 +93,24 @@
               </div>
               <div class="flex flex-col ml-3">
                 <div
-                  class="flex items-center text-base font-medium text-ink-gray-9"
+                  class="flex items-center text-[14px] font-medium leading-5 text-[var(--ct-text-primary)]"
                 >
                   {{ user.full_name }}
                 </div>
-                <div class="text-base text-ink-gray-6">
+                <div
+                  class="mt-0.5 text-[14px] leading-5 text-[var(--ct-text-secondary)]"
+                >
                   {{ user.name }}
                 </div>
               </div>
             </div>
-            <div class="flex gap-2 items-center flex-row-reverse">
+            <div class="flex flex-row-reverse items-center gap-3">
               <Dropdown
                 :options="getMoreOptions(user)"
                 :button="{
                   icon: 'lucide-more-horizontal',
+                  variant: 'ghost',
+                  class: 'size-8',
                   onblur: (e) => {
                     e.stopPropagation()
                     confirmRemove = false
@@ -112,27 +118,28 @@
                 }"
                 align="end"
               />
+              <!-- Figma "Configurações · Usuários": the role is a "Filtro"
+                   select (border, label and chevron, no leading icon) -->
               <Tooltip
                 v-if="isManager() && user.role == 'System Manager'"
                 :text="__('Cannot change role of user with Admin access')"
               >
-                <Button :label="__('Admin')" icon-left="lucide-shield" />
+                <button type="button" class="ct-filter" disabled>
+                  <span class="truncate">{{ __('Admin') }}</span>
+                </button>
               </Tooltip>
-              <Dropdown
-                v-else
-                :options="getDropdownOptions(user)"
-                :button="{
-                  label: roleMap[user.role],
-                  iconRight: 'lucide-chevron-down',
-                  iconLeft:
-                    user.role === 'System Manager'
-                      ? 'lucide-shield'
-                      : user.role === 'Sales Manager'
-                        ? 'lucide-briefcase'
-                        : 'lucide-user-check',
-                }"
-                align="end"
-              />
+              <Dropdown v-else :options="getDropdownOptions(user)" align="end">
+                <template #default="{ open }">
+                  <button type="button" class="ct-filter">
+                    <span class="truncate">{{ roleMap[user.role] }}</span>
+                    <span
+                      class="size-4 shrink-0"
+                      :class="open ? 'lucide-chevron-up' : 'lucide-chevron-down'"
+                      aria-hidden="true"
+                    />
+                  </button>
+                </template>
+              </Dropdown>
             </div>
           </li>
         </template>

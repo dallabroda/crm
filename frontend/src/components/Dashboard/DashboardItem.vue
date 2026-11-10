@@ -33,7 +33,7 @@
         </template>
       </component>
     </ChartCard>
-    <ChartCard v-else-if="item.type == 'donut_chart'" class="h-full">
+    <ChartCard v-else-if="item.type == 'donut_chart'" class="ct-donut h-full">
       <DonutChart v-if="item.data" v-bind="donutChartProps">
         <template #empty>
           <ChartEmptyState kind="donut" />
@@ -136,6 +136,36 @@ const axisChart = computed(() => ({
 </script>
 
 <style scoped>
+/* Figma "Painel · Visão geral" donut cards: a 164px ring with the legend
+   stacked on its right ("Gráfico e legenda") */
+.ct-donut :deep([data-slot='chart-container']) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto minmax(0, 1fr);
+  column-gap: 24px;
+  row-gap: 6px;
+}
+.ct-donut :deep([data-slot='chart-header']) {
+  grid-column: 1 / -1;
+}
+.ct-donut :deep([data-slot='chart-plot']) {
+  grid-column: 1;
+  align-self: center;
+  height: 100%;
+  max-height: 182px;
+  padding-bottom: 0;
+}
+.ct-donut :deep([data-slot='chart-legend']) {
+  grid-column: 2;
+  grid-row: 2;
+  align-self: center;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  gap: 4px;
+  padding-right: 8px;
+}
+
 /* Figma "Métrica": label on top, value (26/500) with the variation
    (12/600) beside it */
 /* (the Tooltip around the card renames its data-slot to "trigger") */

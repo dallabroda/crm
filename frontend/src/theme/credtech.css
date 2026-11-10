@@ -368,3 +368,30 @@
 .ct-panel-toggle:hover {
   background: var(--ct-bg-soft);
 }
+
+/* Figma "Legenda de gráfico" (1215:1325): 8px dot, label 12 Regular
+   secondary, value 12 Medium primary, 8px apart */
+[data-slot='chart-legend'] > button {
+  height: 16px;
+  padding: 0;
+  font-size: 12px;
+  line-height: 16px;
+}
+[data-slot='chart-legend'] {
+  column-gap: 12px;
+}
+[data-slot='chart-legend'] > button > span > span > span:first-child,
+[data-slot='chart-legend'] > button span.size-2 {
+  width: 8px;
+  height: 8px;
+}
+[data-slot='chart-legend'] > button span.gap-1\.5 {
+  gap: 8px;
+}
+[data-slot='chart-legend'] > button span.text-ink-gray-6 {
+  color: var(--ct-text-secondary);
+}
+[data-slot='chart-legend'] > button span.tabular-nums {
+  color: var(--ct-text-primary);
+  font-weight: 500;
+}

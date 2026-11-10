@@ -107,18 +107,46 @@ function groupDonutTail(config: DonutChartConfig): Row[] {
   ]
 }
 
+// Figma "Legenda de gráfico": rings use only the blue scale, biggest slices
+// darkest, two slices per tone, and grey for the 7th slice onwards / "Outros"
+const DONUT_TONES = [
+  ['--ct-chart-2', '#0088ff'],
+  ['--ct-chart-3', '#66b8ff'],
+  ['--ct-chart-4', '#b3dbff'],
+]
+const DONUT_REST: [string, string] = ['--ct-chart-5', '#dcdde2']
+
+function cssColor([name, fallback]: string[]): string {
+  if (typeof document === 'undefined') return fallback
+  const value = getComputedStyle(document.documentElement)
+    .getPropertyValue(name)
+    .trim()
+  return value || fallback
+}
+
+export function donutColors(rows: Row[], category: string): string[] {
+  return rows.map((row, i) =>
+    i >= 6 || row[category] === __('Others')
+      ? cssColor(DONUT_REST)
+      : cssColor(DONUT_TONES[Math.min(2, Math.floor(i / 2))]),
+  )
+}
+
 export function toDonutChartProps(config: DonutChartConfig): DonutChartProps {
+  const data = groupDonutTail(config)
   return {
     title: config.title,
     subtitle: config.subtitle,
-    data: groupDonutTail(config),
+    data,
     category: config.categoryColumn,
     value: config.valueColumn,
     maxSlices: config.maxSliceCount,
     // Without it the ring's middle reads the value column's key ("Count")
     centerLabel: config.centerLabel ?? __('Total'),
     showDataLabels: config.showInlineLabels,
-    palette: config.colors,
+    palette: config.colors?.length
+      ? config.colors
+      : donutColors(data, config.categoryColumn),
     echartOptions: config.echartOptions,
   }
 }

@@ -128,6 +128,34 @@ describe('toDonutChartProps', () => {
     })
     expect(props.data).toHaveLength(1)
   })
+
+  it('colours the ring in the blue scale, two slices per tone', () => {
+    const props = toDonutChartProps({
+      data: [5, 9, 1, 7, 3, 2, 8].map((count, i) => ({ stage: `S${i}`, count })),
+      categoryColumn: 'stage',
+      valueColumn: 'count',
+    })
+    expect(props.data.map((row) => row.count)).toEqual([9, 8, 7, 5, 3, 2, 1])
+    expect(props.palette).toEqual([
+      '#0088ff',
+      '#0088ff',
+      '#66b8ff',
+      '#66b8ff',
+      '#b3dbff',
+      '#b3dbff',
+      '#dcdde2',
+    ])
+  })
+
+  it('keeps colours the chart was saved with', () => {
+    const props = toDonutChartProps({
+      data: [{ source: 'Site', count: 1 }],
+      categoryColumn: 'source',
+      valueColumn: 'count',
+      colors: ['#123456'],
+    })
+    expect(props.palette).toEqual(['#123456'])
+  })
 })
 
 describe('toNumberCardProps', () => {
