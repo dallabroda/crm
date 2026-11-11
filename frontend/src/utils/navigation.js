@@ -9,7 +9,7 @@ import router from '@/router'
 
 export const navigationItems = [
   {
-    label: 'Dashboard',
+    label: 'Home',
     icon: LucideLayoutDashboard,
     route: 'Dashboard',
     desktopOnly: true,
