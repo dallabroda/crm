@@ -736,15 +736,19 @@ const columnKey = (name) =>
     .filter((w) => w && w !== 'de')
     .join('')
 // Only what the company uses is shown: required, automatic, already chosen or added now
-const shownCedenteFields = computed(() =>
-  (mapping.value?.cedente.fields || []).filter(
+const shownCedenteFields = computed(() => {
+  const shown = (mapping.value?.cedente.fields || []).filter(
     (f) =>
       f.required === 'yes' ||
       f.kind === 'auto' ||
       cedenteRow(f.erp_field) ||
       showMore.has('cedente:' + f.erp_field),
-  ),
-)
+  )
+  return [
+    ...shown.filter((f) => f.kind !== 'auto'),
+    ...shown.filter((f) => f.kind === 'auto'),
+  ]
+})
 const hiddenCedenteOptions = computed(() => [
   { label: __('+ Add an ERP field'), value: '' },
   ...(mapping.value?.cedente.fields || [])
@@ -752,12 +756,17 @@ const hiddenCedenteOptions = computed(() => [
     .map((f) => ({ label: __(f.label), value: f.erp_field })),
 ])
 function shownColumns(part) {
-  return part.options.columns.filter(
+  const shown = part.options.columns.filter(
     (c) =>
       part.options.fixed[c] ||
       importValue(part.table, c) ||
       showMore.has(part.table + ':' + c),
   )
+  // The ones read automatically go last, after what the company chose (as in the Figma)
+  return [
+    ...shown.filter((c) => !part.options.fixed[c]),
+    ...shown.filter((c) => part.options.fixed[c]),
+  ]
 }
 function hiddenColumnOptions(part) {
   const shown = shownColumns(part)
