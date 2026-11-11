@@ -2,13 +2,15 @@
   <!-- Figma: cards start 24px from the sides and 16px below the top bar
        (16px here + the 8px around each card) -->
   <div class="flex-1 overflow-y-auto px-4 pb-4 pt-2">
+    <!-- Figma "Início · Visão geral" (819:2): a 47.2px row makes a 2-row
+         metric 94px (78px card) and a 8-row chart 378px (362px card) -->
     <GridLayout
       v-if="items.length > 0"
       class="h-fit w-full"
       :class="[editing ? 'mb-[20rem] !select-none' : '']"
       :col-num="20"
       :cols="{ lg: 20, md: 20, sm: 20, xs: 1, xxs: 1 }"
-      :row-height="42"
+      :row-height="47.2"
       :margin="[0, 0]"
       :is-draggable="editing"
       :is-resizable="editing"

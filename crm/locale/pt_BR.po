@@ -14822,3 +14822,15 @@ msgstr "Promessa de pagamento para {0} · {1}"
 
 msgid "Payment of {0} · balance after {1}"
 msgstr "Pagamento de {0} · saldo depois {1}"
+
+msgid "My account"
+msgstr "Minha conta"
+
+msgid "About"
+msgstr "Sobre"
+
+msgid "Log out"
+msgstr "Sair"
+
+msgid "Apps"
+msgstr "Aplicativos"
