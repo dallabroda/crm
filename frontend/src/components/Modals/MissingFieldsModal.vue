@@ -1,11 +1,14 @@
 <template>
+  <!-- Figma "Modal · Preencha para mover o card" (1738:22750): 480px, one
+       group per record with a 14 Medium title, Style Guide "Campo" fields -->
   <Dialog
     v-model:open="show"
+    size="ct-480"
     :title="__('Fill in to move the card')"
     @close="cancel"
   >
     <template #default>
-      <div class="-mt-3 mb-4 text-p-base text-ink-gray-7">
+      <div class="mb-4 text-base leading-5 text-ink-gray-6">
         {{ __('The stage {0} requires these fields.', [stageLabel]) }}
       </div>
       <div class="flex flex-col gap-4">
@@ -17,7 +20,7 @@
         >
           <div
             v-if="groups.length > 1 || group.block !== 'Card'"
-            class="text-base-medium text-ink-gray-8"
+            class="text-base font-medium leading-5 text-ink-gray-9"
           >
             {{ group.title }}
           </div>
@@ -33,8 +36,8 @@
     <template #actions>
       <div class="flex items-center justify-between gap-2">
         <div><ErrorMessage :message="error" /></div>
-        <div class="flex gap-2">
-          <Button :label="__('Cancel')" @click="cancel" />
+        <div class="flex gap-3">
+          <Button variant="outline" :label="__('Cancel')" @click="cancel" />
           <Button variant="solid" :label="__('Move')" @click="save" />
         </div>
       </div>

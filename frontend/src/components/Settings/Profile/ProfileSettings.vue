@@ -61,12 +61,18 @@
                     <span class="text-lg font-medium leading-6 text-ink-gray-9">
                       {{ fullName }}
                     </span>
+                    <!-- Figma "Minha conta" (2323:12889): black 14px
+                         pencil, 6px after the name -->
                     <Button
-                      class="!px-1 !h-5"
+                      class="!px-0.5 !h-5"
                       variant="ghost"
+                      :aria-label="__('Edit')"
                       @click="editFullName"
                     >
-                      <EditIcon class="size-3.5" />
+                      <span
+                        class="lucide-pencil size-3.5 text-ink-gray-9"
+                        aria-hidden="true"
+                      />
                     </Button>
                   </div>
                   <div v-else class="flex items-center gap-1">
@@ -141,7 +147,6 @@
 </template>
 
 <script setup>
-import EditIcon from '@/components/Icons/EditIcon.vue'
 import SettingsLayoutBase from '@/components/Layouts/SettingsLayoutBase.vue'
 import ChangePasswordModal from '@/components/Modals/ChangePasswordModal.vue'
 import AvailabilitySelect from './AvailabilitySelect.vue'

@@ -1,19 +1,17 @@
 <template>
-  <Dialog v-model:open="show" :title="__('Lost Reason')" @close="cancel">
+  <!-- Figma "Modal · Motivo da Perda" (1327:20065; "Outro" state 1876:24313):
+       480px, "Informe o motivo", no description line, Style Guide "Campo"
+       fields and a help line under the notes when the reason is "Outro" -->
+  <Dialog
+    v-model:open="show"
+    size="ct-480"
+    :title="__('Enter the reason')"
+    @close="cancel"
+  >
     <template #default>
-      <div class="-mt-3 mb-4 text-p-base text-ink-gray-7">
-        {{
-          __('Please provide a reason for marking this {0} as lost', [
-            doctype.toLowerCase().replace('crm ', ''),
-          ])
-        }}
-      </div>
-      <div class="flex flex-col gap-3">
-        <div>
-          <div class="mb-2 text-sm text-ink-gray-5">
-            {{ __('Lost Reason') }}
-            <span class="text-ink-red-4">*</span>
-          </div>
+      <div class="flex flex-col gap-4">
+        <div class="flex flex-col gap-1.5">
+          <div class="ct-field-label">{{ __('Lost Reason') }} *</div>
           <Link
             ref="linkRef"
             class="form-control flex-1 truncate"
@@ -23,25 +21,31 @@
             @change="(v) => (lostReason = v)"
           />
         </div>
-        <div>
-          <div class="mb-2 text-sm text-ink-gray-5">
-            {{ __('Lost Notes') }}
-            <span v-if="lostReason == 'Other'" class="text-ink-red-4">*</span>
+        <div class="flex flex-col gap-1.5">
+          <div class="ct-field-label">
+            {{ __('Lost Notes') }}{{ lostReason == 'Other' ? ' *' : '' }}
           </div>
+          <!-- no `truncate` here: it kept the notes on one line -->
           <FormControl
-            class="form-control flex-1 truncate"
+            class="form-control flex-1"
             type="textarea"
             :value="lostNotes"
             @change="(e) => (lostNotes = e.target.value)"
           />
+          <p
+            v-if="lostReason == 'Other'"
+            class="text-xs leading-4 text-ink-gray-6"
+          >
+            {{ __('Tell us why: with "Other", the note is required.') }}
+          </p>
         </div>
       </div>
     </template>
     <template #actions>
       <div class="flex justify-between items-center gap-2">
         <div><ErrorMessage :message="error" /></div>
-        <div class="flex gap-2">
-          <Button :label="__('Cancel')" @click="cancel" />
+        <div class="flex gap-3">
+          <Button variant="outline" :label="__('Cancel')" @click="cancel" />
           <Button variant="solid" :label="__('Save')" @click="save" />
         </div>
       </div>

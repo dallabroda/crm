@@ -2,7 +2,7 @@
   <Dialog v-model:open="show" :size="'4xl'">
     <template #title>
       <h3
-        class="flex items-center gap-2 text-3xl-semibold leading-6 text-ink-gray-9"
+        class="flex items-center gap-2 text-[20px] font-semibold leading-7 text-ink-gray-9"
       >
         <div>{{ __('Edit Data Fields Layout') }}</div>
         <Badge
