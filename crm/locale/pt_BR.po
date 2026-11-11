@@ -14505,3 +14505,285 @@ msgstr "Duas etapas no mesmo dia ({0})."
 
 msgid "The template {0} is no longer approved for this WhatsApp number. Choose another one."
 msgstr "O modelo {0} não está mais aprovado para este número de WhatsApp. Escolha outro."
+
+# Integração com ERP (credtech#367)
+msgid "ERP integration"
+msgstr "Integração com ERP"
+
+msgid "Direct connection with the ERP of your securitization company or factoring. The contract and the API credentials are your company's with the ERP; HubTech only does the technical integration."
+msgstr "Conexão direta com o ERP da sua securitizadora ou factoring. O contrato e as credenciais de API são da sua empresa com o ERP; o HubTech faz só a integração técnica."
+
+msgid "Choose the ERP and enter the API credentials it gave your company."
+msgstr "Escolha o ERP e informe as credenciais de API que ele forneceu para a sua empresa."
+
+msgid "ERP"
+msgstr "ERP"
+
+msgid "API address"
+msgstr "Endereço da API"
+
+msgid "Tenant ID"
+msgstr "Tenant ID"
+
+msgid "Cedente registration (credit funnel)"
+msgstr "Cadastro do cedente (funil de Crédito)"
+
+msgid "Registers the card's company as a cedente in the ERP, with the Receita data (address, IBGE code and tax regime). Each send leaves a comment on the card with the manager. The ERP does not accept editing or deleting the registration by API."
+msgstr "Cadastra a empresa do card como cedente no ERP, com os dados da Receita (endereço, código IBGE e regime tributário). Cada envio deixa um comentário no card com o gerente. O ERP não aceita editar nem apagar o cadastro pela API."
+
+msgid "When to register"
+msgstr "Quando cadastrar"
+
+msgid "Default manager"
+msgstr "Gerente padrão"
+
+msgid "Manager: the card owner, when they are also a manager in the ERP; otherwise the default manager. Sector: automatic from the company's CNAE (e.g. CNAE 62 → IT services)."
+msgstr "Gerente: o responsável pelo card, quando ele também é gerente no ERP; senão, o gerente padrão. Setor: automático pelo CNAE da empresa (ex.: CNAE 62 → Serviço de TI)."
+
+msgid "Overdue títulos in the collection funnel"
+msgstr "Inadimplentes no funil de Cobrança"
+
+msgid "Every day at 7:30 the overdue títulos of the ERP become cards in the collection funnel; settlements and repurchases close the títulos. The balance of ERP títulos is read-only on the card."
+msgstr "Todo dia às 7h30 os títulos vencidos no ERP viram cards no funil de Cobrança; quitações e recompras fecham os títulos. O saldo dos títulos do ERP fica só leitura no card."
+
+msgid "Simulation mode (nothing is saved)"
+msgstr "Modo simulação (nada é gravado)"
+
+msgid "On until you turn it off: each run only shows what it would create, update and close. Read the result before turning it off."
+msgstr "Ligado até você desligar: cada execução só mostra o que criaria, atualizaria e fecharia. Leia o resultado antes de desligar."
+
+msgid "Days overdue to become a card"
+msgstr "Dias de atraso para virar card"
+
+msgid "Check settlements of the last (days)"
+msgstr "Conferir quitações dos últimos (dias)"
+
+msgid "Sync now"
+msgstr "Sincronizar agora"
+
+msgid "Field mapping"
+msgstr "De-para de campos"
+
+msgid "How each ERP field is filled with the CRM data. It comes ready for the chosen ERP; change it only if your portfolio uses something different."
+msgstr "Como cada campo do ERP é preenchido com os dados do CRM. Já vem pronto para o ERP escolhido; ajuste só se a sua carteira usar algo diferente."
+
+msgid "{0} (ERP) ←"
+msgstr "{0} (ERP) ←"
+
+msgid "Restore the default mapping"
+msgstr "Restaurar o de-para padrão"
+
+msgid "When the card enters a stage"
+msgstr "Quando o card entra em uma etapa"
+
+msgid "Manual only"
+msgstr "Só manual"
+
+msgid "Credit committee"
+msgstr "Comitê de crédito"
+
+msgid "Automatic (from the ERP lists)"
+msgstr "Automático (pelas listas do ERP)"
+
+msgid "Date of the registration"
+msgstr "Data do cadastro"
+
+msgid "ERP settings saved"
+msgstr "Configurações do ERP salvas"
+
+msgid "Default mapping restored"
+msgstr "De-para padrão restaurado"
+
+msgid "Simulation report: what the sync would do"
+msgstr "Relatório da simulação: o que o sync faria"
+
+msgid "Organization name"
+msgstr "Nome da organização"
+
+msgid "Legal name"
+msgstr "Razão social"
+
+msgid "Trade name"
+msgstr "Nome fantasia"
+
+msgid "Registration status"
+msgstr "Situação cadastral"
+
+msgid "Legal nature"
+msgstr "Natureza jurídica"
+
+msgid "Opening date"
+msgstr "Data de abertura"
+
+msgid "Share capital"
+msgstr "Capital social"
+
+msgid "Registry e-mail"
+msgstr "E-mail da Receita"
+
+msgid "Registry phone"
+msgstr "Telefone da Receita"
+
+msgid "District"
+msgstr "Bairro"
+
+msgid "State"
+msgstr "UF"
+
+msgid "Street type"
+msgstr "Tipo de logradouro"
+
+msgid "IBGE city code"
+msgstr "Código IBGE do município"
+
+msgid "Tax regime"
+msgstr "Regime tributário"
+
+msgid "ZIP code"
+msgstr "CEP"
+
+msgid "Address line"
+msgstr "Endereço"
+
+msgid "Address line 2"
+msgstr "Complemento do endereço"
+
+msgid "E-mail"
+msgstr "E-mail"
+
+msgid "Mobile"
+msgstr "Celular"
+
+msgid "Approved limit"
+msgstr "Limite aprovado"
+
+msgid "Card value"
+msgstr "Valor do card"
+
+msgid "Turn off the simulation?"
+msgstr "Desligar a simulação?"
+
+msgid "From the next run the sync saves for real: it creates the cards and títulos and closes the settled ones in the collection funnel. Read the simulation report first."
+msgstr "A partir da próxima execução o sync grava de verdade: cria os cards e títulos e fecha os quitados no funil de Cobrança. Leia antes o relatório da simulação."
+
+msgid "Turn off and save"
+msgstr "Desligar e salvar"
+
+msgid "Restore the default mapping?"
+msgstr "Restaurar o de-para padrão?"
+
+msgid "The field mapping goes back to the default of the chosen ERP. Any change your company made to it is lost."
+msgstr "O de-para volta ao padrão do ERP escolhido. As alterações que a sua empresa fez nele se perdem."
+
+msgid "CPF/CNPJ"
+msgstr "CPF/CNPJ"
+
+msgid "Person type"
+msgstr "Tipo de pessoa"
+
+msgid "Credit limit (approved by the committee)"
+msgstr "Limite (aprovado pelo comitê)"
+
+msgid "Minimum floating (days)"
+msgstr "Floating mínimo (dias)"
+
+msgid "Contact name"
+msgstr "Nome do contato"
+
+msgid "Company e-mail"
+msgstr "E-mail da empresa"
+
+msgid "Contact e-mail"
+msgstr "E-mail do contato"
+
+msgid "Phone area code"
+msgstr "DDD do telefone"
+
+msgid "Mobile area code"
+msgstr "DDD do celular"
+
+msgid "Country"
+msgstr "País"
+
+msgid "Client since"
+msgstr "Cliente desde"
+
+msgid "Master contract number (next number from the Smart)"
+msgstr "Nº do contrato-mãe (próximo número da Smart)"
+
+msgid "Main e-mail"
+msgstr "E-mail principal"
+
+msgid "Sector (from the CNAE, by the Smart's sector names)"
+msgstr "Setor (pelo CNAE, nos setores da Smart)"
+
+msgid "Manager (card owner, else the default manager)"
+msgstr "Gerente (responsável pelo card, senão o gerente padrão)"
+
+msgid "Tax regime (from the Receita)"
+msgstr "Regime tributário (da Receita)"
+
+msgid "Foundation date"
+msgstr "Data de fundação"
+
+msgid "Billing address = main"
+msgstr "Endereço de cobrança = principal"
+
+msgid "Street and number"
+msgstr "Logradouro e número"
+
+
+msgid "Cedente registration (CRM → ERP)"
+msgstr "Cadastro do cedente (CRM → ERP)"
+
+msgid "Títulos (ERP → CRM)"
+msgstr "Títulos (ERP → CRM)"
+
+msgid "Sacados (ERP → CRM)"
+msgstr "Sacados (ERP → CRM)"
+
+msgid "Each column of the ERP títulos goes to the título field you choose, on every sync. The protest species is always picked by the operator."
+msgstr "Cada coluna dos títulos do ERP vai para o campo do título que você escolher, a cada sincronização. A espécie do protesto é sempre escolhida pelo operador."
+
+
+msgid "Do not bring"
+msgstr "Não trazer"
+
+msgid "Do not send"
+msgstr "Não enviar"
+
+msgid "Fixed value"
+msgstr "Valor fixo"
+
+msgid "Read automatically"
+msgstr "Lido automaticamente"
+
+msgid "{0} (ERP) →"
+msgstr "{0} (ERP) →"
+
+msgid "or, if empty,"
+msgstr "ou, se vazio,"
+
+msgid "Each field of the cedente registration in the ERP and where it comes from in the CRM: a field, a fixed value, a name of the ERP list or do not send."
+msgstr "Cada campo do cadastro do cedente no ERP e de onde ele vem no CRM: um campo, um valor fixo, um nome da lista do ERP ou não enviar."
+
+msgid "Loading the field mapping…"
+msgstr "Carregando o de-para…"
+
+msgid "You choose which ERP fields to use: the screen shows the required ones and the ones you added. * required by the ERP."
+msgstr "Você escolhe quais campos do ERP usar: a tela mostra os obrigatórios e os que você adicionou. * obrigatório no ERP."
+
+msgid "+ Add an ERP field"
+msgstr "+ Adicionar campo do ERP"
+
+msgid "+ Add an ERP column"
+msgstr "+ Adicionar coluna do ERP"
+
+msgid "Cedentes (ERP → CRM)"
+msgstr "Cedentes (ERP → CRM)"
+
+msgid "Read once, when the sync creates the sacado: the columns you choose fill its company or person and its contact. A sacado that already exists is not read again; the CNPJ data comes from the automatic enrichment."
+msgstr "Lido uma vez, quando a sincronização cria o sacado: as colunas que você escolher preenchem a empresa ou pessoa e o contato dele. Sacado que já existe não é lido de novo; os dados do CNPJ vêm do enriquecimento automático."
+
+msgid "Read once, when the sync creates the cedente: the columns you choose fill its company and its contact. A cedente that already exists is not read again; the CNPJ data comes from the automatic enrichment."
+msgstr "Lido uma vez, quando a sincronização cria o cedente: as colunas que você escolher preenchem a empresa e o contato dele. Cedente que já existe não é lido de novo; os dados do CNPJ vêm do enriquecimento automático."
