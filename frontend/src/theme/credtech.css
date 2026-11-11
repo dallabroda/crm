@@ -395,3 +395,29 @@
   color: var(--ct-text-primary);
   font-weight: 500;
 }
+/* Figma "Botão de opção" (2052:76283): 20px circle; unchecked = white with
+   the default border, checked = Uso/Ação/Destaque with an 8px white dot. */
+input[type='radio'].ct-radio {
+  appearance: none;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  border: 1px solid var(--ct-border);
+  border-radius: 999px;
+  background: var(--ct-bg-page);
+  box-shadow: none;
+  cursor: pointer;
+}
+input[type='radio'].ct-radio:checked {
+  border: 6px solid var(--ct-accent);
+  background: #ffffff;
+}
+input[type='radio'].ct-radio:focus-visible {
+  outline: var(--focus-outline-default);
+  outline-offset: 1px;
+}
+input[type='radio'].ct-radio:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
