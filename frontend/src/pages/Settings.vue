@@ -120,7 +120,11 @@ const activeItem = computed(
 // in step, unless the section is waiting for the plan/API keys to load.
 function waitingFor(section) {
   if (section === 'users-and-plan') return plan.loading
-  if (['api', 'bureaus', 'erp-integration'].includes(section))
+  if (
+    ['api', 'bureaus', 'collection-reminders', 'erp-integration'].includes(
+      section,
+    )
+  )
     return apiKeys.loading
   return false
 }
