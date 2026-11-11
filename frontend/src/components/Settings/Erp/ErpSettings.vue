@@ -58,6 +58,7 @@
               <FormControl
                 v-model="settings.doc.erp_provider"
                 type="select"
+                  :placeholder="__('Select')"
                 :label="__('ERP')"
                 :options="providerOptions"
                 required
@@ -154,12 +155,14 @@
                 <FormControl
                   v-model="settings.doc.cedente_trigger"
                   type="select"
+                  :placeholder="__('Select')"
                   :label="__('When to register')"
                   :options="triggerOptions"
                 />
                 <FormControl
                   v-model="settings.doc.cedente_pipeline"
                   type="select"
+                  :placeholder="__('Select')"
                   :label="__('Funnel')"
                   :options="pipelineOptions"
                   required
@@ -168,6 +171,7 @@
                   v-if="settings.doc.cedente_trigger === 'Card enters a stage'"
                   v-model="settings.doc.cedente_stage"
                   type="select"
+                  :placeholder="__('Select')"
                   :label="__('Stage')"
                   :options="stageOptions"
                   required
@@ -176,6 +180,7 @@
                   v-if="settings.doc.erp_provider === 'Smart Securities'"
                   v-model="settings.doc.default_manager"
                   type="select"
+                  :placeholder="__('Select')"
                   :label="__('Default manager')"
                   :options="managerOptions"
                 />
@@ -469,7 +474,7 @@ const FIELD_LABELS = {
   ibge_code: __('IBGE city code'),
   tax_regime: __('Tax regime'),
   pincode: __('ZIP code'),
-  address_line1: __('Address line'),
+  address_line1: __('Street and number'),
   address_line2: __('Address line 2'),
   full_name: __('Name'),
   email_id: __('E-mail'),

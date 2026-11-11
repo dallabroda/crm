@@ -14670,3 +14670,6 @@ msgstr "Data de fundação"
 
 msgid "Billing address = main"
 msgstr "Endereço de cobrança = principal"
+
+msgid "Street and number"
+msgstr "Logradouro e número"
