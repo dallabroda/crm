@@ -172,6 +172,8 @@ def create_field(
 		unknown = set(place.stages or []) - stages
 		if not frappe.db.exists("CRM Pipeline", place.pipeline) or unknown:
 			frappe.throw(_("Choose stages of the pipeline {0}.").format(frappe.bold(place.pipeline)))
+		# a field admin who does not own the pipeline (an API key) is stopped here, before the field exists
+		_assert_can_manage(place.pipeline)
 
 	field = catalog.create_field(label, fieldtype, options, doctype)
 	for place in placement:

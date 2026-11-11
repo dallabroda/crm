@@ -110,6 +110,25 @@ class TestPipelineFields(FrappeTestCase):
 		with self.assertRaises(frappe.PermissionError):
 			update_field(self.cpf, label="Renamed")
 
+	def test_field_admin_hook_lets_a_vouched_caller_change_the_catalog(self):
+		"""crm_field_admin (credtech#375): another app vouches for the call (cred_hub: an API key with the fields
+		admin scope). Without it the same user is refused; pipeline ownership still applies."""
+		from crm.api import forms
+
+		frappe.set_user(SALES_USER)
+		try:
+			with patch("crm.api.pipeline._field_admin_by_hook", return_value=True):
+				self.assertEqual(update_field(self.kind, label="Kind by key")["label"], "Kind by key")
+				placement = [{"pipeline": self.pipeline["name"], "stages": []}]
+				with self.assertRaises(frappe.PermissionError):
+					forms.create_field("Not my pipeline", "Data", placement=placement)
+			self.assertFalse(frappe.db.exists("Custom Field", {"dt": "CRM Deal", "fieldname": "ch_not_my_pipeline"}))
+			with self.assertRaises(frappe.PermissionError):
+				update_field(self.kind, label="Again")
+		finally:
+			frappe.set_user("Administrator")
+			update_field(self.kind, label="Kind test")
+
 	def test_deleted_field_is_dropped_from_pipelines(self):
 		gone = create_field("Gone test", "Data")["fieldname"]
 		save_pipeline({"name": self.pipeline["name"], "fields": [self.cpf, gone]})
