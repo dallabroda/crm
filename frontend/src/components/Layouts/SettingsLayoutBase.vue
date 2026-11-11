@@ -1,5 +1,7 @@
 <template>
   <div class="flex h-full w-full flex-col gap-6 text-ink-gray-8">
+    <!-- above the description, e.g. the Automação tabs -->
+    <slot name="header-top" />
     <!-- Title and actions go to the top bar; the description stays here -->
     <SettingsPageHeader :title="title" :description="description">
       <template v-if="$slots.title" #title><slot name="title" /></template>

@@ -14,7 +14,15 @@ const step = ref({ screen: 'list', data: null, fetchData: false })
 
 const slaPolicyListData = createListResource({
   doctype: 'CRM Service Level Agreement',
-  fields: ['name', 'default', 'enabled', 'apply_on'],
+  // the conditions say which cards the policy applies to (Figma "Vale para")
+  fields: [
+    'name',
+    'default',
+    'enabled',
+    'apply_on',
+    'condition',
+    'condition_json',
+  ],
   cache: ['SLAPolicyList'],
   orderBy: 'modified desc',
   start: 0,

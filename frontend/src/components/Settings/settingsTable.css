@@ -1,0 +1,98 @@
+/* Figma "Tabela" of the settings panels (Configurações · Funis 2324:14511,
+   Funis · Etapas 2339:10530, Automação 2335:9863): #dcdde2 border, 8px
+   radius, a 40px #f5f5f7 header in 12 Medium gray and rows 16px apart in
+   columns, with a #dcdde2 line between them. Each table sets its columns
+   (`grid-template-columns`) and, when fixed, the row height. */
+.ct-table {
+  overflow: hidden;
+  border: 1px solid var(--ct-border);
+  border-radius: var(--ct-radius-md);
+  background-color: var(--ct-bg-page);
+}
+.ct-table-head,
+.ct-table-row {
+  display: grid;
+  align-items: center;
+  column-gap: 16px;
+  padding: 0 16px;
+}
+.ct-table-head {
+  height: 40px;
+  border-bottom: 1px solid var(--ct-border);
+  background-color: var(--ct-bg-soft);
+  color: var(--ct-text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+}
+.ct-table-row {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--ct-border);
+  color: var(--ct-text-secondary);
+  font-size: 14px;
+  line-height: 20px;
+}
+.ct-table-row:last-child {
+  border-bottom: 0;
+}
+.ct-table-row > * {
+  min-width: 0;
+}
+/* the first column: 14 Medium black */
+.ct-table-name {
+  overflow: hidden;
+  color: var(--ct-text-primary);
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* Figma "Pílula de status": 20px pill, 12 Medium, optional 6px dot */
+.ct-pill {
+  display: inline-flex;
+  height: 20px;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 10px;
+  border-radius: var(--ct-radius-pill);
+  background-color: var(--ct-bg-panel);
+  color: var(--ct-text-primary);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+  white-space: nowrap;
+}
+.ct-pill-dot::before {
+  width: 6px;
+  height: 6px;
+  flex-shrink: 0;
+  border-radius: var(--ct-radius-pill);
+  background-color: currentColor;
+  content: '';
+}
+.ct-pill-blue {
+  background-color: var(--ct-accent-soft);
+  color: var(--ct-accent);
+}
+.ct-pill-green {
+  background-color: var(--ct-success-soft);
+  color: var(--ct-success);
+}
+.ct-pill-red {
+  background-color: var(--ct-error-soft);
+  color: var(--ct-error);
+}
+.ct-pill-amber {
+  background-color: var(--ct-warning-soft);
+  color: var(--ct-warning);
+}
+/* row menus (duplicate, delete) are not in the Figma: shown on hover/focus */
+.ct-table-row .ct-row-menu {
+  opacity: 0;
+}
+.ct-table-row:hover .ct-row-menu,
+.ct-table-row:focus-within .ct-row-menu,
+.ct-table-row .ct-row-menu[aria-expanded='true'] {
+  opacity: 1;
+}

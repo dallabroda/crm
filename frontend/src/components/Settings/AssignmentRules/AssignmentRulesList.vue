@@ -15,29 +15,19 @@
     :action-label="__('New rule')"
     @action="updateStep('view', null)"
   />
-  <div
-    v-else
-    class="w-full self-start overflow-hidden rounded-lg border border-outline-gray-1"
-  >
-    <div
-      class="flex h-10 items-center gap-4 border-b border-outline-gray-1 bg-surface-gray-2 px-4 text-xs font-medium text-ink-gray-6"
-    >
-      <div class="w-7/12">{{ __('Assignment Rule') }}</div>
-      <div class="w-3/12">{{ __('Priority') }}</div>
-      <div class="w-2/12">{{ __('Enabled') }}</div>
+  <div v-else class="ct-table w-full self-start">
+    <div class="ct-table-head" :style="columns">
+      <div>{{ __('Name') }}</div>
+      <div>{{ __('Funnel') }}</div>
+      <div>{{ __('How it distributes') }}</div>
+      <div>{{ __('Active', null, 'automation') }}</div>
     </div>
-    <div class="overflow-y-auto">
-      <template
-        v-for="(assignmentRule, i) in assignmentRulesList.data"
-        :key="assignmentRule.name"
-      >
-        <AssignmentRuleListItem :data="assignmentRule" />
-        <div
-          v-if="assignmentRulesList.data.length !== i + 1"
-          class="h-px bg-outline-gray-1"
-        />
-      </template>
-    </div>
+    <AssignmentRuleListItem
+      v-for="assignmentRule in assignmentRulesList.data"
+      :key="assignmentRule.name"
+      :data="assignmentRule"
+      :columns="columns"
+    />
   </div>
 </template>
 
@@ -47,7 +37,15 @@ import SettingsEmptyState from '@/components/Settings/SettingsEmptyState.vue'
 import AssignmentRuleListItem from './AssignmentRuleListItem.vue'
 import { LoadingIndicator } from 'frappe-ui'
 import { inject } from 'vue'
+import '@/components/Settings/settingsTable.css'
 
 const assignmentRulesList = inject('assignmentRulesList')
 const updateStep = inject('updateStep')
+
+// Figma column widths at 1440px (Nome 305, Funil 152, Como distribui 437,
+// Ativa 104), kept in proportion on other widths
+const columns = {
+  gridTemplateColumns:
+    'minmax(0,305fr) minmax(0,152fr) minmax(0,437fr) minmax(0,104fr)',
+}
 </script>
