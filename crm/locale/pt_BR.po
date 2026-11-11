@@ -14464,20 +14464,29 @@ msgstr "Todo dia às 9h. Nunca vai para título protestado, quitado ou fechado, 
 msgid "Steps"
 msgstr "Etapas"
 
-msgid "Days from the due date: -2 is two days before, 0 is the due date, 5 is five days after. Each step goes once per título."
-msgstr "Dias a partir do vencimento: -2 é dois dias antes, 0 é o dia do vencimento, 5 é cinco dias depois. Cada etapa vai uma vez por título."
-
-msgid "Add step"
-msgstr "Adicionar etapa"
-
 msgid "This number has no approved text template yet. Create one in SmartChat › Settings › Templates and wait for Meta to approve it."
 msgstr "Este número ainda não tem modelo de texto aprovado. Crie um em SmartChat › Configurações › Modelos e aguarde a aprovação da Meta."
 
+msgid "Create as many messages as you want: each step is sent a few days before or after the due date (e.g. 5 days before, 3 days before, 2 days after). Each step goes once per título."
+msgstr "Crie quantas mensagens quiser: cada etapa é enviada alguns dias antes ou depois do vencimento (ex.: 5 dias antes, 3 dias antes, 2 dias depois). Cada etapa vai uma vez por título."
+
+msgid "Add more steps"
+msgstr "Adicionar mais etapas"
+
+msgid "Days"
+msgstr "Dias"
+
+msgid "When"
+msgstr "Quando"
+
+msgid "before the due date"
+msgstr "antes do vencimento"
+
+msgid "after the due date"
+msgstr "depois do vencimento"
+
 msgid "No step yet."
 msgstr "Nenhuma etapa ainda."
-
-msgid "Days from the due date"
-msgstr "Dias do vencimento"
 
 msgid "Choose the título information"
 msgstr "Escolha a informação do título"
