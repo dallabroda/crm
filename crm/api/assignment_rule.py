@@ -15,11 +15,17 @@ def get_assignment_rules_list():
 				"description",
 				"disabled",
 				"priority",
+				# what the list shows in "Funil" and "Como distribui" (Figma 2335:10136)
+				"rule",
+				"field",
+				"assign_condition_json",
 			],
 			as_dict=True,
 		)
-		users_exists = bool(frappe.db.exists("Assignment Rule User", {"parent": docname.name}))
-		assignment_rules.append({**doc, "users_exists": users_exists})
+		users = frappe.get_all(
+			"Assignment Rule User", {"parent": docname.name}, pluck="user", order_by="idx asc"
+		)
+		assignment_rules.append({**doc, "users_exists": bool(users), "users": users})
 	return assignment_rules
 
 

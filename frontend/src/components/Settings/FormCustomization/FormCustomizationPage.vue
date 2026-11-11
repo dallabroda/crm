@@ -1,6 +1,9 @@
 <template>
   <div class="flex h-full flex-col gap-6 text-ink-gray-8">
     <SettingsPageHeader :title="__('Form customization')">
+      <!-- inside a funnel (Figma "Funis · Campos do card" 2324:15315) the
+           editor sets the title and the tabs -->
+      <template v-if="$slots.title" #title><slot name="title" /></template>
       <template #description>
         {{
           __(
@@ -19,6 +22,7 @@
       </template>
       <template v-if="isManager()" #actions>
         <Button
+          variant="outline"
           :label="__('Created fields')"
           data-testid="created-fields"
           @click="showCreated = true"
@@ -39,7 +43,8 @@
     <div
       class="flex shrink-0 items-center gap-4 border-b border-[var(--ct-border-soft)]"
     >
-      <div class="flex flex-1 items-start gap-6" role="tablist">
+      <slot v-if="$slots.tabs" name="tabs" />
+      <div v-else class="flex flex-1 items-start gap-6" role="tablist">
         <button
           v-for="option in tabs"
           :key="option.value"
@@ -82,7 +87,8 @@
       </div>
     </div>
 
-    <div class="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto">
+    <!-- Figma "Coluna" (2324:15315): 24px between the filters and the preview -->
+    <div class="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto">
       <div
         v-if="isCards && !pipelines.length && !loading"
         class="text-p-base text-ink-gray-5"
@@ -100,7 +106,7 @@
                 : __('One form for every contact of the company.')
             }}
           </p>
-          <div v-if="isCards" class="w-[200px] shrink-0">
+          <div v-if="isCards && !funnel" class="w-[200px] shrink-0">
             <FormControl
               type="select"
               class="ct-field-48"
@@ -142,12 +148,16 @@
           </div>
         </div>
 
-        <div class="rounded-lg border border-outline-gray-2 p-4">
-          <div class="mb-3 flex items-center justify-between">
-            <span class="text-base-medium text-ink-gray-8">
+        <!-- Figma "Prévia do formulário" (2324:15315): 20px padding, the
+             title in 14 Medium and the hint in 12 gray, 16px above the fields -->
+        <div class="rounded-[8px] border border-[var(--ct-border)] p-5">
+          <div class="mb-4 flex items-center justify-between gap-4">
+            <span
+              class="text-[14px] font-medium leading-5 text-[var(--ct-text-primary)]"
+            >
               {{ __('Form preview') }}
             </span>
-            <span class="text-sm text-ink-gray-5">
+            <span class="text-[12px] leading-4 text-[var(--ct-text-tertiary)]">
               {{ previewHint }}
             </span>
           </div>
@@ -291,6 +301,7 @@ import SettingsPageHeader from '@/components/Settings/SettingsPageHeader.vue'
 import FormPreview from './FormPreview.vue'
 import FormConfigModal from './FormConfigModal.vue'
 import FieldDialog from './FieldDialog.vue'
+import '../fieldOutline.css'
 import { fieldTypeLabel } from '../Fields/fieldTypes'
 import { pipelinesStore } from '@/stores/pipelines'
 import { usersStore } from '@/stores/users'
@@ -306,6 +317,12 @@ import {
   toast,
 } from 'frappe-ui'
 import { computed, onMounted, ref, watch } from 'vue'
+
+const props = defineProps({
+  // the funnel whose card fields are shown (inside the funnel editor); empty:
+  // the Form customization section, with its funnel select
+  funnel: { type: String, default: '' },
+})
 
 const pipelineStore = pipelinesStore()
 // admins on the server (crm.permissions.pipeline.is_admin) include Sales
@@ -620,9 +637,17 @@ function fieldActions(field) {
 onMounted(async () => {
   try {
     await Promise.all([pipelineStore.ensureLoaded(), loadCatalog()])
-    pipeline.value = pipelines.value[0]?.name || ''
+    pipeline.value = props.funnel || pipelines.value[0]?.name || ''
   } finally {
     loading.value = false
   }
 })
 </script>
+
+<style scoped>
+/* Figma "Campo" (2339:10530, 2324:15315): the label is 20px tall, 6px over
+   the 48px box */
+.ct-field-48 :deep(label) {
+  line-height: 20px;
+}
+</style>
