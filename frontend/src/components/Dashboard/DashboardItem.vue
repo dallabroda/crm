@@ -166,8 +166,8 @@ const axisChart = computed(() => ({
   padding-right: 8px;
 }
 
-/* Figma "Métrica": label on top, value (26/500) with the variation
-   (12/600) beside it */
+/* Figma "Métrica" (Início · Visão geral 819:2): label (14/500 gray) on top,
+   value (20/600) with the variation (chevron + 12/600) beside it */
 /* (the Tooltip around the card renames its data-slot to "trigger") */
 .ct-metric > :deep(div) {
   border-radius: var(--ct-radius-lg);
@@ -185,16 +185,42 @@ const axisChart = computed(() => ({
   grid-column: 1 / -1;
 }
 .ct-metric :deep(.text-3xl-semibold) {
-  font-size: 26px;
-  line-height: 32px;
-  font-weight: 500;
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ct-text-primary);
 }
 .ct-metric :deep(.text-3xl-semibold + .text-sm) {
   gap: 2px;
   font-size: 12px;
+  line-height: 16px;
+}
+.ct-metric :deep(.text-3xl-semibold + .text-sm > *) {
+  font-size: 12px;
+  line-height: 16px;
   font-weight: 600;
 }
+.ct-metric :deep(.text-3xl-semibold + .text-sm > .size-4) {
+  width: 16px;
+  height: 16px;
+}
+.ct-metric :deep(.text-ink-green-7) {
+  color: var(--ct-success);
+}
+.ct-metric :deep(.text-ink-red-7) {
+  color: var(--ct-danger);
+}
+.ct-metric :deep(.lucide-arrow-up-right) {
+  @apply lucide-chevron-up;
+}
+.ct-metric :deep(.lucide-arrow-down-left) {
+  @apply lucide-chevron-down;
+}
 .ct-metric :deep(.text-sm.text-ink-gray-5) {
+  font-size: 14px;
+  line-height: 20px;
   font-weight: 500;
+  color: var(--ct-text-secondary);
 }
 </style>

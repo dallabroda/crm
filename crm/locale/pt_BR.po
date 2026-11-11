@@ -14835,6 +14835,33 @@ msgstr "Atualizar registros existentes"
 msgid "Success"
 msgstr "Sucesso"
 
+msgid "My account"
+msgstr "Minha conta"
+
+msgid "About"
+msgstr "Sobre"
+
+msgid "Log out"
+msgstr "Sair"
+
+msgid "Apps"
+msgstr "Aplicativos"
+
+msgid "Enter the reason"
+msgstr "Informe o motivo"
+
+msgid "Tell us why: with \"Other\", the note is required."
+msgstr "Conte o motivo: com \"Outro\", a observação é obrigatória."
+
+msgid "WhatsApp only accepts templates approved by Meta."
+msgstr "O WhatsApp só aceita modelos aprovados pela Meta."
+
+msgid "Message preview"
+msgstr "Prévia"
+
+msgid "Approved"
+msgstr "Aprovado"
+
 msgid "Automations"
 msgstr "Automações"
 

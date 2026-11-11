@@ -1,7 +1,7 @@
 <template>
   <Dialog v-model:open="show" :title="__('Move to another funnel')">
     <template #default>
-      <div class="-mt-3 mb-4 text-p-base text-ink-gray-7">
+      <div class="mb-4 text-base leading-5 text-ink-gray-6">
         {{
           __('Field values are kept, even those the new funnel does not show.')
         }}

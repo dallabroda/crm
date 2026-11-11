@@ -1,7 +1,14 @@
 <template>
   <!-- Figma "Barra lateral · HubTech" footer: avatar, name and e-mail of the
        signed-in user; opens the account menu. Collapsed, only the avatar. -->
-  <Dropdown :options="dropdownItems" v-bind="$attrs">
+  <!-- Figma "Menu da conta" (2326:41374): as wide as the footer, 10px above it -->
+  <Dropdown
+    :options="dropdownItems"
+    side="top"
+    :offset="10"
+    :matchTriggerWidth="!isCollapsed"
+    v-bind="$attrs"
+  >
     <template #default="{ open }">
       <button
         type="button"
@@ -47,6 +54,7 @@ import { confirmLoginToFrappeCloud } from '@/composables/frappecloud'
 import { spriteIcon } from '@/utils/spriteIcon'
 import { Avatar, createResource, Dropdown } from 'frappe-ui'
 import { computed, h, markRaw } from 'vue'
+import { useRouter } from 'vue-router'
 
 defineProps({
   isCollapsed: { type: Boolean, default: false },
@@ -55,6 +63,7 @@ defineProps({
 const { settings } = getSettings()
 const { logout } = sessionStore()
 const { getUser } = usersStore()
+const router = useRouter()
 
 const user = computed(() => getUser() || {})
 
@@ -70,11 +79,18 @@ const dropdownItems = computed(() => {
 
   let items = settings.value.dropdown_items
 
+  // Figma "Menu da conta": "Minha conta" opens the account page
   let _dropdownItems = [
     {
       group: 'Dropdown Items',
       hideLabel: true,
-      options: [],
+      options: [
+        {
+          icon: 'lucide-user-round ct-account-menu-icon',
+          label: __('My account'),
+          onClick: () => router.push({ name: 'My Account' }),
+        },
+      ],
     },
   ]
 
@@ -145,8 +161,10 @@ function getStandardItem(item) {
         onClick: () => (showAboutModal.value = true),
       }
     case 'logout':
+      // Figma "Sair": red, arrow leaving to the left
       return {
-        icon: item.icon,
+        icon: 'lucide-arrow-left-from-line',
+        theme: 'red',
         label: __(item.label),
         onClick: () => logout.submit(),
       }
@@ -183,3 +201,45 @@ function crmSiblingApps(data) {
     }))
 }
 </script>
+
+<style>
+/* Figma "Menu da conta" (2326:41374). The menu is portaled out of this
+   component, so it is found by the "Minha conta" icon it holds: 8px radius,
+   #e6e7eb border, 6px padding, 36px rows (10px sides and gap, 14 Regular
+   black), 2px around the divider */
+.menu-content:has(.ct-account-menu-icon) {
+  border: 1px solid var(--ct-border-soft);
+  border-radius: var(--ct-radius-md);
+  box-shadow:
+    0 4px 6px rgba(16, 24, 40, 0.03),
+    0 12px 16px rgba(16, 24, 40, 0.08);
+}
+.menu-content:has(.ct-account-menu-icon) > [data-slot='group'] {
+  padding: 2px 6px;
+}
+.menu-content:has(.ct-account-menu-icon) > [data-slot='group']:first-child {
+  padding-top: 6px;
+}
+.menu-content:has(.ct-account-menu-icon) > [data-slot='group']:last-child {
+  padding-bottom: 6px;
+}
+.menu-content:has(.ct-account-menu-icon) [role='menuitem'] {
+  border-radius: var(--ct-radius-sm);
+}
+.menu-content:has(.ct-account-menu-icon) [role='menuitem'] > * {
+  height: 36px;
+  gap: 10px;
+  padding: 0 10px;
+  font-size: 14px;
+  line-height: 20px;
+}
+.menu-content:has(.ct-account-menu-icon) .text-ink-gray-7 {
+  color: var(--ct-text-primary);
+}
+.menu-content:has(.ct-account-menu-icon) .text-ink-gray-6 {
+  color: var(--ct-text-primary);
+}
+.menu-content:has(.ct-account-menu-icon) .text-ink-red-7 {
+  color: var(--ct-danger);
+}
+</style>

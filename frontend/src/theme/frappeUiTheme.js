@@ -233,7 +233,11 @@ export const patches = {
     [`class="fill-surface-gray-10"`, `class="fill-[var(--ct-tooltip-bg)]"`],
   ],
 
-  // Figma "Modal" (960:356): radius 12, soft shadow, 20 Semi Bold title.
+  // Figma "Modal" (960:356; e.g. "Modal · Nova tarefa" 2424:26862): white,
+  // radius 12, soft shadow. Header 20/16/8/24 with the 20/28 Semi Bold title
+  // and a 40px ghost close button (20px icon); content 0/24/24/24; actions on
+  // a #f5f5f7 footer, 16/24, 12px between buttons. `ct-modal` scopes the
+  // Style Guide "Campo" fields in credtech.css.
   'components/Dialog/Dialog.vue': [
     [
       `class="fixed inset-0 z-50 bg-black-overlay-200 dark:bg-black-overlay-700 dialog-overlay outline-none"`,
@@ -241,7 +245,25 @@ export const patches = {
     ],
     [
       `rounded-7 bg-surface-elevation-1 text-start align-middle shadow-xl dialog-content`,
-      `rounded-[var(--ct-radius-lg)] bg-surface-elevation-1 text-start align-middle shadow-[var(--ct-shadow-modal)] dialog-content`,
+      `rounded-[var(--ct-radius-lg)] bg-surface-elevation-1 text-start align-middle shadow-[var(--ct-shadow-modal)] dialog-content ct-modal`,
+    ],
+    [
+      `<div class="bg-surface-elevation-1 px-4 pb-6 pt-5 sm:px-6">`,
+      `<div class="bg-surface-elevation-1 px-6 pb-6" :class="showHeader ? '' : 'pt-6'">`,
+    ],
+    [
+      `class="mb-6 flex items-center justify-between"`,
+      `class="-mr-2 flex items-center justify-between gap-3 pb-2 pt-5"`,
+    ],
+    [
+      `<DialogClose v-if="props.showCloseButton" as-child>
+                        <Button variant="ghost" label="Close">
+                          <template #icon>
+                            <span class="lucide-x size-4 text-ink-gray-9" />`,
+      `<DialogClose v-if="props.showCloseButton" as-child>
+                        <Button variant="ghost" label="Close" class="!size-10">
+                          <template #icon>
+                            <span class="lucide-x size-5 text-ink-gray-9" />`,
     ],
     [
       `class="text-2xl-semibold leading-6 text-ink-gray-8"`,
@@ -249,7 +271,21 @@ export const patches = {
     ],
     [
       `<p class="text-p-base text-ink-gray-7">`,
-      `<p class="text-p-base text-ink-gray-6">`,
+      `<p class="text-base leading-5 text-ink-gray-6">`,
+    ],
+    [
+      `class="px-4 pb-7 pt-4 sm:px-6"`,
+      `class="bg-[var(--ct-bg-soft)] px-6 py-4"`,
+    ],
+    [
+      `isSingleActionFullWidth ? '' : 'flex justify-end gap-2'`,
+      `isSingleActionFullWidth ? '' : 'flex justify-end gap-3'`,
+    ],
+    // Figma widths with no Tailwind size: 480 ("Motivo da perda", "Enviar
+    // WhatsApp") and 520 ("Nova tarefa").
+    [
+      `lg: 'max-w-lg',`,
+      `lg: 'max-w-lg',\n    'ct-480': 'max-w-[480px]',\n    'ct-520': 'max-w-[520px]',`,
     ],
   ],
 

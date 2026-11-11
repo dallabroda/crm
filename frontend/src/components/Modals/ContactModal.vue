@@ -1,8 +1,8 @@
 <template>
   <Dialog v-model:open="show" :size="'xl'" bare>
     <template #default>
-      <div class="bg-surface-elevation-2 px-4 pb-6 pt-5 sm:px-6">
-        <div class="mb-5 flex items-center justify-between">
+      <div class="px-6 pb-6">
+        <div class="-mr-2 flex items-center justify-between gap-3 pb-2 pt-5">
           <div>
             <Dialog.Title as-child>
               <h3 class="text-[20px] font-semibold leading-7 text-ink-gray-9">
@@ -23,7 +23,7 @@
               <Button
                 :aria-label="__('Close')"
                 variant="ghost"
-                class="w-7"
+                size="lg"
                 icon="lucide-x"
               />
             </Dialog.Close>
@@ -51,7 +51,7 @@
         </div>
         <ErrorMessage v-if="error" class="mt-6" :message="__(error)" />
       </div>
-      <div class="px-4 pb-7 pt-4 sm:px-6">
+      <div class="bg-[var(--ct-bg-soft)] px-6 py-4">
         <div class="space-y-2">
           <Button
             class="w-full"

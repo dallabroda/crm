@@ -6,7 +6,7 @@
         field.fieldtype != 'Button' &&
         field.fieldtype != 'HTML'
       "
-      class="mb-2 flex items-center justify-between gap-2 text-sm text-ink-gray-5"
+      class="ct-field-label mb-2 flex items-center justify-between gap-2 text-sm text-ink-gray-5"
     >
       <span>
         {{ __(field.label) }}

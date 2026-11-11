@@ -140,6 +140,12 @@ const routes = [
     meta: { viewKey: 'settings' },
   },
   {
+    // Figma "Minha conta" (2323:12889): opened from the account menu
+    path: '/account',
+    name: 'My Account',
+    component: () => import('@/pages/MyAccount.vue'),
+  },
+  {
     path: '/welcome',
     name: 'Welcome',
     component: () => import('@/pages/Welcome.vue'),

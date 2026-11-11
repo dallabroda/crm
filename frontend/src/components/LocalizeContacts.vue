@@ -51,9 +51,11 @@
     </div>
     <Dialog.Description
       as="div"
-      class="flex flex-col gap-4 px-6 pb-6 text-p-base text-ink-gray-6"
+      class="flex flex-col gap-4 px-6 pb-6 text-base text-ink-gray-6"
     >
-      <p v-for="text in dialog.paragraphs" :key="text">{{ text }}</p>
+      <p v-for="text in dialog.paragraphs" :key="text" class="leading-5">
+        {{ text }}
+      </p>
     </Dialog.Description>
     <div
       class="flex flex-wrap items-center justify-end gap-3 bg-[var(--ct-bg-soft)] px-6 py-4"
@@ -62,11 +64,6 @@
         v-for="action in dialog.actions"
         :key="action.label"
         :variant="action.variant || 'outline'"
-        :class="
-          action.variant
-            ? ''
-            : 'border-[var(--ct-border-strong)] hover:border-[var(--ct-border-strong)]'
-        "
         :label="action.label"
         @click="action.onClick"
       />
