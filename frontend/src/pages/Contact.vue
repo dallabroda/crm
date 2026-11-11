@@ -31,10 +31,56 @@
     </template>
   </LayoutHeader>
   <div v-if="contact.doc" ref="parentRef" class="flex h-full">
+    <Tabs
+      v-model="activeTab"
+      as="div"
+      :tabs="tabLabels"
+      class="flex flex-1 overflow-hidden flex-col [&_[role='tab']]:px-1 [&_[role='tab']]:shrink-0 [&_[role='tablist']]:px-6 [&_[role='tablist']::-webkit-scrollbar]:h-0 [&_[role='tablist']]:min-h-[45px] [&_[role='tablist']]:gap-4 [&_[role='tablist']]:border-[var(--ct-border-soft)] [&>[role='tabpanel']:not([hidden])]:flex [&>[role='tabpanel']:not([hidden])]:grow [&>[data-slot=tab-list]]:overflow-x-auto [&_[data-slot=tab-indicator]]:translate-y-0 [&>[data-slot=tab-panel]]:min-h-0 [&>[data-slot=tab-panel]]:flex-col [&>[data-slot=tab-panel]]:overflow-auto"
+    >
+      <template #tab-label="{ tab }">{{ __(tab.label) }}</template>
+      <template #tab-suffix="{ tab, active }">
+        <TabCounter :count="tab.count" :active="active" />
+      </template>
+      <template #tab-panel="{ tab }">
+        <DealsListView
+          v-if="tab.label === 'Deals' && rows.length"
+          class="mt-4"
+          :rows="rows"
+          :columns="columns"
+          :options="{ selectable: false, showTooltip: false }"
+        />
+
+        <RecordNotes
+          v-if="tab.value === 'notes' && docName"
+          :key="notesKey"
+          :doctype="'Contact'"
+          :docname="docName"
+          @count="(n) => (notesCount = n)"
+        />
+        <EmptyState
+          v-if="tab.value !== 'notes' && !rows.length"
+          :icon="tab.iconLeft"
+          name="Deals"
+          :title="__('No deals found')"
+          :description="__('Use New Deal to create a deal for this contact.')"
+        >
+          <Button
+            class="mt-2"
+            variant="solid"
+            :label="__('New Deal')"
+            iconLeft="lucide-plus"
+            @click="openDealModal"
+          />
+        </EmptyState>
+      </template>
+    </Tabs>
+    <!-- Figma "Contatos · Detalhe" (805:2): the side panel is on the right,
+         384px, like the card page -->
     <Resizer
       v-if="contact.doc"
-      :parent="$refs.parentRef"
-      class="flex h-full flex-col overflow-hidden border-r border-[var(--ct-border-soft)]"
+      side="right"
+      :defaultWidth="384"
+      class="flex h-full flex-col overflow-hidden border-l border-[var(--ct-border-soft)]"
     >
       <div class="border-b border-[var(--ct-border-soft)]">
         <FileUploader
@@ -160,49 +206,6 @@
         />
       </div>
     </Resizer>
-    <Tabs
-      v-model="activeTab"
-      as="div"
-      :tabs="tabLabels"
-      class="flex flex-1 overflow-hidden flex-col [&_[role='tab']]:px-1 [&_[role='tab']]:shrink-0 [&_[role='tablist']]:px-6 [&_[role='tablist']::-webkit-scrollbar]:h-0 [&_[role='tablist']]:min-h-[45px] [&_[role='tablist']]:gap-4 [&_[role='tablist']]:border-[var(--ct-border-soft)] [&>[role='tabpanel']:not([hidden])]:flex [&>[role='tabpanel']:not([hidden])]:grow [&>[data-slot=tab-list]]:overflow-x-auto [&_[data-slot=tab-indicator]]:translate-y-0 [&>[data-slot=tab-panel]]:min-h-0 [&>[data-slot=tab-panel]]:flex-col [&>[data-slot=tab-panel]]:overflow-auto"
-    >
-      <template #tab-label="{ tab }">{{ __(tab.label) }}</template>
-      <template #tab-suffix="{ tab, active }">
-        <TabCounter :count="tab.count" :active="active" />
-      </template>
-      <template #tab-panel="{ tab }">
-        <DealsListView
-          v-if="tab.label === 'Deals' && rows.length"
-          class="mt-4"
-          :rows="rows"
-          :columns="columns"
-          :options="{ selectable: false, showTooltip: false }"
-        />
-
-        <RecordNotes
-          v-if="tab.value === 'notes' && docName"
-          :key="notesKey"
-          :doctype="'Contact'"
-          :docname="docName"
-          @count="(n) => (notesCount = n)"
-        />
-        <EmptyState
-          v-if="tab.value !== 'notes' && !rows.length"
-          :icon="tab.iconLeft"
-          name="Deals"
-          :title="__('No deals found')"
-          :description="__('Use New Deal to create a deal for this contact.')"
-        >
-          <Button
-            class="mt-2"
-            variant="solid"
-            :label="__('New Deal')"
-            iconLeft="lucide-plus"
-            @click="openDealModal"
-          />
-        </EmptyState>
-      </template>
-    </Tabs>
   </div>
   <ErrorPage
     v-else-if="errorTitle"
@@ -586,7 +589,7 @@ watch(
 
 // Figma "Card · Atividades": tab labels without icons (the icons stay in
 // `tabs` for the activity empty states)
-const tabLabels = computed(() =>
-  (tabs.value || tabs).map((tab) => ({ ...tab, iconLeft: undefined, icon: undefined })),
-)
+// Figma "Contatos · Detalhe" / "Organizações · Detalhe": tabs keep their
+// 16px icon (the card page's tabs have none)
+const tabLabels = computed(() => tabs.value || tabs)
 </script>
