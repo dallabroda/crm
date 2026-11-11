@@ -619,10 +619,12 @@ def validate_deal(doc):
 				title=_("Required fields"),
 			)
 	before = doc.get_doc_before_save()
-	if not before or before.pipeline != doc.pipeline:
+	if not before or not before.pipeline:
 		return
-	moving = before.status != doc.status
-	for fieldname, rule in get_stage_rules(doc.pipeline, before.status).items():
+	# The rules of the stage the card is leaving apply, also when the same save changes its pipeline: otherwise
+	# moving the card to another pipeline would unlock a read-only field for that save (audit M7)
+	moving = before.status != doc.status or before.pipeline != doc.pipeline
+	for fieldname, rule in get_stage_rules(before.pipeline, before.status).items():
 		df = doc.meta.get_field(fieldname)
 		if not rule["read_only"] or not df:
 			continue

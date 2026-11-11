@@ -251,6 +251,21 @@ class TestPipelineFields(FrappeTestCase):
 		card.set(self.cpf, "3")
 		card.save()  # editable again in the next stage
 
+	def test_read_only_field_stays_locked_when_the_same_save_changes_pipeline(self):
+		"""Audit M7: changing pipeline and a read-only field in one save used to skip the stage rules."""
+		self.set_rule(self.lead, self.cpf, read_only=1)
+		card = self.make_card(**{self.cpf: "1"})
+		other = save_pipeline({"pipeline_name": "Other funnel", "stages": [{"deal_status": "Start"}]})
+		card.pipeline = other["name"]
+		card.status = other["stages"][0]["name"]
+		card.set(self.cpf, "2")
+		with self.assertRaises(frappe.ValidationError):
+			card.save()
+		card.reload()
+		card.pipeline = other["name"]
+		card.status = other["stages"][0]["name"]
+		card.save()  # moving without touching the locked field is fine
+
 	def test_empty_read_only_field_can_be_filled_when_moving_on(self):
 		self.set_rule(self.lead, self.cpf, read_only=1)
 		self.set_rule(self.documents, self.cpf, required=1)
