@@ -1,7 +1,7 @@
 <template>
   <!-- Figma "Card · Títulos" (1324:17539): no box around the table, it uses
        the whole width of the tab (designer comment 1992558696) -->
-  <div class="flex flex-col gap-4 pb-5 bg-surface-white">
+  <div class="flex flex-col pb-5 bg-surface-white">
     <!-- Header com resumo e botão de adicionar -->
     <div class="flex items-center justify-between p-4 border-b border-outline-gray-2">
       <div class="flex items-center gap-3">
@@ -9,7 +9,7 @@
           {{ __('Títulos e Duplicatas Vencidas') }}
         </span>
         <Badge
-          :label="`${titles.length} título(s)`"
+          :label="`${titles.length} ${titles.length === 1 ? 'título' : 'títulos'}`"
           variant="subtle"
           theme="gray"
         />
@@ -20,8 +20,9 @@
           theme="blue"
         />
       </div>
+      <!-- Figma "Botão" Destaque 32px -->
       <Button
-        variant="subtle"
+        variant="solid"
         iconLeft="lucide-plus"
         :label="__('Adicionar Título')"
         @click="showAddModal = true"
@@ -31,7 +32,7 @@
     <!-- Todos os títulos pagos: o sistema avisa, quem encerra o card é o operador (credtech#315) -->
     <div
       v-if="allPaid && deal.outcome === 'In progress'"
-      class="mx-4 flex items-center justify-between gap-3 rounded border border-outline-green-2 bg-surface-green-1 p-3 text-sm text-ink-green-3"
+      class="mx-4 mt-4 flex items-center justify-between gap-3 rounded border border-outline-green-2 bg-surface-green-1 p-3 text-sm text-ink-green-3"
     >
       <span>{{
         anyRepurchased
@@ -52,43 +53,45 @@
 
     <!-- Tabela de Títulos -->
     <div v-if="titles.length" class="overflow-x-auto">
-      <table class="w-full text-left border-collapse text-p-sm">
+      <!-- Figma "Tabela (rola para o lado)" (2445:4220): gray header row,
+           12px text, 32px between columns, rows centered -->
+      <table class="ct-titles w-full text-left border-collapse text-xs leading-4 text-ink-gray-9">
         <thead>
-          <tr class="border-b border-outline-gray-2 text-ink-gray-5 font-medium">
-            <th class="py-2.5 px-3">{{ __('Nº Título') }}</th>
-            <th class="py-2.5 px-3">{{ __('Nosso Nº') }}</th>
-            <th class="py-2.5 px-3">{{ __('Vencimento') }}</th>
-            <th class="py-2.5 px-3 text-right">{{ __('Valor Original') }}</th>
-            <th class="py-2.5 px-3 text-right">{{ __('Balance') }}</th>
-            <th class="py-2.5 px-3 min-w-[200px]">{{ __('Título cartório') }}</th>
-            <th class="py-2.5 px-3 min-w-[140px]">{{ __('Anexos') }}</th>
-            <th class="py-2.5 px-3">{{ __('Status cartório') }}</th>
-            <th class="py-2.5 px-3 text-center min-w-[140px]">{{ __('Ações') }}</th>
+          <tr class="border-b border-[var(--ct-border-soft)] bg-surface-gray-2 font-medium text-ink-gray-6">
+            <th>{{ __('Nº Título') }}</th>
+            <th>{{ __('Nosso Nº') }}</th>
+            <th>{{ __('Vencimento') }}</th>
+            <th class="text-right">{{ __('Valor Original') }}</th>
+            <th class="text-right min-w-[120px]">{{ __('Balance') }}</th>
+            <th>{{ __('Título cartório') }}</th>
+            <th class="min-w-[132px]">{{ __('Anexos') }}</th>
+            <th class="min-w-[143px]">{{ __('Status cartório') }}</th>
+            <th>{{ __('Ações') }}</th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-outline-gray-1">
+        <tbody>
           <tr
             v-for="title in titles"
             :key="title.name || title.title_number"
-            class="hover:bg-surface-gray-1 transition-colors"
+            class="border-b border-[var(--ct-border-soft)] hover:bg-surface-gray-1 transition-colors"
           >
             <!-- Nº Título -->
-            <td class="py-3 px-3 font-medium text-ink-gray-9">
+            <td class="font-semibold">
               <span>{{ title.title_number }}</span>
             </td>
 
             <!-- Nosso Nº -->
-            <td class="py-3 px-3 text-ink-gray-7">
+            <td class="text-ink-gray-6">
               {{ title.our_number || '—' }}
             </td>
 
             <!-- Vencimento no formato brasileiro dd mmm aaaa + Dias de Atraso -->
-            <td class="py-3 px-3">
-              <div class="flex flex-col">
-                <span class="text-ink-gray-9 font-medium">{{ formatBrazilianDate(title.due_date) }}</span>
+            <td>
+              <div class="flex flex-col gap-1 whitespace-nowrap">
+                <span>{{ formatBrazilianDate(title.due_date) }}</span>
                 <span
                   v-if="daysOverdue(title.due_date) > 0"
-                  class="text-xs text-red-600 font-medium"
+                  class="text-[color:var(--ct-danger)]"
                 >
                   {{ daysOverdue(title.due_date) }} dias de atraso
                 </span>
@@ -96,58 +99,70 @@
             </td>
 
             <!-- Valor Original -->
-            <td class="py-3 px-3 text-right text-ink-gray-7">
+            <td class="text-right whitespace-nowrap">
               {{ formatMoney(title.original_amount) }}
             </td>
 
             <!-- Valor Atualizado -->
-            <td class="py-3 px-3 text-right">
-              <div class="font-semibold text-ink-gray-9">{{ formatMoney(balanceOf(title)) }}</div>
-              <div v-if="title.erp_title_id" class="text-[11px] leading-[14px] text-[#8A8C94]">
-                {{ __('ERP · {0}', [title.erp_source || 'ERP']) }}
+            <td class="text-right">
+              <div class="flex flex-col items-end gap-1 whitespace-nowrap">
+                <div class="font-semibold">{{ formatMoney(balanceOf(title)) }}</div>
+                <div v-if="title.erp_title_id" class="text-[11px] font-semibold leading-[14px] text-[color:var(--ct-text-tertiary)]">
+                  {{ __('ERP · {0}', [title.erp_source || 'ERP']) }}
+                </div>
+                <div v-if="Number(title.paid_amount)" class="text-[11px] leading-[14px] text-[color:var(--ct-success)]">
+                  {{ __('Paid {0}', [formatMoney(title.paid_amount)]) }}
+                </div>
+                <!-- Figma "Motivo do fechamento": 6px radius tag, 11 Medium -->
+                <span
+                  v-if="negotiationOf(title)"
+                  class="rounded-[var(--ct-radius-sm)] px-2 py-0.5 text-[11px] font-medium leading-[14px]"
+                  :class="TAG_TONES[negotiationOf(title).theme]"
+                >
+                  {{ negotiationOf(title).label }}
+                </span>
               </div>
-              <div v-if="Number(title.paid_amount)" class="text-[11px] text-ink-green-3">
-                {{ __('Paid {0}', [formatMoney(title.paid_amount)]) }}
-              </div>
-              <Badge
-                v-if="negotiationOf(title)"
-                class="mt-1"
-                :label="negotiationOf(title).label"
-                :theme="negotiationOf(title).theme"
-                variant="subtle"
-              />
             </td>
 
             <!-- Título cartório (Dropdown obrigatório) -->
-            <td class="py-3 px-3">
+            <td>
               <!-- Quem escolhe a espécie é o analista; depois de enviado à CENPROT não muda (a consulta usa a mesma) -->
-              <select
-                :value="title.species || ''"
-                :disabled="Boolean(title.sent_at)"
+              <!-- Figma "Filtro" (1165:20747): the closed select shows only the code (DMI, NP...);
+                   the native list keeps the full names -->
+              <label
+                class="ct-filter relative cursor-pointer"
+                :class="{ 'cursor-default opacity-40': title.sent_at }"
                 :title="title.sent_at ? __('Sent to CENPROT: the species can no longer change.') : ''"
-                class="w-full text-xs rounded border border-outline-gray-2 bg-surface-white px-2 py-1.5 text-ink-gray-9 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600"
-                @change="onSpeciesChange(title, $event.target.value)"
               >
-                <option value="">{{ __('Selecionar') }}</option>
-                <option
-                  v-for="opt in speciesOptions"
-                  :key="opt.value"
-                  :value="opt.value"
+                <span>{{ title.species || __('Selecionar') }}</span>
+                <Icon icon="lucide-chevron-down" class="size-4 shrink-0" />
+                <select
+                  :value="title.species || ''"
+                  :disabled="Boolean(title.sent_at)"
+                  class="absolute inset-0 h-full w-full cursor-[inherit] opacity-0"
+                  @change="onSpeciesChange(title, $event.target.value)"
                 >
-                  {{ opt.label }}
-                </option>
-              </select>
+                  <option value="">{{ __('Selecionar') }}</option>
+                  <option
+                    v-for="opt in speciesOptions"
+                    :key="opt.value"
+                    :value="opt.value"
+                  >
+                    {{ opt.label }}
+                  </option>
+                </select>
+              </label>
             </td>
 
             <!-- Anexos com alerta visual -->
-            <td class="py-3 px-3">
-              <!-- Se tem arquivo anexado -->
-              <div v-if="title.attachment" class="flex items-center gap-1 text-ink-gray-8">
-                <Icon icon="lucide-paperclip" class="size-3.5 text-blue-600 shrink-0" />
+            <td>
+              <!-- Se tem arquivo anexado: Figma "Link de texto" Azul with a 12px paperclip -->
+              <div v-if="title.attachment" class="flex items-center gap-1 text-[color:var(--ct-text-accent)]">
+                <Icon icon="lucide-paperclip" class="size-3 shrink-0" />
                 <a
                   :href="title.attachment"
                   target="_blank"
-                  class="text-xs text-blue-600 hover:underline truncate max-w-[100px]"
+                  class="whitespace-nowrap text-sm font-medium leading-5 underline"
                 >
                   {{ __('Ver Instrumento') }}
                 </a>
@@ -175,20 +190,20 @@
                 >
                   {{ __('Anexar') }}
                 </Button>
-                <span class="text-xs text-[color:var(--ct-danger)]">
+                <span class="font-medium text-[color:var(--ct-danger)]">
                   {{ __('*Obrigatório') }}
                 </span>
               </div>
 
               <!-- Dispensado / Sem necessidade -->
-              <span v-else class="text-xs text-ink-gray-4">
+              <span v-else class="text-ink-gray-4">
                 {{ title.species ? '—' : '—' }}
               </span>
             </td>
 
             <!-- Status no Cartório -->
-            <td class="py-3 px-3">
-              <div class="flex flex-col gap-1">
+            <td>
+              <div class="flex flex-col items-start gap-1">
                 <!-- PROTESTADO -->
                 <Badge
                   v-if="(title.protest_status || '').toUpperCase() === 'PROTESTADO'"
@@ -213,9 +228,9 @@
 
                 <!-- Na CENPROT / no cartório (status oficiais do manual v2.2) -->
                 <template v-else-if="IN_PROGRESS.includes(statusOf(title))">
-                  <Badge :label="statusLabel(statusOf(title))" :theme="statusOf(title) === 'CONFIRMADO' ? 'orange' : 'blue'" variant="subtle" />
-                  <span v-if="title.sent_at" class="text-[10px] text-ink-gray-5">
-                    {{ __('Sent on {0}', [formatBrazilianDate(String(title.sent_at).slice(0, 10))]) }}
+                  <Badge :label="statusLabel(statusOf(title))" :theme="statusOf(title) === 'CONFIRMADO' ? 'amber' : 'blue'" variant="subtle" />
+                  <span v-if="title.sent_at" class="whitespace-nowrap text-ink-gray-6">
+                    {{ __('Sent on {0}', [String(title.sent_at).slice(0, 10).split('-').reverse().join('/')]) }}
                   </span>
                 </template>
 
@@ -237,82 +252,84 @@
 
                 <span
                   v-if="title.protest_protocol"
-                  class="block text-[11px] text-ink-gray-5"
+                  class="block whitespace-nowrap text-ink-gray-4"
                 >
                   Prot: {{ title.protest_protocol }}
                 </span>
               </div>
             </td>
 
-            <!-- Ações Rápidas -->
-            <td class="py-3 px-3 text-center">
-              <div class="flex flex-col items-center justify-center gap-1">
-                <div class="flex items-center gap-1.5">
-                  <!-- Botão 2ª Via WhatsApp -->
-                  <Tooltip :text="__('Copiar linha digitável / 2ª via')">
-                    <!-- Figma (designer update, 1992652768): outline buttons -->
+            <!-- Ações Rápidas: Figma "Coluna 9" (2436:29174): 32px outline buttons,
+                 12px apart; after the send, the registry links stacked on the right -->
+            <td>
+              <div class="flex flex-col items-start gap-1">
+                <div class="flex items-center gap-3">
+                  <div class="flex items-center gap-1.5">
+                    <!-- Botão 2ª Via WhatsApp -->
+                    <Tooltip :text="__('Copiar linha digitável / 2ª via')">
+                      <!-- Figma (designer update, 1992652768): outline buttons -->
+                      <Button
+                        variant="outline"
+                        iconLeft="lucide-copy"
+                        @click="sendSecondCopy(title)"
+                      >
+                        2ª Via
+                      </Button>
+                    </Tooltip>
+
+                    <!-- Pagamentos, promessa e acordo do título -->
                     <Button
-                      size="sm"
                       variant="outline"
-                      iconLeft="lucide-copy"
-                      @click="sendSecondCopy(title)"
+                      iconLeft="lucide-handshake"
+                      @click="openNegotiation(title)"
                     >
-                      2ª Via
+                      {{ __('Negotiate') }}
                     </Button>
-                  </Tooltip>
 
-                  <!-- Pagamentos, promessa e acordo do título -->
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    iconLeft="lucide-handshake"
-                    @click="openNegotiation(title)"
-                  >
-                    {{ __('Negotiate') }}
-                  </Button>
-
-                  <!-- Botão Enviar / Protestar -->
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    class="ct-btn-accent-text"
-                    :loading="loadingProtest === title.name"
-                    :disabled="
-                      loadingProtest === title.name ||
-                      balanceOf(title) <= 0 ||
-                      !title.species ||
-                      (requiresAttachment(title.species) && !title.attachment) ||
-                      !SENDABLE.includes(statusOf(title))
-                    "
-                    @click="protestTitle(title)"
-                  >
-                    {{ __('Send to protest') }}
-                  </Button>
-                </div>
-                <div v-if="title.sent_at" class="flex items-center gap-2">
-                  <button
-                    type="button"
-                    class="text-[11px] text-ink-gray-6 hover:underline"
-                    :disabled="loadingProtest === title.name"
-                    @click="refreshTitle(title)"
-                  >
-                    {{ __('Update status') }}
-                  </button>
-                  <button
-                    v-if="WITHDRAW_LABEL[statusOf(title)]"
-                    type="button"
-                    class="text-[11px] text-red-600 hover:underline"
-                    :disabled="loadingProtest === title.name"
-                    @click="confirmWithdraw(title)"
-                  >
-                    {{ __(WITHDRAW_LABEL[statusOf(title)]) }}
-                  </button>
+                    <!-- Botão Enviar / Protestar (Figma 2445:4191: hidden once the title is at the registry) -->
+                    <Button
+                      v-if="!title.sent_at || SENDABLE.includes(statusOf(title))"
+                      variant="outline"
+                      class="ct-btn-accent-text"
+                      :loading="loadingProtest === title.name"
+                      :disabled="
+                        loadingProtest === title.name ||
+                        balanceOf(title) <= 0 ||
+                        !title.species ||
+                        (requiresAttachment(title.species) && !title.attachment) ||
+                        !SENDABLE.includes(statusOf(title))
+                      "
+                      @click="protestTitle(title)"
+                    >
+                      {{ __('Send to protest') }}
+                    </Button>
+                  </div>
+                  <!-- Figma "Link de texto": 14 Medium underlined, black / red -->
+                  <div v-if="title.sent_at" class="flex flex-col items-center gap-1 whitespace-nowrap">
+                    <button
+                      type="button"
+                      class="text-sm font-medium leading-5 text-ink-gray-9 underline"
+                      :disabled="loadingProtest === title.name"
+                      @click="refreshTitle(title)"
+                    >
+                      {{ __('Update status') }}
+                    </button>
+                    <button
+                      v-if="WITHDRAW_LABEL[statusOf(title)]"
+                      type="button"
+                      class="text-sm font-medium leading-5 text-[color:var(--ct-danger)] underline"
+                      :disabled="loadingProtest === title.name"
+                      @click="confirmWithdraw(title)"
+                    >
+                      {{ __(WITHDRAW_LABEL[statusOf(title)]) }}
+                    </button>
+                  </div>
                 </div>
 
                 <!-- Mensagens de Validação Obrigatória em Vermelho Embaixo do Botão -->
                 <span
                   v-if="!title.species"
-                  class="text-[11px] text-red-600 font-medium"
+                  class="font-medium text-[color:var(--ct-danger)]"
                 >
                   Selecione o título cartório
                 </span>
@@ -326,7 +343,7 @@
     <!-- Empty State -->
     <div
       v-else
-      class="mx-4 flex flex-col items-center justify-center py-8 text-center border border-dashed border-outline-gray-3 rounded-lg"
+      class="mx-4 mt-4 flex flex-col items-center justify-center py-8 text-center border border-dashed border-outline-gray-3 rounded-lg"
     >
       <Icon icon="lucide-file-text" class="size-8 text-ink-gray-4 mb-2" />
       <span class="text-p-base font-medium text-ink-gray-8">
@@ -651,6 +668,14 @@ const negotiationTitle = ref('')
 function openNegotiation(title) {
   negotiationTitle.value = title.name
   showNegotiation.value = true
+}
+
+// Figma "Motivo do fechamento" tag colors (Style Guide feedback palette)
+const TAG_TONES = {
+  green: 'bg-[var(--ct-success-soft)] text-[color:var(--ct-success)]',
+  blue: 'bg-[var(--ct-accent-soft)] text-[color:var(--ct-accent-text)]',
+  red: 'bg-[var(--ct-danger-soft)] text-[color:var(--ct-danger)]',
+  orange: 'bg-[var(--ct-warning-soft)] text-[color:var(--ct-warning)]',
 }
 
 // Situação da negociação do título, para o selo da tabela
@@ -1011,3 +1036,17 @@ async function saveNewTitle() {
   }
 }
 </script>
+
+<style scoped>
+/* Figma table: 16px side padding per cell = 32px between columns */
+.ct-titles th {
+  padding: 8px 16px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.ct-titles td {
+  padding: 12px 16px;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+</style>
