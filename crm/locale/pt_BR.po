@@ -14889,6 +14889,18 @@ msgstr "Já existe um usuário com o e-mail {0}"
 msgid "User with email {0} already invited"
 msgstr "O e-mail {0} já foi convidado"
 
+msgid "Imports"
+msgstr "Importações"
+
+msgid "Insert New Records"
+msgstr "Inserir novos registros"
+
+msgid "Update Existing Records"
+msgstr "Atualizar registros existentes"
+
+msgid "Success"
+msgstr "Sucesso"
+
 msgid "My account"
 msgstr "Minha conta"
 

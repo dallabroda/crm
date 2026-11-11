@@ -1,6 +1,6 @@
 <template>
   <ListView
-    :columns="columns"
+    :columns="fillColumns(columns)"
     :rows="rows"
     :options="{
       onRowClick: (row) => emit('showCallLog', row.name),
@@ -19,6 +19,7 @@
       <ListHeaderItem
         v-for="column in columns"
         :key="column.key"
+        class="!text-base"
         :item="column"
         @columnWidthUpdated="(e) => onColumnWidthUpdated(e, column)"
       >
@@ -53,7 +54,8 @@
             />
           </div>
           <div v-else-if="['type', 'duration'].includes(column.key)">
-            <Icon :icon="item.icon" class="h-3 w-3" />
+            <!-- Figma "Ligações · Lista" (813:2): 16px icons -->
+            <Icon :icon="item.icon" class="h-4 w-4" />
           </div>
         </template>
         <template #default="{ label }">
@@ -185,7 +187,7 @@ import Icon from '@/components/Icon.vue'
 import ListBulkActions from '@/components/ListBulkActions.vue'
 import ListRows from '@/components/ListViews/ListRows.vue'
 import RatingInput from '@/components/Controls/RatingInput.vue'
-import { isTranslatable } from '@/utils'
+import { isTranslatable, fillColumns } from '@/utils'
 import { Avatar, Tooltip, Dropdown } from 'frappe-ui'
 import {
   ListView,

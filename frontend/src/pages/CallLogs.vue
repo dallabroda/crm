@@ -76,6 +76,7 @@ import TelephonyOffer from '@/components/Telephony/TelephonyOffer.vue'
 import CallLogDetailModal from '@/components/Modals/CallLogDetailModal.vue'
 import { useDoctypeModal } from '@/composables/doctypeModal'
 import { getCallLogDetail } from '@/utils/callLog'
+import { sessionStore } from '@/stores/session'
 import { useTelemetry } from '@framework/ui/telemetry'
 import { createResource } from 'frappe-ui'
 import { computed, ref, onMounted } from 'vue'
@@ -88,6 +89,7 @@ const loadMore = ref(1)
 const triggerResize = ref(1)
 const updatedPageCount = ref(20)
 const viewControls = ref(null)
+const session = sessionStore()
 
 const rows = computed(() => {
   if (
@@ -99,6 +101,14 @@ const rows = computed(() => {
     let _rows = {}
     callLogs.value?.data.rows.forEach((row) => {
       _rows[row] = getCallLogDetail(row, callLog, callLogs.value?.data.columns)
+      // the signed-in user reads "Você" (Figma "Ligações · Lista" 813:2)
+      if (
+        ['caller', 'receiver'].includes(row) &&
+        _rows[row].name &&
+        _rows[row].name === session.user
+      ) {
+        _rows[row] = { ..._rows[row], label: __('You') }
+      }
     })
     return _rows
   })

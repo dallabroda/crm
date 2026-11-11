@@ -152,7 +152,7 @@
     </div>
   </div>
   <!-- Figma "Vendas · Lista" (790:2): quick filters and search on the left,
-       outline actions on the right, 24px sides. -->
+       outline actions on the right (no divider between them), 24px sides. -->
   <div v-else class="flex items-center justify-between gap-2 px-6 py-4">
     <FadedScrollableDiv
       class="flex flex-1 items-center overflow-x-auto -ml-1 h-8"
@@ -169,7 +169,6 @@
         />
       </div>
     </FadedScrollableDiv>
-    <div class="-ml-2 h-[70%] border-l" />
     <div class="flex items-center gap-2">
       <div
         v-if="viewUpdated && route.query.view && (!view.public || isManager())"

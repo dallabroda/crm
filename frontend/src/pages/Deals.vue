@@ -218,9 +218,14 @@
           v-if="cardOwner(itemName)?.full_name"
           class="flex min-w-0 items-center gap-2"
         >
-          <UserAvatar :user="cardOwner(itemName).name" size="md" hideStatus />
+          <UserAvatar
+            :user="cardOwner(itemName).name"
+            :label="cardOwner(itemName).label"
+            size="md"
+            hideStatus
+          />
           <span class="truncate text-xs text-ink-gray-6">
-            {{ cardOwner(itemName).full_name }}
+            {{ cardOwner(itemName).label }}
           </span>
         </div>
         <div v-else />
@@ -319,7 +324,7 @@ import { ref, reactive, computed, h, watch } from 'vue'
 const { getFormattedPercent, getFormattedFloat, getFormattedCurrency } =
   getMeta('CRM Deal')
 const { makeCall } = globalStore()
-const { getUser } = usersStore()
+const { getUser, userLabel } = usersStore()
 const { getOrganization } = organizationsStore()
 const { getDealStatus } = statusesStore()
 const { completeStep } = useCrmOnboarding()
@@ -595,15 +600,15 @@ function parseRows(rows, columns = []) {
         }
       } else if (row == 'deal_owner') {
         _rows[row] = {
-          label: deal.deal_owner && getUser(deal.deal_owner).full_name,
           ...(deal.deal_owner && getUser(deal.deal_owner)),
+          label: deal.deal_owner && userLabel(deal.deal_owner),
         }
       } else if (row == '_assign') {
         let assignees = JSON.parse(deal._assign || '[]')
         _rows[row] = assignees.map((user) => ({
           name: user,
           image: getUser(user).user_image,
-          label: getUser(user).full_name,
+          label: userLabel(user),
         }))
       } else if (['modified', 'creation'].includes(row)) {
         _rows[row] = timestampCell(deal[row])
