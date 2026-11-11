@@ -1,8 +1,12 @@
 <template>
-  <Dialog v-model:open="open" :title="__('Send WhatsApp')">
+  <!-- Figma "Modal · Enviar WhatsApp" (1737:24291; template 1885:26844):
+       480px, contact line, Style Guide "Campo" fields; outside the 24-hour
+       window an info alert, the template with its "Aprovado" pill, the
+       variables side by side and a chat-bubble preview -->
+  <Dialog v-model:open="open" size="ct-480" :title="__('Send WhatsApp')">
     <template #default>
       <div class="flex flex-col gap-4" data-testid="smartchat-whatsapp">
-        <div class="text-p-base text-ink-gray-7">
+        <div class="text-base leading-5 text-ink-gray-6">
           {{ [name, options.data?.phone || phone].filter(Boolean).join(' · ') }}
         </div>
 
@@ -37,6 +41,16 @@
         </template>
 
         <template v-else-if="inboxes.length">
+          <!-- Figma "Aviso · Janela de 24 h": Style Guide info alert, above
+               the inbox, when only a template can go out -->
+          <div
+            v-if="inbox && !inbox.can_reply"
+            class="flex items-start gap-2.5 rounded-[var(--ct-radius-md)] bg-[var(--ct-info-soft)] py-3 pl-3.5 pr-2.5 text-base font-medium leading-5 text-[color:var(--ct-info)]"
+            role="note"
+          >
+            <span class="lucide-info size-5 shrink-0" aria-hidden="true" />
+            {{ __('WhatsApp only accepts templates approved by Meta.') }}
+          </div>
           <FormControl
             type="select"
             :label="__('Inbox')"
@@ -50,42 +64,71 @@
             v-model="text"
             type="textarea"
             :label="__('Message')"
-            :rows="4"
+            :rows="3"
           />
 
           <template v-else-if="inbox">
-            <p class="text-p-sm text-ink-gray-6">
-              {{
-                __(
-                  'Outside the 24-hour window, WhatsApp only accepts a template approved by Meta.',
-                )
-              }}
-            </p>
             <p
               v-if="!inbox.templates.length"
-              class="text-p-base text-ink-gray-7"
+              class="text-base leading-5 text-ink-gray-6"
             >
               {{ __('This number has no approved text template.') }}
             </p>
             <template v-else>
-              <FormControl
-                type="select"
-                :label="__('Template')"
-                :options="templateOptions"
-                :model-value="templateKey"
-                @update:model-value="(v) => (templateKey = v)"
-              />
-              <FormControl
-                v-for="variable in template?.variables || []"
-                :key="variable"
-                v-model="variables[variable]"
-                :label="`{{${variable}}}`"
-              />
+              <!-- template and variables are 80px Campos (6px under the box) -->
+              <div class="relative pb-1.5">
+                <FormControl
+                  type="select"
+                  :label="__('Template')"
+                  :options="templateOptions"
+                  :model-value="templateKey"
+                  @update:model-value="(v) => (templateKey = v)"
+                />
+                <!-- Figma "Pílula · Aprovado": only approved templates are listed -->
+                <Badge
+                  v-if="template"
+                  class="pointer-events-none absolute bottom-5 right-11 !bg-[var(--ct-success-soft)] !text-[color:var(--ct-success)]"
+                  :label="__('Approved')"
+                >
+                  <template #prefix>
+                    <span
+                      class="size-1.5 rounded-full bg-[var(--ct-status-green)]"
+                    />
+                  </template>
+                </Badge>
+              </div>
               <div
-                v-if="template"
-                class="whitespace-pre-wrap rounded bg-surface-gray-2 p-2 text-p-sm text-ink-gray-7"
+                v-if="template?.variables?.length"
+                class="grid grid-cols-3 gap-3 pb-1.5"
               >
-                {{ preview }}
+                <FormControl
+                  v-for="variable in template.variables"
+                  :key="variable"
+                  v-model="variables[variable]"
+                  :label="`{{${variable}}}`"
+                />
+              </div>
+              <!-- Figma "Prévia": the message as a sent bubble -->
+              <div v-if="template" class="flex flex-col gap-1.5">
+                <div class="ct-field-label">{{ __('Message preview') }}</div>
+                <div
+                  class="flex justify-end rounded-[var(--ct-radius-md)] bg-[var(--ct-bg-soft)] p-3"
+                >
+                  <div
+                    class="flex max-w-[342px] flex-col gap-1 rounded-[8px_8px_2px_8px] border border-[var(--ct-border)] bg-surface-base px-2.5 pb-1.5 pt-2"
+                  >
+                    <div
+                      class="whitespace-pre-wrap text-base leading-5 text-ink-gray-9"
+                    >
+                      {{ preview }}
+                    </div>
+                    <div
+                      class="self-end text-xs font-medium leading-4 text-ink-gray-6"
+                    >
+                      {{ previewTime }}
+                    </div>
+                  </div>
+                </div>
               </div>
             </template>
           </template>
@@ -94,14 +137,17 @@
     </template>
     <template #actions>
       <div class="flex items-center justify-between gap-2">
-        <ErrorMessage :message="sendError" />
-        <div class="flex gap-2">
+        <!-- the wrapper keeps the buttons on the right when there is no error -->
+        <div><ErrorMessage :message="sendError" /></div>
+        <div class="flex gap-3">
           <Button
             v-if="sent"
+            variant="outline"
             :label="__('Open in SmartChat')"
             :href="sent.conversation_url"
           />
           <Button
+            variant="outline"
             :label="sent ? __('Close') : __('Cancel')"
             @click="open = false"
           />
@@ -121,6 +167,7 @@
 
 <script setup>
 import {
+  Badge,
   Dialog,
   ErrorMessage,
   FormControl,
@@ -205,6 +252,14 @@ const preview = computed(() =>
     /{{\s*([\w.]+)\s*}}/g,
     (match, key) => variables[key] || match,
   ),
+)
+
+// the bubble's time, as the message would be sent now
+const previewTime = computed(() =>
+  new Date().toLocaleTimeString('pt-BR', {
+    hour: '2-digit',
+    minute: '2-digit',
+  }),
 )
 
 const canSend = computed(() => {

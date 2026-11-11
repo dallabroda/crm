@@ -1,10 +1,10 @@
 <template>
   <Dialog v-model:open="show" :size="dialogOptions.size" bare>
     <template #default>
-      <div class="bg-surface-elevation-2 px-4 pb-6 pt-5 sm:px-6">
-        <div class="mb-5 flex items-center justify-between">
+      <div class="px-6 pb-6">
+        <div class="-mr-2 flex items-center justify-between gap-3 pb-2 pt-5">
           <div>
-            <h3 class="text-3xl-semibold leading-6 text-ink-gray-9">
+            <h3 class="text-[20px] font-semibold leading-7 text-ink-gray-9">
               {{ __(dialogOptions.title) || __('Untitled') }}
             </h3>
           </div>
@@ -19,7 +19,7 @@
             />
             <Button
               variant="ghost"
-              class="w-7"
+              size="lg"
               icon="lucide-x"
               @click="show = false"
             />
@@ -30,7 +30,7 @@
           <ErrorMessage class="mt-2" :message="error" />
         </div>
       </div>
-      <div class="px-4 pb-7 pt-4 sm:px-6">
+      <div class="bg-[var(--ct-bg-soft)] px-6 py-4">
         <div class="space-y-2">
           <Button
             v-for="action in dialogOptions.actions"

@@ -2,7 +2,7 @@
   <Dialog v-model:open="show" :size="'xl'">
     <template #title>
       <div class="flex items-center justify-between">
-        <h3 class="text-3xl-semibold leading-6 text-ink-gray-9">
+        <h3 class="text-[20px] font-semibold leading-7 text-ink-gray-9">
           {{ __('Convert to Deal') }}
         </h3>
         <Button
