@@ -30,6 +30,7 @@ import LucideMegaphone from '~icons/lucide/megaphone'
 import LucidePhone from '~icons/lucide/phone'
 import LucideKeyRound from '~icons/lucide/key-round'
 import LucideSearchCheck from '~icons/lucide/search-check'
+import LucideCalendarClock from '~icons/lucide/calendar-clock'
 import WhatsAppIcon from '@/components/Icons/WhatsAppIcon.vue'
 
 import ProfilePage from '@/components/Settings/Profile/ProfilePage.vue'
@@ -57,6 +58,7 @@ import TelephonyPage from '@/components/Settings/Telephony/TelephonyPage.vue'
 import WhatsAppSettings from '@/components/Settings/WhatsAppSettings.vue'
 import ApiKeysPage from '@/components/Settings/ApiKeys/ApiKeysPage.vue'
 import BureausSettings from '@/components/Settings/Bureaus/BureausSettings.vue'
+import CollectionReminders from '@/components/Settings/Collection/CollectionReminders.vue'
 import CreditBureausSettings from '@/components/Settings/CreditBureaus/CreditBureausSettings.vue'
 
 import { plan } from '@/components/Settings/UsersAndPlan/planApi'
@@ -191,6 +193,10 @@ function allSections() {
         }),
         // Assertiva Localize and CENPROT (credtech#290): admins only, with the cred_hub app
         item('Cartório & Localização', LucideSearchCheck, BureausSettings, {
+          condition: () => isAdmin() && apiKeys.enabled,
+        }),
+        // Régua de cobrança (credtech#367): admins only, with the cred_hub app
+        item('Collection reminders', LucideCalendarClock, CollectionReminders, {
           condition: () => isAdmin() && apiKeys.enabled,
         }),
         item(

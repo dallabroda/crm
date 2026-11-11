@@ -35,6 +35,7 @@ export const SETTINGS_SLUGS = {
   WhatsApp: 'whatsapp',
   API: 'api',
   'Cartório & Localização': 'bureaus',
+  'Collection reminders': 'collection-reminders',
   'Políticas de Crédito & Compliance': 'credit-compliance',
 }
 
