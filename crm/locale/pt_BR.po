@@ -14448,6 +14448,64 @@ msgstr "A parcela {0} foi cancelada."
 msgid "Cancelled on"
 msgstr "Cancelada em"
 
+msgid "Collection reminders"
+msgstr "Régua de cobrança"
+
+msgid "Approved WhatsApp templates sent through SmartChat to the sacado of each open título of the collection funnel, on the days you choose. The AI agent that answers and the templates are configured in SmartChat."
+msgstr "Modelos de WhatsApp aprovados enviados pelo SmartChat ao sacado de cada título aberto do funil de Cobrança, nos dias que você escolher. O agente de IA que responde e os modelos são configurados no SmartChat."
+
+msgid "Connect your SmartChat in Settings › Lead Sources (SmartChat box) to use the collection reminders."
+msgstr "Conecte o seu SmartChat em Configurações › Origens (quadro SmartChat) para usar a régua de cobrança."
+
+msgid "Every day at 9h. Never sent to a título that is protested, paid or closed, or has a payment promise or an agreement."
+msgstr "Todo dia às 9h. Nunca vai para título protestado, quitado ou fechado, com promessa de pagamento ou com acordo."
+
+
+msgid "Steps"
+msgstr "Etapas"
+
+msgid "Days from the due date: -2 is two days before, 0 is the due date, 5 is five days after. Each step goes once per título."
+msgstr "Dias a partir do vencimento: -2 é dois dias antes, 0 é o dia do vencimento, 5 é cinco dias depois. Cada etapa vai uma vez por título."
+
+msgid "Add step"
+msgstr "Adicionar etapa"
+
+msgid "This number has no approved text template yet. Create one in SmartChat › Settings › Templates and wait for Meta to approve it."
+msgstr "Este número ainda não tem modelo de texto aprovado. Crie um em SmartChat › Configurações › Modelos e aguarde a aprovação da Meta."
+
+msgid "No step yet."
+msgstr "Nenhuma etapa ainda."
+
+msgid "Days from the due date"
+msgstr "Dias do vencimento"
+
+msgid "Choose the título information"
+msgstr "Escolha a informação do título"
+
+msgid "Could not load the collection reminders"
+msgstr "Não foi possível carregar a régua de cobrança"
+
+msgid "Collection reminders on"
+msgstr "Régua de cobrança ligada"
+
+msgid "Collection reminders saved"
+msgstr "Régua de cobrança salva"
+
+msgid "Could not save the collection reminders"
+msgstr "Não foi possível salvar a régua de cobrança"
+
+msgid "Meta charges each template sent. With the saved steps, about {0} messages in the next {1} days."
+msgstr "A Meta cobra cada modelo enviado. Com as etapas salvas, cerca de {0} mensagens nos próximos {1} dias."
+
+msgid "Approved message template"
+msgstr "Mensagem (modelo aprovado)"
+
+msgid "Two steps on the same day ({0})."
+msgstr "Duas etapas no mesmo dia ({0})."
+
+msgid "The template {0} is no longer approved for this WhatsApp number. Choose another one."
+msgstr "O modelo {0} não está mais aprovado para este número de WhatsApp. Escolha outro."
+
 # Integração com ERP (credtech#367)
 msgid "ERP integration"
 msgstr "Integração com ERP"
