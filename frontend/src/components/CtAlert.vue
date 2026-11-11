@@ -3,7 +3,7 @@
        color, icon 20px, text 14px in the same color -->
   <div
     role="alert"
-    class="flex items-start gap-2.5 rounded-[var(--ct-radius-md)] py-2.5 pl-3.5 pr-2.5 text-p-base"
+    class="flex items-start gap-2.5 rounded-[var(--ct-radius-md)] py-2.5 pl-3.5 pr-2.5 text-p-base font-medium"
     :class="tone.box"
   >
     <component
