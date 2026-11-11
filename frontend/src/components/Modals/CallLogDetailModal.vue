@@ -2,8 +2,8 @@
 <template>
   <Dialog v-model:open="show" bare>
     <template #default>
-      <div class="bg-surface-elevation-2 px-4 pb-6 pt-5 sm:px-6">
-        <div class="mb-5 flex items-center justify-between">
+      <div class="px-6 pb-6">
+        <div class="-mr-2 flex items-center justify-between gap-3 pb-2 pt-5">
           <div>
             <Dialog.Title as-child>
               <h3 class="text-[20px] font-semibold leading-7 text-ink-gray-9">
@@ -53,7 +53,7 @@
                 :aria-label="__('Close')"
                 icon="lucide-x"
                 variant="ghost"
-                class="w-7"
+                size="lg"
               />
             </Dialog.Close>
           </div>
@@ -163,7 +163,7 @@
       </div>
       <div
         v-if="!callLog?.data?._lead && !callLog?.data?._deal"
-        class="flex flex-col gap-3 px-4 pb-7 pt-4 sm:px-6"
+        class="flex flex-col gap-3 bg-[var(--ct-bg-soft)] px-6 py-4"
       >
         <!-- the call becomes a card in a funnel (#70) -->
         <PipelineSelect v-model="callPipeline" />

@@ -445,3 +445,140 @@ input[type='radio'].ct-radio:disabled {
   opacity: 0.4;
   cursor: default;
 }
+
+/* Figma "Campo" (940:99) in every modal (frappeUiTheme adds .ct-modal to the
+   Dialog; e.g. "Modal · Nova tarefa" 2424:26862): label 14 Medium secondary,
+   white 48px box with the #dcdde2 border, radius 6, 14px sides, 16/24 value;
+   textareas 120px with 12/14 padding. Only frappe-ui's own field classes are
+   matched, so search boxes, grids and custom inputs keep their look. */
+.ct-modal label.leading-tighter.text-ink-gray-6,
+.ct-modal .ct-field-label {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  color: var(--ct-text-secondary);
+}
+.ct-modal .ct-field-label.mb-2 {
+  margin-bottom: 6px;
+}
+/* the Figma "Campo" of the quick-entry forms is 80px: 6px under the box */
+.ct-modal .field {
+  padding-bottom: 6px;
+}
+.ct-modal
+  :is(input, select, button, textarea):is(
+    [class*='border-[--surface-gray-2]'],
+    [class*='border-outline-gray-2'],
+    [class*='bg-surface-gray-1']
+  ) {
+  border-color: var(--ct-border);
+  border-radius: var(--ct-radius-sm);
+  font-size: 16px;
+  line-height: 24px;
+}
+.ct-modal
+  :is(input, select, button, textarea):is(
+    [class*='border-[--surface-gray-2]'],
+    [class*='border-outline-gray-2']
+  ) {
+  background-color: var(--ct-bg-page);
+  color: var(--ct-text-primary);
+}
+/* disabled: same box on the soft gray */
+.ct-modal :is(input, select, button, textarea)[class*='bg-surface-gray-1'] {
+  background-color: var(--ct-bg-soft);
+  color: var(--ct-text-tertiary);
+}
+.ct-modal
+  :is(input, select, button):is(
+    [class*='border-[--surface-gray-2]'],
+    [class*='border-outline-gray-2'],
+    [class*='bg-surface-gray-1']
+  ) {
+  height: 48px;
+}
+.ct-modal
+  :is(input, select, button):is(
+    [class*='border-[--surface-gray-2]'],
+    [class*='border-outline-gray-2'],
+    [class*='bg-surface-gray-1']
+  ):not(.ps-7, .ps-8, .ps-9, .ps-10) {
+  padding-inline-start: 14px;
+}
+.ct-modal
+  :is(input, select, button):is(
+    [class*='border-[--surface-gray-2]'],
+    [class*='border-outline-gray-2'],
+    [class*='bg-surface-gray-1']
+  ):not(.pe-7, .pe-8, .pe-9, .pe-10) {
+  padding-inline-end: 14px;
+}
+.ct-modal
+  textarea:is(
+    [class*='border-[--surface-gray-2]'],
+    [class*='border-outline-gray-2'],
+    [class*='bg-surface-gray-1']
+  ) {
+  min-height: 120px;
+  padding: 12px 14px;
+}
+.ct-modal
+  :is(input, select, button, textarea):is(
+    [class*='border-[--surface-gray-2]'],
+    [class*='border-outline-gray-2']
+  ):hover {
+  border-color: var(--outline-gray-3);
+}
+.ct-modal
+  :is(input, select, button, textarea):is(
+    [class*='border-[--surface-gray-2]'],
+    [class*='border-outline-gray-2']
+  ):is(:focus, [data-state='open']) {
+  border-color: var(--ct-border-strong);
+  box-shadow: 0 0 0 1px var(--ct-border-strong);
+}
+.ct-modal :is(input, textarea)::placeholder {
+  color: var(--ct-text-tertiary);
+}
+/* link/autocomplete triggers set their own text size on the value */
+.ct-modal
+  button:is(
+    [class*='border-[--surface-gray-2]'],
+    [class*='border-outline-gray-2'],
+    [class*='bg-surface-gray-1']
+  )
+  .truncate {
+  font-size: 16px;
+  line-height: 24px;
+}
+/* the field's "Seta": 20px, black */
+.ct-modal
+  button:is(
+    [class*='border-[--surface-gray-2]'],
+    [class*='border-outline-gray-2']
+  )
+  .lucide-chevron-down,
+.ct-modal
+  input:is(
+    [class*='border-[--surface-gray-2]'],
+    [class*='border-outline-gray-2']
+  )
+  ~ *
+  .lucide-chevron-down {
+  width: 20px;
+  height: 20px;
+  color: var(--ct-text-primary);
+}
+/* Figma modal "Rodapé": the secondary action is "Contorno cinza" (white with
+   the #dcdde2 border), also when the modal kept frappe-ui's default subtle
+   button, which would disappear on the #f5f5f7 band. */
+.ct-modal [data-slot='actions'] button[class*='bg-[var(--ct-action-neutral)]'] {
+  border: 1px solid var(--ct-border);
+  background-color: var(--ct-bg-page);
+  font-weight: 500;
+}
+.ct-modal
+  [data-slot='actions']
+  button[class*='bg-[var(--ct-action-neutral)]']:hover {
+  background-color: var(--ct-bg-soft);
+}

@@ -1,8 +1,8 @@
 <template>
   <Dialog v-model:open="show" size="2xl" bare>
     <template #default>
-      <div class="px-4 pb-6 pt-5 sm:px-6">
-        <div class="mb-4 flex items-start justify-between gap-4">
+      <div class="px-6 pb-6">
+        <div class="-mr-2 mb-2 flex items-center justify-between gap-3 pt-5">
           <Dialog.Title as-child>
             <h3 class="text-[20px] font-semibold leading-7 text-ink-gray-9">
               {{ doc.title }}
@@ -26,7 +26,7 @@
               <Button
                 :aria-label="__('Close')"
                 variant="ghost"
-                class="w-7"
+                size="lg"
                 icon="lucide-x"
               />
             </Dialog.Close>

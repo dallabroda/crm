@@ -227,10 +227,8 @@
       </div>
     </template>
     <template #actions>
-      <!-- Figma "Rodapé": soft gray band with the outline "Fechar" on the right -->
-      <div
-        class="-mx-4 -mb-7 -mt-4 flex justify-end rounded-b-[var(--ct-radius-lg)] bg-surface-gray-2 px-4 py-4 sm:-mx-6 sm:px-6"
-      >
+      <!-- Figma "Rodapé": outline "Fechar" on the right (the gray band is the Dialog's) -->
+      <div class="flex justify-end">
         <Button variant="outline" :label="__('Close')" @click="open = false" />
       </div>
     </template>

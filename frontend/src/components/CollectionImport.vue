@@ -11,7 +11,7 @@
     <template #default>
       <div class="ct-collection-import flex flex-col gap-4">
         <!-- 1. Arquivo -->
-        <p class="text-p-base text-ink-gray-6">
+        <p class="text-base leading-5 text-ink-gray-6">
           {{ __('Send a .xlsx or .csv file with one title per line. The first line must have the column names.') }}
           {{ __('Cards are grouped by: {0}.', [groupingLabel]) }}
         </p>
@@ -36,7 +36,7 @@
 
         <!-- 2. Colunas -->
         <div v-if="columns" class="flex flex-col gap-4">
-          <div class="text-base font-semibold text-ink-gray-9">{{ __('Which column is each field?') }}</div>
+          <div class="text-base font-semibold leading-5 text-ink-gray-9">{{ __('Which column is each field?') }}</div>
           <div class="ct-columns grid grid-cols-3 gap-3">
             <FormControl
               v-for="target in columns.targets"
@@ -49,7 +49,7 @@
               @update:modelValue="result = null"
             />
           </div>
-          <div class="text-p-xs text-ink-gray-6">
+          <div class="text-xs leading-4 text-ink-gray-6">
             {{ __('Species only comes in when the column has a registry code (DMI, DSI, CCB...): there is no default.') }}
           </div>
         </div>
@@ -59,7 +59,7 @@
           v-if="result"
           class="flex flex-col gap-3 rounded-[var(--ct-radius-md)] bg-[var(--ct-bg-soft)] p-4"
         >
-          <div class="text-base font-semibold text-ink-gray-9">{{ __('Preview (nothing saved yet)') }}</div>
+          <div class="text-base font-semibold leading-5 text-ink-gray-9">{{ __('Preview (nothing saved yet)') }}</div>
           <!-- Figma "Números": 222px items, 42px between columns, 8px between rows -->
           <div class="grid max-w-[486px] grid-cols-2 gap-x-[42px] gap-y-2">
             <div
@@ -67,14 +67,14 @@
               :key="stat.label"
               class="flex items-baseline justify-between gap-2"
             >
-              <span class="text-xs text-ink-gray-6">{{ stat.label }}</span>
-              <span class="text-base font-semibold tabular-nums text-ink-gray-9">{{ stat.value }}</span>
+              <span class="text-xs leading-4 text-ink-gray-6">{{ stat.label }}</span>
+              <span class="text-base font-semibold leading-5 tabular-nums text-ink-gray-9">{{ stat.value }}</span>
             </div>
           </div>
           <template v-if="result.problem_count">
             <!-- Figma "Linhas de fora" (designer update): black title, white
                  box with the lines in secondary gray -->
-            <div class="text-base font-semibold text-ink-gray-9">
+            <div class="text-base font-semibold leading-5 text-ink-gray-9">
               {{ __('{0} lines will be left out:', [result.problem_count]) }}
             </div>
             <div
@@ -89,10 +89,8 @@
       </div>
     </template>
     <template #actions>
-      <!-- Figma "Rodapé": gray band across the modal -->
-      <div
-        class="-mx-4 -mb-7 -mt-4 flex justify-end gap-3 bg-[var(--ct-bg-soft)] px-4 py-4 sm:-mx-6 sm:px-6"
-      >
+      <!-- Figma "Rodapé" (the gray band is the Dialog's) -->
+      <div class="flex justify-end gap-3">
         <!-- Figma "Botão" Destrutivo (designer update, 1992648471) -->
         <Button
           variant="solid"
@@ -234,19 +232,3 @@ async function startImport() {
   }
 }
 </script>
-
-<style scoped>
-/* Figma "Campo" (Seleção) at 48px: label 14/500 gray, value 16px */
-.ct-columns :deep(select),
-.ct-columns :deep(button) {
-  height: 48px;
-  font-size: 16px;
-  padding-inline: 14px;
-  border-radius: 6px;
-}
-.ct-columns :deep(label) {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--ink-gray-6);
-}
-</style>
