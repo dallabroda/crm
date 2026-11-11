@@ -48,37 +48,40 @@ class CRMOrganization(Document):
 
 	@staticmethod
 	def default_list_data():
+		# Figma column widths at 1440px (the list grid sizes to its content, so
+		# proportions would grow with long names); last modified right aligned
 		columns = [
 			{
 				"label": "Organization",
 				"type": "Data",
 				"key": "organization_name",
-				"width": "16rem",
+				"width": "18.3125rem",
 			},
 			{
 				"label": "Website",
 				"type": "Data",
 				"key": "website",
-				"width": "14rem",
+				"width": "16.0625rem",
 			},
 			{
 				"label": "Industry",
 				"type": "Link",
 				"key": "industry",
 				"options": "CRM Industry",
-				"width": "14rem",
+				"width": "16.0625rem",
 			},
 			{
 				"label": "Annual Revenue",
 				"type": "Currency",
 				"key": "annual_revenue",
-				"width": "14rem",
+				"width": "16.0625rem",
 			},
 			{
 				"label": "Last Modified",
 				"type": "Datetime",
 				"key": "modified",
-				"width": "8rem",
+				"width": "9.1875rem",
+				"align": "right",
 			},
 		]
 		rows = [
