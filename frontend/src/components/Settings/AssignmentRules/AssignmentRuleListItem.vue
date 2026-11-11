@@ -1,35 +1,19 @@
 <template>
+  <!-- Figma "Linha" of "Distribuição de cards" (2335:10136): name, funnel, how
+       the rule distributes and Active. The priority is set in the rule. -->
   <div
-    class="flex min-h-14 items-center justify-between gap-4 px-4 py-2 cursor-pointer hover:bg-surface-gray-2"
+    class="ct-table-row cursor-pointer hover:bg-[var(--ct-bg-soft)]"
+    :style="columns"
+    @click="updateStep('view', data)"
   >
-    <div class="w-7/12" @click="updateStep('view', data)">
-      <div class="text-base text-ink-gray-9">{{ data.name }}</div>
-      <div
-        v-if="data.description && data.description.length > 0"
-        class="text-p-base w-full text-ink-gray-5 mt-0.5 whitespace-nowrap overflow-ellipsis overflow-hidden"
-      >
-        {{ data.description }}
-      </div>
+    <div class="ct-table-name" :title="data.description || ''">
+      {{ data.name }}
     </div>
-    <div class="w-3/12">
-      <select
-        v-model="localData.priority"
-        class="w-full h-7 text-base hover:bg-surface-gray-3 rounded-5 p-0 pl-2 pr-5 bg-transparent -ml-2 border-0 text-ink-gray-8 focus-visible:!ring-0 bg-none truncate"
-        @update:modelValue="onPriorityChange"
-        @change="onPriorityChange"
-      >
-        <option
-          v-for="option in priorityOptions"
-          :key="option.value"
-          :value="option.value"
-        >
-          {{ option.label }}
-        </option>
-      </select>
-    </div>
-    <div class="flex justify-between items-center w-2/12">
+    <div class="truncate">{{ funnelLabel }}</div>
+    <div class="truncate">{{ howItDistributes }}</div>
+    <div class="flex items-center justify-between gap-2" @click.stop>
       <Switch
-        size="sm"
+        size="md"
         :modelValue="!data.disabled"
         @update:modelValue="onToggle"
       />
@@ -38,7 +22,13 @@
         :options="dropdownOptions"
         @update:open="(open) => open && (isConfirmingDelete = false)"
       >
-        <Button icon="lucide-more-horizontal" variant="ghost" />
+        <Button
+          icon="lucide-more-horizontal"
+          variant="ghost"
+          size="sm"
+          class="ct-row-menu -my-1.5"
+          :aria-label="__('Options')"
+        />
       </Dropdown>
     </div>
   </div>
@@ -79,8 +69,9 @@ import {
   toast,
 } from 'frappe-ui'
 import { useTelemetry } from '@framework/ui/telemetry'
-import { inject, ref, reactive, watch } from 'vue'
+import { computed, inject, ref } from 'vue'
 import { ConfirmDelete } from '../../../utils'
+import { usersStore } from '@/stores/users'
 
 const { capture } = useTelemetry()
 
@@ -89,22 +80,45 @@ const updateStep = inject('updateStep')
 
 const props = defineProps({
   data: { type: Object, required: true },
+  // the table's grid-template-columns (AssignmentRulesList.vue)
+  columns: { type: Object, default: () => ({}) },
 })
 
-const localData = reactive({ ...props.data })
-watch(
-  () => props.data,
-  (val) => Object.assign(localData, val),
-  { deep: true },
-)
+const { getUser } = usersStore()
 
-const priorityOptions = [
-  { label: __('Low'), value: '0' },
-  { label: __('Low-Medium'), value: '1' },
-  { label: __('Medium'), value: '2' },
-  { label: __('Medium-High'), value: '3' },
-  { label: __('High'), value: '4' },
-]
+// the funnel the rule's condition picks ("pipeline equals X"), if any
+const funnelLabel = computed(() => {
+  let conditions
+  try {
+    conditions = JSON.parse(props.data.assign_condition_json || '[]')
+  } catch {
+    conditions = []
+  }
+  let funnel = conditions
+    .flat(Infinity)
+    .map((_, i, all) => all.slice(i, i + 3))
+    .find(
+      ([field, op]) =>
+        field === 'pipeline' && ['equals', '=', '=='].includes(op),
+    )
+  return funnel ? __(funnel[2]) : __('All funnels')
+})
+
+// "Rodízio entre Juliana Prado e Carlos Menezes" (Figma); the rule's
+// description, when it has one, says it in the company's words
+const howItDistributes = computed(() => {
+  if (props.data.description) return props.data.description
+  let names = (props.data.users || []).map((u) => getUser(u).full_name)
+  let people =
+    names.length > 1
+      ? __('{0} and {1}', [names.slice(0, -1).join(', '), names.at(-1)])
+      : names[0] || ''
+  if (props.data.rule === 'Load Balancing')
+    return __('Load balancing among {0}', [people])
+  if (props.data.rule === 'Based on Field')
+    return __('By the field {0}', [props.data.field || ''])
+  return __('Round robin among {0}', [people])
+})
 
 const duplicateDialog = ref({
   show: false,
@@ -162,10 +176,6 @@ const duplicate = () => {
     },
     auto: true,
   })
-}
-
-const onPriorityChange = () => {
-  setAssignmentRuleValue('priority', localData.priority)
 }
 
 const onToggle = () => {

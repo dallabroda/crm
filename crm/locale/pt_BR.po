@@ -3028,7 +3028,7 @@ msgstr "O ERPNext não está integrado ao CRM"
 
 #: frontend/src/components/Settings/Pipelines/PipelinesPage.vue:17
 msgid "Each funnel has its own stages, members and fields. Salespeople only see the funnels they are part of."
-msgstr "Cada funil tem as próprias etapas, membros e campos. O vendedor só vê os funis de que participa."
+msgstr "Cada funil tem as suas etapas, as pessoas que trabalham nele e os campos do card. Vendedores só veem os funis de que participam."
 
 #: frontend/src/components/Activities/CommentArea.vue:94 frontend/src/components/Activities/NoteArea.vue:17 frontend/src/components/FieldLayout/Field.vue:134 frontend/src/components/FieldLayoutEditor.vue:414 frontend/src/components/FieldLayoutEditor.vue:457 frontend/src/components/ListBulkActions.vue:232 frontend/src/components/Modals/NoteViewModal.vue:14 frontend/src/components/PrimaryDropdownItem.vue:53 frontend/src/components/Settings/Fields/FieldsPage.vue:271 frontend/src/components/Settings/Forms/FormBuilderPanel.vue:31 frontend/src/components/Settings/Forms/FormsList.vue:264 frontend/src/components/Settings/Sla/SlaHolidays.vue:202 frontend/src/components/Settings/Sla/SlaPriorityList.vue:188 frontend/src/components/Settings/WorkflowAutomations/WorkflowAutomationDetail.vue:35 frontend/src/components/ViewControls.vue:1603 frontend/src/pages/Dashboard.vue:16 frontend/src/pages/Notes.vue:54 frontend/src/pages/Tasks.vue:387
 msgid "Edit"
@@ -14834,3 +14834,111 @@ msgstr "Atualizar registros existentes"
 
 msgid "Success"
 msgstr "Sucesso"
+
+msgid "Automations"
+msgstr "Automações"
+
+msgid "Card distribution"
+msgstr "Distribuição de cards"
+
+msgid "Deadlines (SLA)"
+msgstr "Prazos (SLA)"
+
+msgid "Add person"
+msgstr "Adicionar pessoa"
+
+msgid "Funnel name"
+msgstr "Nome do funil"
+
+msgid "Order"
+msgstr "Ordem"
+
+msgid "Role in the funnel"
+msgstr "Papel no funil"
+
+msgid "Created by"
+msgstr "Criada por"
+
+msgid "How it distributes"
+msgstr "Como distribui"
+
+msgid "Applies to"
+msgstr "Vale para"
+
+msgid "First response"
+msgstr "1ª resposta"
+
+msgid "Resolution"
+msgstr "Resolução"
+
+msgid "Edit fields"
+msgstr "Editar campos"
+
+msgid "Contacts and Organizations fields"
+msgstr "Campos de Contatos e Organizações"
+
+msgid "They apply to every funnel. The card fields are inside each funnel."
+msgstr "Valem para todos os funis. Os campos do card ficam dentro de cada funil."
+
+msgid "Who works in this funnel. Salespeople only see the funnels they take part in; owners can also change the stages and the fields."
+msgstr "Quem trabalha neste funil. Vendedores só veem os funis de que participam; donos também podem mudar as etapas e os campos."
+
+msgid "1 person"
+msgstr "1 pessoa"
+
+msgid "{0} people"
+msgstr "{0} pessoas"
+
+msgid "Round robin among {0}"
+msgstr "Rodízio entre {0}"
+
+msgid "Load balancing among {0}"
+msgstr "Balanceamento entre {0}"
+
+msgid "By the field {0}"
+msgstr "Pelo campo {0}"
+
+msgid "{0} and {1}"
+msgstr "{0} e {1}"
+
+msgid "All funnels"
+msgstr "Todos os funis"
+
+msgid "Cards with a condition"
+msgstr "Cards com condição"
+
+msgid "1 minute"
+msgstr "1 minuto"
+
+msgid "{0} minutes"
+msgstr "{0} minutos"
+
+msgid "1 hour"
+msgstr "1 hora"
+
+msgid "{0} hours"
+msgstr "{0} horas"
+
+msgid "1 day"
+msgstr "1 dia"
+
+msgid "{0} days"
+msgstr "{0} dias"
+
+msgid "Drag to reorder"
+msgstr "Arraste para reordenar"
+
+msgctxt "card status"
+msgid "Open"
+msgstr "Aberto"
+
+msgctxt "automation"
+msgid "Active"
+msgstr "Ativa"
+
+msgctxt "automation"
+msgid "Enabled"
+msgstr "Ativada"
+
+msgid "Status of the card"
+msgstr "Situação do card"

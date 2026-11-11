@@ -1,9 +1,12 @@
 <template>
   <SettingsLayoutBase
     v-if="screen === 'list'"
-    :title="__('Workflow Automations')"
+    :title="__('Automation')"
     :description="__('Create workflow automations for CRM documents.')"
   >
+    <template #header-top>
+      <AutomationTabs current="workflow-automations" />
+    </template>
     <template #header-actions>
       <Button
         :label="__('New automation')"
@@ -47,79 +50,59 @@
         :action-label="__('New automation')"
         @action="newAutomation"
       />
-      <List
-        v-else
-        class="workflow-automation-list"
-        :columns="listColumns"
-        :row-height="56"
-        divider="full"
-      >
-        <ListHeader class="sticky top-0 z-10 mx-3 bg-surface-elevation-2">
-          <ListHeaderCell>{{ __('Name') }}</ListHeaderCell>
-          <ListHeaderCell>{{ __('Document Type') }}</ListHeaderCell>
-          <ListHeaderCell>{{ __('Status') }}</ListHeaderCell>
-          <ListHeaderCell>{{ __('Enabled') }}</ListHeaderCell>
-          <ListHeaderCell>{{ __('Created By') }}</ListHeaderCell>
-        </ListHeader>
-        <ListRows
-          v-slot="{ item: row }"
-          :items="filteredAutomations"
-          row-key="name"
+      <!-- Figma "Configurações · Automação · Automações" (2335:9863) -->
+      <div v-else class="ct-table">
+        <div class="ct-table-head" :style="listColumns">
+          <div>{{ __('Name') }}</div>
+          <div>{{ __('Document') }}</div>
+          <div>{{ __('Status') }}</div>
+          <div>{{ __('Enabled', null, 'automation') }}</div>
+          <div>{{ __('Created by') }}</div>
+        </div>
+        <div
+          v-for="row in filteredAutomations"
+          :key="row.name"
+          class="ct-table-row cursor-pointer hover:bg-[var(--ct-bg-soft)]"
+          :style="listColumns"
+          @click="openAutomation(row)"
         >
-          <ListRow :value="row.name" @click="openAutomation(row)">
-            <ListCell>
-              <span class="truncate text-base-medium text-ink-gray-7">
-                {{ row.title || row.name }}
-              </span>
-            </ListCell>
-            <ListCell>
-              <span class="truncate text-sm">
-                {{ formatDocType(row.document_type) }}
-              </span>
-            </ListCell>
-
-            <ListCell>
-              <Badge
-                :label="row.enabled ? __('Enabled') : __('Draft')"
-                :theme="row.enabled ? 'green' : 'amber'"
-                variant="outline"
+          <div class="ct-table-name">{{ row.title || row.name }}</div>
+          <div class="truncate">{{ formatDocType(row.document_type) }}</div>
+          <div class="flex">
+            <span
+              class="ct-pill ct-pill-dot"
+              :class="row.enabled && 'ct-pill-green'"
+            >
+              {{ row.enabled ? __('Active', null, 'automation') : __('Draft') }}
+            </span>
+          </div>
+          <div class="flex" @click.stop>
+            <Switch
+              size="md"
+              :model-value="Boolean(row.enabled)"
+              :disabled="toggling.has(row.name)"
+              :aria-label="__('Enabled')"
+              @update:model-value="toggleAutomation(row, $event)"
+            />
+          </div>
+          <div class="flex items-center justify-between gap-2" @click.stop>
+            <span class="truncate">{{ ownerName(row.owner) }}</span>
+            <Dropdown
+              align="end"
+              :options="rowOptions(row)"
+              @update:open="(open) => open && (confirmingDelete = '')"
+            >
+              <Button
+                icon="lucide-more-horizontal"
+                variant="ghost"
+                size="sm"
+                class="ct-row-menu -my-1.5"
+                :aria-label="__('Options')"
               />
-            </ListCell>
-            <ListCell>
-              <div @click.stop>
-                <Switch
-                  size="sm"
-                  :model-value="Boolean(row.enabled)"
-                  :disabled="toggling.has(row.name)"
-                  :aria-label="__('Enabled')"
-                  @update:model-value="toggleAutomation(row, $event)"
-                />
-              </div>
-            </ListCell>
-            <ListCell>
-              <div
-                class="flex w-full items-center justify-between pr-1"
-                @click.stop
-              >
-                <Tooltip :text="getUser(row.owner).full_name">
-                  <UserAvatar :user="row.owner" size="sm" />
-                </Tooltip>
-                <Dropdown
-                  align="end"
-                  :options="rowOptions(row)"
-                  @update:open="(open) => open && (confirmingDelete = '')"
-                >
-                  <Button
-                    icon="lucide-more-horizontal"
-                    variant="ghost"
-                    class="ml-auto"
-                  />
-                </Dropdown>
-              </div>
-            </ListCell>
-          </ListRow>
-        </ListRows>
-      </List>
+            </Dropdown>
+          </div>
+        </div>
+      </div>
     </template>
   </SettingsLayoutBase>
   <WorkflowAutomationDetail
@@ -150,29 +133,21 @@
 import LucideWorkflow from '~icons/lucide/workflow'
 import SettingsEmptyState from '@/components/Settings/SettingsEmptyState.vue'
 import SettingsLayoutBase from '@/components/Layouts/SettingsLayoutBase.vue'
+import AutomationTabs from '@/components/Settings/AutomationTabs.vue'
+import '@/components/Settings/settingsTable.css'
 import WorkflowAutomationBuilder from './WorkflowAutomationBuilder.vue'
 import WorkflowAutomationDetail from './WorkflowAutomationDetail.vue'
-import UserAvatar from '@/components/UserAvatar.vue'
+import { sessionStore } from '@/stores/session'
 import { ConfirmDelete } from '@/utils'
 import { createDialog } from '@/utils/dialogs'
 import { usersStore } from '@/stores/users'
 import { disableSettingModalOutsideClick } from '@/composables/settings'
 import {
-  List,
-  ListCell,
-  ListHeader,
-  ListHeaderCell,
-  ListRow,
-  ListRows,
-} from 'frappe-ui/list'
-import {
-  Badge,
   Button,
   Dialog,
   Dropdown,
   LoadingIndicator,
   Switch,
-  Tooltip,
   call,
   createListResource,
   toast,
@@ -189,13 +164,18 @@ const showBuilder = ref(false)
 const dirty = ref(false)
 const toggling = reactive(new Set())
 
-const listColumns = [
-  'minmax(0, 4fr)',
-  'minmax(0, 2fr)',
-  'minmax(0, 1.3fr)',
-  'minmax(0, 1fr)',
-  'minmax(0, 1.5fr)',
-]
+// Figma column widths at 1440px (Nome 406, Documento 132, Situação 152,
+// Ativada 102, Criada por 190), kept in proportion on other widths
+const listColumns = {
+  gridTemplateColumns:
+    'minmax(0,406fr) minmax(0,132fr) minmax(0,152fr) minmax(0,102fr) minmax(0,190fr)',
+}
+
+// Figma "Criada por": the name, "Você" for the current user
+const { user: currentUser } = sessionStore()
+function ownerName(owner) {
+  return owner === currentUser ? __('You') : getUser(owner).full_name
+}
 
 // While the builder is up, a click outside must not take the settings dialog with it.
 watch(showBuilder, (open) => (disableSettingModalOutsideClick.value = open))
@@ -415,10 +395,3 @@ async function deleteAutomation(automation) {
   reloadList()
 }
 </script>
-
-<style scoped>
-/* Match the header's rule so rows read as one table. */
-.workflow-automation-list :deep([data-slot='list-divider']) {
-  border-color: var(--outline-gray-2);
-}
-</style>
