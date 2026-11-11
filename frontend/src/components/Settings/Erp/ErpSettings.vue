@@ -237,6 +237,18 @@
             <CtAlert v-if="settings.doc.last_sync_message" type="info">
               {{ settings.doc.last_sync_message }}
             </CtAlert>
+            <details
+              v-if="settings.doc.last_sync_report"
+              class="rounded-[var(--ct-radius-md)] border border-[var(--ct-border)] px-3.5 py-2.5"
+            >
+              <summary class="cursor-pointer text-p-base font-medium text-ink-gray-8">
+                {{ __('Simulation report: what the sync would do') }}
+              </summary>
+              <pre
+                class="mt-2 max-h-80 overflow-auto whitespace-pre-wrap text-p-sm text-ink-gray-7"
+                >{{ settings.doc.last_sync_report }}</pre
+              >
+            </details>
             <div>
               <Button
                 variant="outline"
@@ -303,6 +315,7 @@ import SettingsLayoutBase from '@/components/Layouts/SettingsLayoutBase.vue'
 import SettingsDivider from '@/components/Settings/SettingsDivider.vue'
 import CtAlert from '@/components/CtAlert.vue'
 import { useDocument } from '@/data/document'
+import { createDialog } from '@/utils/dialogs'
 import { pipelinesStore } from '@/stores/pipelines'
 import { Badge, Button, ErrorMessage, FormControl, Switch, call, toast } from 'frappe-ui'
 import { computed, reactive, ref, watch } from 'vue'
@@ -362,7 +375,7 @@ const isDirty = computed(() => {
 })
 
 const providerOptions = [
-  { label: '', value: '' },
+  { label: __('Select'), value: '' },
   { label: 'Smart Securities', value: 'Smart Securities' },
   { label: 'WBA', value: 'WBA' },
 ]
@@ -371,7 +384,7 @@ const triggerOptions = [
   { label: __('Manual only'), value: 'Manual only' },
 ]
 const pipelineOptions = computed(() => [
-  { label: '', value: '' },
+  { label: __('Select'), value: '' },
   ...(pipelineStore.pipelines || []).map((p) => ({
     label: __(p.pipeline_name || p.name),
     value: p.name,
@@ -382,7 +395,7 @@ const stageOptions = computed(() => {
     ? pipelineStore.getPipeline(settings.doc.cedente_pipeline)
     : null
   return [
-    { label: '', value: '' },
+    { label: __('Select'), value: '' },
     ...(pipeline?.stages || []).map((s) => ({
       label: __(s.deal_status),
       value: s.name,
@@ -394,7 +407,7 @@ const managerOptions = computed(() => {
   const names = [...lists.managers]
   const current = settings.doc?.default_manager
   if (current && !names.includes(current)) names.unshift(current)
-  return [{ label: '', value: '' }, ...names.map((n) => ({ label: n, value: n }))]
+  return [{ label: __('Select'), value: '' }, ...names.map((n) => ({ label: n, value: n }))]
 })
 
 // A stage of another funnel is not valid: clear it when the funnel changes
@@ -426,11 +439,43 @@ watch(
 
 const mappingRows = computed(() => settings.doc?.cedente_field_map || [])
 const SOURCE_LABELS = {
-  organization: __('Company'),
+  organization: __('Organization'),
   contact: __('Contact'),
   address: __('Address'),
   deal: __('Card'),
   credit: __('Credit committee'),
+}
+// CRM fields by their screen names (the mapping stores the technical field name)
+const FIELD_LABELS = {
+  cnpj: 'CNPJ',
+  legal_name: __('Legal name'),
+  organization_name: __('Organization name'),
+  trade_name: __('Trade name'),
+  registration_status: __('Registration status'),
+  main_cnae: 'CNAE',
+  legal_nature: __('Legal nature'),
+  activity_start_date: __('Opening date'),
+  share_capital: __('Share capital'),
+  registry_email: __('Registry e-mail'),
+  registry_phone: __('Registry phone'),
+  website: __('Website'),
+  neighborhood: __('District'),
+  city: __('City'),
+  state: __('State'),
+  address_street_type: __('Street type'),
+  address_street: __('Street'),
+  address_number: __('Number'),
+  address_complement: __('Complement'),
+  ibge_code: __('IBGE city code'),
+  tax_regime: __('Tax regime'),
+  pincode: __('ZIP code'),
+  address_line1: __('Address line'),
+  address_line2: __('Address line 2'),
+  full_name: __('Name'),
+  email_id: __('E-mail'),
+  mobile_no: __('Mobile'),
+  approved_limit: __('Approved limit'),
+  deal_value: __('Card value'),
 }
 function sourceLabel(row) {
   if (row.source === 'auto') return __('Automatic (from the ERP lists)')
@@ -438,10 +483,35 @@ function sourceLabel(row) {
   if (!row.source) return row.default_value || '-'
   const first = row.source.split('|')[0]
   const [entity, field] = first.split('.')
-  return `${SOURCE_LABELS[entity] || entity} › ${field}`
+  return `${SOURCE_LABELS[entity] || entity} › ${FIELD_LABELS[field] || field}`
 }
 
 function save() {
+  const leavingSimulation =
+    settings.originalDoc?.sync_dry_run && !settings.doc.sync_dry_run
+  if (!leavingSimulation) return submit()
+  // Owner decision (credtech#367): read the simulation report before saving for real
+  createDialog({
+    title: __('Turn off the simulation?'),
+    message: __(
+      'From the next run the sync saves for real: it creates the cards and títulos and closes the settled ones in the collection funnel. Read the simulation report first.',
+    ),
+    size: 'md',
+    actions: [
+      { label: __('Cancel'), onClick: ({ close }) => close() },
+      {
+        label: __('Turn off and save'),
+        variant: 'solid',
+        onClick: ({ close }) => {
+          close()
+          submit()
+        },
+      },
+    ],
+  })
+}
+
+function submit() {
   saveError.value = ''
   settings.save.submit(null, {
     onSuccess: () => {
@@ -477,7 +547,28 @@ async function syncNow() {
   }
 }
 
-async function resetMapping() {
+function resetMapping() {
+  createDialog({
+    title: __('Restore the default mapping?'),
+    message: __(
+      'The field mapping goes back to the default of the chosen ERP. Any change your company made to it is lost.',
+    ),
+    size: 'md',
+    actions: [
+      { label: __('Cancel'), onClick: ({ close }) => close() },
+      {
+        label: __('Restore'),
+        variant: 'solid',
+        onClick: ({ close }) => {
+          close()
+          doResetMapping()
+        },
+      },
+    ],
+  })
+}
+
+async function doResetMapping() {
   resetting.value = true
   try {
     await call('cred_hub.erp.settings.reset_field_map')

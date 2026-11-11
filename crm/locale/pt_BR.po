@@ -14535,3 +14535,138 @@ msgstr "Configurações do ERP salvas"
 
 msgid "Default mapping restored"
 msgstr "De-para padrão restaurado"
+
+msgid "Simulation report: what the sync would do"
+msgstr "Relatório da simulação: o que o sync faria"
+
+msgid "Organization name"
+msgstr "Nome da organização"
+
+msgid "Legal name"
+msgstr "Razão social"
+
+msgid "Trade name"
+msgstr "Nome fantasia"
+
+msgid "Registration status"
+msgstr "Situação cadastral"
+
+msgid "Legal nature"
+msgstr "Natureza jurídica"
+
+msgid "Opening date"
+msgstr "Data de abertura"
+
+msgid "Share capital"
+msgstr "Capital social"
+
+msgid "Registry e-mail"
+msgstr "E-mail da Receita"
+
+msgid "Registry phone"
+msgstr "Telefone da Receita"
+
+msgid "District"
+msgstr "Bairro"
+
+msgid "State"
+msgstr "UF"
+
+msgid "Street type"
+msgstr "Tipo de logradouro"
+
+msgid "IBGE city code"
+msgstr "Código IBGE do município"
+
+msgid "Tax regime"
+msgstr "Regime tributário"
+
+msgid "ZIP code"
+msgstr "CEP"
+
+msgid "Address line"
+msgstr "Endereço"
+
+msgid "Address line 2"
+msgstr "Complemento do endereço"
+
+msgid "E-mail"
+msgstr "E-mail"
+
+msgid "Mobile"
+msgstr "Celular"
+
+msgid "Approved limit"
+msgstr "Limite aprovado"
+
+msgid "Card value"
+msgstr "Valor do card"
+
+msgid "Turn off the simulation?"
+msgstr "Desligar a simulação?"
+
+msgid "From the next run the sync saves for real: it creates the cards and títulos and closes the settled ones in the collection funnel. Read the simulation report first."
+msgstr "A partir da próxima execução o sync grava de verdade: cria os cards e títulos e fecha os quitados no funil de Cobrança. Leia antes o relatório da simulação."
+
+msgid "Turn off and save"
+msgstr "Desligar e salvar"
+
+msgid "Restore the default mapping?"
+msgstr "Restaurar o de-para padrão?"
+
+msgid "The field mapping goes back to the default of the chosen ERP. Any change your company made to it is lost."
+msgstr "O de-para volta ao padrão do ERP escolhido. As alterações que a sua empresa fez nele se perdem."
+
+msgid "CPF/CNPJ"
+msgstr "CPF/CNPJ"
+
+msgid "Person type"
+msgstr "Tipo de pessoa"
+
+msgid "Credit limit (approved by the committee)"
+msgstr "Limite (aprovado pelo comitê)"
+
+msgid "Minimum floating (days)"
+msgstr "Floating mínimo (dias)"
+
+msgid "Contact name"
+msgstr "Nome do contato"
+
+msgid "Company e-mail"
+msgstr "E-mail da empresa"
+
+msgid "Contact e-mail"
+msgstr "E-mail do contato"
+
+msgid "Phone area code"
+msgstr "DDD do telefone"
+
+msgid "Mobile area code"
+msgstr "DDD do celular"
+
+msgid "Country"
+msgstr "País"
+
+msgid "Client since"
+msgstr "Cliente desde"
+
+msgid "Master contract number (next number from the Smart)"
+msgstr "Nº do contrato-mãe (próximo número da Smart)"
+
+msgid "Main e-mail"
+msgstr "E-mail principal"
+
+msgid "Sector (from the CNAE, by the Smart's sector names)"
+msgstr "Setor (pelo CNAE, nos setores da Smart)"
+
+msgid "Manager (card owner, else the default manager)"
+msgstr "Gerente (responsável pelo card, senão o gerente padrão)"
+
+msgid "Tax regime (from the Receita)"
+msgstr "Regime tributário (da Receita)"
+
+msgid "Foundation date"
+msgstr "Data de fundação"
+
+msgid "Billing address = main"
+msgstr "Endereço de cobrança = principal"
