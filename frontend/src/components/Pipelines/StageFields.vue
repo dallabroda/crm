@@ -1,13 +1,16 @@
 <template>
-  <div class="flex flex-col gap-3">
+  <!-- Figma "Campo" (940:99) as in "Preencha para mover o card" (1738:22750):
+       14 Medium gray label (the * in the same gray), 6px to the box, 80px
+       per field (6px under the box) and 8px between fields -->
+  <div class="flex flex-col gap-2">
     <div
       v-for="field in fields"
       :key="field.fieldname"
+      class="pb-1.5"
       :data-stage-field="field.fieldname"
     >
-      <div class="mb-2 text-sm text-ink-gray-5">
-        {{ __(field.label) }}
-        <span v-if="isRequired(field)" class="text-ink-red-4">*</span>
+      <div class="ct-field-label mb-1.5">
+        {{ __(field.label) }}{{ isRequired(field) ? ' *' : '' }}
       </div>
       <Link
         v-if="field.fieldtype === 'Link'"
