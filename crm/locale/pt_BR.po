@@ -14673,3 +14673,42 @@ msgstr "Endereço de cobrança = principal"
 
 msgid "Street and number"
 msgstr "Logradouro e número"
+
+msgid "Every field the ERP accepts or returns. It comes ready for the chosen ERP; change only what your portfolio uses differently. * required by the ERP."
+msgstr "Todos os campos que o ERP aceita ou devolve. Já vem pronto para o ERP escolhido; mude só o que a sua carteira usa diferente. * obrigatório no ERP."
+
+msgid "Cedente registration (CRM → ERP)"
+msgstr "Cadastro do cedente (CRM → ERP)"
+
+msgid "Títulos (ERP → CRM)"
+msgstr "Títulos (ERP → CRM)"
+
+msgid "Sacados (ERP → CRM)"
+msgstr "Sacados (ERP → CRM)"
+
+msgid "Each column of the ERP títulos goes to the título field you choose, on every sync. The protest species is always picked by the operator."
+msgstr "Cada coluna dos títulos do ERP vai para o campo do título que você escolher, a cada sincronização. A espécie do protesto é sempre escolhida pelo operador."
+
+msgid "Each column of the ERP sacado registry fills the field you choose on the sacado company or person, only when it is empty. Nothing mapped, the registry is not read."
+msgstr "Cada coluna do cadastro de sacados do ERP preenche o campo que você escolher na empresa ou pessoa do sacado, só quando ele está vazio. Sem nenhuma coluna escolhida, o cadastro não é lido."
+
+msgid "Do not bring"
+msgstr "Não trazer"
+
+msgid "Do not send"
+msgstr "Não enviar"
+
+msgid "Fixed value"
+msgstr "Valor fixo"
+
+msgid "Read automatically"
+msgstr "Lido automaticamente"
+
+msgid "{0} (ERP) →"
+msgstr "{0} (ERP) →"
+
+msgid "or, if empty,"
+msgstr "ou, se vazio,"
+
+msgid "Each field of the cedente registration in the ERP and where it comes from in the CRM: a field, a fixed value, a name of the ERP list or do not send."
+msgstr "Cada campo do cadastro do cedente no ERP e de onde ele vem no CRM: um campo, um valor fixo, um nome da lista do ERP ou não enviar."

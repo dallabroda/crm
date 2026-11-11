@@ -58,7 +58,7 @@
               <FormControl
                 v-model="settings.doc.erp_provider"
                 type="select"
-                  :placeholder="__('Select')"
+                :placeholder="__('Select')"
                 :label="__('ERP')"
                 :options="providerOptions"
                 required
@@ -124,7 +124,10 @@
                 @click="testConnection"
               />
             </div>
-            <CtAlert v-if="connection" :type="connection.ok ? 'success' : 'error'">
+            <CtAlert
+              v-if="connection"
+              :type="connection.ok ? 'success' : 'error'"
+            >
               {{ connection.message }}
             </CtAlert>
           </template>
@@ -143,7 +146,7 @@
                 <span class="text-base leading-5 text-ink-gray-6">
                   {{
                     __(
-                      'Registers the card\'s company as a cedente in the ERP, with the Receita data (address, IBGE code and tax regime). Each send leaves a comment on the card with the manager. The ERP does not accept editing or deleting the registration by API.',
+                      "Registers the card's company as a cedente in the ERP, with the Receita data (address, IBGE code and tax regime). Each send leaves a comment on the card with the manager. The ERP does not accept editing or deleting the registration by API.",
                     )
                   }}
                 </span>
@@ -188,7 +191,7 @@
               <span class="text-p-sm text-ink-gray-5">
                 {{
                   __(
-                    'Manager: the card owner, when they are also a manager in the ERP; otherwise the default manager. Sector: automatic from the company\'s CNAE (e.g. CNAE 62 → IT services).',
+                    "Manager: the card owner, when they are also a manager in the ERP; otherwise the default manager. Sector: automatic from the company's CNAE (e.g. CNAE 62 → IT services).",
                   )
                 }}
               </span>
@@ -246,7 +249,9 @@
               v-if="settings.doc.last_sync_report"
               class="rounded-[var(--ct-radius-md)] border border-[var(--ct-border)] px-3.5 py-2.5"
             >
-              <summary class="cursor-pointer text-p-base font-medium text-ink-gray-8">
+              <summary
+                class="cursor-pointer text-p-base font-medium text-ink-gray-8"
+              >
                 {{ __('Simulation report: what the sync would do') }}
               </summary>
               <pre
@@ -270,8 +275,8 @@
             v-if="settings.doc.erp_provider === 'Smart Securities'"
           />
 
-          <!-- Field mapping: ready for the chosen ERP -->
-          <section class="flex flex-col gap-6">
+          <!-- Field mapping (de-para): every field the ERP accepts or returns, the company picks the CRM side -->
+          <section v-if="mapping" class="flex flex-col gap-6">
             <div class="flex flex-col gap-1">
               <div class="text-lg font-semibold leading-6 text-ink-gray-9">
                 {{ __('Field mapping') }}
@@ -279,24 +284,110 @@
               <span class="text-base leading-5 text-ink-gray-6">
                 {{
                   __(
-                    'How each ERP field is filled with the CRM data. It comes ready for the chosen ERP; change it only if your portfolio uses something different.',
+                    'Every field the ERP accepts or returns. It comes ready for the chosen ERP; change only what your portfolio uses differently. * required by the ERP.',
                   )
                 }}
               </span>
             </div>
-            <div
-              v-if="mappingRows.length"
-              class="ct-field-48 grid grid-cols-2 gap-4"
-            >
-              <FormControl
-                v-for="row in mappingRows"
-                :key="row.name || row.erp_field"
-                :model-value="sourceLabel(row)"
-                type="text"
-                :label="__('{0} (ERP) ←', [__(row.label || row.erp_field)])"
-                readonly
-              />
+
+            <div class="flex flex-col gap-4">
+              <div class="flex flex-col gap-1">
+                <div
+                  class="text-[16px] font-semibold leading-6 text-ink-gray-9"
+                >
+                  {{ __('Cedente registration (CRM → ERP)') }}
+                </div>
+                <span class="text-base leading-5 text-ink-gray-6">
+                  {{
+                    __(
+                      'Each field of the cedente registration in the ERP and where it comes from in the CRM: a field, a fixed value, a name of the ERP list or do not send.',
+                    )
+                  }}
+                </span>
+              </div>
+              <div class="ct-field-48 grid grid-cols-2 gap-4">
+                <div
+                  v-for="field in mapping.cedente.fields"
+                  :key="field.erp_field"
+                  class="flex flex-col gap-2"
+                >
+                  <FormControl
+                    v-if="field.kind === 'auto'"
+                    type="text"
+                    :label="fieldLabel(field)"
+                    :model-value="__('Automatic (from the ERP lists)')"
+                    readonly
+                  />
+                  <FormControl
+                    v-else-if="field.kind === 'list'"
+                    type="select"
+                    :label="fieldLabel(field)"
+                    :options="listOptions(field)"
+                    :model-value="
+                      cedenteRow(field.erp_field)?.default_value || ''
+                    "
+                    @update:model-value="(v) => pickList(field, v)"
+                  />
+                  <template v-else>
+                    <FormControl
+                      type="select"
+                      :label="fieldLabel(field)"
+                      :options="sourceOptions(field)"
+                      :model-value="sourceValue(field)"
+                      @update:model-value="(v) => pickSource(field, v)"
+                    />
+                    <FormControl
+                      v-if="sourceValue(field) === FIXED"
+                      type="text"
+                      :placeholder="__('Fixed value')"
+                      :model-value="
+                        cedenteRow(field.erp_field)?.default_value || ''
+                      "
+                      @update:model-value="
+                        (v) => (cedenteRow(field.erp_field).default_value = v)
+                      "
+                    />
+                  </template>
+                </div>
+              </div>
             </div>
+
+            <div
+              v-for="part in importParts"
+              :key="part.table"
+              class="flex flex-col gap-4"
+            >
+              <div class="flex flex-col gap-1">
+                <div
+                  class="text-[16px] font-semibold leading-6 text-ink-gray-9"
+                >
+                  {{ part.title }}
+                </div>
+                <span class="text-base leading-5 text-ink-gray-6">{{
+                  part.hint
+                }}</span>
+              </div>
+              <div class="ct-field-48 grid grid-cols-2 gap-4">
+                <FormControl
+                  v-for="column in part.options.columns"
+                  :key="column"
+                  type="select"
+                  :label="__('{0} (ERP) →', [column])"
+                  :disabled="Boolean(part.options.fixed[column])"
+                  :options="
+                    part.options.fixed[column]
+                      ? [{ label: __('Read automatically'), value: '' }]
+                      : [
+                          { label: part.none, value: '' },
+                          ...part.options.targets,
+                        ]
+                  "
+                  :model-value="importValue(part.table, column)"
+                  @update:model-value="(v) => pickImport(part.table, column, v)"
+                />
+              </div>
+            </div>
+
             <div>
               <Button
                 variant="outline"
@@ -322,7 +413,15 @@ import CtAlert from '@/components/CtAlert.vue'
 import { useDocument } from '@/data/document'
 import { createDialog } from '@/utils/dialogs'
 import { pipelinesStore } from '@/stores/pipelines'
-import { Badge, Button, ErrorMessage, FormControl, Switch, call, toast } from 'frappe-ui'
+import {
+  Badge,
+  Button,
+  ErrorMessage,
+  FormControl,
+  Switch,
+  call,
+  toast,
+} from 'frappe-ui'
 import { computed, reactive, ref, watch } from 'vue'
 
 // WBA / Smart Securities integration (credtech#367), served by the cred_hub app.
@@ -376,7 +475,10 @@ const isDirty = computed(() => {
   const doc = settings.doc
   const original = settings.originalDoc
   if (!doc || !original) return false
-  return FIELDS.some((f) => normalize(doc[f]) !== normalize(original[f]))
+  return (
+    FIELDS.some((f) => normalize(doc[f]) !== normalize(original[f])) ||
+    mapShape(doc) !== mapShape(original)
+  )
 })
 
 const providerOptions = [
@@ -412,7 +514,10 @@ const managerOptions = computed(() => {
   const names = [...lists.managers]
   const current = settings.doc?.default_manager
   if (current && !names.includes(current)) names.unshift(current)
-  return [{ label: __('Select'), value: '' }, ...names.map((n) => ({ label: n, value: n }))]
+  return [
+    { label: __('Select'), value: '' },
+    ...names.map((n) => ({ label: n, value: n })),
+  ]
 })
 
 // A stage of another funnel is not valid: clear it when the funnel changes
@@ -442,54 +547,169 @@ watch(
   { immediate: true },
 )
 
-const mappingRows = computed(() => settings.doc?.cedente_field_map || [])
-const SOURCE_LABELS = {
-  organization: __('Organization'),
-  contact: __('Contact'),
-  address: __('Address'),
-  deal: __('Card'),
-  credit: __('Credit committee'),
+// De-para (credtech#367): the options come from the server (every ERP field and column, every CRM field)
+const mapping = ref(null)
+const FIXED = '__fixed'
+const LIST_SOURCE = 'erp_list'
+
+async function loadMapping() {
+  if (!settings.originalDoc?.erp_provider) return (mapping.value = null)
+  try {
+    mapping.value = await call('cred_hub.erp.settings.mapping_options')
+  } catch (err) {
+    mapping.value = null
+    toast.error(err.messages?.[0] || err.message)
+  }
 }
-// CRM fields by their screen names (the mapping stores the technical field name)
-const FIELD_LABELS = {
-  cnpj: 'CNPJ',
-  legal_name: __('Legal name'),
-  organization_name: __('Organization name'),
-  trade_name: __('Trade name'),
-  registration_status: __('Registration status'),
-  main_cnae: 'CNAE',
-  legal_nature: __('Legal nature'),
-  activity_start_date: __('Opening date'),
-  share_capital: __('Share capital'),
-  registry_email: __('Registry e-mail'),
-  registry_phone: __('Registry phone'),
-  website: __('Website'),
-  neighborhood: __('District'),
-  city: __('City'),
-  state: __('State'),
-  address_street_type: __('Street type'),
-  address_street: __('Street'),
-  address_number: __('Number'),
-  address_complement: __('Complement'),
-  ibge_code: __('IBGE city code'),
-  tax_regime: __('Tax regime'),
-  pincode: __('ZIP code'),
-  address_line1: __('Street and number'),
-  address_line2: __('Address line 2'),
-  full_name: __('Name'),
-  email_id: __('E-mail'),
-  mobile_no: __('Mobile'),
-  approved_limit: __('Approved limit'),
-  deal_value: __('Card value'),
+watch(() => settings.originalDoc?.erp_provider, loadMapping, {
+  immediate: true,
+})
+
+const fieldLabel = (field) =>
+  __(field.label) + (field.required === 'yes' ? ' *' : '')
+
+function cedenteRow(erpField) {
+  return (settings.doc?.cedente_field_map || []).find(
+    (r) => r.erp_field === erpField,
+  )
 }
-function sourceLabel(row) {
-  if (row.source === 'auto') return __('Automatic (from the ERP lists)')
-  if (row.source === 'today') return __('Date of the registration')
-  if (!row.source) return row.default_value || '-'
-  const first = row.source.split('|')[0]
-  const [entity, field] = first.split('.')
-  return `${SOURCE_LABELS[entity] || entity} › ${FIELD_LABELS[field] || field}`
+function ensureCedenteRow(field) {
+  let row = cedenteRow(field.erp_field)
+  if (!row) {
+    row = {
+      erp_field: field.erp_field,
+      label: field.label,
+      source: '',
+      default_value: '',
+    }
+    settings.doc.cedente_field_map = [
+      ...(settings.doc.cedente_field_map || []),
+      row,
+    ]
+    row = cedenteRow(field.erp_field)
+  }
+  return row
 }
+function dropCedenteRow(erpField) {
+  settings.doc.cedente_field_map = settings.doc.cedente_field_map.filter(
+    (r) => r.erp_field !== erpField,
+  )
+}
+
+function sourceValue(field) {
+  const row = cedenteRow(field.erp_field)
+  if (!row) return ''
+  if (row.source) return row.source
+  return row.default_value ? FIXED : ''
+}
+function sourceOptions(field) {
+  const sources = mapping.value?.cedente.sources || []
+  const options = [
+    {
+      label: field.required === 'yes' ? __('Select') : __('Do not send'),
+      value: '',
+    },
+    { label: __('Fixed value'), value: FIXED },
+    ...sources,
+  ]
+  // "a|b": the second CRM field is used when the first is empty
+  const current = cedenteRow(field.erp_field)?.source
+  if (current && !sources.some((o) => o.value === current)) {
+    const names = current
+      .split('|')
+      .map((s) => sources.find((o) => o.value === s)?.label || s)
+    options.splice(2, 0, {
+      label: names.join(' ' + __('or, if empty,') + ' '),
+      value: current,
+    })
+  }
+  return options
+}
+function pickSource(field, value) {
+  if (!value) return dropCedenteRow(field.erp_field)
+  const row = ensureCedenteRow(field)
+  if (value === FIXED) {
+    row.source = ''
+    row.default_value = row.default_value || ''
+  } else {
+    row.source = value
+    row.default_value = ''
+  }
+}
+
+function listOptions(field) {
+  const names = [...(mapping.value?.lists?.[field.resource] || [])]
+  const current = cedenteRow(field.erp_field)?.default_value
+  if (current && !names.includes(current)) names.unshift(current)
+  return [
+    { label: __('Do not send'), value: '' },
+    ...names.map((n) => ({ label: n, value: n })),
+  ]
+}
+function pickList(field, value) {
+  if (!value) return dropCedenteRow(field.erp_field)
+  const row = ensureCedenteRow(field)
+  row.source = LIST_SOURCE
+  row.default_value = value
+}
+
+const importParts = computed(() =>
+  mapping.value
+    ? [
+        {
+          table: 'title_field_map',
+          options: mapping.value.title,
+          title: __('Títulos (ERP → CRM)'),
+          hint: __(
+            'Each column of the ERP títulos goes to the título field you choose, on every sync. The protest species is always picked by the operator.',
+          ),
+          none: __('Do not bring'),
+        },
+        {
+          table: 'sacado_field_map',
+          options: mapping.value.sacado,
+          title: __('Sacados (ERP → CRM)'),
+          hint: __(
+            'Each column of the ERP sacado registry fills the field you choose on the sacado company or person, only when it is empty. Nothing mapped, the registry is not read.',
+          ),
+          none: __('Do not bring'),
+        },
+      ]
+    : [],
+)
+const columnKey = (name) =>
+  String(name || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter((w) => w && w !== 'de')
+    .join('')
+function importValue(table, column) {
+  const row = (settings.doc?.[table] || []).find(
+    (r) => columnKey(r.erp_column) === columnKey(column),
+  )
+  return row?.crm_field || ''
+}
+function pickImport(table, column, value) {
+  const rows = (settings.doc[table] || []).filter(
+    (r) => columnKey(r.erp_column) !== columnKey(column),
+  )
+  if (value) rows.push({ erp_column: column, crm_field: value })
+  settings.doc[table] = rows
+}
+
+// The de-para tables count as changes too (Discard / Not saved)
+const mapShape = (doc) =>
+  JSON.stringify([
+    (doc?.cedente_field_map || []).map((r) => [
+      r.erp_field,
+      r.source || '',
+      r.default_value || '',
+    ]),
+    (doc?.title_field_map || []).map((r) => [r.erp_column, r.crm_field]),
+    (doc?.sacado_field_map || []).map((r) => [r.erp_column, r.crm_field]),
+  ])
 
 function save() {
   const leavingSimulation =
@@ -521,6 +741,7 @@ function submit() {
   settings.save.submit(null, {
     onSuccess: () => {
       settings.reload()
+      loadMapping()
       connection.value = null
       toast.success(__('ERP settings saved'))
     },
