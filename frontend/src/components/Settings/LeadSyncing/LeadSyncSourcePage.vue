@@ -1,6 +1,9 @@
 <template>
   <div class="flex h-full flex-col gap-6 text-ink-gray-8">
-    <SettingsPageHeader :title="__('Lead Sources')">
+    <!-- Figma "Entrada de leads · Fontes de leads" (2324:20471): tab of the
+         "Entrada de leads" page -->
+    <SettingsTabs :tabs="leadIntakeTabs" active="lead-sources" />
+    <SettingsPageHeader :title="__('Lead intake')">
       <template #description>
         {{
           __(
@@ -35,6 +38,8 @@
 
 <script setup>
 import SettingsPageHeader from '@/components/Settings/SettingsPageHeader.vue'
+import SettingsTabs from '@/components/Settings/SettingsTabs.vue'
+import { leadIntakeTabs } from './webhookSourcesApi'
 // Lead sources connected by the company admin (credtech#51). The old screen,
 // where a Meta access token was pasted by hand, gave way to "Connect with
 // Facebook": the token never shows up here.
@@ -59,6 +64,7 @@ const webhooks = ref(null)
 /* card titles 14/500, descriptions 14 gray */
 .ct-sources > :deep(.rounded-lg.border .text-base-semibold) {
   font-weight: 500;
+  line-height: 20px;
 }
 .ct-sources > :deep(.rounded-lg.border .text-p-sm) {
   font-size: 14px;

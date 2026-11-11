@@ -67,10 +67,10 @@
                 {{ __('Acessar site oficial da Assertiva Soluções (contratação e suporte) ↗') }}
               </a>
             </div>
-            <Switch v-model="assertivaEnabled" />
+            <Switch v-model="assertivaEnabled" size="md" />
           </div>
           <template v-if="settings.doc.assertiva_enabled">
-            <div class="ct-field-48 grid grid-cols-2 gap-4">
+            <div class="ct-field-48 grid grid-cols-2 gap-4 pr-8">
               <FormControl
                 v-model="settings.doc.assertiva_client_id"
                 :label="__('Client ID')"
@@ -94,13 +94,15 @@
                 v-model="settings.doc.assertiva_cache_days"
                 type="number"
                 :label="__('Reuse a query for (days)')"
-                :description="
-                  __(
-                    'Within this period the saved result is used at no cost, unless someone asks for a new paid query.',
-                  )
-                "
               />
             </div>
+            <p class="text-xs text-ink-gray-6">
+              {{
+                __(
+                  'Within this period the saved result is used at no cost, unless someone asks for a new paid query.',
+                )
+              }}
+            </p>
             <FormControl
               v-model="settings.doc.assertiva_partner_lookup"
               type="checkbox"
@@ -165,7 +167,7 @@
                 </router-link>
               </div>
             </div>
-            <Switch v-model="cenprotEnabled" />
+            <Switch v-model="cenprotEnabled" size="md" />
           </div>
           <template v-if="settings.doc.cenprot_enabled">
             <!-- IEPTB only answers registered IPs: the client registers ours in their contract -->
@@ -180,7 +182,7 @@
               </CtAlert>
               <div class="flex items-center gap-2">
                 <TextInput
-                  class="ct-field-48 w-60"
+                  class="ct-field-48 ct-ip w-60"
                   :model-value="serverIp"
                   readonly
                   @focus="$event.target.select()"
@@ -195,14 +197,13 @@
                 />
               </div>
             </div>
-            <div class="ct-field-48 grid grid-cols-2 gap-4">
+            <div class="ct-field-48 grid grid-cols-2 gap-4 pr-8">
               <FormControl
                 v-model="settings.doc.cenprot_environment"
                 type="select"
                 :label="__('Environment')"
                 :options="environmentOptions"
               />
-              <div />
               <FormControl
                 v-model="settings.doc.cenprot_username"
                 :label="__('CENPROT username')"
@@ -237,7 +238,7 @@
             <div class="text-lg font-semibold leading-6 text-ink-gray-9">
               {{ __('Creditor (who protests)') }}
             </div>
-            <div class="ct-field-48 grid grid-cols-3 gap-4">
+            <div class="ct-field-48 grid grid-cols-3 gap-4 pr-8">
               <FormControl
                 v-model="settings.doc.creditor_name"
                 class="col-span-2"
@@ -300,7 +301,7 @@
               {{ __('Title defaults') }}
             </div>
             <!-- Sem tipo de título padrão: a espécie é escolhida em cada título (dono, 02/11/2026) -->
-            <div class="ct-field-48 grid grid-cols-2 gap-4">
+            <div class="ct-field-48 grid grid-cols-2 gap-4 pr-8">
               <FormControl
                 v-model="settings.doc.default_endorsement"
                 type="select"
@@ -329,19 +330,21 @@
                   }}
                 </span>
               </div>
-              <div class="ct-field-48 grid grid-cols-2 gap-4">
+              <div class="ct-field-48 grid grid-cols-2 gap-4 pr-8">
                 <FormControl
                   v-model="settings.doc.collection_grouping"
                   type="select"
                   :label="__('Group the cards by')"
                   :options="groupingOptions"
-                  :description="
-                    __(
-                      'Used by the spreadsheet import and the ERP synchronization. The cedente is kept on each title either way.',
-                    )
-                  "
                 />
               </div>
+              <p class="text-xs text-ink-gray-6">
+                {{
+                  __(
+                    'Used by the spreadsheet import and the ERP synchronization. The cedente is kept on each title either way.',
+                  )
+                }}
+              </p>
               <FormControl
                 v-model="settings.doc.auto_send_on_stage"
                 type="checkbox"
@@ -368,7 +371,7 @@
                   )
                 "
               />
-              <div class="ct-field-48 grid grid-cols-2 gap-4">
+              <div class="ct-field-48 grid grid-cols-2 gap-4 pr-8">
                 <FormControl
                   v-for="stage in stageFields"
                   :key="stage.field"
@@ -583,3 +586,33 @@ async function test(provider) {
   }
 }
 </script>
+
+<style scoped>
+/* Figma "Caixa de seleção" (2324:26055): 20px box, 14/20 black label, 12px
+   help 26px in */
+.ct-bureaus :deep(input[type='checkbox']) {
+  width: 20px;
+  height: 20px;
+  margin-top: 0;
+  border-radius: 6px;
+}
+.ct-bureaus :deep(input[type='checkbox'] + label) {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: var(--ct-text-primary);
+}
+.ct-bureaus :deep(div:has(> input[type='checkbox']) + div) {
+  margin-top: 2px;
+  padding-inline-start: 26px;
+}
+.ct-bureaus :deep(div:has(> input[type='checkbox']) + div p) {
+  font-size: 12px;
+  line-height: 16px;
+}
+/* the server IP is read-only: gray box, as in the Figma "IP" */
+.ct-bureaus .ct-ip :deep(input) {
+  background-color: var(--ct-bg-soft);
+  color: var(--ct-text-tertiary);
+}
+</style>

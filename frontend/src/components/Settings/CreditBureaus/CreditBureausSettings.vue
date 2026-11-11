@@ -1130,9 +1130,10 @@
             </span>
           </div>
 
-          <!-- Master Enable Switch -->
+          <!-- Master Enable Switch: Figma "Análise de risco e compliance"
+               (2324:25139) is a gray panel without border -->
           <div
-            class="flex items-center justify-between gap-4 rounded-[var(--ct-radius-md)] border border-[var(--ct-border)] bg-surface-white px-5 py-4"
+            class="flex items-center justify-between gap-4 rounded-[var(--ct-radius-md)] bg-[var(--ct-bg-soft)] px-5 py-4"
           >
             <div class="flex flex-col gap-1">
               <span
@@ -1150,19 +1151,20 @@
                 }}
               </span>
             </div>
-            <Switch v-model="settingsDoc.enabled" />
+            <Switch v-model="settingsDoc.enabled" size="md" />
           </div>
 
-          <!-- Funnel automation trigger -->
+          <!-- Funnel automation trigger (Figma "Gatilho de automação no funil":
+               12px apart, 12px help text, 495px field) -->
           <div
-            class="space-y-3 rounded-[var(--ct-radius-md)] border border-[var(--ct-border)] bg-surface-white px-5 py-4"
+            class="flex flex-col gap-3 rounded-[var(--ct-radius-md)] border border-[var(--ct-border)] bg-surface-white px-5 py-4"
           >
             <span
               class="text-[16px] font-semibold leading-6 text-[var(--ct-text-primary)]"
             >
               {{ __('Gatilho de automação no funil') }}
             </span>
-            <p class="text-p-xs text-ink-gray-6">
+            <p class="text-xs text-ink-gray-6">
               {{
                 __(
                   'Roda a verificação automaticamente quando um card entra nesta etapa. Cada verificação automática faz consultas pagas nas suas contas dos provedores.',
@@ -1184,23 +1186,24 @@
             />
           </div>
 
-          <!-- Risk tolerance and blocks -->
+          <!-- Risk tolerance and blocks (Figma "Critérios de risco e bloqueios":
+               12px apart, two 495px fields) -->
           <div
-            class="space-y-3 rounded-[var(--ct-radius-md)] border border-[var(--ct-border)] bg-surface-white px-5 py-4"
+            class="flex flex-col gap-3 rounded-[var(--ct-radius-md)] border border-[var(--ct-border)] bg-surface-white px-5 py-4"
           >
             <span
               class="text-[16px] font-semibold leading-6 text-[var(--ct-text-primary)]"
             >
               {{ __('Critérios de risco e bloqueios') }}
             </span>
-            <p class="text-p-xs text-ink-gray-6">
+            <p class="text-xs text-ink-gray-6">
               {{
                 __(
                   'Nada reprova sozinho: o sistema avisa e o operador decide. Ligue um bloqueio, ou defina um limite acima de 0, só se a sua política reprova por isso.',
                 )
               }}
             </p>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:pr-8">
               <FormControl
                 v-model.number="settingsDoc.max_lawsuits_defendant"
                 type="number"
@@ -1218,7 +1221,7 @@
                 "
               />
             </div>
-            <div class="flex flex-col gap-3 pt-1">
+            <div class="flex flex-col gap-3">
               <Checkbox
                 v-model="settingsDoc.block_on_bankruptcy"
                 :label="
@@ -2081,11 +2084,19 @@ onMounted(() => {
 .ct-credit :deep(input[type='checkbox']) {
   width: 20px;
   height: 20px;
+  margin-top: 0;
   border-radius: 6px;
+}
+/* its label: 14/20 Regular, black (Figma 2324:25139) */
+.ct-credit :deep(input[type='checkbox'] + label) {
+  font-weight: 400;
+  line-height: 20px;
+  color: var(--ct-text-primary);
 }
 .ct-credit :deep(label.block) {
   font-size: 14px;
   font-weight: 500;
+  line-height: 20px;
   color: var(--ink-gray-6);
 }
 /* Figma provider card (Bureaus e credenciais): 8px radius, 20/16 padding */

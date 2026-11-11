@@ -1,5 +1,17 @@
 import { validateEmail } from '../../utils'
+import { usersStore } from '@/stores/users'
 import { call } from 'frappe-ui'
+
+// Tabs of the "E-mail" page (Figma 2336:10121); same conditions as the
+// sections in settingsSections.js
+export const emailTabs = [
+  {
+    slug: 'email-accounts',
+    label: 'Accounts',
+    condition: () => usersStore().isManager(),
+  },
+  { slug: 'email-templates', label: 'Templates' },
+]
 
 // The platform's own sending accounts (crm.api.email_accounts, credtech#191).
 // When there is one, system emails always go through it: company accounts are

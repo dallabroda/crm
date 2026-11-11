@@ -3,7 +3,8 @@
     class="flex flex-col gap-3 rounded-lg border border-outline-gray-2 p-4"
     data-testid="email-company-setting"
   >
-    <div class="flex items-start justify-between gap-4">
+    <!-- Figma "Descobrir a empresa": switch centered on the text, 24px apart -->
+    <div class="flex items-center justify-between gap-6">
       <div class="flex flex-col gap-1">
         <h3 class="text-base-semibold text-ink-gray-9">
           {{ __("Find the company from the lead's e-mail") }}
@@ -17,6 +18,7 @@
         </p>
       </div>
       <Switch
+        size="md"
         :model-value="Boolean(setting.data?.enabled)"
         :disabled="setting.loading || saving"
         @update:model-value="save"

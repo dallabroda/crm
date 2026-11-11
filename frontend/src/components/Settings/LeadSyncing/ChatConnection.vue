@@ -1,8 +1,10 @@
 <template>
-  <div class="flex flex-col gap-3 rounded-lg border border-outline-gray-2 p-4">
-    <div class="flex items-start justify-between gap-4">
-      <div class="flex items-start gap-3">
-        <WhatsAppIcon class="mt-0.5 size-6 shrink-0" />
+  <!-- Figma "SmartChat" (2324:20471): 16px apart; 16px icon centered on the
+       text, 24px from it -->
+  <div class="flex flex-col gap-4 rounded-lg border border-outline-gray-2 p-4">
+    <div class="flex items-center justify-between gap-6">
+      <div class="flex items-center gap-6">
+        <WhatsAppIcon class="size-4 shrink-0" />
         <div class="flex flex-col gap-1">
           <div class="text-base-semibold text-ink-gray-9">
             {{ __('Cred Chat') }}
@@ -76,7 +78,7 @@
 
     <template v-if="!chat.connected">
       <ol
-        class="flex list-decimal flex-col gap-1 pl-5 text-p-sm text-ink-gray-7"
+        class="flex list-decimal flex-col gap-1 pl-5 text-p-sm text-ink-gray-6"
       >
         <li>
           {{
@@ -95,7 +97,7 @@
       </ol>
       <!-- Figma "Conexão": 48px fields and an outline Conectar -->
       <div class="ct-field-48 flex items-end gap-3">
-        <div class="w-44">
+        <div class="w-[180px]">
           <FormControl
             v-model="accountId"
             type="number"
@@ -113,6 +115,7 @@
         <!-- Figma "Origens": primary button (designer comment 1992544263) -->
         <Button
           variant="solid"
+          class="!px-7"
           :label="__('Connect')"
           :disabled="!accountId || !accessToken.trim()"
           :loading="busy"

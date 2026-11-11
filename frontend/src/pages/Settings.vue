@@ -233,6 +233,7 @@ onMounted(() => {
 .settings-page .ct-field-48 label {
   font-size: 14px;
   font-weight: 500;
+  line-height: 20px;
   color: var(--ink-gray-6);
 }
 </style>
