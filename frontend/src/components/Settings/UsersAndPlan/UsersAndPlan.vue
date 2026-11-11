@@ -1,15 +1,9 @@
 <template>
-  <div class="flex h-full flex-col gap-6 text-ink-gray-8">
-    <SettingsPageHeader :title="__('Users and Plan')">
-      <template #description>
-        {{
-          __(
-            'After the free trial, your plan includes {0} free user. Each extra user costs {1} per month, paid by card.',
-            [data?.free ?? 1, money(data?.price_per_user)],
-          )
-        }}
-      </template>
-    </SettingsPageHeader>
+  <!-- Figma "Configurações · Usuários e plano · preenchida" (2201:2060):
+       the title lives in the top bar; the page is the plan list and the
+       "Adicionais" block, with no intro text, usage card or comparison table. -->
+  <div class="flex h-full flex-col gap-6 text-[var(--ct-text-primary)]">
+    <SettingsPageHeader :title="__('Users and Plan')" />
 
     <div v-if="!data" class="flex mt-28 justify-between w-full h-full">
       <Button
@@ -22,97 +16,19 @@
 
     <div
       v-else-if="data.unlimited"
-      class="rounded-lg bg-surface-blue-2 px-3.5 py-2.5 text-base font-medium text-ink-blue-5"
+      class="rounded-[8px] bg-[var(--ct-info-soft)] px-3.5 py-2.5 text-base font-medium text-[var(--ct-info)]"
     >
       {{ __('Your company has no user limit.') }}
     </div>
 
-    <div v-else class="flex flex-col gap-6 overflow-y-auto">
-      <!-- Usage and status -->
-      <div class="flex flex-col gap-3 rounded border border-outline-gray-1 p-4">
-        <div class="flex items-center justify-between gap-4">
-          <div class="flex flex-col gap-0.5">
-            <span class="text-lg-semibold text-ink-gray-8">
-              {{
-                seats.unlimited
-                  ? __('{0} users, no limit during the trial', [seats.used])
-                  : __('{0} of {1} users', [seats.used, seats.limit])
-              }}
-            </span>
-            <span class="text-p-sm text-ink-gray-5">
-              {{
-                __('{0} active, {1} invited', [
-                  data.used_active,
-                  data.used_invited,
-                ])
-              }}
-            </span>
-          </div>
-          <Badge
-            :label="statusBadge(data.status, data.in_trial).label"
-            :theme="statusBadge(data.status, data.in_trial).theme"
-            variant="subtle"
-            size="lg"
-          />
-        </div>
-        <div
-          v-if="!seats.unlimited"
-          class="h-1.5 w-full overflow-hidden rounded-full bg-surface-gray-3"
-        >
-          <div
-            class="h-full rounded-full"
-            :class="seats.full ? 'bg-surface-red-5' : 'bg-surface-gray-7'"
-            :style="{ width: barWidth }"
-          />
-        </div>
-        <p
-          v-if="seats.full && data.status !== 'Awaiting Payment'"
-          class="text-p-sm text-ink-gray-6"
-        >
-          {{
-            __(
-              'All seats are in use. To invite someone else, contract extra users below.',
-            )
-          }}
-        </p>
-        <div
-          v-if="data.status === 'Active' && data.next_due && data.amount"
-          class="text-p-sm text-ink-gray-6"
-        >
-          {{
-            __('Next charge: {0} on {1}', [
-              money(data.amount),
-              date(data.next_due),
-            ])
-          }}
-        </div>
-      </div>
-
-      <!-- What needs attention -->
-      <PlanNotice
-        v-if="data.in_trial"
-        theme="gray"
-        :text="
-          __(
-            'Free trial with unlimited users until {0} ({1}). From {2}, the users above the {3} free one and the extra users you contract are paused, the most recent first, and pending invitations over the limit are no longer valid. To keep them, contract extra users below or choose who stays by deactivating the users you no longer need.',
-            [
-              date(data.trial_ends_on),
-              data.trial_days_left === 1
-                ? __('last day')
-                : __('{0} days left', [data.trial_days_left]),
-              date(dayAfterTrial(data)),
-              data.free,
-            ],
-          )
-        "
-      />
+    <div v-else class="flex flex-col gap-6 overflow-y-auto pb-6">
+      <!-- Alertas de pagamento (só aparecem quando há pendência) -->
       <PlanNotice
         v-if="data.status === 'Awaiting Payment'"
         theme="orange"
         :text="
           __(
-            'Waiting for the first payment. The {0} extra users are released as soon as it is confirmed.',
-            [data.pending_extras],
+            'Waiting for the first payment. The plan and extra seats are released as soon as it is confirmed.',
           )
         "
         :invoice-url="data.invoice_url"
@@ -174,8 +90,10 @@
       />
 
       <div v-if="data.paused_users.length" class="flex flex-col gap-2">
-        <div class="text-base-semibold">{{ __('Paused by the plan') }}</div>
-        <p class="text-p-sm text-ink-gray-6">
+        <div class="text-base font-semibold text-[#1E1F23]">
+          {{ __('Paused by the plan') }}
+        </div>
+        <p class="text-sm text-[#5E6068]">
           {{
             __(
               'Their data is kept. They come back on their own when there is a seat again. You can also choose who stays: deactivate a user and re-enable a paused one.',
@@ -186,50 +104,172 @@
           <li
             v-for="user in data.paused_users"
             :key="user.name"
-            class="flex items-center gap-2 rounded-6 bg-surface-gray-2 px-2 py-1 text-base"
+            class="flex items-center gap-2 rounded-[6px] bg-[#F5F5F7] px-2.5 py-1.5 text-sm"
           >
-            <span class="text-ink-gray-8">{{
+            <span class="font-medium text-[#1E1F23]">{{
               user.full_name || user.name
             }}</span>
-            <span class="text-ink-gray-5">{{ user.name }}</span>
+            <span class="text-[#8A8C94]">{{ user.name }}</span>
           </li>
         </ul>
       </div>
 
-      <!-- Change the number of extra users -->
-      <div class="flex flex-col gap-4 border-t border-outline-gray-1 pt-6">
-        <div class="text-base-semibold">{{ __('Extra users') }}</div>
-        <div class="flex items-center gap-3">
-          <FormControl
-            v-model="quantity"
-            type="number"
-            class="w-40"
-            :min="0"
-            :max="500"
+      <!-- Planos · lista -->
+      <div
+        class="flex flex-col overflow-hidden rounded-[8px] border border-[#EDEDF0] bg-white"
+      >
+        <div
+          v-for="tier in PLAN_TIERS"
+          :key="tier.id"
+          class="flex items-center gap-4 border-b border-[#EDEDF0] px-6 py-5 last:border-b-0"
+        >
+          <div
+            class="flex size-10 shrink-0 items-center justify-center rounded-[8px] bg-[var(--ct-bg-soft)] text-[var(--ct-text-secondary)]"
+          >
+            <component :is="TIER_ICONS[tier.id]" class="ct-plan-icon size-5" />
+          </div>
+          <div class="flex min-w-0 flex-1 flex-col gap-1.5">
+            <div class="flex items-center gap-2">
+              <span class="text-[16px] font-semibold">{{ tier.name }}</span>
+              <span
+                v-if="tier.id === currentTier"
+                class="rounded-full bg-[var(--ct-bg-panel)] px-2.5 py-0.5 text-[12px] font-medium leading-4"
+              >
+                Plano atual
+              </span>
+              <span
+                v-else-if="tier.badge"
+                class="rounded-full bg-[var(--ct-accent-soft)] px-2.5 py-0.5 text-[12px] font-medium leading-4 text-[var(--ct-accent-text)]"
+              >
+                {{ tier.badge }}
+              </span>
+            </div>
+            <p
+              class="text-[14px] leading-[normal] text-[var(--ct-text-secondary)]"
+            >
+              {{ tierDescription(tier) }}
+            </p>
+          </div>
+          <div class="flex shrink-0 items-baseline gap-1 whitespace-nowrap">
+            <span class="text-[16px] font-semibold leading-6">
+              {{ price(tier.basePrice) }}
+            </span>
+            <span class="text-[14px] text-[var(--ct-text-secondary)]"
+              >/mês</span
+            >
+          </div>
+          <button
+            v-if="tier.id === currentTier"
+            type="button"
+            disabled
+            class="flex h-10 w-[220px] shrink-0 items-center justify-center rounded-[6px] bg-[var(--ct-bg-panel)] px-6 text-[14px] font-semibold opacity-40"
+          >
+            Plano atual
+          </button>
+          <button
+            v-else-if="tier.id === selectedTier"
+            type="button"
+            class="flex h-10 w-[220px] shrink-0 items-center justify-center rounded-[6px] border border-[var(--ct-border)] bg-white px-6 text-[14px] font-semibold hover:bg-[var(--ct-bg-soft)]"
+            @click="selectTier(currentTier || tier.id)"
+          >
+            Plano escolhido
+          </button>
+          <button
+            v-else
+            type="button"
+            class="flex h-10 w-[220px] shrink-0 items-center justify-center rounded-[6px] bg-[var(--ct-accent)] px-6 text-[14px] font-semibold text-white hover:bg-[var(--ct-accent-hover)] disabled:opacity-40"
             :disabled="saving"
-          />
-          <span class="text-p-base text-ink-gray-7">
-            {{
-              __('{0} users in total, {1} per month', [
-                (data.free || 0) + extras,
-                money(change.monthly),
-              ])
-            }}
+            @click="selectTier(tier.id)"
+          >
+            Mudar para {{ tier.name }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Adicionais -->
+      <div
+        v-if="selectedSpec"
+        class="flex flex-col gap-4 rounded-[8px] border border-[#EDEDF0] bg-white p-6"
+      >
+        <div class="text-[14px] font-medium">Adicionais</div>
+        <div class="flex items-center gap-4">
+          <div
+            class="flex size-10 shrink-0 items-center justify-center rounded-[8px] bg-[var(--ct-bg-soft)] text-[#2A2B30]"
+          >
+            <UsersIcon class="ct-plan-icon size-5" />
+          </div>
+          <div
+            class="flex min-w-0 flex-1 flex-col gap-1 text-[14px] leading-[normal]"
+          >
+            <span class="font-medium">{{ __('Extra users') }}</span>
+            <span class="text-[var(--ct-text-secondary)]">
+              {{ extrasDescription }}
+            </span>
+          </div>
+          <template v-if="!selectedSpec.unlimitedUsers">
+            <div
+              class="flex shrink-0 overflow-hidden rounded-[6px] border border-[var(--ct-border)] bg-white text-[14px]"
+            >
+              <button
+                type="button"
+                class="flex h-8 w-9 items-center justify-center bg-[var(--ct-bg-soft)] font-semibold hover:bg-[var(--ct-bg-panel)]"
+                aria-label="Remover um usuário extra"
+                :disabled="saving || extras <= 0"
+                @click="quantity = Math.max(0, extras - 1)"
+              >
+                −
+              </button>
+              <input
+                v-model.number="quantity"
+                type="number"
+                min="0"
+                max="500"
+                class="ct-stepper-value h-8 w-9 border-0 p-0 text-center text-[14px] font-medium focus:ring-0"
+                :aria-label="__('Extra users')"
+                :disabled="saving"
+              />
+              <button
+                type="button"
+                class="flex h-8 w-9 items-center justify-center bg-[var(--ct-bg-soft)] font-semibold hover:bg-[var(--ct-bg-panel)] disabled:opacity-40"
+                aria-label="Adicionar um usuário extra"
+                :disabled="saving || extras >= 500"
+                @click="quantity = Math.min(500, extras + 1)"
+              >
+                +
+              </button>
+            </div>
+            <span
+              class="shrink-0 whitespace-nowrap text-[14px] font-medium text-[var(--ct-text-secondary)]"
+            >
+              + {{ price(selectedSpec.extraUserPrice) }}/mês cada
+            </span>
+          </template>
+        </div>
+        <div class="flex items-start justify-between whitespace-nowrap">
+          <span class="text-[14px] font-medium">Total estimado</span>
+          <span class="text-[16px] font-semibold leading-6">
+            {{ money(change.monthly) }}/mês
           </span>
         </div>
+      </div>
+
+      <!-- Confirmação da mudança (só quando algo mudou) -->
+      <div v-if="change.kind !== 'same'" class="flex flex-col gap-4">
         <ErrorMessage v-if="errors.quantity" :message="errors.quantity" />
 
-        <p v-if="explanation" class="text-p-sm text-ink-gray-6">
+        <p v-if="explanation" class="text-sm text-[var(--ct-text-secondary)]">
           {{ explanation }}
         </p>
-        <p v-if="pausedWarning" class="text-p-sm text-ink-red-4">
+        <p v-if="pausedWarning" class="text-sm text-[var(--ct-error)]">
           {{ pausedWarning }}
         </p>
 
         <template v-if="askPayer">
           <div class="flex flex-col gap-0.5">
-            <div class="text-base-semibold">{{ __('Who pays') }}</div>
-            <p class="text-p-sm text-ink-gray-6">
+            <div class="text-base font-semibold text-[#1E1F23]">
+              {{ __('Who pays') }}
+            </div>
+            <p class="text-sm text-[#5E6068]">
               {{
                 __(
                   'Used for the invoice. The card is typed on the payment page, never in Cred Hub.',
@@ -237,7 +277,7 @@
               }}
             </p>
           </div>
-          <div class="grid grid-cols-2 gap-3">
+          <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div v-for="field in payerFields" :key="field.name">
               <FormControl
                 v-model="payer[field.name]"
@@ -277,36 +317,87 @@ import { usersStore } from '@/stores/users'
 import { formatDate } from '@/utils'
 import { formatCurrency } from '@/utils/numberFormat'
 import PlanNotice from './PlanNotice.vue'
+import HandshakeIcon from '~icons/lucide/handshake'
+import ShieldCheckIcon from '~icons/lucide/shield-check'
+import Building2Icon from '~icons/lucide/building-2'
+import UsersIcon from '~icons/lucide/users'
 import {
+  PLAN_TIERS,
   plan,
   planApi,
   loadPlan,
-  usage,
   describeChange,
   chosenExtras,
+  chosenTier,
+  getTierSpec,
   overLimitAfter,
-  statusBadge,
   inGrace,
   openInvoice,
   dayAfterTrial,
 } from './planApi'
-import { Badge, Button, ErrorMessage, FormControl, toast } from 'frappe-ui'
+import { Button, ErrorMessage, FormControl, toast } from 'frappe-ui'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 
 const { users } = usersStore()
 
+const TIER_ICONS = {
+  vendas: HandshakeIcon,
+  credito_cobranca: ShieldCheckIcon,
+  enterprise: Building2Icon,
+}
+
 const data = computed(() => plan.data)
-const seats = computed(() => usage(data.value))
-const barWidth = computed(() => {
-  const { used, limit } = seats.value
-  return `${limit ? Math.min(100, (used / limit) * 100) : 0}%`
+
+const selectedTier = ref('credito_cobranca')
+const selectedSpec = computed(() => getTierSpec(selectedTier.value))
+
+// The plan the company pays for today ("Plano atual"); none during the trial.
+const currentTier = computed(() => {
+  const d = data.value
+  if (!d || d.in_trial) return null
+  if (['Active', 'Past Due'].includes(d.status)) return d.plan_tier || null
+  if (d.status === 'Awaiting Payment') {
+    return d.pending_plan_tier || d.plan_tier || null
+  }
+  return null
+})
+
+// Row text: the included-users line followed by the plan subtitle, both
+// taken as-is from PLAN_TIERS (plan wording belongs to the owner).
+function tierDescription(tier) {
+  return `${tier.features[0]}. ${tier.subtitle}.`
+}
+
+const extrasDescription = computed(() => {
+  const spec = selectedSpec.value
+  if (!spec) return ''
+  if (spec.unlimitedUsers) return `Usuários ilimitados no ${spec.name}.`
+  const others = PLAN_TIERS.filter((t) => t.id !== spec.id).map((t) =>
+    t.unlimitedUsers
+      ? `ilimitados no ${t.name}`
+      : `+ ${price(t.extraUserPrice)}/mês no ${t.name}`,
+  )
+  return `Além dos ${spec.includedUsers} inclusos no ${spec.name}. ${others.join(' · ')}.`
 })
 
 const quantity = ref(0)
-const extras = computed(() => Math.max(0, parseInt(quantity.value, 10) || 0))
-const change = computed(() => describeChange(data.value, extras.value))
+const extras = computed(() =>
+  selectedSpec.value?.unlimitedUsers
+    ? 0
+    : Math.max(0, parseInt(quantity.value, 10) || 0),
+)
+const change = computed(() =>
+  describeChange(data.value, extras.value, selectedTier.value),
+)
 const saving = ref(false)
 const errors = reactive({})
+
+function selectTier(tierId) {
+  selectedTier.value = tierId
+  if (tierId === 'enterprise') {
+    quantity.value = 0
+  }
+}
 
 const payer = reactive({
   name: '',
@@ -339,11 +430,11 @@ const explanation = computed(() => {
           [date(dayAfterTrial(data.value)), monthly],
         )
       : __(
-          'You pay the first month on the payment page. The extra users are released as soon as the payment is confirmed. Then {0} per month on the same card.',
+          'You pay the first month on the payment page. The plan and seats are released as soon as the payment is confirmed. Then {0} per month on the same card.',
           [monthly],
         ),
     increase: __(
-      'The new users are released now. The prorated difference until {0} goes by payment link, with 3 days to pay (a very small difference goes on the next invoice instead). Then {1} per month.',
+      'The new seats and plan are released now. The prorated difference until {0} goes by payment link, with 3 days to pay (a very small difference goes on the next invoice instead). Then {1} per month.',
       [nextDue, monthly],
     ),
     decrease: __(
@@ -355,7 +446,7 @@ const explanation = computed(() => {
       [nextDue],
     ),
     keep: __(
-      'Keeps the extra users already paid and drops the pending change.',
+      'Keeps the plan and extra users already paid and drops the pending change.',
     ),
     free: __('Back to the {0} free users, with no charges.', [
       data.value?.free,
@@ -365,8 +456,8 @@ const explanation = computed(() => {
 
 const pausedWarning = computed(() => {
   const kind = change.value.kind
-  if (!['decrease', 'cancel', 'free'].includes(kind)) return null
-  const over = overLimitAfter(data.value, extras.value)
+  if (!['decrease', 'cancel', 'free', 'subscribe'].includes(kind)) return null
+  const over = overLimitAfter(data.value, extras.value, selectedTier.value)
   if (!over) return null
   if (data.value.in_trial) {
     return __(
@@ -385,9 +476,14 @@ const pausedWarning = computed(() => {
       )
 })
 
-watch(data, (value) => (quantity.value = chosenExtras(value)), {
-  immediate: true,
-})
+watch(
+  data,
+  (value) => {
+    quantity.value = chosenExtras(value)
+    selectedTier.value = chosenTier(value)
+  },
+  { immediate: true },
+)
 
 async function save() {
   Object.keys(errors).forEach((key) => delete errors[key])
@@ -396,6 +492,7 @@ async function save() {
     const result = await planApi.requestExtraUsers(
       extras.value,
       askPayer.value ? { ...payer } : null,
+      selectedTier.value,
     )
     if (!result.ok) {
       errors[result.field] = result.message
@@ -421,15 +518,47 @@ async function save() {
   }
 }
 
+// Prices in the plan list read like the Figma: "R$ 119" (no cents when whole).
+function price(value) {
+  const v = value || 0
+  return formatCurrency(
+    v,
+    null,
+    data.value?.currency || 'BRL',
+    Number.isInteger(v) ? 0 : 2,
+  )
+}
+
 function money(value) {
   return formatCurrency(value || 0, null, data.value?.currency || 'BRL')
 }
 
-// Plan dates come as YYYY-MM-DD: "Nov 9, 2026" in English, "9 nov 2026" in Portuguese
 function date(value) {
   return formatDate(value, 'MMM D, YYYY')
 }
 
-// Fresh counts each time the page opens, unless Settings is loading it already
 onMounted(() => plan.loading || loadPlan())
 </script>
+
+<style scoped>
+/* Figma plan icons: Lucide at 20px with a 1.4 stroke */
+.ct-plan-icon :deep(path),
+.ct-plan-icon :deep(circle),
+.ct-plan-icon :deep(rect),
+.ct-plan-icon :deep(line) {
+  stroke-width: 1.4;
+}
+.ct-plan-icon {
+  stroke-width: 1.4;
+}
+/* Stepper value: plain number, no browser spin buttons */
+.ct-stepper-value {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+.ct-stepper-value::-webkit-inner-spin-button,
+.ct-stepper-value::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+</style>

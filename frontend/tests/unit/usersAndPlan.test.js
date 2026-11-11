@@ -3,6 +3,7 @@ const frappeRequest = vi.fn()
 vi.mock('frappe-ui', () => ({ call: vi.fn(), frappeRequest }))
 
 const {
+  PLAN_TIERS,
   plan,
   loadPlan,
   usage,
@@ -223,5 +224,30 @@ describe('free trial', () => {
       '2027-01-01',
     )
     expect(dayAfterTrial(planData())).toBeNull()
+  })
+})
+
+describe('3-tier plans (CRM Vendas, Crédito & Cobrança, Enterprise)', () => {
+  it('defines the 3 plans with expected base prices and seats', () => {
+    expect(PLAN_TIERS.map((t) => [t.id, t.basePrice, t.includedUsers])).toEqual([
+      ['vendas', 119, 2],
+      ['credito_cobranca', 449, 5],
+      ['enterprise', 990, 1000000],
+    ])
+  })
+
+  it('calculates monthly amount across tiers', () => {
+    expect(describeChange(planData(), 1, 'vendas')).toEqual({
+      kind: 'subscribe',
+      monthly: 119 + 49,
+    })
+    expect(describeChange(planData(), 2, 'credito_cobranca')).toEqual({
+      kind: 'subscribe',
+      monthly: 449 + 2 * 59,
+    })
+    expect(describeChange(planData(), 10, 'enterprise')).toEqual({
+      kind: 'subscribe',
+      monthly: 990,
+    })
   })
 })
