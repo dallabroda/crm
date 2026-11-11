@@ -92,77 +92,6 @@
   </div>
 
   <div v-if="organization.doc" ref="parentRef" class="flex h-full">
-    <Resizer
-      v-if="organization.doc"
-      :parent="$refs.parentRef"
-      class="flex h-full flex-col overflow-hidden border-r border-[var(--ct-border-soft)]"
-    >
-      <div class="border-b border-[var(--ct-border-soft)]">
-        <div class="flex flex-col items-start justify-start gap-4 px-6 py-5">
-          <div class="flex w-full min-w-0 items-center gap-4">
-            <div class="h-15.5 w-15.5 shrink-0">
-              <Avatar
-                size="3xl"
-                class="h-15.5 w-15.5 [&>div]:text-[20px] [&>div]:font-semibold"
-                :label="organization.doc.organization_name"
-              />
-            </div>
-            <div class="flex flex-col gap-2 truncate">
-              <div
-                class="truncate text-[20px] font-semibold leading-7 text-ink-gray-9"
-              >
-                <span>{{ organization.doc.name }}</span>
-              </div>
-              <div
-                v-if="organization.doc.website"
-                class="flex items-center gap-1.5 text-base text-ink-gray-9"
-              >
-                <WebsiteIcon class="size-4" />
-                <span>{{ website(organization.doc.website) }}</span>
-              </div>
-            </div>
-          </div>
-          <div class="flex gap-2">
-            <Button
-              v-if="canDelete"
-              size="md"
-              :label="__('Delete')"
-              theme="red"
-              variant="subtle"
-              iconLeft="lucide-trash-2"
-              class="ct-btn-danger-icon"
-              @click="deleteOrganization()"
-            />
-            <Button
-              size="md"
-              variant="outline"
-              :tooltip="__('Open Website')"
-              icon="lucide-link"
-              @click="openWebsite"
-            />
-            <Button
-              size="md"
-              variant="outline"
-              :tooltip="__('Anexar arquivo')"
-              :icon="AttachmentIcon"
-              @click="showFilesUploader = true"
-            />
-          </div>
-        </div>
-      </div>
-      <div
-        v-if="sections.data"
-        class="flex flex-1 flex-col justify-between overflow-hidden"
-      >
-        <SidePanelLayout
-          :sections="panelSections"
-          doctype="CRM Organization"
-          :docname="organization.doc.name"
-          @reload="sections.reload"
-          @beforeFieldChange="beforeFieldChange"
-        />
-      </div>
-    </Resizer>
     <Tabs
       v-model="activeTab"
       as="div"
@@ -262,6 +191,77 @@
         />
       </template>
     </Tabs>
+    <!-- Figma "Organizações · Detalhe" (807:2): side panel on the right,
+         384px, like the card page; actions as 32px outline icon buttons with
+         delete last (red) -->
+    <Resizer
+      v-if="organization.doc"
+      side="right"
+      :defaultWidth="384"
+      class="flex h-full flex-col overflow-hidden border-l border-[var(--ct-border-soft)]"
+    >
+      <div class="border-b border-[var(--ct-border-soft)]">
+        <div class="flex flex-col items-start justify-start gap-4 px-6 py-5">
+          <div class="flex w-full min-w-0 items-center gap-4">
+            <div class="h-15.5 w-15.5 shrink-0">
+              <Avatar
+                size="3xl"
+                class="h-15.5 w-15.5 [&>div]:text-[20px] [&>div]:font-semibold"
+                :label="organization.doc.organization_name"
+              />
+            </div>
+            <div class="flex flex-col gap-2 truncate">
+              <div
+                class="truncate text-[20px] font-semibold leading-7 text-ink-gray-9"
+              >
+                <span>{{ organization.doc.name }}</span>
+              </div>
+              <div
+                v-if="organization.doc.website"
+                class="flex items-center gap-1.5 text-base text-ink-gray-9"
+              >
+                <WebsiteIcon class="size-4" />
+                <span>{{ website(organization.doc.website) }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="flex gap-2">
+            <Button
+              variant="outline"
+              :tooltip="__('Open Website')"
+              icon="lucide-link"
+              @click="openWebsite"
+            />
+            <Button
+              variant="outline"
+              :tooltip="__('Anexar arquivo')"
+              :icon="AttachmentIcon"
+              @click="showFilesUploader = true"
+            />
+            <Button
+              v-if="canDelete"
+              variant="outline"
+              :tooltip="__('Delete')"
+              icon="lucide-trash-2"
+              class="ct-btn-danger-icon"
+              @click="deleteOrganization()"
+            />
+          </div>
+        </div>
+      </div>
+      <div
+        v-if="sections.data"
+        class="flex flex-1 flex-col justify-between overflow-hidden"
+      >
+        <SidePanelLayout
+          :sections="panelSections"
+          doctype="CRM Organization"
+          :docname="organization.doc.name"
+          @reload="sections.reload"
+          @beforeFieldChange="beforeFieldChange"
+        />
+      </div>
+    </Resizer>
   </div>
   <ErrorPage
     v-else-if="errorTitle"
@@ -949,7 +949,7 @@ watch(
 
 // Figma "Card · Atividades": tab labels without icons (the icons stay in
 // `tabs` for the activity empty states)
-const tabLabels = computed(() =>
-  (tabs.value || tabs).map((tab) => ({ ...tab, iconLeft: undefined, icon: undefined })),
-)
+// Figma "Contatos · Detalhe" / "Organizações · Detalhe": tabs keep their
+// 16px icon (the card page's tabs have none)
+const tabLabels = computed(() => tabs.value || tabs)
 </script>

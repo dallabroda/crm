@@ -23,6 +23,7 @@
       <ListHeaderItem
         v-for="column in columns"
         :key="column.key"
+        class="!text-base"
         :item="column"
         @columnWidthUpdated="(e) => onColumnWidthUpdated(e, column)"
       >
