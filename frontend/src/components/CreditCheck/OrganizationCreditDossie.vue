@@ -1,24 +1,27 @@
 <template>
-  <div class="flex flex-col gap-6 p-5 max-w-4xl">
-    <!-- ===================================================================== -->
-    <!-- TOP FUNNEL BAR: 3 NÍVEIS PROGRESSIVOS + VALOR PRETENDIDO DA OPERAÇÃO  -->
-    <!-- ===================================================================== -->
-    <div
-      class="flex flex-col gap-4 p-4 bg-surface-white rounded-xl border border-outline-gray-2 shadow-sm"
-    >
-      <div class="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <div class="flex items-center gap-2">
-            <span class="text-base font-semibold text-[#1E1F23]">
+  <!-- Figma "Card · Análise de crédito · preenchida" (2164:12977): one white
+       card per section (grey border, radius 8, padding 20), 16px between them -->
+  <div class="flex max-w-[984px] flex-col gap-4 p-5">
+    <!-- 1. Esteira progressiva (3 níveis) + valor pretendido -->
+    <section :class="cardClass" class="gap-[18px]">
+      <div class="flex flex-col gap-4">
+        <div class="flex flex-col gap-0.5">
+          <div class="flex items-center gap-4">
+            <h2 :class="titleClass" class="min-w-0 flex-1">
               {{ __('Esteira Progressiva de Análise de Crédito (3 Níveis)') }}
-            </span>
-            <Badge
-              :label="__('Zero Redundância')"
-              theme="blue"
-              variant="subtle"
-            />
+            </h2>
+            <router-link
+              v-if="canOpenSettings"
+              :to="creditSettingsRoute"
+              class="flex h-8 shrink-0 items-center gap-1.5 rounded-[var(--ct-radius-sm)] border border-[var(--ct-border)] bg-[var(--ct-bg-page)] px-4 text-[14px] font-medium leading-5 text-[color:var(--ct-text-primary)] transition-colors hover:bg-[var(--ct-bg-soft)]"
+            >
+              <span class="lucide-settings size-4" aria-hidden="true" />
+              {{ __('Configurações') }}
+            </router-link>
           </div>
-          <p class="text-p-xs text-[#5E6068] mt-0.5">
+          <p
+            class="text-[12px] leading-4 text-[color:var(--ct-text-secondary)]"
+          >
             {{
               __(
                 'Avance conforme o ticket da operação para proteger o custo de API da sua conta nos bureaus.',
@@ -27,1186 +30,700 @@
           </p>
         </div>
 
-        <!-- Valor Pretendido da Operação -->
-        <div class="flex items-center gap-2 bg-[#F5F5F7] px-3 py-2 rounded-lg border border-[#E6E7EB]">
-          <div class="text-xs font-medium text-[#5E6068]">
-            {{ __('Valor Pretendido (R$):') }}
-          </div>
+        <!-- Figma "Campo" (Valor pretendido): label 14 Medium, box 48px -->
+        <label class="flex w-[290px] max-w-full flex-col gap-1.5">
+          <span :class="fieldLabelClass">{{
+            __('Valor pretendido (R$)')
+          }}</span>
           <input
-            v-model.number="requestedAmount"
-            type="number"
-            min="0"
-            step="1000"
-            :placeholder="__('Ex: 50000')"
-            class="w-36 h-8 px-2.5 text-sm font-semibold text-[#1E1F23] bg-white border border-[#DCDDE2] rounded-md focus:outline-none focus:border-[#0088FF]"
+            :value="amountDisplay"
+            type="text"
+            inputmode="decimal"
+            :placeholder="__('Ex.: 50.000,00')"
+            :class="fieldBoxClass"
+            @focus="onAmountFocus"
+            @input="amountDraft = $event.target.value"
+            @blur="onAmountBlur"
+            @keydown.enter="$event.target.blur()"
           />
-          <Badge
-            v-if="recommendedTierBadge"
-            :theme="recommendedTierBadge.theme"
-            variant="subtle"
-            :label="recommendedTierBadge.label"
-          />
-        </div>
+        </label>
       </div>
 
-      <!-- 3 Steps Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-        <!-- Nível 1 -->
-        <div
-          class="p-3.5 rounded-lg border transition-colors bg-surface-white"
-          :class="
-            isReportSuccess
-              ? 'border-outline-gray-2'
-              : isReportError
-                ? 'border-[#FECDCA] bg-[#FEF3F2]/30'
-                : 'border-outline-gray-2'
-          "
-        >
-          <div class="flex items-center justify-between gap-2 mb-1.5">
-            <span class="text-xs font-semibold uppercase tracking-wider text-[#1E1F23]">
-              {{ __('1. Nível Inicial · Triagem') }}
+      <!-- 3 níveis lado a lado. Níveis 2 e 3 escolhem o pacote do dossiê. -->
+      <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <div :class="levelCardClass(false)">
+          <div class="flex flex-col gap-3">
+            <span :class="pillClass(levelOneStatus.tone)" class="self-start">
+              <span :class="dotClass(levelOneStatus.tone)" />
+              {{ levelOneStatus.label }}
             </span>
-            <Badge
-              v-if="isReportSuccess"
-              :label="__('Concluído')"
-              theme="green"
-              variant="subtle"
-            />
-            <Badge
-              v-else-if="isReportError"
-              :label="__('Falha na triagem')"
-              theme="red"
-              variant="subtle"
-            />
-            <Badge
-              v-else
-              :label="__('Pendente')"
-              theme="gray"
-              variant="subtle"
-            />
+            <h3 :class="levelTitleClass">{{ __('Nível 1 · Triagem') }}</h3>
           </div>
-          <p class="text-p-xs text-[#5E6068] leading-relaxed">
+          <p :class="levelTextClass">
             {{
               __(
-                'Receita Federal/QSA + CGU CEIS/CNEP (Grátis) + Sintegra UF (R$ 0,36) + FGTS (R$ 0,36). Elimina empresas inaptas ou sancionadas na largada.',
+                'Receita Federal/QSA, CGU CEIS/CNEP (grátis), Sintegra UF (R$ 0,36) e FGTS (R$ 0,36). Elimina empresas inaptas logo no início.',
               )
             }}
           </p>
         </div>
 
-        <!-- Nível 2 -->
-        <div
-          class="p-3.5 rounded-lg border transition-colors cursor-pointer bg-surface-white"
-          :class="
-            selectedTierMode === 'tier_2'
-              ? 'border-[#0088FF] ring-1 ring-[#0088FF]/30 bg-[#F5F9FF]'
-              : 'border-outline-gray-2 hover:border-[#DCDDE2]'
-          "
-          @click="selectTierMode('tier_2')"
+        <button
+          type="button"
+          :class="levelCardClass(selectedTierMode === 'tier_2')"
+          :aria-pressed="selectedTierMode === 'tier_2'"
+          @click="toggleTierMode('tier_2')"
         >
-          <div class="flex items-center justify-between gap-2 mb-1.5">
-            <span class="text-xs font-semibold uppercase tracking-wider text-[#1E1F23]">
-              {{ __('2. Nível Médio · Dossiê Base') }}
-            </span>
-            <Badge
-              :label="__('R$ 10,89 PJ')"
-              theme="blue"
-              variant="subtle"
-            />
-          </div>
-          <p class="text-p-xs text-[#5E6068] leading-relaxed">
+          <h3 :class="levelTitleClass">{{ __('Nível 2 · Dossiê base') }}</h3>
+          <p :class="levelTextClass">
             {{
               __(
-                'Dossiê QUOD Completo (Score + Protestos + Ações + Cheques) + SCR Bacen. Ideal para tickets pequenos e médios.',
+                'Dossiê QUOD Completo (score, protestos, ações e cheques) + SCR Bacen. Indicado para tickets pequenos e médios.',
               )
             }}
           </p>
-        </div>
+          <span :class="levelCostClass">{{ __('R$ 10,89 por empresa') }}</span>
+        </button>
 
-        <!-- Nível 3 -->
-        <div
-          class="p-3.5 rounded-lg border transition-colors cursor-pointer bg-surface-white"
-          :class="
-            selectedTierMode.startsWith('tier_3')
-              ? 'border-[#0088FF] ring-1 ring-[#0088FF]/30 bg-[#F5F9FF]'
-              : 'border-outline-gray-2 hover:border-[#DCDDE2]'
-          "
-          @click="selectTierMode('tier_3_boavista')"
+        <button
+          type="button"
+          :class="levelCardClass(selectedTierMode.startsWith('tier_3'))"
+          :aria-pressed="selectedTierMode.startsWith('tier_3')"
+          @click="toggleTierMode('tier_3_boavista')"
         >
-          <div class="flex items-center justify-between gap-2 mb-1.5">
-            <span class="text-xs font-semibold uppercase tracking-wider text-[#1E1F23]">
-              {{ __('3. Nível Profundo · Alto Ticket') }}
-            </span>
-            <Badge
-              :label="__('Positivo + Penhoras + Sócios')"
-              theme="gray"
-              variant="subtle"
-            />
-          </div>
-          <p class="text-p-xs text-[#5E6068] leading-relaxed">
+          <h3 :class="levelTitleClass">
+            {{ __('Nível 3 · Profundo (ticket alto)') }}
+          </h3>
+          <p :class="levelTextClass">
             {{
               __(
-                'Boa Vista Risco Positivo PJ (ou Serasa) + SCR Bacen + Processos c/ Penhoras + Sócios PF. Pule direto do Nível 1 para cá em operações maiores.',
+                'Boa Vista Positivo PJ (ou Serasa) + SCR Bacen + processos com penhoras + sócios PF. Dá para pular direto do Nível 1 para cá em operações maiores.',
               )
             }}
           </p>
-        </div>
-      </div>
-    </div>
-
-    <!-- ===================================================================== -->
-    <!-- NÍVEL 1: TRIAGEM JURÍDICA, CADASTRAL & FISCAL (PRÉ-FILTRO BARATO)     -->
-    <!-- ===================================================================== -->
-    <div
-      class="flex flex-col gap-3 p-4 bg-surface-white rounded-xl border border-outline-gray-2 shadow-sm"
-    >
-      <div class="flex flex-wrap items-center justify-between gap-3">
-        <div class="space-y-1">
-          <div class="flex items-center gap-2.5">
-            <span class="text-base font-semibold text-ink-gray-9">
-              {{ __('Nível 1 · Triagem Cadastral, Fiscal & Compliance') }}
-            </span>
-            <Badge :theme="verdictTheme" variant="subtle" size="md">
-              {{ verdictLabel }}
-            </Badge>
-            <span v-if="org.data?.cnpj" class="text-p-xs font-medium text-ink-gray-6">
-              {{ __('CNPJ') }} {{ org.data?.cnpj }}
-            </span>
-          </div>
-          <p class="text-p-xs text-ink-gray-6">
-            {{
-              __(
-                'Checagem de Situação Cadastral/QSA, Sanções Públicas CEIS/CNEP (CGU · Grátis), Sintegra/CCC por UF, Regularidade FGTS e Dívida Ativa PGFN antes de consultar bureaus de crédito.',
-              )
-            }}
-          </p>
-        </div>
-        <div class="flex gap-2 items-center">
-          <Button
-            v-if="!org.data?.credit_report"
-            variant="solid"
-            :loading="checking"
-            @click="askRunCheck(false)"
+          <span :class="levelCostClass">
+            {{ __('Positivo + penhoras + sócios') }}
+          </span>
+          <!-- Boa Vista or Serasa, only once level 3 is chosen -->
+          <span
+            v-if="selectedTierMode.startsWith('tier_3')"
+            class="flex flex-wrap gap-x-3 gap-y-1 whitespace-nowrap text-[12px] font-medium leading-4"
           >
-            {{ __('Executar Triagem Nível 1') }}
-          </Button>
-          <Button
-            v-else
-            variant="outline"
-            :loading="checking"
-            @click="askRunCheck(true)"
-          >
-            {{ __('Atualizar Triagem Nível 1') }}
-          </Button>
-        </div>
+            <span
+              v-for="opt in tierThreeOptions"
+              :key="opt.value"
+              role="button"
+              tabindex="0"
+              :class="
+                selectedTierMode === opt.value
+                  ? 'text-[color:var(--ct-text-accent)] underline'
+                  : 'text-[color:var(--ct-text-secondary)] hover:text-[color:var(--ct-text-primary)]'
+              "
+              @click.stop="selectTierMode(opt.value)"
+              @keydown.enter.stop="selectTierMode(opt.value)"
+            >
+              {{ opt.label }}
+            </span>
+          </span>
+        </button>
       </div>
+    </section>
 
-      <!-- Alerta de Sucesso com prazo de validade (apenas quando não for erro) -->
-      <div
-        v-if="isReportSuccess && report.data?.checked_on"
-        class="flex flex-wrap items-center justify-between gap-2 text-p-xs text-[#1F7A3D] bg-[#E7F6EC]/70 px-3.5 py-2 rounded-lg border border-[#A6F4C5]"
-      >
-        <span>
-          ✓ {{ __('Triagem realizada em {0} · Prazo para nova consulta: {1} dias (válido até {2})', [
-            report.data.checked_on,
-            pkg.data?.reuse_days ?? 30,
-            report.data.valid_until || '—',
-          ]) }}
-        </span>
-        <span class="text-[#5E6068]">
-          {{ __('Prazo configurável em Configurações > Bureaus e Crédito') }}
-        </span>
-      </div>
-
-      <!-- Alerta de Falha/Erro na triagem -->
-      <div
-        v-if="isReportError"
-        class="flex flex-col gap-1.5 p-3.5 rounded-lg bg-[#FEF3F2] border border-[#FECDCA] text-[#B42318] text-p-xs"
-      >
-        <div class="flex items-center gap-2 font-semibold text-sm">
-          <span>⚠️ {{ __('Falha na checagem da triagem inicial') }}</span>
+    <!-- 2. Nível 1 · Triagem cadastral, fiscal e compliance -->
+    <section :class="cardClass" class="gap-3">
+      <div class="flex flex-col gap-1">
+        <div class="flex flex-wrap items-center gap-2">
+          <h2 :class="titleClass">
+            {{ __('Nível 1 · Triagem cadastral, fiscal e compliance') }}
+          </h2>
+          <span v-if="org.data?.credit_report" :class="pillClass(verdictTone)">
+            <span :class="dotClass(verdictTone)" />
+            {{ verdictLabel }}
+          </span>
         </div>
-        <p class="text-ink-gray-8 leading-relaxed">
-          {{ report.data?.verdict_summary || __('Ocorreu uma falha na consulta aos serviços externos. Nenhum parecer foi emitido.') }}
+        <p v-if="org.data?.cnpj" :class="bodySecondaryClass">
+          {{ __('CNPJ') }} {{ org.data.cnpj }}
+        </p>
+        <p :class="bodySecondaryClass">
+          {{
+            __(
+              'Checagem imediata de Situação Cadastral/QSA, Sanções Públicas CEIS/CNEP (CGU · Grátis), Sintegra/CCC por UF, Regularidade FGTS e Dívida Ativa PGFN antes de consultar bureaus de crédito.',
+            )
+          }}
         </p>
       </div>
 
-      <!-- Resumo do veredito quando a checagem foi realizada com sucesso -->
-      <div
-        v-else-if="report.data?.verdict_summary"
-        class="text-p-xs text-ink-gray-8 bg-surface-gray-2 px-3.5 py-2.5 rounded-lg border border-outline-gray-1 leading-relaxed"
+      <!-- Figma "Aviso (toast)" Informação with the white button on the right -->
+      <div v-if="isReportError" :class="alertClass('error')">
+        <span class="lucide-circle-alert size-5 shrink-0" aria-hidden="true" />
+        <p class="min-w-0 flex-1">
+          {{ __('Falha na checagem da triagem inicial.') }}
+          {{
+            report.data?.verdict_summary ||
+            __(
+              'Ocorreu uma falha na consulta aos serviços externos. Nenhum parecer foi emitido.',
+            )
+          }}
+        </p>
+        <button
+          type="button"
+          :class="alertButtonClass"
+          :disabled="checking"
+          @click="askRunCheck(true)"
+        >
+          {{ __('Atualizar triagem') }}
+        </button>
+      </div>
+      <div v-else-if="org.data?.credit_report" :class="alertClass('info')">
+        <span class="lucide-info size-5 shrink-0" aria-hidden="true" />
+        <p class="min-w-0 flex-1">
+          <template v-if="report.data?.checked_on">
+            {{
+              __(
+                'Triagem feita em {0}. Nova consulta liberada a partir de {1}',
+                [report.data.checked_on, report.data.valid_until || '—'],
+              )
+            }}
+            <br />
+            {{
+              __(
+                '(prazo de {0} dias, alterável em Configurações › Políticas de Crédito & Compliance).',
+                [pkg.data?.reuse_days ?? 30],
+              )
+            }}
+          </template>
+          <template v-else>{{ __('Triagem em andamento…') }}</template>
+        </p>
+        <button
+          type="button"
+          :class="alertButtonClass"
+          :disabled="checking"
+          @click="askRunCheck(true)"
+        >
+          {{ __('Atualizar triagem') }}
+        </button>
+      </div>
+      <div v-else :class="alertClass('info')">
+        <span class="lucide-info size-5 shrink-0" aria-hidden="true" />
+        <p class="min-w-0 flex-1">
+          {{
+            __(
+              'Nenhuma triagem jurídica/fiscal foi executada para esta organização ainda.',
+            )
+          }}
+        </p>
+        <button
+          type="button"
+          :class="alertButtonClass"
+          :disabled="checking"
+          @click="askRunCheck(false)"
+        >
+          {{ __('Executar triagem') }}
+        </button>
+      </div>
+
+      <p
+        v-if="isReportSuccess && showVerdictSummary"
+        :class="bodySecondaryClass"
       >
         {{ report.data.verdict_summary }}
-      </div>
-    </div>
-
-    <p v-if="!org.data?.credit_report" class="text-p-sm text-ink-gray-5">
-      {{ __('Nenhuma triagem jurídica/fiscal foi executada para esta organização ainda.') }}
-    </p>
-
-    <template v-if="report.data">
-      <!-- Summary Nível 1 -->
-      <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
-        <div class="p-3.5 border border-outline-gray-2 rounded-lg space-y-1 bg-surface-white">
-          <div class="text-p-xs text-ink-gray-5">
-            {{ __('Sanções CEIS/CNEP (CGU)') }}
-          </div>
-          <div
-            class="text-base-medium"
-            :class="
-              !report.data.ceis_cnep_verified
-                ? 'text-ink-gray-6'
-                : report.data.ceis_cnep_sanctioned
-                  ? 'text-ink-red-3'
-                  : 'text-ink-green-3'
-            "
-          >
-            {{
-              report.data.ceis_cnep_verified
-                ? report.data.ceis_cnep_sanctioned
-                  ? __('Sancionado')
-                  : __('Nenhuma')
-                : __('Não verificado')
-            }}
-          </div>
-        </div>
-        <div class="p-3.5 border border-outline-gray-2 rounded-lg space-y-1 bg-surface-white">
-          <div class="text-p-xs text-ink-gray-5">{{ __('Regularidade FGTS (CRF)') }}</div>
-          <div class="text-base-medium">
-            {{ report.data.fgts_status || '—' }}
-          </div>
-        </div>
-        <div class="p-3.5 border border-outline-gray-2 rounded-lg space-y-1 bg-surface-white">
-          <div class="text-p-xs text-ink-gray-5">{{ __('Sintegra / Inscrição Estadual') }}</div>
-          <div class="text-base-medium">
-            {{ report.data.sintegra_status || '—' }}
-          </div>
-        </div>
-        <div class="p-3.5 border border-outline-gray-2 rounded-lg space-y-1 bg-surface-white">
-          <div class="text-p-xs text-ink-gray-5">
-            {{ __('Dívida ativa na PGFN') }}
-          </div>
-          <div class="text-base-medium">
-            {{ report.data.pgfn_status || '—' }}
-          </div>
-        </div>
-        <div class="p-3.5 border border-outline-gray-2 rounded-lg space-y-1 bg-surface-white">
-          <div class="text-p-xs text-ink-gray-5">
-            {{ __('Processos (como réu)') }}
-          </div>
-          <div class="text-base-medium">
-            {{ report.data.lawsuits_defendant ?? '—' }} /
-            {{ report.data.lawsuits_total ?? '—' }}
-          </div>
-        </div>
-        <div class="p-3.5 border border-outline-gray-2 rounded-lg space-y-1 bg-surface-white">
-          <div class="text-p-xs text-ink-gray-5">
-            {{ __('Protestos em cartório (CENPROT)') }}
-          </div>
-          <div
-            class="text-base-medium"
-            :class="
-              report.data.cenprot_has_protests
-                ? 'text-ink-red-3'
-                : 'text-ink-green-3'
-            "
-          >
-            {{
-              report.data.cenprot_has_protests
-                ? __('{0} encontrado(s)', [report.data.cenprot_protests_count])
-                : __('Nenhuma')
-            }}
-          </div>
-        </div>
-      </div>
-    </template>
-
-    <!-- ===================================================================== -->
-    <!-- VISÃO EXECUTIVA CONSOLIDADA DOS BUREAUS + ALERTAS DE FRAUDE           -->
-    <!-- ===================================================================== -->
-    <div
-      v-if="hasHighlights"
-      class="p-5 bg-surface-white rounded-xl border border-outline-gray-2 space-y-4"
-    >
-      <div class="flex flex-wrap items-center justify-between gap-2">
-        <div>
-          <span class="text-lg-semibold text-[#1E1F23]">
-            {{ __('Resumo Executivo Unificado dos Bureaus') }}
-          </span>
-          <p class="text-p-xs text-[#5E6068]">
-            {{
-              __(
-                'Indicadores consolidados automaticamente a partir das consultas realizadas (QUOD, Boa Vista, Serasa, SCR Bacen e Processos).',
-              )
-            }}
-          </p>
-        </div>
-        <Badge
-          :label="__('Visão Consolidada')"
-          theme="blue"
-          variant="subtle"
-        />
-      </div>
-
-      <!-- Fraud Alerts / Red Flags -->
-      <div
-        v-if="highlights.data?.fraud_alerts?.length"
-        class="space-y-2"
-      >
-        <div
-          v-for="(alert, idx) in highlights.data.fraud_alerts"
-          :key="idx"
-          class="p-3 rounded-lg border text-p-sm flex items-start gap-2.5"
-          :class="
-            alert.severity === 'critical'
-              ? 'bg-[#FEF3F2] border-[#B42318]/30 text-[#B42318]'
-              : 'bg-[#FFF4D6] border-[#8A5A00]/30 text-[#8A5A00]'
-          "
-        >
-          <span class="font-bold">⚠️</span>
-          <div class="space-y-0.5">
-            <div class="font-semibold">{{ alert.title }}</div>
-            <div class="text-p-xs opacity-90">{{ alert.detail }}</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 6 Consolidated KPI Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-        <!-- 1. Scores -->
-        <div class="p-3.5 rounded-lg border border-[#E6E7EB] bg-[#F5F5F7]/50 space-y-1.5">
-          <div class="text-xs font-semibold uppercase tracking-wider text-[#5E6068]">
-            {{ __('Scores de Crédito') }}
-          </div>
-          <div v-if="highlights.data?.scores?.length" class="space-y-1">
-            <div
-              v-for="sc in highlights.data.scores"
-              :key="sc.source"
-              class="flex items-center justify-between text-p-sm"
-            >
-              <span class="text-[#5E6068]">{{ sc.source }}:</span>
-              <span class="font-bold text-[#1E1F23]">
-                {{ sc.value }}
-                <span v-if="sc.band" class="text-xs font-normal text-[#5E6068]">({{ sc.band }})</span>
-              </span>
-            </div>
-          </div>
-          <div v-else class="text-p-xs text-[#8A8C94]">
-            {{ __('Nenhum score consultado ainda') }}
-          </div>
-        </div>
-
-        <!-- 2. Capacidade & Limite vs Operação -->
-        <div class="p-3.5 rounded-lg border border-[#E6E7EB] bg-[#F5F5F7]/50 space-y-1.5">
-          <div class="text-xs font-semibold uppercase tracking-wider text-[#5E6068]">
-            {{ __('Capacidade & Limite (Positivo)') }}
-          </div>
-          <div class="space-y-1 text-p-sm">
-            <div class="flex items-center justify-between">
-              <span class="text-[#5E6068]">{{ __('Fat. Presumido:') }}</span>
-              <span class="font-semibold text-[#1E1F23]">
-                {{
-                  highlights.data?.capacity?.presumed_revenue != null
-                    ? formatMoney(highlights.data.capacity.presumed_revenue)
-                    : '—'
-                }}
-              </span>
-            </div>
-            <div class="flex items-center justify-between">
-              <span class="text-[#5E6068]">{{ __('Limite Sugerido:') }}</span>
-              <span class="font-semibold text-[#0088FF]">
-                {{
-                  highlights.data?.capacity?.suggested_limit != null
-                    ? formatMoney(highlights.data.capacity.suggested_limit)
-                    : '—'
-                }}
-              </span>
-            </div>
-            <div
-              v-if="requestedAmount > 0"
-              class="flex items-center justify-between pt-1 border-t border-[#E6E7EB]"
-            >
-              <span class="text-[#5E6068]">{{ __('Valor Pretendido:') }}</span>
-              <span
-                class="font-bold"
-                :class="
-                  highlights.data?.capacity?.suggested_limit &&
-                  requestedAmount > highlights.data.capacity.suggested_limit
-                    ? 'text-[#B42318]'
-                    : 'text-[#1F7A3D]'
-                "
-              >
-                {{ formatMoney(requestedAmount) }}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <!-- 3. Endividamento SCR Bacen -->
-        <div class="p-3.5 rounded-lg border border-[#E6E7EB] bg-[#F5F5F7]/50 space-y-1.5">
-          <div class="text-xs font-semibold uppercase tracking-wider text-[#5E6068]">
-            {{ __('Endividamento Bancário (SCR)') }}
-          </div>
-          <div v-if="highlights.data?.scr" class="space-y-1 text-p-sm">
-            <div class="flex items-center justify-between">
-              <span class="text-[#5E6068]">{{ __('Carteira Ativa:') }}</span>
-              <span class="font-semibold text-[#1E1F23]">
-                {{ formatMoney(highlights.data.scr.carteira_ativa) }}
-              </span>
-            </div>
-            <div class="flex items-center justify-between">
-              <span class="text-[#5E6068]">{{ __('Vencido:') }}</span>
-              <span
-                class="font-semibold"
-                :class="highlights.data.scr.vencido > 0 ? 'text-[#B42318]' : 'text-[#1F7A3D]'"
-              >
-                {{ formatMoney(highlights.data.scr.vencido) }}
-              </span>
-            </div>
-            <div class="flex items-center justify-between">
-              <span class="text-[#5E6068]">{{ __('Prejuízo Baixado:') }}</span>
-              <span
-                class="font-semibold"
-                :class="highlights.data.scr.prejuizo > 0 ? 'text-[#B42318]' : 'text-[#1E1F23]'"
-              >
-                {{ formatMoney(highlights.data.scr.prejuizo) }}
-              </span>
-            </div>
-          </div>
-          <div v-else class="text-p-xs text-[#8A8C94]">
-            {{ __('SCR Bacen ainda não consultado') }}
-          </div>
-        </div>
-
-        <!-- 4. Protestos & Negativações -->
-        <div class="p-3.5 rounded-lg border border-[#E6E7EB] bg-[#F5F5F7]/50 space-y-1.5">
-          <div class="text-xs font-semibold uppercase tracking-wider text-[#5E6068]">
-            {{ __('Protestos & Negativações') }}
-          </div>
-          <div class="space-y-1 text-p-sm">
-            <div class="flex items-center justify-between">
-              <span class="text-[#5E6068]">{{ __('Protestos:') }}</span>
-              <span
-                class="font-semibold"
-                :class="highlights.data?.restrictions?.protests_count > 0 ? 'text-[#B42318]' : 'text-[#1F7A3D]'"
-              >
-                {{ highlights.data?.restrictions?.protests_count || 0 }}
-                <span v-if="highlights.data?.restrictions?.protests_total">
-                  ({{ formatMoney(highlights.data.restrictions.protests_total) }})
-                </span>
-              </span>
-            </div>
-            <div class="flex items-center justify-between">
-              <span class="text-[#5E6068]">{{ __('Apontamentos/PEFIN:') }}</span>
-              <span
-                class="font-semibold"
-                :class="highlights.data?.restrictions?.Restrictive_count > 0 ? 'text-[#B42318]' : 'text-[#1F7A3D]'"
-              >
-                {{ highlights.data?.restrictions?.Restrictive_count || 0 }}
-              </span>
-            </div>
-            <div class="flex items-center justify-between">
-              <span class="text-[#5E6068]">{{ __('Cheques s/ Fundo:') }}</span>
-              <span class="font-semibold text-[#1E1F23]">
-                {{ highlights.data?.restrictions?.bad_checks || 0 }}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <!-- 5. Processos Judiciais & Penhoras -->
-        <div class="p-3.5 rounded-lg border border-[#E6E7EB] bg-[#F5F5F7]/50 space-y-1.5">
-          <div class="text-xs font-semibold uppercase tracking-wider text-[#5E6068]">
-            {{ __('Processos & Penhoras') }}
-          </div>
-          <div class="space-y-1 text-p-sm">
-            <div class="flex items-center justify-between">
-              <span class="text-[#5E6068]">{{ __('Total Processos:') }}</span>
-              <span class="font-semibold text-[#1E1F23]">
-                {{ highlights.data?.lawsuits?.total || 0 }}
-              </span>
-            </div>
-            <div class="flex items-center justify-between">
-              <span class="text-[#5E6068]">{{ __('Valor em Disputa:') }}</span>
-              <span class="font-semibold text-[#1E1F23]">
-                {{ formatMoney(highlights.data?.lawsuits?.total_value || 0) }}
-              </span>
-            </div>
-            <div class="flex items-center justify-between">
-              <span class="text-[#5E6068]">{{ __('Penhoras Ativas:') }}</span>
-              <span
-                class="font-bold"
-                :class="highlights.data?.lawsuits?.penhoras_count > 0 ? 'text-[#B42318]' : 'text-[#1F7A3D]'"
-              >
-                {{ highlights.data?.lawsuits?.penhoras_count || 0 }}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <!-- 6. Pontualidade / Consultas Recentes -->
-        <div class="p-3.5 rounded-lg border border-[#E6E7EB] bg-[#F5F5F7]/50 space-y-1.5">
-          <div class="text-xs font-semibold uppercase tracking-wider text-[#5E6068]">
-            {{ __('Pontualidade & Buscas') }}
-          </div>
-          <div class="space-y-1 text-p-sm">
-            <div class="flex items-center justify-between">
-              <span class="text-[#5E6068]">{{ __('Pagamentos em Dia:') }}</span>
-              <span class="font-semibold text-[#1E1F23]">
-                {{
-                  highlights.data?.capacity?.punctuality_pct != null
-                    ? `${highlights.data.capacity.punctuality_pct}%`
-                    : '—'
-                }}
-              </span>
-            </div>
-            <div class="flex items-center justify-between">
-              <span class="text-[#5E6068]">{{ __('Consultas (30 dias):') }}</span>
-              <span
-                class="font-semibold"
-                :class="highlights.data?.inquiries_30d >= 8 ? 'text-[#B42318]' : 'text-[#1E1F23]'"
-              >
-                {{ highlights.data?.inquiries_30d ?? 0 }}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ===================================================================== -->
-    <!-- QUADRO SOCIETÁRIO (PRÉ-SELEÇÃO DO SÓCIO-ADMINISTRADOR P/ ECONOMIA)   -->
-    <!-- ===================================================================== -->
-    <div
-      v-if="partners.data && partners.data.length"
-      class="p-5 bg-surface-white rounded-lg border border-outline-gray-2 space-y-3"
-    >
-      <div class="flex flex-wrap items-center justify-between gap-2">
-        <div>
-          <span class="text-lg-semibold text-ink-gray-9">{{
-            __('Quadro Societário (Seleção de Sócios para Consulta PF)')
-          }}</span>
-          <p class="text-p-xs text-ink-gray-6 mt-0.5">
-            {{
-              __(
-                'Por padrão, pré-selecionamos apenas o(s) Sócio(s)-Administrador(es) para evitar cobrança multiplicada em sócios minoritários. Marque ou desmarque quem deseja consultar no Dossiê ou em consultas avulsas.',
-              )
-            }}
-          </p>
-        </div>
-        <Badge
-          :label="__('{0} sócio(s) selecionado(s)', [selectedPartners.length])"
-          theme="blue"
-          variant="subtle"
-        />
-      </div>
-
-      <div
-        v-for="partner in partners.data"
-        :key="partner.contact"
-        class="flex items-center justify-between p-3 border border-outline-gray-2 rounded gap-3"
-      >
-        <div class="flex items-center gap-3 min-w-0">
-          <input
-            type="checkbox"
-            class="size-4 accent-[#0088FF]"
-            :checked="selected.includes(partner.contact)"
-            :disabled="!partner.has_cpf"
-            @change="togglePartner(partner.contact)"
-          />
-          <div class="min-w-0">
-            <div class="flex items-center gap-2">
-              <span class="text-base-medium truncate">{{ partner.name }}</span>
-              <Badge
-                v-if="partner.is_admin"
-                :label="__('Sócio-Administrador')"
-                theme="blue"
-                variant="subtle"
-              />
-            </div>
-            <div class="text-p-sm text-ink-gray-5">
-              {{ partner.designation }}
-              <span v-if="partner.share != null"> · {{ partner.share }}%</span>
-            </div>
-          </div>
-        </div>
-        <div v-if="partner.has_cpf" class="text-p-sm text-ink-gray-7 font-mono">
-          {{ partner.cpf }}
-        </div>
-        <div v-else class="flex items-center gap-2">
-          <FormControl
-            v-model="cpfDraft[partner.contact]"
-            type="text"
-            class="w-40"
-            :placeholder="__('CPF completo')"
-          />
-          <Button
-            variant="outline"
-            size="sm"
-            :loading="savingCpf === partner.contact"
-            :disabled="!cpfDraft[partner.contact]"
-            @click="saveCpf(partner)"
-          >
-            {{ __('Salvar CPF') }}
-          </Button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ===================================================================== -->
-    <!-- DOSSIÊ DE CRÉDITO COMPLETO (ESCOLHA DE NÍVEL 2 OU NÍVEL 3 + PDF 1/2) -->
-    <!-- ===================================================================== -->
-    <div
-      v-if="pkg.data"
-      class="p-5 bg-surface-white rounded-lg border border-outline-gray-2 space-y-3"
-    >
-      <div class="flex flex-wrap items-center justify-between gap-2">
-        <div class="flex items-center gap-2">
-          <span class="text-lg-semibold text-ink-gray-9">{{
-            __('Gerar Dossiê de Crédito (Nível 2 Médio ou Nível 3 Profundo)')
-          }}</span>
-          <Badge
-            v-if="pkgRunning"
-            theme="blue"
-            variant="subtle"
-            :label="__('Gerando…')"
-          />
-        </div>
-
-        <!-- Seletor Rápido de Nível -->
-        <div class="flex flex-wrap items-center gap-1.5">
-          <Button
-            :variant="selectedTierMode === 'default' ? 'solid' : 'subtle'"
-            size="sm"
-            @click="selectTierMode('default')"
-          >
-            {{ __('Padrão da Empresa') }}
-          </Button>
-          <Button
-            :variant="selectedTierMode === 'tier_2' ? 'solid' : 'subtle'"
-            size="sm"
-            @click="selectTierMode('tier_2')"
-          >
-            {{ __('Nível 2 · Médio (QUOD + SCR)') }}
-          </Button>
-          <Button
-            :variant="selectedTierMode === 'tier_3_boavista' ? 'solid' : 'subtle'"
-            size="sm"
-            @click="selectTierMode('tier_3_boavista')"
-          >
-            {{ __('Nível 3 · Boa Vista Positivo') }}
-          </Button>
-          <Button
-            :variant="selectedTierMode === 'tier_3_serasa' ? 'solid' : 'subtle'"
-            size="sm"
-            @click="selectTierMode('tier_3_serasa')"
-          >
-            {{ __('Nível 3 · Serasa Avançado') }}
-          </Button>
-        </div>
-      </div>
-
-      <p class="text-p-sm text-ink-gray-6">
-        {{
-          __(
-            'Executa apenas as consultas que faltam no nível selecionado (reaproveitando consultas dos últimos {0} dias sem novo custo, como o SCR Bacen), gera o PDF 1 (Relatório Executivo Formatado) e o PDF 2 (Parecer Estruturado da IA em 6 Seções).',
-            [pkg.data.reuse_days],
-          )
-        }}
       </p>
 
-      <div class="space-y-1.5 bg-[#F5F5F7] p-3.5 rounded-lg border border-[#E6E7EB]">
-        <div class="text-xs font-semibold uppercase tracking-wider text-[#5E6068]">
-          {{ __('Consultas incluídas nesta execução') }}
+      <div v-if="report.data && !isReportError" class="flex flex-col">
+        <div v-for="row in triageRows" :key="row.label" :class="rowClass">
+          <span :class="rowLabelClass">{{ row.label }}</span>
+          <span :class="rowValueClass(row.tone)">{{ row.value }}</span>
         </div>
-        <div
-          v-if="!pkg.data.items?.length"
-          class="text-p-xs text-[#8A8C94] py-1"
+      </div>
+    </section>
+
+    <!-- 3. Resumo executivo unificado dos bureaus -->
+    <section v-if="hasHighlights" :class="cardClass" class="gap-4">
+      <div class="flex flex-col gap-0.5">
+        <h2 :class="titleClass">
+          {{ __('Resumo Executivo Unificado dos Bureaus') }}
+        </h2>
+        <p class="text-[12px] leading-4 text-[color:var(--ct-text-secondary)]">
+          {{
+            __(
+              'Indicadores consolidados automaticamente a partir das consultas realizadas (QUOD, Boa Vista, Serasa, SCR Bacen e Processos).',
+            )
+          }}
+        </p>
+      </div>
+
+      <div
+        v-for="(alert, idx) in highlights.data?.fraud_alerts || []"
+        :key="'alert-' + idx"
+        :class="alertClass(alert.severity === 'critical' ? 'error' : 'warning')"
+      >
+        <span
+          class="lucide-triangle-alert size-5 shrink-0"
+          aria-hidden="true"
+        />
+        <p class="min-w-0 flex-1">
+          {{ alert.title }}
+          <span class="font-normal">· {{ alert.detail }}</span>
+        </p>
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <template v-for="group in highlightGroups" :key="group.key">
+          <div class="flex flex-col" :class="group.rows.length ? '' : 'gap-1'">
+            <h3 :class="groupTitleClass">{{ group.title }}</h3>
+            <div v-for="row in group.rows" :key="row.label" :class="rowClass">
+              <span :class="rowLabelClass">{{ row.label }}</span>
+              <span :class="rowValueClass(row.tone)">{{ row.value }}</span>
+            </div>
+            <p
+              v-if="!group.rows.length"
+              class="text-[12px] leading-4 text-[color:var(--ct-text-tertiary)]"
+            >
+              {{ group.empty }}
+            </p>
+          </div>
+          <!-- Figma "Divisor" Linha -->
+          <div v-if="group.divider" class="flex h-5 items-center">
+            <div class="h-px flex-1 bg-[var(--ct-border)]" />
+          </div>
+        </template>
+      </div>
+    </section>
+
+    <!-- 4. Quadro societário (seleção de sócios para consulta PF) -->
+    <section
+      v-if="partners.data && partners.data.length"
+      :class="cardClass"
+      class="gap-1.5"
+    >
+      <div class="flex items-center gap-2">
+        <h2 :class="titleClass" class="min-w-0 flex-1">
+          {{ __('Quadro Societário (Seleção de Sócios para Consulta PF)') }}
+        </h2>
+        <button
+          type="button"
+          class="flex size-8 shrink-0 items-center justify-center rounded-[var(--ct-radius-sm)] text-[color:var(--ct-text-primary)] hover:bg-[var(--ct-bg-soft)]"
+          :aria-expanded="partnersOpen"
+          :aria-label="partnersOpen ? __('Recolher') : __('Expandir')"
+          @click="partnersOpen = !partnersOpen"
         >
-          {{ __('Nenhuma consulta sob demanda configurada para o nível selecionado.') }}
+          <span
+            :class="partnersOpen ? 'lucide-chevron-up' : 'lucide-chevron-down'"
+            class="size-4"
+            aria-hidden="true"
+          />
+        </button>
+      </div>
+      <template v-if="partnersOpen">
+        <p
+          class="max-w-[735px] text-[12px] leading-5 text-[color:var(--ct-text-secondary)]"
+        >
+          {{
+            __(
+              'Por padrão, pré-selecionamos apenas o(s) Sócio(s)-Administrador(es) para evitar cobrança multiplicada em sócios minoritários. Marque ou desmarque quem deseja consultar no Dossiê ou em consultas avulsas.',
+            )
+          }}
+        </p>
+
+        <div
+          v-for="partner in partners.data"
+          :key="partner.contact"
+          class="flex items-center gap-3 py-3"
+        >
+          <div class="flex min-w-0 flex-1 flex-col gap-0.5">
+            <!-- Figma "Caixa de seleção": 20px, radius 6, blue when checked -->
+            <label
+              class="flex items-start gap-2"
+              :class="partner.has_cpf ? 'cursor-pointer' : 'cursor-not-allowed'"
+            >
+              <input
+                type="checkbox"
+                class="peer sr-only"
+                :checked="selected.includes(partner.contact)"
+                :disabled="!partner.has_cpf"
+                @change="togglePartner(partner.contact)"
+              />
+              <span
+                class="flex size-5 shrink-0 items-center justify-center rounded-[var(--ct-radius-sm)] border peer-focus-visible:ring-2 peer-focus-visible:ring-[var(--ct-accent-soft-hover)]"
+                :class="
+                  selected.includes(partner.contact)
+                    ? 'border-[var(--ct-accent)] bg-[var(--ct-accent)] text-white'
+                    : 'border-[var(--ct-border)] bg-[var(--ct-bg-page)]'
+                "
+                aria-hidden="true"
+              >
+                <span
+                  v-if="selected.includes(partner.contact)"
+                  class="lucide-check size-3.5"
+                />
+              </span>
+              <span
+                class="min-w-0 truncate text-[14px] leading-5 text-[color:var(--ct-text-primary)]"
+              >
+                {{ partner.name }}
+              </span>
+            </label>
+            <span
+              class="pl-7 text-[12px] text-[color:var(--ct-text-secondary)]"
+            >
+              {{ partnerRole(partner) }}
+            </span>
+          </div>
+          <span
+            v-if="partner.has_cpf"
+            class="shrink-0 text-[14px] leading-5 text-[color:var(--ct-text-primary)]"
+          >
+            {{ partner.cpf }}
+          </span>
+          <template v-else>
+            <input
+              v-model="cpfDraft[partner.contact]"
+              type="text"
+              inputmode="numeric"
+              :placeholder="__('CPF completo')"
+              :aria-label="__('CPF completo de {0}', [partner.name])"
+              :class="fieldBoxClass"
+              class="w-[200px] shrink-0"
+            />
+            <Button
+              variant="outline"
+              :loading="savingCpf === partner.contact"
+              :disabled="!cpfDraft[partner.contact]"
+              @click="saveCpf(partner)"
+            >
+              {{ __('Salvar CPF') }}
+            </Button>
+          </template>
         </div>
+
+        <!-- Bureaus PF para os sócios marcados (consultas pagas por sócio) -->
+        <div
+          v-if="partnerBureaus.length"
+          class="flex flex-wrap items-end gap-4"
+        >
+          <div class="flex w-[485px] max-w-full flex-col gap-1.5">
+            <span :class="fieldLabelClass">
+              {{ __('Bureaus para os sócios marcados') }}
+            </span>
+            <Popover
+              side="bottom"
+              align="start"
+              :offset="4"
+              bare
+              match-trigger-width
+            >
+              <template #trigger="{ open: isOpen }">
+                <button
+                  type="button"
+                  :class="fieldBoxClass"
+                  class="flex w-full items-center gap-2 text-left"
+                >
+                  <span
+                    class="min-w-0 flex-1 truncate"
+                    :class="
+                      chosenPartnerBureaus.length
+                        ? ''
+                        : 'text-[color:var(--ct-text-tertiary)]'
+                    "
+                  >
+                    {{
+                      chosenPartnerBureaus.length
+                        ? chosenPartnerBureaus.map((b) => b.label).join(', ')
+                        : __('Selecione os bureaus')
+                    }}
+                  </span>
+                  <span
+                    :class="
+                      isOpen ? 'lucide-chevron-up' : 'lucide-chevron-down'
+                    "
+                    class="size-5 shrink-0"
+                    aria-hidden="true"
+                  />
+                </button>
+              </template>
+              <template #default>
+                <div
+                  class="rounded-[var(--ct-radius-md)] border border-[var(--ct-border)] bg-[var(--ct-bg-page)] p-1 shadow-lg"
+                >
+                  <label
+                    v-for="bureau in partnerBureaus"
+                    :key="bureau.key"
+                    class="flex items-center gap-2 rounded-[var(--ct-radius-sm)] px-2.5 py-2 text-[14px] leading-5"
+                    :class="
+                      bureau.configured
+                        ? 'cursor-pointer hover:bg-[var(--ct-bg-soft)]'
+                        : 'cursor-not-allowed opacity-50'
+                    "
+                  >
+                    <input
+                      type="checkbox"
+                      class="size-4 accent-[var(--ct-accent)]"
+                      :checked="partnerBureauKeys.includes(bureau.key)"
+                      :disabled="!bureau.configured"
+                      @change="togglePartnerBureau(bureau.key)"
+                    />
+                    <span class="min-w-0 flex-1 truncate">{{
+                      bureau.label
+                    }}</span>
+                    <span
+                      class="shrink-0 text-[12px] text-[color:var(--ct-text-tertiary)]"
+                    >
+                      {{
+                        bureau.configured
+                          ? bureau.price_reference
+                            ? formatMoney(bureau.price_reference)
+                            : bureau.provider
+                          : __('sem credencial')
+                      }}
+                    </span>
+                  </label>
+                </div>
+              </template>
+            </Popover>
+          </div>
+          <div class="pb-2">
+            <Button
+              variant="outline"
+              class="w-[130px]"
+              :loading="requesting.endsWith(':partners')"
+              :disabled="!canRunPartnerBureaus"
+              @click="askPartnerBureaus"
+            >
+              {{ __('Gerar bureaus') }}
+            </Button>
+          </div>
+        </div>
+      </template>
+    </section>
+
+    <!-- 5. Gerar dossiê de crédito (nível 2 ou 3) + documentos gerados -->
+    <section v-if="pkg.data" :class="cardClass" class="gap-3">
+      <div class="flex items-center gap-2">
+        <h2 :class="titleClass" class="min-w-0 flex-1">
+          {{
+            __('Gerar Dossiê de Crédito (Nível 2 Médio ou Nível 3 Profundo)')
+          }}
+        </h2>
+        <span v-if="pkgRunning" :class="pillClass('info')">
+          <span :class="dotClass('info')" />
+          {{ __('Gerando…') }}
+        </span>
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <h3
+          class="text-[12px] font-semibold uppercase leading-4 tracking-[0.6px] text-[color:var(--ct-text-secondary)]"
+        >
+          {{ __('Consultas incluídas nesta execução') }}
+        </h3>
+        <p
+          v-if="!pkg.data.items?.length"
+          class="text-[14px] leading-5 text-[color:var(--ct-text-tertiary)]"
+        >
+          {{
+            __(
+              'Nenhuma consulta sob demanda configurada para o nível selecionado.',
+            )
+          }}
+        </p>
         <div
           v-for="entry in pkg.data.items"
           :key="entry.item + (entry.contact || '')"
-          class="flex items-start gap-2 text-p-sm"
+          class="flex items-start gap-2 text-[14px] leading-5"
         >
           <span
+            class="shrink-0 font-bold"
             :class="
               entry.state === 'reused'
-                ? 'text-ink-green-3 font-bold'
+                ? 'text-[color:var(--ct-success)]'
                 : entry.state === 'unavailable'
-                  ? 'text-ink-red-3 font-bold'
-                  : 'text-[#0088FF] font-bold'
+                  ? 'text-[color:var(--ct-error)]'
+                  : 'text-[color:var(--ct-accent)]'
             "
+            aria-hidden="true"
             >{{ entry.state === 'reused' ? '✓' : '•' }}</span
           >
-          <div>
-            <span class="text-ink-gray-8 font-medium"
+          <div class="min-w-0 flex-1">
+            <span class="font-medium text-[#2a2b30]"
               >{{ entry.label }} · {{ entry.subject_name }}</span
             >
-            <span class="text-ink-gray-5">
+            <span class="text-[color:var(--ct-text-tertiary)]">
               — {{ packageEntryText(entry) }}</span
             >
-            <div v-if="entry.last_error" class="text-ink-red-3">
+            <div v-if="entry.last_error" class="text-[color:var(--ct-error)]">
               {{ __('Última tentativa falhou: {0}', [entry.last_error]) }}
             </div>
           </div>
         </div>
-        <div
+        <p
           v-if="pkg.data.partners_without_cpf.length"
-          class="text-p-xs text-ink-gray-5 pt-1"
+          class="text-[12px] leading-4 text-[color:var(--ct-text-secondary)]"
         >
           {{
             __('Sócios sem CPF completo ficam de fora do pacote: {0}.', [
               pkg.data.partners_without_cpf.join(', '),
             ])
           }}
-        </div>
+        </p>
       </div>
 
-      <div class="text-p-sm font-medium text-ink-gray-8">{{ packageSummary }}</div>
-      <div v-if="pkg.data.unavailable.length" class="text-p-sm text-ink-red-3">
+      <p class="text-[14px] font-medium leading-5 text-[#2a2b30]">
+        {{ packageSummary }}
+      </p>
+      <p
+        v-if="pkg.data.unavailable.length"
+        class="text-[14px] leading-5 text-[color:var(--ct-error)]"
+      >
         {{
           __(
             'Um administrador precisa habilitar e configurar o token destes bureaus ou retirá-los do pacote em Configurações > Bureaus e Crédito.',
           )
         }}
-      </div>
-      <div v-if="opinionNote" class="text-p-sm text-[color:var(--ct-warning)] font-medium">
+      </p>
+      <p
+        v-if="opinionNote"
+        class="text-[14px] font-medium leading-5 text-[color:var(--ct-warning)]"
+      >
         {{ opinionNote }}
-      </div>
-      <div class="flex items-center gap-2">
+      </p>
+      <div>
         <Button
           variant="solid"
+          iconLeft="lucide-file-text"
           :loading="startingPackage"
           :disabled="!canGeneratePackage"
           @click="askPackage"
         >
-          {{ __('Gerar Dossiê Completo (PDF Formatado + Parecer IA)') }}
+          {{ __('Gerar Dossiê Completo (PDF)') }}
         </Button>
       </div>
-      <div v-if="groupedDossiers.length" class="space-y-1.5 pt-2">
-        <div class="text-p-sm font-medium text-ink-gray-6">
-          {{ __('Dossiês gerados (PDF Executivo + JSON Auditável)') }}
-        </div>
+
+      <template v-if="groupedDossiers.length || opinionDocs.length">
+        <h3
+          class="text-[14px] font-medium leading-4 text-[color:var(--ct-text-secondary)]"
+        >
+          {{ __('Documentos gerados') }}
+        </h3>
         <div
           v-for="group in groupedDossiers"
           :key="group.key"
-          class="flex flex-wrap items-center justify-between gap-2 p-2.5 bg-surface-gray-1 rounded border border-outline-gray-1 text-p-sm"
+          :class="docBoxClass"
         >
-          <div class="flex items-center gap-2 min-w-0">
+          <div class="flex min-w-0 items-center gap-2">
             <a
               v-if="group.pdf"
               :href="group.pdf.file_url"
               target="_blank"
-              class="font-medium text-ink-blue-3 underline truncate"
+              rel="noopener noreferrer"
+              :class="linkClass"
             >
               {{ __('Abrir Dossiê Executivo (PDF)') }}
             </a>
-            <span class="text-ink-gray-5">· {{ formatDate(group.creation) }}</span>
+            <span :class="docDateClass"
+              >· {{ formatDate(group.creation) }}</span
+            >
           </div>
           <a
             v-if="group.json"
             :href="group.json.file_url"
             target="_blank"
-            class="text-p-xs text-ink-gray-6 hover:text-ink-gray-8 underline"
+            rel="noopener noreferrer"
+            :class="linkClass"
           >
             {{ __('JSON bruto (auditoria)') }}
           </a>
         </div>
-      </div>
-    </div>
-
-    <!-- ===================================================================== -->
-    <!-- PARECER EXECUTIVO DE CRÉDITO (IA) — 6 SEÇÕES SEMAFÓRICAS             -->
-    <!-- ===================================================================== -->
-    <div
-      v-if="opinionStatus.data"
-      class="p-5 bg-surface-white rounded-lg border border-outline-gray-2 space-y-4"
-    >
-      <div class="flex flex-wrap items-center justify-between gap-2">
-        <div class="flex items-center gap-3">
-          <span class="text-lg-semibold text-ink-gray-9">{{
-            __('Parecer Executivo de Crédito (IA · 6 Seções Semafóricas)')
-          }}</span>
-          <span v-if="opinionStatus.data" class="text-p-sm text-ink-gray-5">
-            {{
-              __('{0} de {1} pareceres usados neste mês', [
-                opinionStatus.data.used,
-                opinionStatus.data.included,
-              ])
-            }}
-          </span>
-        </div>
-        <div class="flex items-center gap-2">
-          <Button
-            v-if="opinionStatus.data?.configured"
-            :variant="hasNewerQueriesThanOpinion ? 'solid' : 'outline'"
-            size="sm"
-            :loading="requestingOpinion"
-            @click="askOpinionOnly"
-          >
-            {{
-              hasNewerQueriesThanOpinion
-                ? __('Atualizar Parecer IA com Novos Dados')
-                : __('Gerar / Reprocessar Parecer IA')
-            }}
-          </Button>
-        </div>
-      </div>
-
-      <!-- Aviso quando entraram novas consultas avulsas após o último parecer -->
-      <div
-        v-if="hasNewerQueriesThanOpinion"
-        class="p-3 rounded-lg border border-[#0088FF]/30 bg-[#E5F1FF] text-p-xs text-[#1E1F23] flex items-center justify-between gap-2"
-      >
-        <span>
-          {{
-            __(
-              '💡 Novas consultas de bureau foram realizadas após a emissão do último parecer. Clique em "Atualizar Parecer IA com Novos Dados" para incorporar os novos retornos.',
-            )
-          }}
-        </span>
-      </div>
-
-      <p class="text-p-sm text-ink-gray-6">
-        {{
-          __(
-            'Parecer executivo direto ao ponto (1 a 2 páginas), estruturado em 6 seções fixas com semáforo de risco e citações verificadas dos bureaus. A decisão final é sempre do analista/comitê.',
-          )
-        }}
-      </p>
-
-      <div
-        v-if="opinionStatus.data && !opinionStatus.data.configured"
-        class="text-p-sm text-[color:var(--ct-warning)] font-medium"
-      >
-        {{ __('A IA de parecer de crédito ainda não está configurada neste ambiente.') }}
-      </div>
-      <div
-        v-else-if="
-          opinionStatus.data?.next_is_extra &&
-          !opinionStatus.data?.extra_allowed
-        "
-        class="text-p-sm text-[color:var(--ct-warning)] font-medium"
-      >
-        {{
-          __(
-            'Os pareceres incluídos neste mês acabaram. Um administrador pode liberar pareceres extras pagos (R$ {0} cada) nas Configurações de Crédito.',
-            [formatPrice(opinionStatus.data.extra_price)],
-          )
-        }}
-      </div>
-
-      <div v-if="opinions.data && opinions.data.length" class="space-y-4 pt-1">
-        <div
-          v-for="item in opinions.data"
-          :key="item.name"
-          class="p-4 border border-outline-gray-2 rounded-xl space-y-3 bg-[#F5F5F7]/40"
-        >
-          <div class="flex items-center justify-between gap-2 flex-wrap">
-            <div class="flex items-center gap-2 flex-wrap">
-              <Badge
-                v-if="item.status === 'Done'"
-                :theme="resultTheme(item.result)"
-                variant="solid"
-                size="lg"
-                :label="resultLabel(item.result)"
-              />
-              <Badge
-                v-else-if="item.status === 'Queued'"
-                theme="blue"
-                variant="subtle"
-                :label="__('Gerando…')"
-              />
-              <Badge v-else theme="red" variant="subtle" :label="__('Falhou')" />
-              <span class="text-p-sm text-ink-gray-5">
-                {{ formatDate(item.requested_on) }} · {{ item.requested_by }}
-              </span>
-              <span v-if="item.is_extra" class="text-p-sm text-ink-gray-5">
-                · {{ __('extra') }}
-              </span>
-            </div>
+        <div v-for="item in opinionDocs" :key="item.name" :class="docBoxClass">
+          <div class="flex min-w-0 items-center gap-2">
             <a
               v-if="item.pdf_url"
               :href="item.pdf_url"
               target="_blank"
-              class="text-p-sm font-medium text-[#0088FF] underline"
+              rel="noopener noreferrer"
+              :class="linkClass"
             >
-              {{ __('Abrir PDF do Parecer (PDF 2)') }}
+              {{ __('Abrir Parecer de IA (PDF)') }}
             </a>
-          </div>
-
-          <!-- Renderização Estruturada em 6 Seções Semafóricas -->
-          <template v-if="item.status === 'Done' && item.opinion">
-            <div
-              v-if="item.opinion.headline"
-              class="text-base font-semibold text-[#1E1F23] bg-white p-3 rounded-lg border border-[#E6E7EB]"
+            <span
+              v-else-if="item.status === 'Queued'"
+              class="text-[14px] font-medium leading-5 text-[color:var(--ct-text-secondary)]"
             >
-              {{ item.opinion.headline }}
-            </div>
-
-            <!-- Os Porquês (Summary Bullets) -->
-            <div
-              v-if="item.opinion.summary_bullets?.length"
-              class="bg-white p-3.5 rounded-lg border border-[#E6E7EB] space-y-1.5"
+              {{ __('Parecer de IA em geração…') }}
+            </span>
+            <span
+              v-else-if="item.status === 'Failed'"
+              class="truncate text-[14px] font-medium leading-5 text-[color:var(--ct-error)]"
             >
-              <div class="text-xs font-bold uppercase tracking-wider text-[#5E6068]">
-                {{ __('Principais Motivos da Recomendação (Os Porquês)') }}
-              </div>
-              <ul class="list-disc pl-5 space-y-1 text-p-sm text-[#1E1F23]">
-                <li v-for="(bullet, bIdx) in item.opinion.summary_bullets" :key="bIdx">
-                  {{ typeof bullet === 'object' && bullet !== null ? (bullet.detail || bullet.title || JSON.stringify(bullet)) : bullet }}
-                </li>
-              </ul>
-            </div>
-
-            <!-- Grid das 6 Seções Semafóricas -->
-            <div
-              v-if="item.opinion.sections?.length"
-              class="grid grid-cols-1 md:grid-cols-2 gap-3"
+              {{ __('Falha ao gerar o parecer de IA')
+              }}{{ item.error ? `: ${item.error}` : '' }}
+            </span>
+            <span :class="docDateClass"
+              >· {{ formatDate(item.requested_on) }}</span
             >
-              <div
-                v-for="sec in item.opinion.sections"
-                :key="sec.key"
-                class="p-3.5 bg-white rounded-lg border border-[#E6E7EB] space-y-2"
-              >
-                <div class="flex items-center justify-between gap-2">
-                  <span class="text-p-sm font-semibold text-[#1E1F23]">
-                    {{ sec.title }}
-                  </span>
-                  <Badge
-                    :theme="sectionBadgeTheme(sec.status)"
-                    variant="subtle"
-                    :label="sectionBadgeLabel(sec.status)"
-                  />
-                </div>
-                <ul
-                  v-if="sec.findings?.length"
-                  class="list-disc pl-4 space-y-1 text-p-xs text-[#2A2B30]"
-                >
-                  <li v-for="(f, fIdx) in sec.findings" :key="fIdx" class="leading-relaxed">
-                    <span v-if="formatFinding(f).title" class="font-semibold text-[#1E1F23]">
-                      {{ formatFinding(f).title }}:
-                    </span>
-                    <span class="text-[#2A2B30]">
-                      {{ formatFinding(f).detail }}
-                    </span>
-                    <span v-if="formatFinding(f).source" class="text-[11px] text-[#5E6068] ml-1">
-                      ({{ formatFinding(f).source }})
-                    </span>
-                  </li>
-                </ul>
-                <div
-                  v-if="sec.citations?.length"
-                  class="flex flex-wrap gap-1 pt-1"
-                >
-                  <span
-                    v-for="(cit, cIdx) in sec.citations"
-                    :key="cIdx"
-                    class="inline-block text-[11px] px-2 py-0.5 rounded bg-[#F5F5F7] text-[#5E6068] border border-[#E6E7EB]"
-                  >
-                    {{ cit.source }} · {{ cit.field }}: <strong>{{ cit.value }}</strong>
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Condicionantes Sugeridas -->
-            <div
-              v-if="item.opinion.recommended_conditions?.length"
-              class="bg-[#FFF4D6]/60 p-3.5 rounded-lg border border-[#8A5A00]/25 space-y-1"
-            >
-              <div class="text-xs font-bold uppercase tracking-wider text-[#8A5A00]">
-                {{ __('Condicionantes & Garantias Recomendadas para o Comitê') }}
-              </div>
-              <ul class="list-disc pl-5 space-y-1 text-p-xs text-[#1E1F23]">
-                <li
-                  v-for="(cond, cIdx) in item.opinion.recommended_conditions"
-                  :key="cIdx"
-                >
-                  {{ typeof cond === 'object' && cond !== null ? (cond.detail || cond.title || JSON.stringify(cond)) : cond }}
-                </li>
-              </ul>
-            </div>
-          </template>
-
-          <div v-else-if="item.status === 'Done'" class="text-p-sm text-ink-gray-7">
-            {{ item.summary }}
-          </div>
-          <div v-if="item.status === 'Failed'" class="text-p-sm text-ink-red-3">
-            {{ item.error }}
           </div>
         </div>
-      </div>
-    </div>
+      </template>
+    </section>
 
-    <!-- Pasta Digital (Checklist de Documentos) centralizada na aba Anexos -->
-    <div
-      class="p-4 rounded-lg border border-[#E6E7EB] bg-white flex flex-wrap items-center justify-between gap-3 text-p-sm"
-    >
-      <div class="flex items-center gap-2.5">
-        <span class="text-xl">📁</span>
-        <div>
-          <span class="font-semibold text-ink-gray-9">
-            {{ __('Pasta Digital & Checklist de Documentos') }}
-          </span>
-          <p class="text-xs text-ink-gray-6 mt-0.5">
-            {{ __('O checklist de documentos (Contrato Social, Sócios, Faturamento, Balanço, etc.) e o Link Seguro para envio pelo cliente estão centralizados na aba Anexos.') }}
-          </p>
-        </div>
-      </div>
-      <Button
-        variant="outline"
-        size="sm"
-        @click="emit('switch-tab', 'attachments')"
-      >
-        {{ __('Ir para aba Anexos ↗') }}
-      </Button>
-    </div>
-
-    <!-- ===================================================================== -->
-    <!-- CONSULTAS AVULSAS NOS BUREAUS (SOB DEMANDA)                           -->
-    <!-- ===================================================================== -->
-    <div
-      v-if="options.data && options.data.bureaus.length"
-      class="p-5 bg-surface-white rounded-lg border border-outline-gray-2 space-y-4"
-    >
-      <div class="flex items-center justify-between">
-        <span class="text-lg-semibold text-ink-gray-9">{{
-          __('Consultas Avulsas nos Bureaus (Sob Demanda)')
-        }}</span>
-      </div>
-      <p class="text-p-sm text-ink-gray-6">
-        {{
-          __(
-            'Cada consulta avulsa utiliza a conta da sua empresa no provedor. A CredTech não cobra taxa adicional.',
-          )
-        }}
-      </p>
-      <div
-        v-if="options.data.needs_acknowledgement"
-        class="p-3 rounded border border-outline-amber-2 bg-surface-amber-1 text-p-sm text-[color:var(--ct-warning)] font-medium space-y-1"
-      >
-        <div class="font-medium">
-          {{ __('Triagem rápida: {0}', [verdictText(options.data.verdict)]) }}
-        </div>
-        <div v-if="options.data.verdict_summary">
-          {{ options.data.verdict_summary }}
-        </div>
-        <div>
-          {{
-            __('Você ainda pode consultar normalmente (será solicitada confirmação do alerta).')
-          }}
-        </div>
-      </div>
-      <div class="grid grid-cols-1 gap-2">
-        <div
-          v-for="bureau in options.data.bureaus"
-          :key="bureau.key"
-          class="flex flex-wrap items-center justify-between p-3 border border-outline-gray-2 rounded gap-2"
-        >
-          <div class="space-y-0.5">
-            <div class="flex items-center gap-2">
-              <span class="text-base-medium">{{ bureau.label }}</span>
-              <Badge
-                :label="`Nível ${bureau.tier || 2}`"
-                :theme="bureau.tier === 1 ? 'green' : bureau.tier === 3 ? 'amber' : 'blue'"
-                variant="subtle"
-              />
-            </div>
-            <div class="text-p-sm text-ink-gray-5">{{ priceText(bureau) }}</div>
-            <div
-              v-if="bureau.recent_company_query"
-              class="text-p-xs text-ink-green-3 font-medium"
-            >
-              ✓ {{ __('Já consultado em {0} · Prazo para nova consulta: {1} dias (válido até {2})', [
-                formatDate(bureau.recent_company_query.requested_on),
-                bureau.recent_company_query.reuse_days,
-                bureau.recent_company_query.valid_until,
-              ]) }}
-            </div>
-            <div v-if="!bureau.configured" class="text-p-sm text-[color:var(--ct-warning)] font-medium">
-              {{ __('Credencial/token ausente nas Configurações de Crédito.') }}
-            </div>
-          </div>
-          <div class="flex items-center gap-2">
-            <Button
-              v-if="bureau.partner_ok && selectedPartners.length"
-              variant="outline"
-              size="sm"
-              :loading="requesting === bureau.key + ':partners'"
-              :disabled="!options.data.can_request || !bureau.configured"
-              @click="askPremiumBureau(bureau, selectedPartners)"
-            >
-              {{ __('Consultar {0} sócio(s)', [selectedPartners.length]) }}
-            </Button>
-            <Button
-              v-if="bureau.company_ok !== false"
-              variant="outline"
-              size="sm"
-              :loading="requesting === bureau.key"
-              :disabled="!options.data.can_request || !bureau.configured"
-              @click="askPremiumBureau(bureau)"
-            >
-              {{ __('Consultar empresa') }}
-            </Button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ===================================================================== -->
-    <!-- HISTÓRICO DE CONSULTAS REALIZADAS (COM LEITURA FORMATADA HUMANA)     -->
-    <!-- ===================================================================== -->
-    <div
+    <!-- 6. Histórico de consultas realizadas -->
+    <section
       v-if="results.data && results.data.length"
-      class="p-5 bg-surface-white rounded-lg border border-outline-gray-2 space-y-3"
+      :class="cardClass"
+      class="gap-3"
     >
-      <span class="text-lg-semibold text-ink-gray-9">{{
-        __('Histórico de Consultas Realizadas (Relatórios Formatados)')
-      }}</span>
+      <h2 :class="titleClass">
+        {{ __('Histórico de Consultas Realizadas (Relatórios Formatados)') }}
+      </h2>
       <div
         v-for="row in results.data"
         :key="row.name"
-        class="flex items-center justify-between p-3 border border-outline-gray-2 rounded gap-3"
+        class="flex items-center gap-3 border-b border-[var(--ct-border-soft)] py-2"
       >
-        <div class="min-w-0">
-          <div class="text-base-medium">{{ row.bureau_label }}</div>
-          <div class="text-p-sm text-ink-gray-6 truncate">
-            {{ row.subject_name || __('Empresa') }} · {{ row.document }}
-          </div>
-          <div class="text-p-sm text-ink-gray-5">
-            {{ row.requested_on }} · {{ row.requested_by }}
-          </div>
-          <div
+        <div class="flex min-w-0 flex-1 flex-col gap-0.5">
+          <span
+            class="text-[14px] font-medium leading-5 text-[color:var(--ct-text-primary)]"
+          >
+            {{ row.bureau_label }}
+          </span>
+          <span
+            class="truncate text-[12px] leading-4 text-[color:var(--ct-text-secondary)]"
+          >
+            {{ resultMeta(row) }}
+          </span>
+          <span
             v-if="row.warning_acknowledged"
-            class="text-p-sm text-[color:var(--ct-warning)] font-medium"
+            class="text-[12px] font-medium leading-4 text-[color:var(--ct-warning)]"
           >
             {{
               __('Consultado com alerta de triagem: {0}', [
                 verdictText(row.pre_filter_verdict),
               ])
             }}
-          </div>
+          </span>
         </div>
-        <Button variant="outline" size="sm" @click="openResult(row)">
+        <Button variant="outline" @click="openResult(row)">
           {{ __('Ver Relatório Formatado') }}
         </Button>
       </div>
-    </div>
+    </section>
 
     <!-- ===================================================================== -->
     <!-- MODAL DO RELATÓRIO DO BUREAU (VISÃO EXECUTIVA FORMATADA + TOGGLE JSON)-->
     <!-- ===================================================================== -->
     <Dialog v-model:open="showResult" :title="resultTitle" :size="'4xl'">
       <template #default>
-        <div class="flex flex-wrap items-center justify-between gap-2 mb-3 pb-2 border-b border-outline-gray-2">
+        <div
+          class="flex flex-wrap items-center justify-between gap-2 mb-3 pb-2 border-b border-outline-gray-2"
+        >
           <p class="text-p-sm text-ink-gray-6">
             {{
               showRawJson
-                ? __('JSON técnico bruto exatamente como retornado pela API do provedor (para fins de auditoria).')
-                : __('Relatório formatado com todos os dados oficiais retornados pelo bureau.')
+                ? __(
+                    'JSON técnico bruto exatamente como retornado pela API do provedor (para fins de auditoria).',
+                  )
+                : __(
+                    'Relatório formatado com todos os dados oficiais retornados pelo bureau.',
+                  )
             }}
           </p>
           <Button
@@ -1230,27 +747,20 @@
         <pre
           v-else
           class="text-p-xs bg-surface-gray-2 rounded p-3 overflow-auto max-h-[65vh] whitespace-pre-wrap"
-          >{{ resultText }}</pre
-        >
+          >{{ resultText }}</pre>
       </template>
     </Dialog>
   </div>
 </template>
 
 <script setup>
-import {
-  Badge,
-  Button,
-  Dialog,
-  FormControl,
-  createResource,
-  call,
-  toast,
-} from 'frappe-ui'
+import { Button, Dialog, Popover, createResource, call, toast } from 'frappe-ui'
 import { computed, onBeforeUnmount, reactive, ref, watch } from 'vue'
 import { createDialog } from '@/utils/dialogs'
+import { settingsRoute } from '@/composables/settingsNavigation'
+import { usersStore } from '@/stores/users'
 
-const emit = defineEmits(['switch-tab'])
+defineEmits(['switch-tab'])
 
 const props = defineProps({
   organizationId: { type: String, required: true },
@@ -1272,20 +782,139 @@ const resultHtml = ref('')
 const requestedAmount = ref(0)
 const selectedTierMode = ref('default')
 
-const recommendedTierBadge = computed(() => {
-  const val = Number(requestedAmount.value || 0)
-  if (!val || val <= 0) return null
-  if (val <= 50000) {
-    return {
-      label: __('Recomendado: Nível 2 · Médio (R$ 10,89)'),
-      theme: 'blue',
-    }
+const { getUser, isManager } = usersStore()
+
+// ---- Figma 2164:12977 styles (CredTech tokens from theme/credtech.css) ----
+const cardClass =
+  'flex flex-col rounded-[var(--ct-radius-md)] border border-[var(--ct-border)] bg-[var(--ct-bg-page)] p-5'
+const titleClass = 'text-[16px] font-semibold leading-6 text-ink-gray-9'
+const fieldLabelClass =
+  'text-[14px] font-medium leading-5 text-[color:var(--ct-text-secondary)]'
+const fieldBoxClass =
+  'h-12 rounded-[var(--ct-radius-sm)] border border-[var(--ct-border)] bg-[var(--ct-bg-page)] px-3.5 text-[16px] leading-6 text-[color:var(--ct-text-primary)] placeholder:text-[color:var(--ct-text-tertiary)] focus:border-2 focus:border-[var(--ct-border-strong)] focus:px-[13px] focus:outline-none focus:ring-0'
+const bodySecondaryClass =
+  'text-[14px] leading-5 text-[color:var(--ct-text-secondary)]'
+const levelTitleClass =
+  'text-[14px] font-semibold text-[color:var(--ct-text-primary)]'
+const levelTextClass =
+  'text-[14px] leading-5 text-[color:var(--ct-text-secondary)]'
+const levelCostClass =
+  'text-[12px] font-medium text-[color:var(--ct-text-tertiary)]'
+const groupTitleClass =
+  'text-[14px] font-medium leading-4 tracking-[0.7px] text-[color:var(--ct-text-primary)]'
+const rowClass = 'flex items-start gap-6 py-1.5 text-[14px] leading-[17px]'
+const rowLabelClass = 'w-[260px] shrink-0 text-[color:var(--ct-text-secondary)]'
+const alertButtonClass =
+  'shrink-0 rounded-[var(--ct-radius-sm)] bg-white px-3 py-1 text-[12px] font-medium text-[color:var(--ct-accent)] hover:bg-[var(--ct-bg-soft)] disabled:opacity-40'
+const docBoxClass =
+  'flex flex-wrap items-center justify-between gap-2 rounded-[var(--ct-radius-md)] border border-[var(--ct-border)] bg-[var(--ct-bg-page)] px-4 py-3'
+const linkClass =
+  'text-[14px] font-medium leading-5 text-[color:var(--ct-text-accent)] underline'
+const docDateClass =
+  'shrink-0 text-[14px] leading-5 text-[color:var(--ct-text-tertiary)]'
+
+const TONES = {
+  success: [
+    'bg-[var(--ct-success-soft)] text-[color:var(--ct-success)]',
+    'bg-[var(--ct-success)]',
+  ],
+  warning: [
+    'bg-[var(--ct-warning-soft)] text-[color:var(--ct-warning)]',
+    'bg-[var(--ct-warning)]',
+  ],
+  error: [
+    'bg-[var(--ct-error-soft)] text-[color:var(--ct-error)]',
+    'bg-[var(--ct-error)]',
+  ],
+  info: [
+    'bg-[var(--ct-info-soft)] text-[color:var(--ct-info)]',
+    'bg-[var(--ct-info)]',
+  ],
+  neutral: [
+    'bg-[var(--ct-bg-soft)] text-[color:var(--ct-text-secondary)]',
+    'bg-[var(--ct-text-tertiary)]',
+  ],
+}
+
+// Figma "Pílula de status": 12 Medium, 6px dot, pill corners
+function pillClass(tone) {
+  return `inline-flex shrink-0 items-center gap-1.5 rounded-[var(--ct-radius-pill)] px-2.5 py-0.5 text-[12px] font-medium leading-4 ${(TONES[tone] || TONES.neutral)[0]}`
+}
+function dotClass(tone) {
+  return `size-1.5 rounded-full ${(TONES[tone] || TONES.neutral)[1]}`
+}
+
+// Figma "Aviso (toast)": colored strip, 14 Medium, icon 20px
+function alertClass(tone) {
+  const colors = {
+    info: 'bg-[var(--ct-accent-soft)] text-[color:var(--ct-accent)]',
+    warning: 'bg-[var(--ct-warning-soft)] text-[color:var(--ct-warning)]',
+    error: 'bg-[var(--ct-error-soft)] text-[color:var(--ct-error)]',
   }
-  return {
-    label: __('Recomendado: Pular para Nível 3 · Profundo'),
-    theme: 'amber',
-  }
+  return `flex min-h-11 items-center gap-2.5 rounded-[var(--ct-radius-md)] py-2.5 pl-3.5 pr-2.5 text-[14px] font-medium leading-5 ${colors[tone] || colors.info}`
+}
+
+function levelCardClass(active) {
+  return `flex flex-col items-start gap-1.5 rounded-[var(--ct-radius-md)] border bg-[var(--ct-bg-page)] p-4 text-left transition-colors ${
+    active
+      ? 'border-[var(--ct-accent)] ring-1 ring-[var(--ct-accent)]'
+      : 'border-[var(--ct-border)]'
+  }`
+}
+
+function rowValueClass(tone) {
+  return `min-w-0 flex-1 truncate ${
+    tone === 'error'
+      ? 'text-[color:var(--ct-error)]'
+      : tone === 'muted'
+        ? 'text-[color:var(--ct-text-tertiary)]'
+        : 'text-[color:var(--ct-text-primary)]'
+  }`
+}
+
+const canOpenSettings = computed(() => isManager())
+const creditSettingsRoute = settingsRoute('Políticas de Crédito & Compliance')
+
+// "Valor pretendido": shown as 48.730,00, typed freely, parsed on blur
+const amountFocused = ref(false)
+const amountDraft = ref('')
+function formatNumber(value) {
+  return Number(value || 0).toLocaleString('pt-BR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })
+}
+const amountDisplay = computed(() => {
+  if (amountFocused.value) return amountDraft.value
+  return requestedAmount.value > 0 ? formatNumber(requestedAmount.value) : ''
 })
+function onAmountFocus() {
+  amountDraft.value =
+    requestedAmount.value > 0 ? formatNumber(requestedAmount.value) : ''
+  amountFocused.value = true
+}
+function onAmountBlur() {
+  const raw = String(amountDraft.value || '')
+    .replace(/[^\d,.-]/g, '')
+    .replace(/\./g, '')
+    .replace(',', '.')
+  const value = Number(raw)
+  requestedAmount.value = Number.isFinite(value) && value > 0 ? value : 0
+  amountFocused.value = false
+}
+
+const tierThreeOptions = [
+  { value: 'tier_3_boavista', label: __('Boa Vista Positivo') },
+  { value: 'tier_3_serasa', label: __('Serasa Avançado') },
+]
+
+const partnersOpen = ref(true)
+
+function partnerRole(partner) {
+  return [partner.designation, partner.share != null ? `${partner.share}%` : '']
+    .filter(Boolean)
+    .join(' · ')
+}
 
 const org = createResource({
   url: 'frappe.client.get_value',
@@ -1343,13 +972,13 @@ const hasHighlights = computed(() => {
   if (!h) return false
   return Boolean(
     h.scores?.length ||
-      h.scr ||
-      h.capacity?.presumed_revenue != null ||
-      h.capacity?.suggested_limit != null ||
-      h.restrictions?.protests_count > 0 ||
-      h.restrictions?.Restrictive_count > 0 ||
-      h.lawsuits?.total > 0 ||
-      h.fraud_alerts?.length,
+    h.scr ||
+    h.capacity?.presumed_revenue != null ||
+    h.capacity?.suggested_limit != null ||
+    h.restrictions?.protests_count > 0 ||
+    h.restrictions?.Restrictive_count > 0 ||
+    h.lawsuits?.total > 0 ||
+    h.fraud_alerts?.length,
   )
 })
 
@@ -1410,13 +1039,23 @@ function selectTierMode(mode) {
   reloadPackageStatus()
 }
 
+// Clicking the chosen level again goes back to the company default package
+function toggleTierMode(mode) {
+  const active =
+    mode === 'tier_2'
+      ? selectedTierMode.value === 'tier_2'
+      : selectedTierMode.value.startsWith('tier_3')
+  selectTierMode(active ? 'default' : mode)
+}
+
 function reloadPackageStatus() {
   pkg.update({
     params: {
       organization_name: props.organizationId,
       deal_name: props.dealId || null,
       selected_contacts: JSON.stringify(selected.value),
-      tier: selectedTierMode.value === 'default' ? null : selectedTierMode.value,
+      tier:
+        selectedTierMode.value === 'default' ? null : selectedTierMode.value,
     },
   })
   pkg.reload()
@@ -1468,88 +1107,191 @@ const isReportSuccess = computed(() => {
 
 function verdictText(v) {
   if (!v || v === 'Not Checked') return __('Não verificado')
-  if (v === 'Pre-Approved') return __('Pré-Aprovado')
+  if (v === 'Pre-Approved') return __('Pré-aprovado')
   if (v === 'Warning') return __('Atenção')
   if (v === 'Rejected') return __('Reprovado')
   if (v === 'Error') return __('Falha na checagem')
   return __(v)
 }
 
-const verdictLabel = computed(() => verdictText(org.data?.credit_verdict || report.data?.verdict))
+const verdictLabel = computed(() =>
+  verdictText(org.data?.credit_verdict || report.data?.verdict),
+)
 
-const verdictTheme = computed(() => {
+const verdictTone = computed(() => {
   const v = org.data?.credit_verdict || report.data?.verdict
-  if (v === 'Rejected' || v === 'Error') return 'red'
-  if (v === 'Warning') return 'amber'
-  if (v === 'Pre-Approved') return 'green'
-  return 'gray'
+  if (v === 'Rejected' || v === 'Error') return 'error'
+  if (v === 'Warning') return 'warning'
+  if (v === 'Pre-Approved') return 'success'
+  return 'neutral'
 })
 
-function sectionBadgeTheme(status) {
-  if (status === 'clear') return 'green'
-  if (status === 'attention') return 'amber'
-  if (status === 'critical') return 'red'
-  return 'gray'
-}
+const levelOneStatus = computed(() => {
+  if (isReportSuccess.value) return { label: __('Concluído'), tone: 'success' }
+  if (isReportError.value)
+    return { label: __('Falha na triagem'), tone: 'error' }
+  return { label: __('Pendente'), tone: 'warning' }
+})
 
-function sectionBadgeLabel(status) {
-  if (status === 'clear') return __('Regular')
-  if (status === 'attention') return __('Atenção')
-  if (status === 'critical') return __('Crítico')
-  return __('Não Verificado')
-}
+// The summary explains a warning or a rejection; a clean pass needs no text
+const showVerdictSummary = computed(() =>
+  Boolean(
+    report.data?.verdict_summary &&
+    ['Warning', 'Rejected'].includes(
+      org.data?.credit_verdict || report.data?.verdict,
+    ),
+  ),
+)
+
+const triageRows = computed(() => {
+  const r = report.data || {}
+  return [
+    {
+      label: __('Sanções CEIS/CNEP (CGU)'),
+      value: r.ceis_cnep_verified
+        ? r.ceis_cnep_sanctioned
+          ? __('Sancionado')
+          : __('Nenhuma')
+        : __('Não verificado'),
+      tone: r.ceis_cnep_verified && r.ceis_cnep_sanctioned ? 'error' : '',
+    },
+    { label: __('Regularidade FGTS (CRF)'), value: r.fgts_status || '—' },
+    {
+      label: __('Sintegra / Inscrição Estadual'),
+      value: r.sintegra_status || '—',
+    },
+    { label: __('Dívida ativa na PGFN'), value: r.pgfn_status || '—' },
+    {
+      label: __('Processos (como réu)'),
+      value: `${r.lawsuits_defendant ?? '—'} / ${r.lawsuits_total ?? '—'}`,
+    },
+    {
+      label: __('Protestos em cartório (CENPROT)'),
+      value: r.cenprot_has_protests
+        ? __('{0} encontrado(s)', [r.cenprot_protests_count])
+        : __('Nenhuma'),
+      tone: r.cenprot_has_protests ? 'error' : '',
+    },
+  ]
+})
+
+const highlightGroups = computed(() => {
+  const h = highlights.data || {}
+  const money = (v) => (v != null ? formatMoney(v) : '—')
+  const capacity = h.capacity || {}
+  const restrictions = h.restrictions || {}
+  const lawsuits = h.lawsuits || {}
+  const capacityRows = [
+    { label: __('Fat. Presumido'), value: money(capacity.presumed_revenue) },
+    { label: __('Limite Sugerido'), value: money(capacity.suggested_limit) },
+  ]
+  if (requestedAmount.value > 0)
+    capacityRows.push({
+      label: __('Valor Pretendido'),
+      value: formatMoney(requestedAmount.value),
+      tone:
+        capacity.suggested_limit &&
+        requestedAmount.value > capacity.suggested_limit
+          ? 'error'
+          : '',
+    })
+  return [
+    {
+      key: 'scores',
+      title: __('Scores de Crédito'),
+      rows: (h.scores || []).map((sc) => ({
+        label: sc.source,
+        value: sc.band ? `${sc.value} (${sc.band})` : String(sc.value ?? '—'),
+      })),
+      empty: __('Nenhum score consultado ainda'),
+    },
+    {
+      key: 'capacity',
+      title: __('Capacidade & Limite (Positivo)'),
+      rows: capacityRows,
+      divider: true,
+    },
+    {
+      key: 'scr',
+      title: __('Endividamento Bancário (SCR)'),
+      rows: h.scr
+        ? [
+            { label: __('Carteira Ativa'), value: money(h.scr.carteira_ativa) },
+            {
+              label: __('Vencido'),
+              value: money(h.scr.vencido),
+              tone: h.scr.vencido > 0 ? 'error' : '',
+            },
+            {
+              label: __('Prejuízo Baixado'),
+              value: money(h.scr.prejuizo),
+              tone: h.scr.prejuizo > 0 ? 'error' : '',
+            },
+          ]
+        : [],
+      empty: __('SCR Bacen ainda não consultado'),
+    },
+    {
+      key: 'restrictions',
+      title: __('Protestos & Negativações'),
+      rows: [
+        {
+          label: __('Protestos'),
+          value:
+            String(restrictions.protests_count || 0) +
+            (restrictions.protests_total
+              ? ` (${formatMoney(restrictions.protests_total)})`
+              : ''),
+          tone: restrictions.protests_count > 0 ? 'error' : '',
+        },
+        {
+          label: __('Apontamentos/PEFIN'),
+          value: String(restrictions.Restrictive_count || 0),
+          tone: restrictions.Restrictive_count > 0 ? 'error' : '',
+        },
+        {
+          label: __('Cheques s/ Fundo'),
+          value: String(restrictions.bad_checks || 0),
+          tone: restrictions.bad_checks > 0 ? 'error' : '',
+        },
+      ],
+    },
+    {
+      key: 'lawsuits',
+      title: __('Processos & Penhoras'),
+      rows: [
+        { label: __('Total Processos'), value: String(lawsuits.total || 0) },
+        { label: __('Valor em Disputa'), value: money(lawsuits.total_value) },
+        {
+          label: __('Penhoras Ativas'),
+          value: String(lawsuits.penhoras_count || 0),
+          tone: lawsuits.penhoras_count > 0 ? 'error' : '',
+        },
+      ],
+    },
+    {
+      key: 'punctuality',
+      title: __('Pontualidade & Buscas'),
+      rows: [
+        {
+          label: __('Pagamentos em Dia'),
+          value:
+            capacity.punctuality_pct != null
+              ? `${capacity.punctuality_pct}%`
+              : '—',
+        },
+        {
+          label: __('Consultas (30 dias)'),
+          value: String(h.inquiries_30d ?? 0),
+          tone: h.inquiries_30d >= 8 ? 'error' : '',
+        },
+      ],
+    },
+  ]
+})
 
 function formatMoney(value) {
-  return `R$ ${Number(value || 0)
-    .toFixed(2)
-    .replace('.', ',')}`
-}
-
-function formatFinding(f) {
-  if (!f) return { title: '', detail: '', source: '' }
-  let obj = f
-  if (typeof f === 'string') {
-    const trimmed = f.trim()
-    if ((trimmed.startsWith('{') && trimmed.endsWith('}')) || (trimmed.startsWith('{\\"') && trimmed.endsWith('\\"}'))) {
-      try {
-        obj = JSON.parse(trimmed)
-      } catch (e) {
-        try {
-          obj = JSON.parse(JSON.parse(trimmed))
-        } catch (e2) {
-          obj = { detail: f }
-        }
-      }
-    } else {
-      obj = { detail: f }
-    }
-  }
-  if (typeof obj !== 'object' || obj === null) {
-    return { title: '', detail: String(f), source: '' }
-  }
-  const title = obj.title || obj.label || ''
-  let detail = obj.detail || obj.description || obj.summary || obj.value || ''
-  if (typeof detail === 'object' && detail !== null) {
-    detail = JSON.stringify(detail)
-  }
-  const source = obj.source || obj.provider || ''
-  return {
-    title: String(title),
-    detail: String(detail),
-    source: String(source),
-  }
-}
-
-function priceText(bureau) {
-  if (bureau.price_reference) {
-    return __('Preço de tabela {0}, cobrado por {1} na sua conta', [
-      formatMoney(bureau.price_reference),
-      bureau.provider,
-    ])
-  }
-  return __('Cobrado por {0} na sua conta, conforme seu contrato', [
-    bureau.provider,
-  ])
+  return `R$ ${formatNumber(value)}`
 }
 
 function askRunCheck(force) {
@@ -1563,7 +1305,11 @@ function askRunCheck(force) {
       ),
       size: 'lg',
       actions: [
-        { label: __('Cancelar (Manter Consulta Atual)'), variant: 'solid', onClick: ({ close }) => close() },
+        {
+          label: __('Cancelar (Manter Consulta Atual)'),
+          variant: 'solid',
+          onClick: ({ close }) => close(),
+        },
         {
           label: __('Forçar Nova Consulta Paga'),
           variant: 'outline',
@@ -1595,7 +1341,9 @@ async function runCheck(force) {
       report.reload()
     } else {
       toast.success(
-        __('Triagem Nível 1 enviada para execução. Atualize em instantes para ver o resultado.'),
+        __(
+          'Triagem Nível 1 enviada para execução. Atualize em instantes para ver o resultado.',
+        ),
       )
     }
   } catch (err) {
@@ -1623,31 +1371,8 @@ const opinions = createResource({
   auto: true,
 })
 
-// Detect if any bureau query was run AFTER the latest Done opinion
-const hasNewerQueriesThanOpinion = computed(() => {
-  const opList = opinions.data || []
-  const qList = results.data || []
-  if (!opList.length || !qList.length) return false
-  const latestOp = opList.find((o) => o.status === 'Done')
-  if (!latestOp || !latestOp.requested_on) return false
-  const latestQueryOn = qList[0]?.requested_on
-  return Boolean(latestQueryOn && String(latestQueryOn) > String(latestOp.requested_on))
-})
-
 let pollTimer = null
 let pollRounds = 0
-
-function resultLabel(result) {
-  if (result === 'Approve') return __('Recomendação: Aprovar')
-  if (result === 'Reject') return __('Recomendação: Reprovar')
-  return __('Recomendação: Aprovar com ressalvas')
-}
-
-function resultTheme(result) {
-  if (result === 'Approve') return 'green'
-  if (result === 'Reject') return 'red'
-  return 'amber'
-}
 
 function formatPrice(value) {
   return Number(value || 0)
@@ -1686,9 +1411,36 @@ watch(
   },
 )
 
+// "2026-10-14 16:22:10" → "14/10/2026 16:22" (other formats pass through)
 function formatDate(value) {
-  return value ? String(value).slice(0, 16) : ''
+  if (!value) return ''
+  const text = String(value)
+  const m = text.match(/^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}:\d{2}))?/)
+  if (!m) return text.slice(0, 16)
+  return `${m[3]}/${m[2]}/${m[1]}${m[4] ? ' ' + m[4] : ''}`
 }
+
+function resultMeta(row) {
+  const who = String(row.requested_by || '').includes('@')
+    ? getUser(row.requested_by)?.full_name || row.requested_by
+    : row.requested_by
+  return [
+    row.subject_name ? __('Sócio') : __('Empresa'),
+    row.document,
+    formatDate(row.requested_on),
+    who,
+  ]
+    .filter(Boolean)
+    .join(' · ')
+}
+
+// AI opinions shown under "Documentos gerados" (PDF, or the state while
+// it is being generated / when it failed)
+const opinionDocs = computed(() =>
+  (opinions.data || []).filter(
+    (item) => item.pdf_url || ['Queued', 'Failed'].includes(item.status),
+  ),
+)
 
 // Minimum package of the dossier (credtech#316)
 const pkg = createResource({
@@ -1699,7 +1451,10 @@ const pkg = createResource({
   },
   auto: true,
   onSuccess(data) {
-    if (data?.deal_amount && (!requestedAmount.value || requestedAmount.value <= 0)) {
+    if (
+      data?.deal_amount &&
+      (!requestedAmount.value || requestedAmount.value <= 0)
+    ) {
       requestedAmount.value = Number(data.deal_amount)
     }
   },
@@ -1720,7 +1475,9 @@ const canGeneratePackage = computed(() => {
 
 function packageEntryText(entry) {
   if (entry.state === 'reused')
-    return __('reaproveitado sem custo (consultado em {0})', [formatDate(entry.last_on)])
+    return __('reaproveitado sem custo (consultado em {0})', [
+      formatDate(entry.last_on),
+    ])
   if (entry.state === 'unavailable')
     return __('indisponível: {0}', [entry.reason])
   return entry.price_reference
@@ -1806,7 +1563,12 @@ const groupedDossiers = computed(() => {
     const isJson = name.endsWith('.json')
     const stampKey = String(file.creation || '').slice(0, 16)
     if (!byStamp[stampKey]) {
-      byStamp[stampKey] = { key: stampKey, creation: file.creation, pdf: null, json: null }
+      byStamp[stampKey] = {
+        key: stampKey,
+        creation: file.creation,
+        pdf: null,
+        json: null,
+      }
       groups.push(byStamp[stampKey])
     }
     if (isPdf && !byStamp[stampKey].pdf) byStamp[stampKey].pdf = file
@@ -1817,7 +1579,8 @@ const groupedDossiers = computed(() => {
 
 async function askOpinionOnly() {
   const opinion = pkg.data?.opinion || opinionStatus.data || {}
-  const extraOpinion = opinion.configured && opinion.next_is_extra && opinion.extra_allowed
+  const extraOpinion =
+    opinion.configured && opinion.next_is_extra && opinion.extra_allowed
   if (extraOpinion) {
     createDialog({
       title: __('Gerar Parecer de Crédito (IA)'),
@@ -1859,7 +1622,9 @@ async function triggerOpinionOnly(confirmExtra) {
     await opinions.reload()
     startPolling()
   } catch (err) {
-    toast.error(err?.messages?.[0] || __('Não foi possível solicitar o parecer da IA.'))
+    toast.error(
+      err?.messages?.[0] || __('Não foi possível solicitar o parecer da IA.'),
+    )
   } finally {
     requestingOpinion.value = false
   }
@@ -1874,7 +1639,9 @@ function askPackage() {
   const needsAck = Boolean(data.needs_acknowledgement)
   if (!data.missing.length && !extraOpinion) {
     createDialog({
-      title: __('Consultas em dia (Prazo de {0} dias)', [data.reuse_days || 30]),
+      title: __('Consultas em dia (Prazo de {0} dias)', [
+        data.reuse_days || 30,
+      ]),
       message: __(
         'Todas as consultas selecionadas para esta empresa já foram realizadas recentemente. O prazo configurado para novas consultas na API do provedor é de {0} dias. Nenhuma nova consulta paga será disparada no provedor.',
         [data.reuse_days || 30],
@@ -1905,16 +1672,17 @@ function askPackage() {
   const lines = []
   if (data.missing.length) {
     lines.push(
-      __(
-        'Consultas pagas, cobradas pelo provedor na sua conta: {0}.',
-        [
-          data.missing
-            .map((entry) => `${entry.label} (${entry.subject_name})`)
-            .join(', '),
-        ],
-      ),
+      __('Consultas pagas, cobradas pelo provedor na sua conta: {0}.', [
+        data.missing
+          .map((entry) => `${entry.label} (${entry.subject_name})`)
+          .join(', '),
+      ]),
     )
-    lines.push(__('Cerca de {0} pelo preço de tabela.', [formatMoney(data.missing_cost)]))
+    lines.push(
+      __('Cerca de {0} pelo preço de tabela.', [
+        formatMoney(data.missing_cost),
+      ]),
+    )
   }
   if (needsAck) {
     lines.push(
@@ -1967,16 +1735,15 @@ async function generatePackage(acknowledged, confirmExtra) {
         acknowledged_warning: acknowledged ? 1 : 0,
         confirm_extra_cost: confirmExtra ? 1 : 0,
         selected_contacts: JSON.stringify(selected.value),
-        tier: selectedTierMode.value === 'default' ? null : selectedTierMode.value,
+        tier:
+          selectedTierMode.value === 'default' ? null : selectedTierMode.value,
         requested_amount: requestedAmount.value || null,
       },
     )
     packageStarted.value = true
     if (res?.opinion_skipped) {
       toast.warning(
-        __('Gerando dossiê sem o parecer da IA: {0}', [
-          res.opinion_skipped,
-        ]),
+        __('Gerando dossiê sem o parecer da IA: {0}', [res.opinion_skipped]),
       )
     } else {
       toast.success(
@@ -2094,6 +1861,96 @@ function askPremiumBureau(bureau, partnerList = []) {
   })
 }
 
+// "Bureaus para os sócios marcados": PF bureaus run for every checked partner
+const partnerBureauKeys = ref([])
+const partnerBureaus = computed(() =>
+  (options.data?.bureaus || []).filter((bureau) => bureau.partner_ok),
+)
+const chosenPartnerBureaus = computed(() =>
+  partnerBureaus.value.filter(
+    (bureau) =>
+      bureau.configured && partnerBureauKeys.value.includes(bureau.key),
+  ),
+)
+const canRunPartnerBureaus = computed(() =>
+  Boolean(
+    options.data?.can_request &&
+    selectedPartners.value.length &&
+    chosenPartnerBureaus.value.length &&
+    !requesting.value,
+  ),
+)
+
+function togglePartnerBureau(key) {
+  partnerBureauKeys.value = partnerBureauKeys.value.includes(key)
+    ? partnerBureauKeys.value.filter((k) => k !== key)
+    : [...partnerBureauKeys.value, key]
+}
+
+function askPartnerBureaus() {
+  const bureaus = chosenPartnerBureaus.value
+  const partnerList = selectedPartners.value
+  if (!bureaus.length || !partnerList.length) return
+  if (bureaus.length === 1) return askPremiumBureau(bureaus[0], partnerList)
+  const data = options.data
+  const needsAck = Boolean(data?.needs_acknowledgement)
+  const count = bureaus.length * partnerList.length
+  const priced = bureaus.every((bureau) => bureau.price_reference)
+  const total = bureaus.reduce(
+    (sum, bureau) => sum + (bureau.price_reference || 0) * partnerList.length,
+    0,
+  )
+  let message =
+    __('Consultas pagas, cobradas pelo provedor na sua conta: {0}.', [
+      bureaus
+        .map((bureau) => `${bureau.label} (${bureau.provider})`)
+        .join(', '),
+    ]) +
+    ' ' +
+    __('Sócios selecionados: {0}. {1} consulta(s)', [
+      partnerList.map((partner) => partner.name).join(', '),
+      count,
+    ]) +
+    (priced
+      ? ' ' +
+        __('(cerca de {0} no total pelo preço de tabela).', [
+          formatMoney(total),
+        ])
+      : '.')
+  if (needsAck) {
+    message +=
+      ' ' +
+      __('Alerta: o resultado da triagem rápida para esta organização é {0}.', [
+        verdictText(data.verdict),
+      ]) +
+      (data.verdict_summary ? ' ' + data.verdict_summary : '') +
+      ' ' +
+      __('A consulta ficará registrada como realizada sob alerta.')
+  }
+  createDialog({
+    title: __('Gerar bureaus dos sócios'),
+    message,
+    size: 'lg',
+    actions: [
+      { label: __('Cancelar'), onClick: ({ close }) => close() },
+      {
+        label: needsAck
+          ? __('Consultar mesmo assim (pago)')
+          : __('Confirmar consulta paga'),
+        variant: 'solid',
+        theme: needsAck ? 'red' : 'gray',
+        onClick: async ({ close }) => {
+          close()
+          const contacts = partnerList.map((partner) => partner.contact)
+          for (const bureau of bureaus) {
+            await requestPremiumBureau(bureau.key, needsAck, contacts)
+          }
+        },
+      },
+    ],
+  })
+}
+
 async function requestPremiumBureau(
   bureau,
   acknowledged,
@@ -2139,4 +1996,19 @@ async function requestPremiumBureau(
   reloadPackageStatus()
   requesting.value = ''
 }
+
+// The deal top bar ("Gerar parecer de IA") drives the AI opinion from here
+defineExpose({
+  askOpinionOnly,
+  requestingOpinion,
+  opinionConfigured: computed(() => Boolean(opinionStatus.data?.configured)),
+  opinionUsage: computed(() =>
+    opinionStatus.data
+      ? __('{0} de {1} pareceres usados neste mês', [
+          opinionStatus.data.used,
+          opinionStatus.data.included,
+        ])
+      : '',
+  ),
+})
 </script>
