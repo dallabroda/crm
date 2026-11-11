@@ -276,6 +276,12 @@
           />
 
           <!-- Field mapping (de-para): every field the ERP accepts or returns, the company picks the CRM side -->
+          <p
+            v-if="mappingLoading && !mapping"
+            class="text-base leading-5 text-ink-gray-6"
+          >
+            {{ __('Loading the field mapping…') }}
+          </p>
           <section v-if="mapping" class="flex flex-col gap-6">
             <div class="flex flex-col gap-1">
               <div class="text-lg font-semibold leading-6 text-ink-gray-9">
@@ -284,7 +290,7 @@
               <span class="text-base leading-5 text-ink-gray-6">
                 {{
                   __(
-                    'Every field the ERP accepts or returns. It comes ready for the chosen ERP; change only what your portfolio uses differently. * required by the ERP.',
+                    'You choose which ERP fields to use: the screen shows the required ones and the ones you added. * required by the ERP.',
                   )
                 }}
               </span>
@@ -307,7 +313,7 @@
               </div>
               <div class="ct-field-48 grid grid-cols-2 gap-4">
                 <div
-                  v-for="field in mapping.cedente.fields"
+                  v-for="field in shownCedenteFields"
                   :key="field.erp_field"
                   class="flex flex-col gap-2"
                 >
@@ -350,6 +356,17 @@
                   </template>
                 </div>
               </div>
+              <div
+                v-if="hiddenCedenteOptions.length > 1"
+                class="ct-field-48 grid grid-cols-2 gap-4"
+              >
+                <FormControl
+                  type="select"
+                  :options="hiddenCedenteOptions"
+                  model-value=""
+                  @update:model-value="(v) => v && showMore.add('cedente:' + v)"
+                />
+              </div>
             </div>
 
             <div
@@ -369,7 +386,7 @@
               </div>
               <div class="ct-field-48 grid grid-cols-2 gap-4">
                 <FormControl
-                  v-for="column in part.options.columns"
+                  v-for="column in shownColumns(part)"
                   :key="column"
                   type="select"
                   :label="__('{0} (ERP) →', [column])"
@@ -384,6 +401,19 @@
                   "
                   :model-value="importValue(part.table, column)"
                   @update:model-value="(v) => pickImport(part.table, column, v)"
+                />
+              </div>
+              <div
+                v-if="hiddenColumnOptions(part).length > 1"
+                class="ct-field-48 grid grid-cols-2 gap-4"
+              >
+                <FormControl
+                  type="select"
+                  :options="hiddenColumnOptions(part)"
+                  model-value=""
+                  @update:model-value="
+                    (v) => v && showMore.add(part.table + ':' + v)
+                  "
                 />
               </div>
             </div>
@@ -549,17 +579,28 @@ watch(
 
 // De-para (credtech#367): the options come from the server (every ERP field and column, every CRM field)
 const mapping = ref(null)
+const mappingLoading = ref(false)
+const mappingLists = ref({})
+// Fields and columns the admin added on the screen (the rest stays hidden until chosen)
+const showMore = reactive(new Set())
 const FIXED = '__fixed'
 const LIST_SOURCE = 'erp_list'
 
 async function loadMapping() {
   if (!settings.originalDoc?.erp_provider) return (mapping.value = null)
+  mappingLoading.value = true
   try {
     mapping.value = await call('cred_hub.erp.settings.mapping_options')
   } catch (err) {
     mapping.value = null
     toast.error(err.messages?.[0] || err.message)
+  } finally {
+    mappingLoading.value = false
   }
+  // The names of the ERP lists call the ERP (slow the first time): they come apart, the screen does not wait
+  call('cred_hub.erp.settings.mapping_lists')
+    .then((lists) => (mappingLists.value = lists || {}))
+    .catch(() => (mappingLists.value = {}))
 }
 watch(() => settings.originalDoc?.erp_provider, loadMapping, {
   immediate: true,
@@ -638,7 +679,7 @@ function pickSource(field, value) {
 }
 
 function listOptions(field) {
-  const names = [...(mapping.value?.lists?.[field.resource] || [])]
+  const names = [...(mappingLists.value?.[field.resource] || [])]
   const current = cedenteRow(field.erp_field)?.default_value
   if (current && !names.includes(current)) names.unshift(current)
   return [
@@ -670,7 +711,16 @@ const importParts = computed(() =>
           options: mapping.value.sacado,
           title: __('Sacados (ERP → CRM)'),
           hint: __(
-            'Each column of the ERP sacado registry fills the field you choose on the sacado company or person, only when it is empty. Nothing mapped, the registry is not read.',
+            'Read once, when the sync creates the sacado: the columns you choose fill its company or person and its contact. A sacado that already exists is not read again; the CNPJ data comes from the automatic enrichment.',
+          ),
+          none: __('Do not bring'),
+        },
+        {
+          table: 'cedente_registry_map',
+          options: mapping.value.cedente_registry,
+          title: __('Cedentes (ERP → CRM)'),
+          hint: __(
+            'Read once, when the sync creates the cedente: the columns you choose fill its company and its contact. A cedente that already exists is not read again; the CNPJ data comes from the automatic enrichment.',
           ),
           none: __('Do not bring'),
         },
@@ -685,6 +735,40 @@ const columnKey = (name) =>
     .split(/[^a-z0-9]+/)
     .filter((w) => w && w !== 'de')
     .join('')
+// Only what the company uses is shown: required, automatic, already chosen or added now
+const shownCedenteFields = computed(() =>
+  (mapping.value?.cedente.fields || []).filter(
+    (f) =>
+      f.required === 'yes' ||
+      f.kind === 'auto' ||
+      cedenteRow(f.erp_field) ||
+      showMore.has('cedente:' + f.erp_field),
+  ),
+)
+const hiddenCedenteOptions = computed(() => [
+  { label: __('+ Add an ERP field'), value: '' },
+  ...(mapping.value?.cedente.fields || [])
+    .filter((f) => !shownCedenteFields.value.includes(f))
+    .map((f) => ({ label: __(f.label), value: f.erp_field })),
+])
+function shownColumns(part) {
+  return part.options.columns.filter(
+    (c) =>
+      part.options.fixed[c] ||
+      importValue(part.table, c) ||
+      showMore.has(part.table + ':' + c),
+  )
+}
+function hiddenColumnOptions(part) {
+  const shown = shownColumns(part)
+  return [
+    { label: __('+ Add an ERP column'), value: '' },
+    ...part.options.columns
+      .filter((c) => !shown.includes(c))
+      .map((c) => ({ label: c, value: c })),
+  ]
+}
+
 function importValue(table, column) {
   const row = (settings.doc?.[table] || []).find(
     (r) => columnKey(r.erp_column) === columnKey(column),
@@ -709,6 +793,7 @@ const mapShape = (doc) =>
     ]),
     (doc?.title_field_map || []).map((r) => [r.erp_column, r.crm_field]),
     (doc?.sacado_field_map || []).map((r) => [r.erp_column, r.crm_field]),
+    (doc?.cedente_registry_map || []).map((r) => [r.erp_column, r.crm_field]),
   ])
 
 function save() {

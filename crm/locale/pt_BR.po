@@ -14674,8 +14674,6 @@ msgstr "Endereço de cobrança = principal"
 msgid "Street and number"
 msgstr "Logradouro e número"
 
-msgid "Every field the ERP accepts or returns. It comes ready for the chosen ERP; change only what your portfolio uses differently. * required by the ERP."
-msgstr "Todos os campos que o ERP aceita ou devolve. Já vem pronto para o ERP escolhido; mude só o que a sua carteira usa diferente. * obrigatório no ERP."
 
 msgid "Cedente registration (CRM → ERP)"
 msgstr "Cadastro do cedente (CRM → ERP)"
@@ -14689,8 +14687,6 @@ msgstr "Sacados (ERP → CRM)"
 msgid "Each column of the ERP títulos goes to the título field you choose, on every sync. The protest species is always picked by the operator."
 msgstr "Cada coluna dos títulos do ERP vai para o campo do título que você escolher, a cada sincronização. A espécie do protesto é sempre escolhida pelo operador."
 
-msgid "Each column of the ERP sacado registry fills the field you choose on the sacado company or person, only when it is empty. Nothing mapped, the registry is not read."
-msgstr "Cada coluna do cadastro de sacados do ERP preenche o campo que você escolher na empresa ou pessoa do sacado, só quando ele está vazio. Sem nenhuma coluna escolhida, o cadastro não é lido."
 
 msgid "Do not bring"
 msgstr "Não trazer"
@@ -14712,3 +14708,24 @@ msgstr "ou, se vazio,"
 
 msgid "Each field of the cedente registration in the ERP and where it comes from in the CRM: a field, a fixed value, a name of the ERP list or do not send."
 msgstr "Cada campo do cadastro do cedente no ERP e de onde ele vem no CRM: um campo, um valor fixo, um nome da lista do ERP ou não enviar."
+
+msgid "Loading the field mapping…"
+msgstr "Carregando o de-para…"
+
+msgid "You choose which ERP fields to use: the screen shows the required ones and the ones you added. * required by the ERP."
+msgstr "Você escolhe quais campos do ERP usar: a tela mostra os obrigatórios e os que você adicionou. * obrigatório no ERP."
+
+msgid "+ Add an ERP field"
+msgstr "+ Adicionar campo do ERP"
+
+msgid "+ Add an ERP column"
+msgstr "+ Adicionar coluna do ERP"
+
+msgid "Cedentes (ERP → CRM)"
+msgstr "Cedentes (ERP → CRM)"
+
+msgid "Read once, when the sync creates the sacado: the columns you choose fill its company or person and its contact. A sacado that already exists is not read again; the CNPJ data comes from the automatic enrichment."
+msgstr "Lido uma vez, quando a sincronização cria o sacado: as colunas que você escolher preenchem a empresa ou pessoa e o contato dele. Sacado que já existe não é lido de novo; os dados do CNPJ vêm do enriquecimento automático."
+
+msgid "Read once, when the sync creates the cedente: the columns you choose fill its company and its contact. A cedente that already exists is not read again; the CNPJ data comes from the automatic enrichment."
+msgstr "Lido uma vez, quando a sincronização cria o cedente: as colunas que você escolher preenchem a empresa e o contato dele. Cedente que já existe não é lido de novo; os dados do CNPJ vêm do enriquecimento automático."
