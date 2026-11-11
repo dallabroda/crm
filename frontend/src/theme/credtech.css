@@ -360,6 +360,14 @@ svg[stroke-width='1.5'] {
   stroke-width: 2.1;
 }
 
+/* Figma "Andamento do card": "Ganho" is a grey outline button with green
+   text and icon. */
+.ct-btn-success-text,
+.ct-btn-success-text svg,
+.ct-btn-success-text [class*='lucide-'] {
+  color: var(--ct-success) !important;
+}
+
 /* Style Guide: the trash icon is always red (Paleta/Feedback/Erro). */
 .ct-btn-danger-icon,
 .ct-btn-danger-icon svg,

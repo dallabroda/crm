@@ -26,10 +26,12 @@
                 />
               </slot>
             </template>
+            <!-- Figma side panel fields: 29px rows, 128px labels starting
+                 4px inside the section, values aligned at label + 136px -->
             <slot v-bind="{ section }">
               <FadedScrollableDiv
                 v-if="section.columns?.[0].fields.length"
-                class="column flex flex-col gap-1.5 overflow-y-auto"
+                class="column flex flex-col overflow-y-auto"
               >
                 <template
                   v-for="field in section.columns[0].fields || []"
@@ -37,7 +39,7 @@
                 >
                   <div
                     v-if="field.visible"
-                    class="field flex gap-2 px-3 leading-5 first:mt-3"
+                    class="field flex min-h-[29px] px-1 leading-5"
                     :class="
                       isTextareaField(field) ? 'items-start' : 'items-center'
                     "
@@ -48,10 +50,12 @@
                       :hoverDelay="1000"
                     >
                       <div
-                        class="w-[35%] min-w-20 shrink-0 flex items-center gap-0.5"
+                        class="w-32 shrink-0 flex items-center gap-0.5"
                         :class="{ 'pt-[9px]': isTextareaField(field) }"
                       >
-                        <div class="truncate text-base text-ink-gray-6">
+                        <div
+                          class="line-clamp-2 break-words py-1.5 text-base leading-[17px] text-ink-gray-6"
+                        >
                           {{ __(field.label) }}
                         </div>
                         <div

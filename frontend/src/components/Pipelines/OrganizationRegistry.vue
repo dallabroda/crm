@@ -1,17 +1,22 @@
 <template>
   <div
     v-if="organization?.name && section.columns && (rows.length || !hasCnpj)"
-    :class="embedded ? 'px-3 py-2' : 'border-b px-4 py-3'"
+    :class="
+      embedded
+        ? 'px-3 py-2'
+        : 'border-b border-[var(--ct-border-soft)] px-4 py-3'
+    "
     data-testid="organization-registry"
   >
     <div class="mb-2 flex items-center justify-between">
-      <div v-if="!embedded" class="text-base-medium text-ink-gray-8">
+      <div v-if="!embedded" class="text-base-medium leading-5 text-ink-gray-9">
         {{ __(section.label) }}
       </div>
       <span v-else class="text-xs font-medium text-ink-gray-6">
         {{ organization.name }}
       </span>
       <router-link
+        v-if="embedded"
         class="text-sm text-ink-blue-3 hover:underline"
         :to="{
           name: 'Organization',
@@ -19,6 +24,17 @@
         }"
       >
         {{ __('Abrir organização ↗') }}
+      </router-link>
+      <!-- Figma "Link de texto" (Azul): 14 Medium, underlined -->
+      <router-link
+        v-else
+        class="text-base font-medium leading-5 text-[color:var(--ct-text-accent)] underline underline-offset-2"
+        :to="{
+          name: 'Organization',
+          params: { organizationId: organization.name },
+        }"
+      >
+        {{ __('Editar na organização') }}
       </router-link>
     </div>
     <p v-if="!hasCnpj" class="text-p-sm text-ink-gray-5">
@@ -33,10 +49,13 @@
         class="flex gap-2 text-base"
         :data-registry-field="row.fieldname"
       >
-        <div class="w-2/5 shrink-0 truncate text-ink-gray-5">
+        <div
+          class="shrink-0 truncate leading-5 text-ink-gray-5"
+          :class="embedded ? 'w-2/5' : 'w-32'"
+        >
           {{ __(row.label) }}
         </div>
-        <div class="truncate text-ink-gray-8">{{ row.value }}</div>
+        <div class="truncate leading-5 text-ink-gray-9">{{ row.value }}</div>
       </div>
     </div>
   </div>
@@ -92,7 +111,9 @@ function display(field, value) {
 const rows = computed(() => {
   let fields = (section.value.columns || []).flatMap((c) => c.fields || [])
   return fields
-    .filter((f) => f && typeof f === 'object' && f.fieldname !== 'cnpj_checked_on')
+    .filter(
+      (f) => f && typeof f === 'object' && f.fieldname !== 'cnpj_checked_on',
+    )
     .map((f) => ({
       fieldname: f.fieldname,
       label: f.label,
