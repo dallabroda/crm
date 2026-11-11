@@ -34,6 +34,7 @@
     :options="{
       onClick: (row) => showTask(row.name),
       onNewClick: (column) => createTask(column),
+      inlineFields: true,
     }"
     @update="(data) => viewControls.updateKanbanSettings(data)"
     @loadMore="(columnName) => viewControls.loadMoreKanban(columnName)"
@@ -64,7 +65,7 @@
         </div>
         <div
           v-else-if="getRow(itemName, titleField).label"
-          class="truncate text-base"
+          class="truncate text-base leading-5"
         >
           {{ getRow(itemName, titleField).label }}
         </div>
@@ -75,6 +76,7 @@
       <div
         v-if="getRow(itemName, fieldName).label"
         class="truncate flex items-center gap-2"
+        :class="{ 'basis-full': fieldName === 'description' }"
       >
         <div v-if="fieldName === 'status'">
           <TaskStatusIcon
@@ -132,7 +134,7 @@
           <button
             v-if="getRow(itemName, 'reference_docname').label"
             type="button"
-            class="rounded-[var(--ct-radius-sm)] text-base font-medium text-[color:var(--ct-text-accent)] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-outline-gray-3"
+            class="rounded-[var(--ct-radius-sm)] text-base font-medium text-[color:var(--ct-text-accent)] underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-outline-gray-3"
             @click.stop="
               redirect(
                 getRow(itemName, 'reference_doctype').label,
@@ -236,7 +238,7 @@ import { useRouter } from 'vue-router'
 
 const { getFormattedPercent, getFormattedFloat, getFormattedCurrency } =
   getMeta('CRM Task')
-const { getUser } = usersStore()
+const { getUser, userLabel } = usersStore()
 const { completeStep } = useCrmOnboarding()
 const { capture } = useTelemetry()
 
@@ -339,8 +341,8 @@ function parseRows(rows, columns = []) {
         _rows[row] = timestampCell(task[row])
       } else if (row == 'assigned_to') {
         _rows[row] = {
-          label: task.assigned_to && getUser(task.assigned_to).full_name,
           ...(task.assigned_to && getUser(task.assigned_to)),
+          label: task.assigned_to && userLabel(task.assigned_to),
         }
       }
     })

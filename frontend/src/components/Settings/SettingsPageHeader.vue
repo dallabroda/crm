@@ -33,9 +33,10 @@
       <slot name="actions" />
     </div>
   </div>
+  <!-- Figma "Descrição": 14/20 Uso/Texto/Secundário -->
   <p
     v-if="description || $slots.description"
-    class="text-p-base text-ink-gray-6"
+    class="text-base leading-5 text-ink-gray-6"
   >
     <slot name="description">{{ description }}</slot>
   </p>

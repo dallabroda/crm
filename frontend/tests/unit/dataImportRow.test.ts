@@ -46,8 +46,12 @@ describe('getDataImportRow', () => {
       label: '2026-10-13',
       timeAgo: 'just now',
     })
-    expect(getDataImportRow('import_type', { import_type: 'Insert' })).toBe(
-      'Insert',
-    )
+  })
+
+  it('translates the import type for display and keeps the stored value', () => {
+    expect(getDataImportRow('import_type', { import_type: 'Insert' })).toEqual({
+      label: 'Insert',
+      name: 'Insert',
+    })
   })
 })

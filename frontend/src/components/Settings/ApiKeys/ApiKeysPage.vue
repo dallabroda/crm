@@ -1,27 +1,52 @@
 <template>
+  <!-- Figma "Configurações · API" (2336:11101): the keys as a "Tabela"; the
+       reference and the audit live on "Documentação da API" (2345:29277),
+       opened from the top bar, with "Voltar" -->
   <div class="flex h-full flex-col gap-6 text-ink-gray-8">
-    <SettingsPageHeader :title="__('API')">
+    <SettingsPageHeader :title="view === 'docs' ? __('API documentation') : __('API')">
+      <template v-if="view === 'docs'" #title>
+        <div class="flex min-w-0 items-center gap-3">
+          <SettingsBackLink @click="view = 'keys'" />
+          <h1 class="truncate">{{ __('API documentation') }}</h1>
+        </div>
+      </template>
       <template #description>
         {{
-          __(
-            'Keys for other systems to read and write your cards, contacts and organizations. Each key only reaches the funnels you choose and does not take a user seat.',
-          )
+          view === 'docs'
+            ? __(
+                'Integre seu ERP, site, motor de crédito ou data warehouse com autenticação Bearer, isolamento por funil, operações em lote (Batch) e sincronização incremental.',
+              )
+            : __(
+                'Keys for other systems to read and write your cards, contacts and organizations. Each key only reaches the funnels you choose and does not take a user seat.',
+              )
         }}
       </template>
       <template #actions>
-        <div class="flex items-center gap-2">
-          <a
+        <div v-if="view === 'docs'" class="flex items-center gap-2">
+          <Button
+            variant="outline"
+            icon-right="lucide-external-link"
+            :label="__('OpenAPI 3.1 (JSON)')"
+            href="/api/method/cred_hub.api_keys.get_openapi_spec"
+          />
+          <Button
+            variant="solid"
+            icon-right="lucide-external-link"
+            :label="__('Open playground')"
             href="/api-docs"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="inline-flex h-7 items-center gap-1.5 rounded border border-outline-gray-2 bg-surface-white px-2.5 text-sm font-medium text-ink-gray-8 hover:bg-surface-gray-2"
-          >
-            <span>{{ __('Documentação da API ↗') }}</span>
-          </a>
+          />
+        </div>
+        <div v-else class="flex items-center gap-2">
+          <Button
+            variant="outline"
+            icon-right="lucide-external-link"
+            :label="__('API documentation')"
+            @click="view = 'docs'"
+          />
           <Button
             v-if="data"
             variant="solid"
-            icon-left="plus"
+            icon-left="lucide-plus"
             :label="__('New key')"
             :disabled="activeCount >= data.limit"
             @click="openForm()"
@@ -39,7 +64,7 @@
       />
     </div>
 
-    <div v-else class="flex flex-col gap-4 overflow-y-auto">
+    <div v-else-if="view === 'keys'" class="flex flex-col gap-4 overflow-y-auto">
       <!-- Old keys (token of a user, made in the technical screen) stop on a date set on deploy -->
       <div
         v-if="data.legacy_until && data.legacy_users.length"
@@ -89,241 +114,207 @@
         @action="openForm()"
       />
 
+      <!-- Figma "Tabela": grey 40px header (12 Medium), 52px rows; the name
+           opens the key (edit, new secret), its details are in the tooltip -->
       <div
-        v-for="key in data.keys"
-        :key="key.name"
-        class="flex flex-col gap-2 rounded border border-outline-gray-1 p-4"
-        :class="{ 'opacity-60': key.status !== 'Active' }"
+        v-else
+        class="overflow-hidden rounded-lg border border-[var(--ct-border)]"
       >
-        <div class="flex items-start justify-between gap-4">
-          <div class="flex flex-col gap-0.5">
-            <div class="flex items-center gap-2">
-              <span class="text-base-semibold text-ink-gray-9">
-                {{ key.label }}
-              </span>
-              <Badge
-                :label="key.status === 'Active' ? __('In use') : __('Revoked')"
-                :theme="key.status === 'Active' ? 'green' : 'gray'"
-                variant="subtle"
-              />
-            </div>
-            <span class="font-mono text-p-sm text-ink-gray-6">
-              {{ key.prefix }}_…{{ key.secret_hint }}
-            </span>
-          </div>
-          <div v-if="key.status === 'Active'" class="flex gap-2">
-            <Button :label="__('Edit')" @click="openForm(key)" />
+        <div
+          class="ct-api-keys-grid h-10 items-center border-b border-[var(--ct-border)] bg-[var(--ct-bg-soft)] text-[12px] font-medium leading-4 text-[color:var(--ct-text-secondary)]"
+        >
+          <span>{{ __('Name') }}</span>
+          <span>{{ __('Key') }}</span>
+          <span>{{ __('Created on') }}</span>
+          <span>{{ __('Last used') }}</span>
+          <span />
+        </div>
+        <div
+          v-for="key in data.keys"
+          :key="key.name"
+          class="ct-api-keys-grid min-h-[52px] items-center border-b border-[var(--ct-border)] py-2.5 text-[14px] leading-5 text-[color:var(--ct-text-secondary)] last:border-b-0"
+          :class="{ 'opacity-60': key.status !== 'Active' }"
+        >
+          <Tooltip :text="keyDetails(key)">
+            <button
+              type="button"
+              class="min-w-0 truncate text-left font-medium text-[color:var(--ct-text-primary)] hover:underline disabled:hover:no-underline"
+              :disabled="key.status !== 'Active'"
+              @click="openForm(key)"
+            >
+              {{ key.label }}
+            </button>
+          </Tooltip>
+          <span class="truncate">
+            {{ key.prefix }}…{{ key.secret_hint }}
+          </span>
+          <span>{{ brDate(key.created_on) }}</span>
+          <span>
+            {{ key.last_used_on ? timeAgo(key.last_used_on) : __('never') }}
+          </span>
+          <div class="flex justify-start">
             <Button
-              :label="
-                confirm.rotate === key.name
-                  ? __('Confirm new secret')
-                  : __('New secret')
-              "
-              :theme="confirm.rotate === key.name ? 'red' : 'gray'"
-              :loading="busy === key.name + ':rotate'"
-              @click="rotate(key)"
-              @blur="confirm.rotate = null"
-            />
-            <Button
+              v-if="key.status === 'Active'"
+              variant="subtle"
+              theme="red"
+              class="whitespace-nowrap"
               :label="
                 confirm.revoke === key.name
                   ? __('Confirm revoke')
                   : __('Revoke')
               "
-              :theme="confirm.revoke === key.name ? 'red' : 'gray'"
               :loading="busy === key.name + ':revoke'"
               @click="revoke(key)"
               @blur="confirm.revoke = null"
             />
+            <Badge
+              v-else
+              :label="__('Revoked')"
+              theme="gray"
+              variant="subtle"
+            />
           </div>
         </div>
-        <p v-if="confirm.rotate === key.name" class="text-p-sm text-ink-red-6">
-          {{ __('The current secret stops working right away.') }}
-        </p>
-        <p v-if="confirm.revoke === key.name" class="text-p-sm text-ink-red-6">
-          {{ __('The key stops working right away. This cannot be undone.') }}
-        </p>
-        <div class="flex flex-wrap gap-x-6 gap-y-1 text-p-sm text-ink-gray-6">
-          <span>{{ __('Permissions: {0}', [scopeSummary(key.scopes)]) }}</span>
-          <span v-if="key.pipelines.length">
-            {{ __('Funnels: {0}', [pipelineLabels(key.pipelines)]) }}
-          </span>
-          <span v-if="key.allowed_ips">
-            {{ __('IPs: {0}', [key.allowed_ips.split('\n').join(', ')]) }}
-          </span>
-          <span v-if="key.expires_on">
-            {{ __('Valid until {0}', [brDate(key.expires_on)]) }}
-          </span>
-          <span>
-            {{
-              key.last_used_on
-                ? __('Last used {0} from {1}', [
-                    brDateTime(key.last_used_on),
-                    key.last_used_ip,
-                  ])
-                : __('Never used')
-            }}
-          </span>
-          <span>
-            {{
-              __('Created by {0} on {1}', [
-                key.created_by,
-                brDate(key.created_on),
-              ])
-            }}
-          </span>
+      </div>
+      <p v-if="confirm.revoke" class="text-p-sm text-ink-red-6">
+        {{ __('The key stops working right away. This cannot be undone.') }}
+      </p>
+    </div>
+
+    <!-- Figma "Documentação da API" (2345:29277): reference (3 mini cards,
+         tabs, endpoints) and the audit card, 32px apart -->
+    <div v-else class="mt-2 flex flex-col gap-8 overflow-y-auto">
+      <div class="flex flex-col gap-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div
+          class="flex flex-col gap-1.5 rounded-lg border border-[var(--ct-border)] p-3"
+        >
+          <div
+            class="text-[12px] font-medium uppercase leading-[18px] tracking-[0.1em] text-ink-gray-9"
+          >
+            {{ __('URL Base') }}
+          </div>
+          <div class="flex h-[17px] items-center justify-between gap-2">
+            <code class="truncate font-mono text-[12px] font-medium leading-[17px] text-ink-gray-9">{{ baseUrl }}</code>
+            <Button
+              size="sm"
+              variant="ghost"
+              icon="lucide-copy"
+              :tooltip="__('Copy')"
+              @click="copyToClipboard(baseUrl)"
+            />
+          </div>
+        </div>
+        <div
+          class="flex flex-col gap-1.5 rounded-lg border border-[var(--ct-border)] p-3"
+        >
+          <div
+            class="text-[12px] font-medium uppercase leading-[18px] tracking-[0.1em] text-ink-gray-9"
+          >
+            {{ __('Cabeçalho de Autenticação') }}
+          </div>
+          <div class="truncate font-mono text-[12px] font-medium leading-[17px] text-ink-gray-9">
+            Authorization: Bearer hub_&lt;id&gt;_&lt;segredo&gt;
+          </div>
+        </div>
+        <div
+          class="flex flex-col gap-1.5 rounded-lg border border-[var(--ct-border)] p-3"
+        >
+          <div
+            class="text-[12px] font-medium uppercase leading-[18px] tracking-[0.1em] text-ink-gray-9"
+          >
+            {{ __('Rate Limit (Janela Deslizante)') }}
+          </div>
+          <div class="truncate text-[12px] font-medium leading-[17px] text-ink-gray-9">
+            {{ __('300 chamadas/min (leitura) · 60 escritas/min por chave') }}
+          </div>
         </div>
       </div>
 
-      <!-- Gold-Standard API Documentation & Reference Section -->
-      <div class="mt-4 flex flex-col gap-4 rounded-lg border border-outline-gray-1 bg-surface-gray-1 p-5">
-        <div class="flex flex-wrap items-start justify-between gap-4">
-          <div class="flex flex-col gap-1">
-            <div class="flex items-center gap-2">
-              <span class="text-lg font-semibold text-ink-gray-9">
-                {{ __('Documentação e Referência Rápida da API REST') }}
-              </span>
-              <Badge :label="__('Padrão Ouro · v1')" theme="blue" variant="subtle" />
-            </div>
-            <p class="text-p-sm text-ink-gray-6">
-              {{
-                __(
-                  'Integre seu ERP, site, motor de crédito ou data warehouse com autenticação Bearer, isolamento por funil, operações em lote (Batch) e sincronização incremental.',
-                )
-              }}
-            </p>
-          </div>
-          <div class="flex flex-wrap items-center gap-2">
-            <a
-              href="/api/method/cred_hub.api_keys.get_openapi_spec"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="inline-flex items-center gap-1.5 rounded bg-surface-white px-3 py-1.5 text-sm font-medium text-ink-gray-8 border border-outline-gray-2 hover:bg-surface-gray-2"
-            >
-              <span>{{ __('OpenAPI 3.1 (JSON) ↗') }}</span>
-            </a>
-            <a
-              href="/api-docs"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="inline-flex items-center gap-1.5 rounded bg-surface-white px-3 py-1.5 text-sm font-medium text-[color:var(--ct-accent-text)] border border-outline-gray-2 hover:bg-surface-gray-2"
-            >
-              <span>{{ __('Abrir Documentação & Playground (/api-docs) ↗') }}</span>
-            </a>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-p-sm">
-          <div class="rounded border border-outline-gray-1 bg-surface-white p-3">
-            <div class="text-xs font-medium uppercase text-ink-gray-5">
-              {{ __('URL Base') }}
-            </div>
-            <div class="mt-1 flex items-center justify-between gap-2">
-              <code class="truncate font-mono text-xs text-ink-gray-9">{{ baseUrl }}</code>
-              <Button
-                size="sm"
-                variant="ghost"
-                icon="copy"
-                @click="copyToClipboard(baseUrl)"
-              />
-            </div>
-          </div>
-          <div class="rounded border border-outline-gray-1 bg-surface-white p-3">
-            <div class="text-xs font-medium uppercase text-ink-gray-5">
-              {{ __('Cabeçalho de Autenticação') }}
-            </div>
-            <div class="mt-1 font-mono text-xs text-ink-gray-9 truncate">
-              Authorization: Bearer hub_&lt;id&gt;_&lt;segredo&gt;
-            </div>
-          </div>
-          <div class="rounded border border-outline-gray-1 bg-surface-white p-3">
-            <div class="text-xs font-medium uppercase text-ink-gray-5">
-              {{ __('Rate Limit (Janela Deslizante)') }}
-            </div>
-            <div class="mt-1 text-xs text-ink-gray-8">
-              {{ __('300 chamadas/min (leitura) · 60 escritas/min por chave') }}
-            </div>
-          </div>
-        </div>
-
-        <div class="flex flex-wrap gap-2 border-b border-outline-gray-1 pb-2">
-          <button
-            v-for="section in docSections"
-            :key="section.id"
-            type="button"
-            class="rounded px-3 py-1 text-sm font-medium transition-colors"
+      <!-- Figma "Abas" -->
+      <div
+        class="flex flex-wrap items-start gap-4 border-b border-[var(--ct-border)]"
+        role="tablist"
+      >
+        <button
+          v-for="section in docSections"
+          :key="section.id"
+          type="button"
+          role="tab"
+          :aria-selected="activeDocTab === section.id"
+          class="flex flex-col"
+          @click="activeDocTab = section.id"
+        >
+          <span
+            class="px-1 py-2.5 text-[14px] font-medium leading-5"
             :class="
               activeDocTab === section.id
-                ? 'bg-ink-gray-9 text-surface-white'
-                : 'bg-surface-white text-ink-gray-7 hover:bg-surface-gray-2 border border-outline-gray-1'
+                ? 'text-[color:var(--ct-text-accent)]'
+                : 'text-[color:var(--ct-text-secondary)] hover:text-[color:var(--ct-text-primary)]'
             "
-            @click="activeDocTab = section.id"
           >
             {{ section.title }}
-          </button>
-        </div>
+          </span>
+          <span
+            class="h-0.5 w-full"
+            :class="activeDocTab === section.id ? 'bg-[var(--ct-accent)]' : ''"
+          />
+        </button>
+      </div>
 
-        <div v-if="currentDocSection" class="flex flex-col gap-3">
-          <div
-            v-for="ep in currentDocSection.endpoints"
-            :key="ep.path"
-            class="rounded border border-outline-gray-1 bg-surface-white p-3.5 flex flex-col gap-2"
-          >
-            <div class="flex flex-wrap items-center justify-between gap-2">
-              <div class="flex items-center gap-2">
-                <Badge
-                  :label="ep.method"
-                  :theme="ep.method === 'GET' ? 'blue' : ep.method === 'DELETE' ? 'red' : 'green'"
-                  variant="subtle"
-                />
-                <code class="font-mono text-xs font-semibold text-ink-gray-9">{{ ep.path }}</code>
-              </div>
-              <span class="text-xs text-ink-gray-5">
-                {{ __('Escopo:') }} <code class="font-mono">{{ ep.scope }}</code>
-              </span>
+      <div v-if="currentDocSection" class="flex flex-col gap-6">
+        <div
+          v-for="ep in currentDocSection.endpoints"
+          :key="ep.path"
+          class="flex flex-col gap-2 rounded-lg border border-[var(--ct-border)] px-4 py-3.5"
+        >
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <Badge
+                :label="ep.method"
+                :theme="ep.method === 'GET' ? 'blue' : ep.method === 'DELETE' ? 'red' : 'green'"
+                variant="subtle"
+              />
+              <code class="font-mono text-[13px] font-semibold text-ink-gray-9">{{ ep.path }}</code>
             </div>
-            <p class="text-p-sm text-ink-gray-7">{{ ep.desc }}</p>
-            <div
-              v-if="ep.curl"
-              class="relative rounded bg-surface-gray-2 p-2.5 font-mono text-xs text-ink-gray-9 overflow-x-auto whitespace-pre"
-            >{{ ep.curl }}</div>
+            <span class="text-[12px] leading-4 text-ink-gray-9">
+              {{ __('Escopo:') }} {{ ep.scope }}
+            </span>
           </div>
+          <p class="text-[14px] leading-5 text-ink-gray-9">{{ ep.desc }}</p>
+          <div
+            v-if="ep.curl"
+            class="relative rounded-md bg-[var(--ct-bg-soft)] px-3 py-2.5 font-mono text-[12px] font-medium leading-[18px] text-ink-gray-9 overflow-x-auto whitespace-pre"
+          >{{ ep.curl }}</div>
         </div>
+      </div>
+
       </div>
 
       <!-- Live API Audit & Telemetry Logs -->
-      <div class="mt-2 flex flex-col gap-3 rounded-lg border border-outline-gray-1 bg-surface-white p-5">
+      <div class="flex flex-col gap-3.5 rounded-lg border border-[var(--ct-border)] p-5">
         <div class="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <div class="flex items-center gap-2">
-              <span class="text-lg font-semibold text-ink-gray-9">
-                {{ __('Auditoria e Últimas Chamadas da API') }}
-              </span>
-              <Badge
-                v-if="auditMetrics"
-                :label="__('{0} chamadas (24h)', [auditMetrics.total_24h || 0])"
-                theme="blue"
-                variant="subtle"
-              />
-              <Badge
-                v-if="auditMetrics && auditMetrics.errors_24h > 0"
-                :label="__('{0} erros (24h)', [auditMetrics.errors_24h])"
-                theme="red"
-                variant="subtle"
-              />
-            </div>
-            <p class="text-p-xs text-ink-gray-6 mt-0.5">
-              {{
-                __(
-                  'Histórico em tempo real das requisições autenticadas por chave (com Request ID, status HTTP, tempo de resposta e IP de origem).',
-                )
-              }}
-            </p>
+          <div class="flex items-center gap-2">
+            <span class="text-[16px] font-semibold leading-[23px] text-ink-gray-9">
+              {{ __('Auditoria e Últimas Chamadas da API') }}
+            </span>
+            <Badge
+              v-if="auditMetrics"
+              :label="__('{0} chamadas (24h)', [auditMetrics.total_24h || 0])"
+              theme="blue"
+              variant="subtle"
+            />
+            <Badge
+              v-if="auditMetrics && auditMetrics.errors_24h > 0"
+              :label="__('{0} erros (24h)', [auditMetrics.errors_24h])"
+              theme="red"
+              variant="subtle"
+            />
           </div>
           <div class="flex items-center gap-2">
             <select
               v-model="selectedLogKey"
-              class="h-7 rounded border border-outline-gray-2 bg-surface-white px-2 text-xs text-ink-gray-8"
+              class="h-[33px] rounded-md border border-[var(--ct-border)] bg-[var(--ct-bg-page)] py-0 pl-2.5 pr-7 text-[13px] text-ink-gray-9"
               @change="loadLogs()"
             >
               <option value="">{{ __('Todas as chaves') }}</option>
@@ -332,53 +323,52 @@
               </option>
             </select>
             <Button
-              size="sm"
               variant="outline"
+              icon-left="lucide-refresh-cw"
               :loading="loadingLogs"
               :label="__('Atualizar')"
               @click="loadLogs()"
             />
           </div>
         </div>
-
         <div v-if="auditLogs.length" class="overflow-x-auto">
-          <table class="w-full text-left text-xs border-collapse">
+          <table class="w-full table-fixed text-left text-[12px] leading-[17px] border-collapse">
             <thead>
-              <tr class="border-b border-outline-gray-1 text-ink-gray-5">
-                <th class="py-2 pr-3 font-medium">{{ __('Data/Hora') }}</th>
-                <th class="py-2 pr-3 font-medium">{{ __('Request ID') }}</th>
-                <th class="py-2 pr-3 font-medium">{{ __('Chave') }}</th>
-                <th class="py-2 pr-3 font-medium">{{ __('Rota / Recurso') }}</th>
-                <th class="py-2 pr-3 font-medium">{{ __('Status') }}</th>
-                <th class="py-2 pr-3 font-medium">{{ __('Latência') }}</th>
-                <th class="py-2 font-medium">{{ __('IP') }}</th>
+              <tr class="h-[34px] border-b border-outline-gray-1 text-ink-gray-5">
+                <th class="w-[140px] pr-2 font-medium">{{ __('Data/Hora') }}</th>
+                <th class="w-[150px] pr-2 font-medium">{{ __('Request ID') }}</th>
+                <th class="w-[120px] pr-2 font-medium">{{ __('Chave') }}</th>
+                <th class="w-[280px] pr-2 font-medium">{{ __('Rota / Recurso') }}</th>
+                <th class="w-20 pr-2 font-medium">{{ __('Status') }}</th>
+                <th class="w-20 pr-2 font-medium">{{ __('Latência') }}</th>
+                <th class="font-medium">{{ __('IP') }}</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-outline-gray-1">
-              <tr v-for="row in auditLogs" :key="row.name" class="text-ink-gray-8">
-                <td class="py-2 pr-3 whitespace-nowrap text-ink-gray-6">
-                  {{ brDateTime(row.called_on) }}
+              <tr v-for="row in auditLogs" :key="row.name" class="h-[38px] text-ink-gray-9">
+                <td class="pr-3 whitespace-nowrap">
+                  {{ logTime(row.called_on) }}
                 </td>
-                <td class="py-2 pr-3 font-mono text-[11px] text-ink-gray-6">
+                <td class="pr-3 font-mono font-semibold">
                   {{ row.request_id || '—' }}
                 </td>
-                <td class="py-2 pr-3 font-medium">
+                <td class="pr-3">
                   {{ row.key_label }}
                 </td>
-                <td class="py-2 pr-3 font-mono text-[11px]">
+                <td class="pr-2 truncate font-mono font-semibold">
                   {{ row.route }}
                 </td>
-                <td class="py-2 pr-3">
+                <td class="pr-3">
                   <Badge
                     :label="String(row.status_code || 200)"
                     :theme="(row.status_code || 200) >= 400 ? 'red' : 'green'"
                     variant="subtle"
                   />
                 </td>
-                <td class="py-2 pr-3 whitespace-nowrap text-ink-gray-6">
+                <td class="pr-3 whitespace-nowrap">
                   {{ row.duration_ms != null ? `${row.duration_ms} ms` : '—' }}
                 </td>
-                <td class="py-2 font-mono text-[11px] text-ink-gray-6">
+                <td>
                   {{ row.ip_address || '—' }}
                 </td>
               </tr>
@@ -391,7 +381,6 @@
       </div>
     </div>
   </div>
-
   <!-- Create / edit -->
   <Dialog
     v-model:open="form.show"
@@ -467,11 +456,29 @@
           :label="__('Valid until (optional)')"
           type="date"
         />
+        <p v-if="confirm.rotate && confirm.rotate === form.name" class="text-p-sm text-ink-red-6">
+          {{ __('The current secret stops working right away.') }}
+        </p>
         <ErrorMessage :message="form.error" />
       </div>
     </template>
     <template #actions>
       <div class="flex gap-2 justify-end">
+        <!-- the key list (Figma "Tabela") has no room for it: the new secret
+             of a key is made here, with the same confirmation as before -->
+        <Button
+          v-if="form.name"
+          class="mr-auto"
+          :label="
+            confirm.rotate === form.name
+              ? __('Confirm new secret')
+              : __('New secret')
+          "
+          :theme="confirm.rotate === form.name ? 'red' : 'gray'"
+          :loading="busy === form.name + ':rotate'"
+          @click="rotateFromForm"
+          @blur="confirm.rotate = null"
+        />
         <Button
           variant="subtle"
           :label="__('Cancel')"
@@ -516,18 +523,20 @@
 import LucideKeyRound from '~icons/lucide/key-round'
 import SettingsEmptyState from '@/components/Settings/SettingsEmptyState.vue'
 import SettingsPageHeader from '@/components/Settings/SettingsPageHeader.vue'
+import SettingsBackLink from '@/components/Settings/SettingsBackLink.vue'
 import {
   Badge,
   Button,
   Dialog,
   ErrorMessage,
   FormControl,
+  Tooltip,
   call,
   toast,
 } from 'frappe-ui'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { pipelinesStore } from '@/stores/pipelines'
-import { copyToClipboard } from '@/utils'
+import { copyToClipboard, timeAgo } from '@/utils'
 import { apiKeys, apiKeysApi, loadApiKeys } from './apiKeysApi'
 import {
   ADMIN_SCOPE,
@@ -543,12 +552,14 @@ import {
 } from './apiKeysUtils'
 
 const pipelines = pipelinesStore()
+// 'keys' (the list) or 'docs' (Figma "Documentação da API")
+const view = ref('keys')
 const baseUrl = window.location.origin
 const activeDocTab = ref('cards')
 const docSections = [
   {
     id: 'cards',
-    title: __('Cards (Deals) & Funis'),
+    title: __('Cards e funis'),
     endpoints: [
       {
         method: 'GET',
@@ -582,7 +593,7 @@ const docSections = [
   },
   {
     id: 'orgs_contacts',
-    title: __('Organizações, Contatos & Entrada'),
+    title: __('Organizações e contatos'),
     endpoints: [
       {
         method: 'POST',
@@ -609,7 +620,7 @@ const docSections = [
   },
   {
     id: 'activities',
-    title: __('Arquivos, Notas, Comentários & Tarefas'),
+    title: __('Arquivos, notas e tarefas'),
     endpoints: [
       {
         method: 'POST',
@@ -643,7 +654,7 @@ const docSections = [
   },
   {
     id: 'batch_sync',
-    title: __('Lote (Batch API), Sync & Schema'),
+    title: __('Lote e sincronização'),
     endpoints: [
       {
         method: 'POST',
@@ -677,7 +688,7 @@ const docSections = [
   },
   {
     id: 'credit_lookup',
-    title: __('Crédito PJ, Pasta Digital & Busca 360°'),
+    title: __('Crédito PJ'),
     endpoints: [
       {
         method: 'GET',
@@ -848,6 +859,45 @@ async function revoke(key) {
   }
 }
 
+async function rotateFromForm() {
+  let key = data.value?.keys.find((k) => k.name === form.name)
+  if (!key) return
+  let confirmed = confirm.rotate === key.name
+  await rotate(key)
+  if (confirmed) form.show = false
+}
+
+// what the old key card listed, now in the tooltip of the name
+function keyDetails(key) {
+  return [
+    __('Permissions: {0}', [scopeSummary(key.scopes)]),
+    key.pipelines.length
+      ? __('Funnels: {0}', [pipelineLabels(key.pipelines)])
+      : null,
+    key.allowed_ips
+      ? __('IPs: {0}', [key.allowed_ips.split('\n').join(', ')])
+      : null,
+    key.expires_on ? __('Valid until {0}', [brDate(key.expires_on)]) : null,
+    key.last_used_on
+      ? __('Last used {0} from {1}', [
+          brDateTime(key.last_used_on),
+          key.last_used_ip,
+        ])
+      : null,
+    __('Created by {0} on {1}', [key.created_by, brDate(key.created_on)]),
+  ]
+    .filter(Boolean)
+    .join(' · ')
+}
+
+// "06/11 10:42:13" in the audit table
+function logTime(value) {
+  if (!value) return ''
+  let [date, time = ''] = String(value).split(' ')
+  let [, month, day] = date.split('-')
+  return `${day}/${month} ${time.slice(0, 8)}`
+}
+
 function showSecret(token) {
   Object.assign(secret, { show: true, token })
 }
@@ -864,3 +914,14 @@ watch(
   },
 )
 </script>
+
+<style>
+/* Figma "Tabela" of the keys: Nome and Chave share the room, the dates are
+   152px, 16px between cells and on the sides */
+.ct-api-keys-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 152px 152px minmax(110px, auto);
+  column-gap: 16px;
+  padding-inline: 16px;
+}
+</style>

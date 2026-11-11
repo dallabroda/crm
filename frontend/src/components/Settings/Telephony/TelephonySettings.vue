@@ -1,6 +1,8 @@
 <template>
+  <!-- Figma "Configurações · Telefonia" (2336:10865): "Filtro" for the
+       medium, 48px number fields with help, 18px section title -->
   <div class="flex h-full flex-col gap-6">
-    <SettingsPageHeader :title="__('Telephony Settings')">
+    <SettingsPageHeader :title="__('Telephony')">
       <template #badge>
         <Badge
           v-if="isDirty"
@@ -28,140 +30,85 @@
     </SettingsPageHeader>
 
     <div v-if="telephonyAgent.doc" class="flex-1 flex flex-col overflow-y-auto">
-      <div class="flex items-center justify-between gap-6 py-3">
-        <div class="flex flex-col">
-          <div class="truncate text-base font-medium leading-5 text-ink-gray-9">
-            {{ __('Default Medium') }}
-          </div>
-          <div class="text-base leading-5 text-ink-gray-6">
-            {{ __('Default calling medium for logged-in user') }}
-          </div>
-        </div>
-        <div class="flex items-center gap-1">
-          <FormControl
-            v-model="telephonyAgent.doc.default_medium"
-            variant="outline"
-            type="select"
-            class="w-44"
-            :options="[
-              { label: __(''), value: '' },
-              { label: __('Twilio'), value: 'Twilio' },
-              { label: __('Exotel'), value: 'Exotel' },
-              ...Object.values(voipOperators).map((medium) => ({
-                label: medium,
-                value: medium,
-              })),
-            ]"
-            :placeholder="__('Select Medium')"
-          />
-          <Button
-            v-if="telephonyAgent.doc.default_medium"
-            icon="lucide-x"
-            :tooltip="__('Clear')"
-            @click="telephonyAgent.doc.default_medium = ''"
-          />
-        </div>
-      </div>
+      <SettingsRow class="py-3">
+        <template #label>{{ __('Default Medium') }}</template>
+        <template #description>
+          {{ __('Default calling medium for logged-in user') }}
+        </template>
+        <SettingsSelect
+          v-model="telephonyAgent.doc.default_medium"
+          :options="[
+            { label: __('Twilio'), value: 'Twilio' },
+            { label: __('Exotel'), value: 'Exotel' },
+            ...Object.values(voipOperators).map((medium) => ({
+              label: medium,
+              value: medium,
+            })),
+          ]"
+          :placeholder="__('Select Medium')"
+        />
+        <Button
+          v-if="telephonyAgent.doc.default_medium"
+          icon="lucide-x"
+          variant="ghost"
+          :tooltip="__('Clear')"
+          @click="telephonyAgent.doc.default_medium = ''"
+        />
+      </SettingsRow>
       <div
-        v-if="isEnabled('twilio')"
-        class="h-px border-t border-outline-gray-2"
-      />
-      <div
-        v-if="isEnabled('twilio')"
-        class="flex items-center justify-between gap-6 py-3"
+        v-if="isEnabled('twilio') || isEnabled('exotel')"
+        class="ct-field-48 flex flex-col gap-6 pb-3 pt-6"
       >
-        <div class="flex flex-col">
-          <div class="truncate text-base font-medium leading-5 text-ink-gray-9">
-            {{ __('Twilio Number') }}
-          </div>
-          <div class="text-base leading-5 text-ink-gray-6">
-            {{ __('Set the Twilio number to be used for outgoing calls.') }}
-          </div>
-        </div>
-        <div>
-          <FormControl
-            v-model="telephonyAgent.doc.twilio_number"
-            variant="outline"
-            class="flex-1 truncate w-44"
-            :placeholder="__('Enter Twilio Number')"
-            :error="
-              Boolean(telephonyAgent.doc.twilio_number) &&
-              !validatePhone(telephonyAgent.doc.twilio_number)
-                ? __('Enter a valid phone number')
-                : undefined
-            "
-            placement="bottom-end"
-          />
-        </div>
-      </div>
-      <div
-        v-if="isEnabled('exotel')"
-        class="h-px border-t border-outline-gray-2"
-      />
-      <div
-        v-if="isEnabled('exotel')"
-        class="flex items-center justify-between gap-6 py-3"
-      >
-        <div class="flex flex-col">
-          <div class="truncate text-base font-medium leading-5 text-ink-gray-9">
-            {{ __('Exotel Number') }}
-          </div>
-          <div class="text-base leading-5 text-ink-gray-6">
-            {{ __('Set the Exotel number to be used for outgoing calls.') }}
-          </div>
-        </div>
-        <div>
-          <FormControl
-            v-model="telephonyAgent.doc.exotel_number"
-            variant="outline"
-            class="flex-1 truncate w-44"
-            :placeholder="__('Enter Exotel Number')"
-            :error="
-              Boolean(telephonyAgent.doc.exotel_number) &&
-              !validatePhone(telephonyAgent.doc.exotel_number)
-                ? __('Enter a valid phone number')
-                : undefined
-            "
-            placement="bottom-end"
-          />
-        </div>
-      </div>
-      <div
-        v-if="isEnabled('exotel')"
-        class="flex items-center justify-between gap-6 py-3"
-      >
-        <div class="flex flex-col">
-          <div class="truncate text-base font-medium leading-5 text-ink-gray-9">
-            {{ __('Personal Mobile Number') }}
-          </div>
-          <div class="text-base leading-5 text-ink-gray-6">
-            {{
-              __(
-                'Enter your personal mobile number used by Exotel to make calls',
-              )
-            }}
-          </div>
-        </div>
-        <div>
-          <FormControl
-            v-model="telephonyAgent.doc.mobile_no"
-            variant="outline"
-            class="flex-1 truncate w-44"
-            :placeholder="__('Enter Personal Mobile Number')"
-            :error="
-              Boolean(telephonyAgent.doc.mobile_no) &&
-              !validatePhone(telephonyAgent.doc.mobile_no)
-                ? __('Enter a valid phone number')
-                : undefined
-            "
-            placement="bottom-end"
-          />
-        </div>
+        <FormControl
+          v-if="isEnabled('twilio')"
+          v-model="telephonyAgent.doc.twilio_number"
+          :label="__('Twilio Number')"
+          :description="
+            __('Set the Twilio number to be used for outgoing calls.')
+          "
+          :placeholder="__('Enter Twilio Number')"
+          :error="
+            Boolean(telephonyAgent.doc.twilio_number) &&
+            !validatePhone(telephonyAgent.doc.twilio_number)
+              ? __('Enter a valid phone number')
+              : undefined
+          "
+        />
+        <FormControl
+          v-if="isEnabled('exotel')"
+          v-model="telephonyAgent.doc.exotel_number"
+          :label="__('Exotel Number')"
+          :description="
+            __('Set the Exotel number to be used for outgoing calls.')
+          "
+          :placeholder="__('Enter Exotel Number')"
+          :error="
+            Boolean(telephonyAgent.doc.exotel_number) &&
+            !validatePhone(telephonyAgent.doc.exotel_number)
+              ? __('Enter a valid phone number')
+              : undefined
+          "
+        />
+        <FormControl
+          v-if="isEnabled('exotel')"
+          v-model="telephonyAgent.doc.mobile_no"
+          :label="__('Personal Mobile Number')"
+          :description="
+            __('Enter your personal mobile number used by Exotel to make calls')
+          "
+          :placeholder="__('Enter Personal Mobile Number')"
+          :error="
+            Boolean(telephonyAgent.doc.mobile_no) &&
+            !validatePhone(telephonyAgent.doc.mobile_no)
+              ? __('Enter a valid phone number')
+              : undefined
+          "
+        />
       </div>
 
       <div
         v-if="isManager()"
-        class="mt-4 flex items-center justify-between py-3 text-lg font-medium leading-6 text-ink-gray-9"
+        class="mt-4 flex items-center justify-between py-3 text-lg font-semibold leading-6 text-ink-gray-9"
       >
         {{ __('Integrations') }}
       </div>
@@ -384,6 +331,8 @@
 </template>
 <script setup>
 import SettingsPageHeader from '@/components/Settings/SettingsPageHeader.vue'
+import SettingsRow from '@/components/Settings/SettingsRow.vue'
+import SettingsSelect from '@/components/Settings/SettingsSelect.vue'
 import SettingsEmptyState from '@/components/Settings/SettingsEmptyState.vue'
 import PhoneIcon from '~icons/lucide/phone'
 import {

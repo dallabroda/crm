@@ -159,6 +159,12 @@ export const usersStore = defineStore('crm-users', () => {
     return null
   }
 
+  // Lists name the signed-in user "Você" (Figma "Vendas · Lista" 790:2)
+  function userLabel(email) {
+    if (email && email === session.user) return __('You')
+    return getUser(email).full_name
+  }
+
   const isCrmUser = (user) => {
     user = user || session.user
     return users.data.crmUsers?.find((u) => u.name === user)
@@ -177,6 +183,7 @@ export const usersStore = defineStore('crm-users', () => {
     getUserRole,
     isWebsiteUser,
     isCrmUser,
+    userLabel,
   }
 })
 

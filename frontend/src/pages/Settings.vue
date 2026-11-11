@@ -232,8 +232,15 @@ onMounted(() => {
 }
 .settings-page .ct-field-48 label {
   font-size: 14px;
+  line-height: 20px;
   font-weight: 500;
   line-height: 20px;
   color: var(--ink-gray-6);
+}
+/* Figma "Campo com ajuda": the help under the field is 12/16 Texto/Terciário */
+.settings-page .ct-field-48 [data-slot='description'] {
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--ct-text-tertiary);
 }
 </style>

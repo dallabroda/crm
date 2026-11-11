@@ -206,7 +206,7 @@ export const patches = {
       `? 'bg-[var(--ct-accent)] enabled:hover:bg-[var(--ct-accent-hover)] active:bg-[var(--ct-accent-active)] group-hover:enabled:bg-[var(--ct-accent-hover)]'
       : 'bg-surface-gray-5 enabled:hover:bg-surface-gray-6 active:bg-surface-gray-6 group-hover:enabled:bg-surface-gray-6',`,
     ],
-    // size md is the Figma one: 36x20, 2px padding, 16px knob
+    // size "md" is the Figma one: 36x20, 16px knob, 2px inset
     [`? 'h-5 w-8 border-[3px]'`, `? 'h-5 w-9 border-2'`],
     [`? 'h-3.5 w-3.5'`, `? 'h-4 w-4'`],
     [

@@ -1,4 +1,6 @@
 <template>
+  <!-- Figma "Configurações · Empresa" (2323:14221), "Valores padrão" block:
+       "Filtro" selects on the right of each row -->
   <div class="flex h-full flex-col gap-6 text-ink-gray-8">
     <SettingsPageHeader :title="__('System Defaults')">
       <template #description>
@@ -21,7 +23,7 @@
       </template>
     </SettingsPageHeader>
 
-    <div class="flex flex-1 flex-col gap-6 overflow-y-auto">
+    <div v-if="settings.doc" class="flex flex-1 flex-col gap-6 overflow-y-auto">
       <SettingsRow>
         <template #label>
           {{ __('Currency') }}
@@ -33,7 +35,18 @@
             )
           }}
         </template>
-        <Link v-model="settings.doc.currency" doctype="Currency" class="w-24" />
+        <Link v-model="settings.doc.currency" doctype="Currency">
+          <template #target="{ togglePopover, isOpen }">
+            <button type="button" class="ct-filter" @click="togglePopover()">
+              <span class="truncate">{{ settings.doc.currency }}</span>
+              <span
+                class="size-4 shrink-0 text-[color:var(--ct-text-secondary)]"
+                :class="isOpen ? 'lucide-chevron-up' : 'lucide-chevron-down'"
+                aria-hidden="true"
+              />
+            </button>
+          </template>
+        </Link>
       </SettingsRow>
       <SettingsRow>
         <template #label>
@@ -42,12 +55,10 @@
         <template #description>
           {{ __('Number of decimal places used for all currency values') }}
         </template>
-        <Select
+        <SettingsSelect
           v-model="settings.doc.currency_precision"
-          variant="outline"
           :options="getOptions('currency_precision')"
           :placeholder="3"
-          class="!w-16"
         />
       </SettingsRow>
       <SettingsDivider />
@@ -62,11 +73,9 @@
             )
           }}
         </template>
-        <Select
+        <SettingsSelect
           v-model="settings.doc.number_format"
-          variant="outline"
           :options="getOptions('number_format')"
-          class="!w-32"
         />
       </SettingsRow>
       <SettingsRow>
@@ -76,12 +85,10 @@
         <template #description>
           {{ __('Number of decimal places for non-currency numeric fields') }}
         </template>
-        <Select
+        <SettingsSelect
           v-model="settings.doc.float_precision"
-          variant="outline"
           :options="getOptions('float_precision')"
           :placeholder="3"
-          class="!w-16"
         />
       </SettingsRow>
       <SettingsDivider />
@@ -92,11 +99,9 @@
         <template #description>
           {{ __('Display format for dates across the system') }}
         </template>
-        <Select
+        <SettingsSelect
           v-model="settings.doc.date_format"
-          variant="outline"
           :options="getOptions('date_format')"
-          class="!w-32"
         />
       </SettingsRow>
       <SettingsRow>
@@ -106,11 +111,9 @@
         <template #description>
           {{ __('Select whether to display time with or without seconds') }}
         </template>
-        <Select
+        <SettingsSelect
           v-model="settings.doc.time_format"
-          variant="outline"
           :options="getOptions('time_format')"
-          class="!w-28"
         />
       </SettingsRow>
     </div>
@@ -121,9 +124,10 @@
 import SettingsRow from '@/components/Settings/SettingsRow.vue'
 import SettingsDivider from '@/components/Settings/SettingsDivider.vue'
 import SettingsPageHeader from '@/components/Settings/SettingsPageHeader.vue'
+import SettingsSelect from '@/components/Settings/SettingsSelect.vue'
 import Link from '@/components/Controls/Link.vue'
 import { getMeta } from '@/stores/meta'
-import { Select, Button, toast, createDocumentResource } from 'frappe-ui'
+import { Button, toast, createDocumentResource } from 'frappe-ui'
 import { computed } from 'vue'
 
 const { getFields } = getMeta('System Settings')
