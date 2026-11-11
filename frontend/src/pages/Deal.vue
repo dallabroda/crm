@@ -1,7 +1,6 @@
 <template>
   <LayoutHeader>
-    <!-- Figma "Card · Atividade" (798:2): "Voltar" + card name on the left,
-         stage, enrich, owner and funnel actions on the right (outline, 32px) -->
+    <!-- Figma "Card · Atividade" (1999:53888): "Voltar" + card name on the left -->
     <template #left-header>
       <router-link
         :to="backRoute"
@@ -36,20 +35,11 @@
         :allowedUsers="assignableUsers"
       />
     </template>
+    <!-- Figma "Card · Atividade" (1999:53888): only the owner on the right;
+         stage and Ganho/Perdido live in "Andamento do card" on the side panel.
+         A closed card (Figma "Card · Ganho" 1327:18983) shows its badge and
+         "Reabrir" before the owner. -->
     <template v-else-if="!errorTitle" #right-header>
-      <Dropdown v-if="doc && document.statuses" :options="statuses" align="end">
-        <template #default="{ open }">
-          <!-- Figma "Card · Atividades": the stage is a "Filtro" (no colour dot) -->
-          <button v-if="doc.status" type="button" class="ct-filter">
-            <span class="truncate">{{ statusLabel(doc.status) }}</span>
-            <span
-              class="size-4 shrink-0"
-              :class="open ? 'lucide-chevron-up' : 'lucide-chevron-down'"
-              aria-hidden="true"
-            />
-          </button>
-        </template>
-      </Dropdown>
       <CustomActions
         v-if="document._actions?.length"
         :actions="document._actions"
@@ -58,22 +48,10 @@
         v-if="document.actions?.length"
         :actions="document.actions"
       />
-      <EnrichFromWebsite
-        doctype="CRM Deal"
-        :docname="dealId"
-        :website="doc.website"
-        @done="onEnriched"
-      />
       <ProtestActions
         :deal="dealId"
         :pipeline="doc.pipeline"
         @done="onEnriched"
-      />
-      <AssignTo
-        v-model="assignees.data"
-        doctype="CRM Deal"
-        :docname="dealId"
-        :allowedUsers="assignableUsers"
       />
       <Button
         v-if="doc.pipeline && pipelines.length > 1"
@@ -82,40 +60,26 @@
         iconLeft="lucide-arrow-right-left"
         @click="showChangePipelineModal = true"
       />
-      <!-- Status do card (credtech#315): em andamento, ganho ou perdido, separado da etapa -->
-      <template v-if="doc.name && doc.outcome">
-        <template v-if="doc.outcome === 'In progress'">
-          <!-- Figma card top bar: "Ganho" outline, icon black like the text
-               (designer comment 1992553654) -->
-          <Button
-            :label="__('Won')"
-            variant="outline"
-            iconLeft="lucide-circle-check"
-            @click="setOutcome('Won')"
-          />
-          <Button
-            :label="__('Lost')"
-            theme="red"
-            variant="subtle"
-            iconLeft="lucide-circle-x"
-            @click="setOutcome('Lost')"
-          />
-        </template>
-        <template v-else>
-          <Badge
-            :label="doc.outcome === 'Won' ? __('Won') : __('Lost')"
-            :theme="doc.outcome === 'Won' ? 'green' : 'red'"
-            variant="subtle"
-            size="lg"
-          />
-          <Button
-            variant="outline"
-            :label="__('Reopen')"
-            iconLeft="lucide-rotate-ccw"
-            @click="setOutcome('In progress')"
-          />
-        </template>
+      <template v-if="doc.name && doc.outcome && doc.outcome !== 'In progress'">
+        <Badge
+          :label="doc.outcome === 'Won' ? __('Won') : __('Lost')"
+          :theme="doc.outcome === 'Won' ? 'green' : 'red'"
+          variant="subtle"
+          size="lg"
+        />
+        <Button
+          variant="outline"
+          :label="__('Reopen')"
+          iconLeft="lucide-rotate-ccw"
+          @click="setOutcome('In progress')"
+        />
       </template>
+      <AssignTo
+        v-model="assignees.data"
+        doctype="CRM Deal"
+        :docname="dealId"
+        :allowedUsers="assignableUsers"
+      />
     </template>
   </LayoutHeader>
   <div v-if="doc.name" class="flex h-full overflow-hidden">
@@ -184,9 +148,11 @@
         <span :class="quick.icon" class="size-4" aria-hidden="true" />
       </button>
     </div>
+    <!-- Figma side panel: 384px including its left border -->
     <Resizer
       v-else
       side="right"
+      :defaultWidth="384"
       class="flex flex-col justify-between border-l border-[var(--ct-border-soft)]"
     >
       <!-- Figma side panel: collapse button and card id (16 Medium), then
@@ -220,13 +186,20 @@
             />
           </div>
         </Tooltip>
-        <div class="flex flex-col gap-2.5 truncate text-ink-gray-9">
+        <div class="flex min-w-0 flex-col gap-2.5 text-ink-gray-9">
           <Tooltip :text="organization?.name || __('Set an Organization')">
-            <div class="truncate text-lg font-medium leading-6">
+            <div class="line-clamp-2 break-words text-lg font-medium leading-6">
               {{ title }}
             </div>
           </Tooltip>
+          <!-- Figma order: WhatsApp, call, e-mail, website, attach, delete -->
           <div class="flex gap-2">
+            <Button
+              variant="outline"
+              :tooltip="__('Send WhatsApp')"
+              :icon="WhatsAppIcon"
+              @click="openWhatsApp"
+            />
             <Button
               v-if="callEnabled || hasPhoneToCall"
               variant="outline"
@@ -235,13 +208,6 @@
               "
               :icon="PhoneIcon"
               @click="triggerCall"
-            />
-
-            <Button
-              variant="outline"
-              :tooltip="__('Send WhatsApp')"
-              :icon="WhatsAppIcon"
-              @click="openWhatsApp"
             />
 
             <Button
@@ -286,6 +252,85 @@
           </div>
         </div>
       </div>
+      <!-- Figma "Andamento do card": stage selector and Ganho/Perdido, 128px
+           labels, 16px padding -->
+      <div
+        v-if="doc.name"
+        class="flex flex-col gap-1.5 border-b border-[var(--ct-border-soft)] p-4"
+        data-testid="card-progress"
+      >
+        <div class="text-base-medium leading-5 text-ink-gray-9">
+          {{ __('Andamento do card') }}
+        </div>
+        <div class="flex flex-col gap-1.5 pt-2">
+          <div class="flex items-start gap-2">
+            <div class="w-32 shrink-0 text-base leading-5 text-ink-gray-5">
+              {{ __('Etapa') }}
+            </div>
+            <div v-if="doc.status" class="min-w-0 flex-1">
+              <Dropdown :options="statuses" align="end" class="w-full">
+                <template #default="{ open }">
+                  <button
+                    type="button"
+                    class="ct-filter !max-w-none w-full !gap-2"
+                  >
+                    <IndicatorIcon
+                      :class="
+                        pipelineStore.getStage(doc.status, doc.pipeline)
+                          ?.colorClass
+                      "
+                    />
+                    <span class="flex-1 truncate text-left">
+                      {{ statusLabel(doc.status) }}
+                    </span>
+                    <span
+                      class="size-4 shrink-0"
+                      :class="
+                        open ? 'lucide-chevron-up' : 'lucide-chevron-down'
+                      "
+                      aria-hidden="true"
+                    />
+                  </button>
+                </template>
+              </Dropdown>
+            </div>
+          </div>
+          <div v-if="doc.outcome" class="flex items-start gap-2">
+            <div class="w-32 shrink-0 text-base leading-5 text-ink-gray-5">
+              Status
+            </div>
+            <div
+              v-if="doc.outcome === 'In progress'"
+              class="flex flex-wrap gap-2"
+            >
+              <Button
+                :label="__('Won')"
+                variant="outline"
+                iconLeft="lucide-circle-check"
+                class="ct-btn-success-text"
+                @click="setOutcome('Won')"
+              />
+              <Button
+                :label="__('Lost')"
+                theme="red"
+                variant="subtle"
+                iconLeft="lucide-circle-x"
+                @click="setOutcome('Lost')"
+              />
+            </div>
+            <Badge
+              v-else
+              :label="doc.outcome === 'Won' ? __('Won') : __('Lost')"
+              :theme="doc.outcome === 'Won' ? 'green' : 'red'"
+              variant="subtle"
+              size="lg"
+            />
+          </div>
+        </div>
+      </div>
+      <!-- Figma "Dados da Receita (CNPJ)": the organization's registry data,
+           read-only, right below the card's progress -->
+      <OrganizationRegistry :organization="organization" />
       <SLASection
         v-if="doc.sla_status"
         v-model="doc"
@@ -469,11 +514,6 @@
               :version="`${doc.organization}|${doc.second_organization}|${doc.contacts_from}`"
               @sent="reloadActivities"
             />
-            <OrganizationRegistry
-              v-else-if="section.name == 'organization_registry'"
-              :organization="organization"
-              embedded
-            />
           </template>
         </SidePanelLayout>
         <!-- fields of the organization, second organization and contact that
@@ -613,7 +653,6 @@ import OrganizationContacts from '@/components/Pipelines/OrganizationContacts.vu
 import SmartChatWhatsAppModal from '@/components/Modals/SmartChatWhatsAppModal.vue'
 import SLASection from '@/components/SLASection.vue'
 import CustomActions from '@/components/CustomActions.vue'
-import EnrichFromWebsite from '@/components/EnrichFromWebsite.vue'
 import ProtestActions from '@/components/ProtestActions.vue'
 import {
   openWebsite,
@@ -1511,9 +1550,7 @@ const visibleSections = computed(() => {
     )
     base = mergeOrganizationSectionIntoCard(base)
   }
-  return withOrganizationRegistry(
-    withOrganizationContacts(restrictOwner(base, assignableUsers.value)),
-  )
+  return withOrganizationContacts(restrictOwner(base, assignableUsers.value))
 })
 
 function mergeOrganizationSectionIntoCard(sections) {
@@ -1546,25 +1583,6 @@ function mergeOrganizationSectionIntoCard(sections) {
     }
   }
   return rest
-}
-
-function withOrganizationRegistry(sections) {
-  if (!doc.value?.organization || !organization.value?.name) return sections
-  let section = {
-    name: 'organization_registry',
-    label: __('Organização'),
-    opened: true,
-    notInLayout: true,
-    columns: [{ name: 'organization_registry_column', fields: [] }],
-  }
-  let contactsIdx = sections.findIndex((s) => s.name === 'contacts_section')
-  return contactsIdx < 0
-    ? [...sections, section]
-    : [
-        ...sections.slice(0, contactsIdx),
-        section,
-        ...sections.slice(contactsIdx),
-      ]
 }
 
 // A card with two organizations shows whose contacts it uses, after the card's
