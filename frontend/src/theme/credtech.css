@@ -353,6 +353,13 @@ button.h-8[aria-label]:has(> span.truncate > svg:only-child) {
   cursor: default;
 }
 
+/* Figma icons are 16px with a 1.4px stroke. frappe-ui draws Lucide SVG icons
+   at stroke-width 1.5 on a 24px grid (1px at 16px); 2.1 gives the Figma 1.4px.
+   The mask icons (`lucide-*` classes) get the same in tailwind.config.js. */
+svg[stroke-width='1.5'] {
+  stroke-width: 2.1;
+}
+
 /* Style Guide: the trash icon is always red (Paleta/Feedback/Erro). */
 .ct-btn-danger-icon,
 .ct-btn-danger-icon svg,
