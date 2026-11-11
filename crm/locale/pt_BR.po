@@ -14822,3 +14822,18 @@ msgstr "Promessa de pagamento para {0} · {1}"
 
 msgid "Payment of {0} · balance after {1}"
 msgstr "Pagamento de {0} · saldo depois {1}"
+
+msgid "Enter the reason"
+msgstr "Informe o motivo"
+
+msgid "Tell us why: with \"Other\", the note is required."
+msgstr "Conte o motivo: com \"Outro\", a observação é obrigatória."
+
+msgid "WhatsApp only accepts templates approved by Meta."
+msgstr "O WhatsApp só aceita modelos aprovados pela Meta."
+
+msgid "Message preview"
+msgstr "Prévia"
+
+msgid "Approved"
+msgstr "Aprovado"

@@ -1,20 +1,24 @@
 <template>
+  <!-- Figma "Modal · Nova tarefa" (2424:26862): 520px for tasks, the shared
+       modal header / gray footer, "Cancelar" (outline) beside "Criar" -->
   <Dialog
     v-model:open="show"
-    :size="doctype === 'FCRM Note' ? '2xl' : 'xl'"
+    :size="
+      doctype === 'FCRM Note' ? '2xl' : doctype === 'CRM Task' ? 'ct-520' : 'xl'
+    "
     :dismissible="doctype !== 'FCRM Note'"
     bare
   >
     <template #default>
       <div
-        class="bg-surface-elevation-2 px-4 pb-6 pt-5 sm:px-6"
+        class="px-6 pb-6"
         @keydown.meta.enter.capture.prevent.stop="submit"
         @keydown.ctrl.enter.capture.prevent.stop="submit"
       >
-        <div class="mb-5 flex items-center justify-between">
+        <div class="-mr-2 flex items-center justify-between gap-3 pb-2 pt-5">
           <div class="flex gap-2 items-center">
             <Dialog.Title as-child>
-              <h3 class="text-3xl-semibold leading-6 text-ink-gray-9">
+              <h3 class="text-[20px] font-semibold leading-7 text-ink-gray-9">
                 {{
                   editMode
                     ? __('Edit {0}', [__(doctypeTitle || doctype)])
@@ -41,7 +45,7 @@
               <Button
                 :aria-label="__('Close')"
                 variant="ghost"
-                class="w-7"
+                size="lg"
                 icon="lucide-x"
               />
             </Dialog.Close>
@@ -58,13 +62,18 @@
           <ErrorMessage v-if="error" class="mt-4" :message="__(error)" />
         </div>
       </div>
-      <div class="px-4 pb-7 pt-4 sm:px-6">
-        <div class="flex flex-row-reverse gap-2">
+      <div class="bg-[var(--ct-bg-soft)] px-6 py-4">
+        <div class="flex flex-row-reverse gap-3">
           <Button
             variant="solid"
             :label="editMode ? __('Update') : __('Create')"
             :loading="editMode ? document.save.loading : create.loading"
             @click="submit"
+          />
+          <Button
+            variant="outline"
+            :label="__('Cancel')"
+            @click="show = false"
           />
         </div>
       </div>
