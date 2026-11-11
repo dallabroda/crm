@@ -14804,3 +14804,21 @@ msgstr "Lido uma vez, quando a sincronização cria o cedente: as colunas que vo
 #: frontend/src/utils/navigation.js:12 frontend/src/pages/Dashboard.vue:5
 msgid "Home"
 msgstr "Início"
+
+msgid "Title history"
+msgstr "Histórico do título"
+
+msgid "Updated amount {0}"
+msgstr "Valor atualizado {0}"
+
+msgid "Overdue since {0} ({1} days late) · updated amount {2}"
+msgstr "Vencido em {0} ({1} dias de atraso) · valor atualizado {2}"
+
+msgid "Due on {0} · updated amount {1}"
+msgstr "Vence em {0} · valor atualizado {1}"
+
+msgid "Promise of payment for {0} · {1}"
+msgstr "Promessa de pagamento para {0} · {1}"
+
+msgid "Payment of {0} · balance after {1}"
+msgstr "Pagamento de {0} · saldo depois {1}"

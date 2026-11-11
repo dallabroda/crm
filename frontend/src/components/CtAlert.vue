@@ -37,7 +37,7 @@ const props = defineProps({
 const TONES = {
   info: {
     icon: InfoIcon,
-    box: 'bg-[var(--ct-info-soft)] text-[color:var(--ct-info)]',
+    box: 'bg-[var(--ct-info-soft)] text-[color:var(--ct-accent)]',
   },
   warning: {
     icon: TriangleAlertIcon,

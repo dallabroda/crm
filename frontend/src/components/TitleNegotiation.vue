@@ -1,128 +1,91 @@
 <template>
-  <Dialog v-model:open="open" :title="dialogTitle" size="3xl">
+  <!-- Figma "Card · Títulos · Negociar (acordo) · preenchida" (2436:29107):
+       564px modal, plain summary fields, Style Guide info alert, title history -->
+  <Dialog v-model:open="open" :title="dialogTitle" :size="erpSource ? 'xl' : '3xl'">
     <template #default>
-      <div v-if="title" class="flex flex-col gap-6 py-1">
-        <!-- Resumo: quanto era, quanto já pagou e quanto falta -->
-        <div class="grid grid-cols-3 gap-3">
-          <div class="rounded border border-outline-gray-2 p-3">
-            <div class="text-xs text-ink-gray-5">{{ __('Original amount') }}</div>
-            <div class="text-base font-medium text-ink-gray-8">{{ money(title.original_amount) }}</div>
+      <div v-if="title" class="ct-negotiation flex flex-col gap-3.5">
+        <p class="text-p-base text-ink-gray-6">{{ dueLine }}</p>
+
+        <!-- Resumo: quanto era, quanto já pagou e quanto falta (rótulo e valor, sem caixa) -->
+        <div class="flex items-start gap-3">
+          <div class="flex min-w-0 flex-1 flex-col gap-1">
+            <span class="text-xs leading-4 text-ink-gray-6">{{ __('Original amount') }}</span>
+            <span class="text-base font-medium leading-5 text-ink-gray-9">{{ money(title.original_amount) }}</span>
           </div>
-          <div class="rounded border border-outline-gray-2 p-3">
-            <div class="text-xs text-ink-gray-5">{{ __('Paid') }}</div>
-            <div class="text-base font-medium text-ink-green-3">{{ money(title.paid_amount) }}</div>
+          <div class="flex min-w-0 flex-1 flex-col gap-1">
+            <span class="text-xs leading-4 text-ink-gray-6">{{ __('Paid') }}</span>
+            <span class="text-base font-medium leading-5 text-[color:var(--ct-success)]">{{ money(title.paid_amount) }}</span>
           </div>
-          <div class="rounded border border-outline-gray-2 p-3">
-            <div class="text-xs text-ink-gray-5">{{ __('Balance') }}</div>
-            <div class="text-base font-semibold text-ink-gray-9">{{ money(balance) }}</div>
+          <div class="flex min-w-0 flex-1 flex-col gap-1">
+            <span class="text-xs leading-4 text-ink-gray-6">{{ __('Balance') }}</span>
+            <span class="text-[16px] font-semibold leading-6 text-ink-gray-9">{{ money(balance) }}</span>
           </div>
         </div>
 
-        <!-- Título do ERP: o saldo é do ERP (credtech#367); só promessa e acordo são feitos aqui -->
-        <div
-          v-if="erpSource"
-          class="rounded-lg bg-[#E5F1FF] px-4 py-3 text-base leading-5 text-[#1E1F23]"
-        >
+        <!-- Título do ERP: o saldo é do ERP (credtech#367); só promessa e acordo são feitos aqui.
+             Style Guide "Aviso (toast)" Informação, sem botão e sem fechar -->
+        <CtAlert v-if="erpSource" type="info" class="!items-center">
           {{
             __(
               'The balance of this title is controlled by {0}. Payments, settlements and installment agreements stay in the ERP; here you register the promise of payment.',
               [erpSource],
             )
           }}
-        </div>
+        </CtAlert>
 
-        <div
-          v-if="registryWarning"
-          class="rounded border border-outline-amber-2 bg-surface-amber-1 p-3 text-sm text-[color:var(--ct-warning)] font-medium"
-        >
+        <CtAlert v-if="registryWarning" type="warning" class="!items-center">
           {{ registryWarning }}
-        </div>
+        </CtAlert>
 
-        <!-- Pagamentos -->
-        <section class="flex flex-col gap-3">
-          <h3 class="text-base font-semibold text-ink-gray-8">{{ __('Payments') }}</h3>
-          <div v-if="paid" class="text-sm text-ink-green-3">
+        <!-- Pagamentos (só títulos sem ERP); a lista fica no histórico do título, abaixo -->
+        <section v-if="!erpSource" class="flex flex-col gap-3.5">
+          <h3 class="ct-section-title">{{ __('Payments') }}</h3>
+          <div v-if="paid" class="text-p-base text-[color:var(--ct-success)]">
             {{ __('This title is fully paid.') }}
           </div>
-          <div v-else-if="!erpSource" class="grid grid-cols-[1fr_1fr_2fr_auto] items-end gap-3">
+          <div v-else class="ct-fields grid grid-cols-[1fr_1fr_2fr_auto] items-end gap-3">
             <FormControl v-model.number="payment.amount" type="number" :label="__('Amount (R$)')" />
-            <FormControl v-model="payment.paid_on" type="date" :label="__('Paid on')" :max="today" />
+            <FormControl v-model="payment.paid_on" type="date" format="DD/MM/YYYY" placeholder="dd/mm/aaaa" :label="__('Paid on')" :max="today" />
             <FormControl v-model="payment.note" type="text" :label="__('Note')" :placeholder="__('PIX, boleto, bank transfer...')" />
-            <Button
-              variant="solid"
-              :label="__('Register payment')"
-              :loading="busy === 'pay'"
-              :disabled="!payment.amount || payment.amount <= 0 || Boolean(busy)"
-              @click="registerPayment"
-            />
+            <div class="pb-1">
+              <Button
+                variant="solid"
+                size="lg"
+                :label="__('Register payment')"
+                :loading="busy === 'pay'"
+                :disabled="!payment.amount || payment.amount <= 0 || Boolean(busy)"
+                @click="registerPayment"
+              />
+            </div>
           </div>
-          <table v-if="payments.length" class="w-full text-left text-p-sm">
-            <thead>
-              <tr class="border-b border-outline-gray-2 text-ink-gray-5">
-                <th class="py-2 pr-3">{{ __('Paid on') }}</th>
-                <th class="py-2 pr-3 text-right">{{ __('Amount') }}</th>
-                <th class="py-2 pr-3 text-right">{{ __('Balance after') }}</th>
-                <th class="py-2 pr-3">{{ __('Note') }}</th>
-                <th class="py-2 pr-3">{{ __('Registered by') }}</th>
-                <th class="py-2"></th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-outline-gray-1">
-              <tr v-for="entry in payments" :key="entry.name">
-                <td class="py-2 pr-3">{{ date(entry.paid_on) }}</td>
-                <td class="py-2 pr-3 text-right font-medium">{{ money(entry.amount) }}</td>
-                <td class="py-2 pr-3 text-right text-ink-gray-6">{{ money(entry.balance_after) }}</td>
-                <td class="py-2 pr-3 text-ink-gray-7">
-                  {{ entry.note || '—' }}
-                  <span v-if="entry.installment" class="text-xs text-ink-gray-5">
-                    ({{ __('installment {0}', [installmentNumber(entry.installment)]) }})
-                  </span>
-                </td>
-                <td class="py-2 pr-3 text-ink-gray-6">{{ entry.registered_by }}</td>
-                <td class="py-2 text-right">
-                  <button
-                    v-if="!erpSource"
-                    type="button"
-                    class="text-xs text-ink-red-4 hover:underline"
-                    :disabled="Boolean(busy)"
-                    @click="confirmReverse(entry)"
-                  >
-                    {{ __('Reverse') }}
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <div v-else class="text-sm text-ink-gray-5">{{ __('No payment registered yet.') }}</div>
         </section>
 
         <!-- Promessa de pagamento -->
-        <section v-if="!paid" class="flex flex-col gap-3">
-          <h3 class="text-base font-semibold text-ink-gray-8">{{ __('Promise of payment') }}</h3>
-          <div class="grid grid-cols-[1fr_1fr_auto_auto] items-end gap-3">
-            <FormControl v-model="promise.date" type="date" :label="__('Promised for')" :min="today" />
+        <section v-if="!paid" class="flex flex-col gap-3.5">
+          <h3 class="ct-section-title">{{ __('Promise of payment') }}</h3>
+          <div class="ct-fields grid grid-cols-[1fr_1fr_auto] items-end gap-3">
+            <FormControl v-model="promise.date" type="date" format="DD/MM/YYYY" placeholder="dd/mm/aaaa" :label="__('Promised for')" :min="today" />
             <FormControl v-model.number="promise.amount" type="number" :label="__('Promised amount (R$)')" :placeholder="money(balance)" />
-            <Button
-              :label="__('Save promise')"
-              :loading="busy === 'promise'"
-              :disabled="!promise.date || Boolean(busy)"
-              @click="savePromise"
-            />
-            <Button
-              v-if="title.promise_date"
-              :label="__('Clear')"
-              :disabled="Boolean(busy)"
-              @click="clearPromise"
-            />
+            <!-- Figma "Botão" Destaque 40px, centered on the 48px field -->
+            <div class="pb-1">
+              <Button
+                variant="solid"
+                size="lg"
+                :label="__('Save promise')"
+                :loading="busy === 'promise'"
+                :disabled="!promise.date || Boolean(busy)"
+                @click="savePromise"
+              />
+            </div>
           </div>
-          <div v-if="promiseBroken" class="text-sm text-ink-red-4">
+          <div v-if="promiseBroken" class="text-p-base text-[color:var(--ct-danger)]">
             {{ __('The promise of {0} was not kept.', [date(title.promise_date)]) }}
           </div>
         </section>
 
         <!-- Acordo: cronograma de parcelas -->
-        <section v-if="(!paid && !erpSource) || installments.length" class="flex flex-col gap-3">
-          <h3 class="text-base font-semibold text-ink-gray-8">{{ __('Agreement') }}</h3>
+        <section v-if="(!paid && !erpSource) || installments.length" class="flex flex-col gap-3.5">
+          <h3 class="ct-section-title">{{ __('Agreement') }}</h3>
 
           <template v-if="installments.length">
             <table class="w-full text-left text-p-sm">
@@ -171,15 +134,19 @@
 
           <!-- Novo acordo: só sem parcelas em aberto (o histórico de um acordo cancelado fica acima) e fora do ERP -->
           <template v-if="!openInstallments.length && !paid && !erpSource">
-            <div v-if="!builder.rows.length" class="grid grid-cols-[1fr_1fr_auto] items-end gap-3">
+            <div v-if="!builder.rows.length" class="ct-fields grid grid-cols-[1fr_1fr_auto] items-end gap-3">
               <FormControl v-model.number="builder.count" type="number" :label="__('Number of installments')" min="1" max="60" />
-              <FormControl v-model="builder.first" type="date" :label="__('First due date')" :min="today" />
-              <Button
-                :label="__('Build schedule')"
-                :loading="busy === 'suggest'"
-                :disabled="!builder.count || !builder.first || Boolean(busy)"
-                @click="buildSchedule"
-              />
+              <FormControl v-model="builder.first" type="date" format="DD/MM/YYYY" placeholder="dd/mm/aaaa" :label="__('First due date')" :min="today" />
+              <div class="pb-1">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  :label="__('Build schedule')"
+                  :loading="busy === 'suggest'"
+                  :disabled="!builder.count || !builder.first || Boolean(busy)"
+                  @click="buildSchedule"
+                />
+              </div>
             </div>
             <template v-else>
               <div class="flex flex-col gap-2">
@@ -210,27 +177,61 @@
         </section>
 
         <!-- Ajuste de saldo (juros, desconto): fica no histórico do card -->
-        <section v-if="!paid && !erpSource" class="flex flex-col gap-3">
-          <h3 class="text-base font-semibold text-ink-gray-8">{{ __('Adjust balance') }}</h3>
-          <div class="grid grid-cols-[1fr_2fr_auto] items-end gap-3">
+        <section v-if="!paid && !erpSource" class="flex flex-col gap-3.5">
+          <h3 class="ct-section-title">{{ __('Adjust balance') }}</h3>
+          <div class="ct-fields grid grid-cols-[1fr_2fr_auto] items-end gap-3">
             <FormControl v-model.number="adjust.balance" type="number" :label="__('New balance (R$)')" :placeholder="money(balance)" />
             <FormControl v-model="adjust.reason" type="text" :label="__('Reason')" :placeholder="__('Interest until today, discount agreed...')" />
-            <Button
-              :label="__('Save balance')"
-              :loading="busy === 'adjust'"
-              :disabled="!adjust.balance || adjust.balance <= 0 || Boolean(openInstallments.length) || Boolean(busy)"
-              @click="adjustBalance"
-            />
+            <div class="pb-1">
+              <Button
+                variant="outline"
+                size="lg"
+                :label="__('Save balance')"
+                :loading="busy === 'adjust'"
+                :disabled="!adjust.balance || adjust.balance <= 0 || Boolean(openInstallments.length) || Boolean(busy)"
+                @click="adjustBalance"
+              />
+            </div>
           </div>
           <div v-if="openInstallments.length" class="text-xs text-ink-gray-5">
             {{ __('This title has an agreement in progress. Cancel the agreement before changing the balance.') }}
           </div>
         </section>
+
+        <!-- Histórico do título: promessa e pagamentos, do mais novo ao mais antigo -->
+        <section v-if="history.length" class="flex flex-col gap-2">
+          <h3 class="ct-section-title">{{ __('Title history') }}</h3>
+          <div
+            v-for="item in history"
+            :key="item.key"
+            class="flex items-center gap-3 rounded-[var(--ct-radius-md)] bg-surface-gray-2 px-3 py-2"
+            :title="item.note || ''"
+          >
+            <component :is="item.icon" class="size-4 shrink-0 text-ink-gray-9" aria-hidden="true" />
+            <div class="flex min-w-0 flex-1 flex-col gap-0.5">
+              <span class="text-p-base font-medium text-ink-gray-9">{{ item.text }}</span>
+              <span v-if="item.meta" class="text-xs leading-4 text-ink-gray-6">{{ item.meta }}</span>
+            </div>
+            <button
+              v-if="item.action"
+              type="button"
+              class="shrink-0 text-p-base font-medium underline"
+              :class="item.action.danger ? 'text-[color:var(--ct-danger)]' : 'text-ink-gray-9'"
+              :disabled="Boolean(busy)"
+              @click="item.action.run"
+            >
+              {{ item.action.label }}
+            </button>
+          </div>
+        </section>
       </div>
     </template>
     <template #actions>
-      <div class="flex justify-end">
-        <Button :label="__('Close')" @click="open = false" />
+      <!-- Figma "Rodapé": soft gray band with the outline "Fechar" on the right -->
+      <div
+        class="-mx-4 -mb-7 -mt-4 flex justify-end rounded-b-[var(--ct-radius-lg)] bg-surface-gray-2 px-4 py-4 sm:-mx-6 sm:px-6"
+      >
+        <Button variant="outline" :label="__('Close')" @click="open = false" />
       </div>
     </template>
   </Dialog>
@@ -239,6 +240,10 @@
 <script setup>
 import { computed, reactive, ref, watch } from 'vue'
 import { Badge, Button, Dialog, FormControl, call, toast } from 'frappe-ui'
+import CalendarIcon from '~icons/lucide/calendar'
+import CircleCheckIcon from '~icons/lucide/circle-check'
+import CtAlert from '@/components/CtAlert.vue'
+import { usersStore } from '@/stores/users'
 import { createDialog } from '@/utils/dialogs'
 
 const props = defineProps({
@@ -282,6 +287,44 @@ const paid = computed(() => balance.value <= 0.005)
 const promiseBroken = computed(
   () => Boolean(title.value?.promise_date) && title.value.promise_date < today && !paid.value,
 )
+// Linha abaixo do título: vencimento, atraso e valor atualizado (o mesmo da coluna da tabela)
+const dueLine = computed(() => {
+  const t = title.value
+  if (!t?.due_date) return __('Updated amount {0}', [money(balance.value)])
+  const late = Math.round((new Date(today) - new Date(String(t.due_date).slice(0, 10))) / 86400000)
+  return late > 0
+    ? __('Overdue since {0} ({1} days late) · updated amount {2}', [longDate(t.due_date), late, money(balance.value)])
+    : __('Due on {0} · updated amount {1}', [longDate(t.due_date), money(balance.value)])
+})
+
+// Histórico do título: a promessa em vigor e os pagamentos, do mais novo ao mais antigo
+const { getUser } = usersStore()
+const history = computed(() => {
+  const items = []
+  const t = title.value
+  if (t?.promise_date) {
+    items.push({
+      key: 'promise',
+      icon: CalendarIcon,
+      text: __('Promise of payment for {0} · {1}', [date(t.promise_date), money(t.promise_amount || balance.value)]),
+      meta: '',
+      action: { label: __('Clear'), run: clearPromise },
+    })
+  }
+  for (const entry of [...payments.value].sort((a, b) => String(b.paid_on).localeCompare(String(a.paid_on)))) {
+    const slot = entry.installment ? ` (${__('installment {0}', [installmentNumber(entry.installment)])})` : ''
+    items.push({
+      key: entry.name,
+      icon: CircleCheckIcon,
+      text: __('Payment of {0} · balance after {1}', [money(entry.amount), money(entry.balance_after)]) + slot,
+      meta: [entry.registered_by ? getUser(entry.registered_by).full_name : '', date(entry.paid_on)].filter(Boolean).join(' · '),
+      note: entry.note,
+      action: erpSource.value ? null : { label: __('Reverse'), danger: true, run: () => confirmReverse(entry) },
+    })
+  }
+  return items
+})
+
 const dialogTitle = computed(() =>
   title.value ? __('Negotiation of title {0}', [title.value.title_number]) : __('Negotiation'),
 )
@@ -306,6 +349,14 @@ function date(value) {
   if (!value) return '—'
   const [y, m, d] = String(value).slice(0, 10).split('-')
   return `${d}/${m}/${y}`
+}
+
+const MONTHS = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez']
+
+// "21 out 2026", como no Figma
+function longDate(value) {
+  const [y, m, d] = String(value).slice(0, 10).split('-')
+  return `${d} ${MONTHS[Number(m) - 1]} ${y}`
 }
 
 function installmentNumber(name) {
@@ -471,3 +522,35 @@ function confirmCancelAgreement() {
   })
 }
 </script>
+
+<style scoped>
+/* Figma section title: 14 Semi Bold, Uso/Texto/Principal */
+.ct-section-title {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  color: var(--ct-text-primary);
+}
+/* Figma "Campo" (940:99): 14 Medium gray label, 6px gap, white 48px box with
+   the #dcdde2 border, 6px radius, 16px value */
+.ct-fields :deep(label) {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  color: var(--ct-text-secondary);
+}
+.ct-fields :deep(input) {
+  height: 48px;
+  padding-inline: 14px;
+  border: 1px solid var(--ct-border);
+  border-radius: var(--ct-radius-sm);
+  background: var(--ct-bg-page);
+  font-size: 16px;
+  line-height: 24px;
+  color: var(--ct-text-primary);
+}
+.ct-fields :deep(input:focus) {
+  border-color: var(--ct-border-strong);
+  box-shadow: 0 0 0 1px var(--ct-border-strong);
+}
+</style>
