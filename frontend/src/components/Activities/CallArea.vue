@@ -20,60 +20,54 @@
         <TimelineTimestamp :date="call.creation" />
       </div>
     </div>
+    <!-- Figma "Card · Atividade" call card: title and avatars, then the date
+         (12px), the status badge and an outline "Ouvir ligação" button -->
     <div
-      class="flex flex-col gap-2 border cursor-pointer border-[var(--ct-border-soft)] rounded-[var(--ct-radius-md)] bg-surface-elevation-1 px-3 py-2.5 text-ink-gray-9 transition-colors hover:bg-[var(--ct-bg-soft)]"
+      class="flex cursor-pointer flex-col gap-2.5 rounded-[var(--ct-radius-md)] border border-[var(--ct-border-soft)] bg-surface-base px-3 py-[11px] text-ink-gray-9 transition-colors hover:bg-[var(--ct-bg-soft)]"
       @click="showCallLogDetailModal = true"
     >
       <div class="flex items-center justify-between">
-        <div class="inline-flex gap-2 items-center text-base-medium">
-          <div>
-            {{
-              call.type == 'Incoming' ? __('Inbound Call') : __('Outbound Call')
-            }}
-          </div>
+        <div class="text-base font-medium leading-5">
+          {{
+            call.type == 'Incoming' ? __('Inbound Call') : __('Outbound Call')
+          }}
         </div>
-        <div>
-          <MultipleAvatar
-            :avatars="[
-              {
-                image: call._caller.image,
-                label: call._caller.label,
-                name: call._caller.label,
-              },
-              {
-                image: call._receiver.image,
-                label: call._receiver.label,
-                name: call._receiver.label,
-              },
-            ]"
-            size="sm"
-          />
-        </div>
+        <MultipleAvatar
+          :avatars="[
+            {
+              image: call._caller.image,
+              label: call._caller.label,
+              name: call._caller.label,
+            },
+            {
+              image: call._receiver.image,
+              label: call._receiver.label,
+              name: call._receiver.label,
+            },
+          ]"
+          size="sm"
+        />
       </div>
-      <div class="flex items-center flex-wrap gap-2">
-        <Badge :label="formatDate(call.creation, 'MMM D, dddd')">
-          <template #prefix>
-            <CalendarIcon class="size-3" />
-          </template>
-        </Badge>
-        <Badge v-if="call.status == 'Completed'" :label="call._duration">
-          <template #prefix>
-            <DurationIcon class="size-3" />
-          </template>
-        </Badge>
-        <Badge
-          v-if="call.recording_url"
-          :label="call.show_recording ? __('Hide Recording') : __('Listen')"
-          class="cursor-pointer"
-          @click.stop="call.show_recording = !call.show_recording"
+      <div class="flex min-h-8 flex-wrap items-center gap-2">
+        <span
+          class="inline-flex items-center gap-1.5 text-xs leading-4 text-ink-gray-6"
         >
-          <template #prefix>
-            <PlayIcon class="size-3" />
-          </template>
-        </Badge>
+          <span class="lucide-calendar size-3.5 shrink-0" aria-hidden="true" />
+          {{ formatDate(call.creation, 'MMM D, dddd') }}
+        </span>
         <Badge
           :label="getCallStatusLabel(call.status, call.type)"
           :theme="statusColorMap[call.status]"
+        />
+        <Button
+          v-if="call.recording_url"
+          class="ml-auto"
+          variant="outline"
+          iconLeft="lucide-play"
+          :label="
+            call.show_recording ? __('Hide Recording') : __('Ouvir ligação')
+          "
+          @click.stop="call.show_recording = !call.show_recording"
         />
       </div>
       <div
@@ -95,16 +89,13 @@
   </div>
 </template>
 <script setup>
-import PlayIcon from '@/components/Icons/PlayIcon.vue'
-import CalendarIcon from '@/components/Icons/CalendarIcon.vue'
-import DurationIcon from '@/components/Icons/DurationIcon.vue'
 import MultipleAvatar from '@/components/MultipleAvatar.vue'
 import AudioPlayer from '@/components/Activities/AudioPlayer.vue'
 import CallLogDetailModal from '@/components/Modals/CallLogDetailModal.vue'
 import TimelineTimestamp from '@/components/Activities/TimelineTimestamp.vue'
 import { getCallStatusLabel, statusColorMap } from '@/utils/callLog.js'
 import { formatDate } from '@/utils'
-import { Avatar, Badge, createResource } from 'frappe-ui'
+import { Avatar, Badge, Button, createResource } from 'frappe-ui'
 import { reactive, ref } from 'vue'
 
 const props = defineProps({

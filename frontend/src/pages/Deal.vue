@@ -615,7 +615,6 @@ import ActivityIcon from '@/components/Icons/ActivityIcon.vue'
 import EmailIcon from '@/components/Icons/EmailIcon.vue'
 import Email2Icon from '@/components/Icons/Email2Icon.vue'
 import CommentIcon from '@/components/Icons/CommentIcon.vue'
-import DetailsIcon from '@/components/Icons/DetailsIcon.vue'
 import PhoneIcon from '@/components/Icons/PhoneIcon.vue'
 import TaskIcon from '@/components/Icons/TaskIcon.vue'
 import NoteIcon from '@/components/Icons/NoteIcon.vue'
@@ -1089,17 +1088,19 @@ const isCreditFunnel = computed(() => {
 
 const tabs = computed(() => {
   let tabOptions = [
+    // Figma "Card · Atividade": Atividade and Anexos; the card's fields live
+    // in the side panel, so there is no "Dados" tab
     {
       name: 'Activity',
       value: 'activity',
-      label: __('Atividades'),
+      label: __('Atividade'),
       iconLeft: ActivityIcon,
     },
     {
-      name: 'Data',
-      value: 'data',
-      label: __('Dados'),
-      iconLeft: DetailsIcon,
+      name: 'Attachments',
+      value: 'attachments',
+      label: __('Anexos'),
+      iconLeft: AttachmentIcon,
     },
     {
       name: 'Titles',

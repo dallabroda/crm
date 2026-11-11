@@ -1,7 +1,8 @@
 <template>
-  <div
-    class="relative flex justify-between gap-3 border-t border-[var(--ct-border-soft)] px-4 py-2.5"
-  >
+  <!-- Figma "Campo de mensagem" (Card · Atividade): a box always visible at
+       the bottom with Comentário / E-mail / WhatsApp and "Enviar"; choosing
+       one opens its editor -->
+  <div class="relative border-t border-[var(--ct-border)]">
     <div
       v-if="showEmailBox || showCommentBox"
       class="group absolute inset-x-0 -top-1 z-10 flex h-2 cursor-row-resize touch-none items-center"
@@ -15,25 +16,46 @@
         :class="{ 'opacity-100': resizing }"
       />
     </div>
-    <div class="flex gap-1.5">
-      <Button
-        variant="ghost"
-        :class="[
-          showEmailBox ? '!bg-surface-gray-4 hover:!bg-surface-gray-3' : '',
-        ]"
-        :label="__('Reply')"
-        :iconLeft="Email2Icon"
-        @click="toggleEmailBox()"
-      />
-      <Button
-        variant="ghost"
-        :label="__('Comment')"
-        :class="[
-          showCommentBox ? '!bg-surface-gray-4 hover:!bg-surface-gray-3' : '',
-        ]"
-        :iconLeft="CommentIcon"
-        @click="toggleCommentBox()"
-      />
+    <div
+      v-if="!showEmailBox && !showCommentBox"
+      class="bg-surface-base px-3 pb-4 pt-3 sm:px-6"
+    >
+      <div
+        class="flex flex-col gap-2 rounded-[var(--ct-radius-md)] border border-[var(--ct-border)] px-3 py-2.5"
+      >
+        <div class="flex gap-1">
+          <button
+            v-for="option in composerOptions"
+            :key="option.value"
+            type="button"
+            class="h-6 rounded-[var(--ct-radius-sm)] px-2.5 text-[13px] leading-4"
+            :class="
+              option.value === 'comment'
+                ? 'bg-[var(--ct-bg-soft)] font-medium text-ink-gray-9'
+                : 'text-ink-gray-6 hover:bg-[var(--ct-bg-soft)]'
+            "
+            @click="option.open()"
+          >
+            {{ option.label }}
+          </button>
+        </div>
+        <button
+          type="button"
+          class="truncate text-left text-base leading-[17px] text-ink-gray-4"
+          @click="openCommentBox()"
+        >
+          {{
+            __('Escreva um comentário… use @ para mencionar alguém da equipe')
+          }}
+        </button>
+        <div class="flex justify-end">
+          <Button
+            variant="solid"
+            :label="__('Enviar')"
+            @click="openCommentBox()"
+          />
+        </div>
+      </div>
     </div>
   </div>
   <div
@@ -108,13 +130,12 @@
 <script setup>
 import EmailEditor from '@/components/EmailEditor.vue'
 import CommentBox from '@/components/CommentBox.vue'
-import CommentIcon from '@/components/Icons/CommentIcon.vue'
-import Email2Icon from '@/components/Icons/Email2Icon.vue'
 import { isContentEmpty } from '@/utils'
 import { usersStore } from '@/stores/users'
+import { whatsappEnabled } from '@/composables/whatsapp'
 import { useStorage, useWindowSize } from '@vueuse/core'
 import { useTelemetry } from '@framework/ui/telemetry'
-import { call, createResource, toast } from 'frappe-ui'
+import { Button, call, createResource, toast } from 'frappe-ui'
 import { ref, watch, computed } from 'vue'
 
 const props = defineProps({
@@ -124,7 +145,15 @@ const props = defineProps({
 const doc = defineModel({ type: Object, default: () => ({}) })
 const reload = defineModel('reload', { type: Boolean })
 
-const emit = defineEmits(['scroll'])
+const emit = defineEmits(['scroll', 'whatsapp'])
+
+const composerOptions = computed(() => [
+  { value: 'comment', label: __('Comentário'), open: openCommentBox },
+  { value: 'email', label: __('E-mail'), open: openEmailBox },
+  ...(whatsappEnabled.value
+    ? [{ value: 'whatsapp', label: 'WhatsApp', open: () => emit('whatsapp') }]
+    : []),
+])
 
 const { getUser } = usersStore()
 const { capture } = useTelemetry()

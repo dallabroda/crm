@@ -8,8 +8,9 @@ export function useTimelinePreferences() {
   const timestampFormat = computed(
     () => _settings.doc?.crm_timeline_timestamp_format || 'Relative',
   )
+  // Figma "Card · Atividade": newest first unless the company chose otherwise
   const sortOrder = computed(
-    () => _settings.doc?.crm_timeline_sort_order || 'Oldest First',
+    () => _settings.doc?.crm_timeline_sort_order || 'Newest First',
   )
 
   const showExactTimestamp = computed(() => timestampFormat.value === 'Exact')

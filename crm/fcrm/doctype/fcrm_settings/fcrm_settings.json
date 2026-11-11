@@ -171,6 +171,7 @@
   },
   {
    "default": "Oldest First",
+   "default": "Newest First",
    "description": "Order of activities, emails, comments and calls in the timeline for all users",
    "fieldname": "crm_timeline_sort_order",
    "fieldtype": "Select",
