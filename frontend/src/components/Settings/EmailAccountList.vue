@@ -2,7 +2,7 @@
   <div class="flex h-full flex-col gap-6">
     <!-- Figma "E-mail · Contas" (2336:10121): one "E-mail" page, tabs Contas
          and Modelos, then the description and the table -->
-    <SettingsTabs :tabs="emailTabs" active="email-accounts" />
+    <SettingsSectionTabs :tabs="emailTabs" active="email-accounts" />
     <SettingsPageHeader :title="__('Email')">
       <template #description>
         {{
@@ -61,7 +61,7 @@
 import LucideMail from '~icons/lucide/mail'
 import SettingsEmptyState from '@/components/Settings/SettingsEmptyState.vue'
 import SettingsPageHeader from '@/components/Settings/SettingsPageHeader.vue'
-import SettingsTabs from '@/components/Settings/SettingsTabs.vue'
+import SettingsSectionTabs from '@/components/Settings/SettingsSectionTabs.vue'
 import EmailAccountCard from './EmailAccountCard.vue'
 import { emailTabs, getSystemEmailAccounts } from './emailConfig'
 import { createListResource } from 'frappe-ui'

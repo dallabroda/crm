@@ -1,50 +1,44 @@
 <template>
-  <!-- Figma "Abas" (E-mail 2336:10121, Entrada de leads 2336:10624): 24px
-       apart, 14/500 labels with 4px/10px padding, 2px blue line on the active
-       tab, 1px line under the row. Each tab is a settings section. -->
+  <!-- Figma "Abas" (Configurações · Automação 2335:9863, Funis · Etapas
+       2339:10530): 14 Medium tabs, 24px apart, the active one in the accent
+       color over a 2px line, on a #dcdde2 bottom border -->
   <div
-    v-if="visibleTabs.length > 1"
     class="flex shrink-0 items-start gap-6 border-b border-[var(--ct-border)]"
     role="tablist"
   >
-    <router-link
-      v-for="tab in visibleTabs"
-      :key="tab.slug"
-      :to="settingsRoute(tab.slug)"
+    <button
+      v-for="tab in tabs"
+      :key="tab.value"
+      type="button"
       role="tab"
-      :aria-selected="tab.slug === active"
+      :aria-selected="modelValue === tab.value"
       class="flex flex-col"
+      @click="emit('update:modelValue', tab.value)"
     >
       <span
         class="px-1 py-2.5 text-[14px] font-medium leading-5"
         :class="
-          tab.slug === active
-            ? 'text-[var(--ct-accent)]'
+          modelValue === tab.value
+            ? 'text-[var(--ct-text-accent)]'
             : 'text-[var(--ct-text-secondary)] hover:text-[var(--ct-text-primary)]'
         "
       >
-        {{ __(tab.label) }}
+        {{ tab.label }}
       </span>
       <span
         class="h-0.5 w-full"
-        :class="tab.slug === active ? 'bg-[var(--ct-accent)]' : ''"
+        :class="modelValue === tab.value ? 'bg-[var(--ct-text-accent)]' : ''"
       />
-    </router-link>
+    </button>
   </div>
 </template>
 
 <script setup>
-import { settingsRoute } from '@/composables/settingsNavigation'
-import { computed } from 'vue'
-
-// tabs: [{ slug, label (English, translated here), condition? }] (condition: same as the section's in
-// settingsSections.js); active: slug of the section on screen
-const props = defineProps({
+defineProps({
+  // [{ label, value }]
   tabs: { type: Array, required: true },
-  active: { type: String, required: true },
+  modelValue: { type: String, default: '' },
 })
 
-const visibleTabs = computed(() =>
-  props.tabs.filter((tab) => !tab.condition || tab.condition()),
-)
+const emit = defineEmits(['update:modelValue'])
 </script>

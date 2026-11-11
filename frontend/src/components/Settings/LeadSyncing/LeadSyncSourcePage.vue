@@ -2,7 +2,7 @@
   <div class="flex h-full flex-col gap-6 text-ink-gray-8">
     <!-- Figma "Entrada de leads · Fontes de leads" (2324:20471): tab of the
          "Entrada de leads" page -->
-    <SettingsTabs :tabs="leadIntakeTabs" active="lead-sources" />
+    <SettingsSectionTabs :tabs="leadIntakeTabs" active="lead-sources" />
     <SettingsPageHeader :title="__('Lead intake')">
       <template #description>
         {{
@@ -38,7 +38,7 @@
 
 <script setup>
 import SettingsPageHeader from '@/components/Settings/SettingsPageHeader.vue'
-import SettingsTabs from '@/components/Settings/SettingsTabs.vue'
+import SettingsSectionTabs from '@/components/Settings/SettingsSectionTabs.vue'
 import { leadIntakeTabs } from './webhookSourcesApi'
 // Lead sources connected by the company admin (credtech#51). The old screen,
 // where a Meta access token was pasted by hand, gave way to "Connect with

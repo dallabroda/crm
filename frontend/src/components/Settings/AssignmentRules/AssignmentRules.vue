@@ -1,6 +1,8 @@
 <template>
   <div class="flex h-full flex-col gap-6 text-ink-gray-8">
-    <SettingsPageHeader :title="__('Assignment Rules')">
+    <!-- Figma "Configurações · Automação · Distribuição de cards" (2335:10136) -->
+    <AutomationTabs current="assignment-rules" />
+    <SettingsPageHeader :title="__('Automation')">
       <template #description>
         {{
           __(
@@ -28,6 +30,7 @@
 <script setup>
 import SettingsPageHeader from '@/components/Settings/SettingsPageHeader.vue'
 import AssignmentRulesList from './AssignmentRulesList.vue'
+import AutomationTabs from '@/components/Settings/AutomationTabs.vue'
 import { createResource } from 'frappe-ui'
 import { inject, provide } from 'vue'
 

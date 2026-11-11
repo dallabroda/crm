@@ -1,7 +1,7 @@
 <template>
   <div class="flex h-full flex-col gap-6 text-ink-gray-8">
     <!-- Figma "E-mail · Modelos" (2336:10373): tab Modelos of the "E-mail" page -->
-    <SettingsTabs :tabs="emailTabs" active="email-templates" />
+    <SettingsSectionTabs :tabs="emailTabs" active="email-templates" />
     <SettingsPageHeader :title="__('Email')">
       <template #description>
         {{
@@ -166,7 +166,7 @@
 import LucideFileText from '~icons/lucide/file-text'
 import SettingsEmptyState from '@/components/Settings/SettingsEmptyState.vue'
 import SettingsPageHeader from '@/components/Settings/SettingsPageHeader.vue'
-import SettingsTabs from '@/components/Settings/SettingsTabs.vue'
+import SettingsSectionTabs from '@/components/Settings/SettingsSectionTabs.vue'
 import { emailTabs } from '@/components/Settings/emailConfig'
 import { useBroadcast } from '@/composables/useBroadcast'
 import { TextInput, FormControl, Switch, Dropdown, toast } from 'frappe-ui'

@@ -1,7 +1,7 @@
 <template>
   <div class="flex h-full flex-col gap-6 text-ink-gray-8">
     <!-- Figma "Entrada de leads · Formulários de captura" (2336:10624) -->
-    <SettingsTabs :tabs="leadIntakeTabs" active="lead-capture-forms" />
+    <SettingsSectionTabs :tabs="leadIntakeTabs" active="lead-capture-forms" />
     <SettingsPageHeader :title="__('Lead intake')">
       <template #description>
         {{
@@ -143,7 +143,7 @@
 import LucideTextCursorInput from '~icons/lucide/text-cursor-input'
 import SettingsEmptyState from '@/components/Settings/SettingsEmptyState.vue'
 import SettingsPageHeader from '@/components/Settings/SettingsPageHeader.vue'
-import SettingsTabs from '@/components/Settings/SettingsTabs.vue'
+import SettingsSectionTabs from '@/components/Settings/SettingsSectionTabs.vue'
 import { leadIntakeTabs } from '@/components/Settings/LeadSyncing/webhookSourcesApi'
 import {
   Button,
