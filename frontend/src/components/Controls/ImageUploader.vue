@@ -10,7 +10,7 @@
         <Button
           variant="outline"
           class="ct-btn-accent-text"
-          :iconLeft="uploading ? 'lucide-cloud-upload' : ImageUpIcon"
+          :iconLeft="uploading ? 'lucide-cloud-upload' : UploadIcon"
           :label="
             uploading
               ? __('Uploading {0}%', [progress])
@@ -30,7 +30,8 @@
   </FileUploader>
 </template>
 <script setup>
-import ImageUpIcon from '~icons/lucide/image-up'
+// Figma "Configurações · Empresa" (2323:14221): "Trocar" with the upload icon
+import UploadIcon from '~icons/lucide/upload'
 import { FileUploader, Button } from 'frappe-ui'
 
 defineProps({

@@ -1,6 +1,14 @@
 <template>
+  <!-- Figma "Configurações · Equipe · Convidar usuário" (2345:28842): "Voltar"
+       to the team before the title; 120px e-mails box, 48px role select -->
   <div class="flex h-full flex-col gap-6 text-ink-gray-8">
-    <SettingsPageHeader :title="__('Invite users')">
+    <SettingsPageHeader :title="__('Invite User')">
+      <template #title>
+        <div class="flex min-w-0 items-center gap-3">
+          <SettingsBackLink :to="settingsRoute('Users')" />
+          <h1 class="truncate">{{ __('Invite User') }}</h1>
+        </div>
+      </template>
       <template #description>
         {{
           __(
@@ -24,7 +32,7 @@
       <div>
         <FormControl
           type="textarea"
-          class="ct-field-48"
+          class="ct-field-48 [&_textarea]:h-[120px]"
           variant="outline"
           :rows="4"
           :label="__('Invite By Email')"
@@ -149,6 +157,8 @@
 </template>
 <script setup>
 import SettingsPageHeader from '@/components/Settings/SettingsPageHeader.vue'
+import SettingsBackLink from '@/components/Settings/SettingsBackLink.vue'
+import { settingsRoute } from '@/composables/settingsNavigation'
 import { validateEmail, convertArrayToString, formatDate } from '@/utils'
 import { usersStore } from '@/stores/users'
 import { useTelemetry } from '@framework/ui/telemetry'
