@@ -1,14 +1,9 @@
 <template>
-  <div class="flex h-full flex-col gap-6 text-[#1E1F23]">
-    <SettingsPageHeader :title="__('Users and Plan')">
-      <template #description>
-        {{
-          __(
-            '14 dias de teste grátis com recursos completos e usuários ilimitados. Escolha o plano ideal para sua operação comercial ou de crédito e cobrança.',
-          )
-        }}
-      </template>
-    </SettingsPageHeader>
+  <!-- Figma "Configurações · Usuários e plano · preenchida" (2201:2060):
+       the title lives in the top bar; the page is the plan list and the
+       "Adicionais" block, with no intro text, usage card or comparison table. -->
+  <div class="flex h-full flex-col gap-6 text-[var(--ct-text-primary)]">
+    <SettingsPageHeader :title="__('Users and Plan')" />
 
     <div v-if="!data" class="flex mt-28 justify-between w-full h-full">
       <Button
@@ -21,107 +16,13 @@
 
     <div
       v-else-if="data.unlimited"
-      class="rounded-[8px] bg-[#E5F1FF] px-3.5 py-2.5 text-base font-medium text-[#0070E0]"
+      class="rounded-[8px] bg-[var(--ct-info-soft)] px-3.5 py-2.5 text-base font-medium text-[var(--ct-info)]"
     >
       {{ __('Your company has no user limit.') }}
     </div>
 
-    <div v-else class="flex flex-col gap-6 overflow-y-auto pr-1 pb-6">
-      <!-- Resumo de uso e status -->
-      <div
-        class="flex flex-col gap-3 rounded-[12px] border border-[#E6E7EB] bg-white p-4"
-      >
-        <div class="flex items-center justify-between gap-4">
-          <div class="flex flex-col gap-0.5">
-            <div class="flex items-center gap-2">
-              <span class="text-lg font-semibold text-[#1E1F23]">
-                {{
-                  seats.unlimited
-                    ? data.in_trial
-                      ? __('{0} users, no limit during the trial', [seats.used])
-                      : __('{0} active users · Unlimited seats (Enterprise)', [
-                          seats.used,
-                        ])
-                    : __('{0} of {1} users', [seats.used, seats.limit])
-                }}
-              </span>
-              <span
-                v-if="currentTierLabel"
-                class="rounded-[6px] bg-[#F5F5F7] px-2 py-0.5 text-xs font-medium text-[#5E6068]"
-              >
-                {{ currentTierLabel }}
-              </span>
-            </div>
-            <span class="text-sm text-[#5E6068]">
-              {{
-                __('{0} active, {1} invited', [
-                  data.used_active,
-                  data.used_invited,
-                ])
-              }}
-              <template v-if="data.included_opinions">
-                · {{ data.included_opinions }} pareceres IA/mês incluídos
-              </template>
-            </span>
-          </div>
-          <Badge
-            :label="statusBadge(data.status, data.in_trial).label"
-            :theme="statusBadge(data.status, data.in_trial).theme"
-            variant="subtle"
-            size="lg"
-          />
-        </div>
-        <div
-          v-if="!seats.unlimited"
-          class="h-1.5 w-full overflow-hidden rounded-full bg-[#EDEDF0]"
-        >
-          <div
-            class="h-full rounded-full"
-            :class="seats.full ? 'bg-[#B42318]' : 'bg-[#0088FF]'"
-            :style="{ width: barWidth }"
-          />
-        </div>
-        <p
-          v-if="seats.full && data.status !== 'Awaiting Payment'"
-          class="text-sm text-[#5E6068]"
-        >
-          {{
-            __(
-              'All seats are in use. To invite someone else, contract extra users below.',
-            )
-          }}
-        </p>
-        <div
-          v-if="data.status === 'Active' && data.next_due && data.amount"
-          class="text-sm text-[#5E6068]"
-        >
-          {{
-            __('Next charge: {0} on {1}', [
-              money(data.amount),
-              date(data.next_due),
-            ])
-          }}
-        </div>
-      </div>
-
-      <!-- Alertas do plano -->
-      <PlanNotice
-        v-if="data.in_trial"
-        theme="gray"
-        :text="
-          __(
-            'Free trial with unlimited users until {0} ({1}). From {2}, the users above the {3} free one and the extra users you contract are paused, the most recent first, and pending invitations over the limit are no longer valid. To keep them, contract extra users below or choose who stays by deactivating the users you no longer need.',
-            [
-              date(data.trial_ends_on),
-              data.trial_days_left === 1
-                ? __('last day')
-                : __('{0} days left', [data.trial_days_left]),
-              date(dayAfterTrial(data)),
-              data.free,
-            ],
-          )
-        "
-      />
+    <div v-else class="flex flex-col gap-6 overflow-y-auto pb-6">
+      <!-- Alertas de pagamento (só aparecem quando há pendência) -->
       <PlanNotice
         v-if="data.status === 'Awaiting Payment'"
         theme="orange"
@@ -213,237 +114,153 @@
         </ul>
       </div>
 
-      <!-- Cards dos 3 Planos -->
-      <div class="flex flex-col gap-3 border-t border-[#E6E7EB] pt-5">
-        <div class="flex flex-col gap-0.5">
-          <div class="text-base font-semibold text-[#1E1F23]">
-            Escolha seu plano
-          </div>
-          <p class="text-sm text-[#5E6068]">
-            Selecione o plano ideal para sua equipe. Bureaus pré-pagos continuam
-            debitados sob demanda da Carteira de Créditos.
-          </p>
-        </div>
-
-        <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+      <!-- Planos · lista -->
+      <div
+        class="flex flex-col overflow-hidden rounded-[8px] border border-[#EDEDF0] bg-white"
+      >
+        <div
+          v-for="tier in PLAN_TIERS"
+          :key="tier.id"
+          class="flex items-center gap-4 border-b border-[#EDEDF0] px-6 py-5 last:border-b-0"
+        >
           <div
-            v-for="tier in PLAN_TIERS"
-            :key="tier.id"
-            class="relative flex cursor-pointer flex-col justify-between rounded-[12px] border p-4 transition-all"
-            :class="
-              selectedTier === tier.id
-                ? 'border-[#0088FF] bg-[#E5F1FF]/35 ring-1 ring-[#0088FF]'
-                : 'border-[#E6E7EB] bg-white hover:border-[#DCDDE2]'
-            "
+            class="flex size-10 shrink-0 items-center justify-center rounded-[8px] bg-[var(--ct-bg-soft)] text-[var(--ct-text-secondary)]"
+          >
+            <component :is="TIER_ICONS[tier.id]" class="ct-plan-icon size-5" />
+          </div>
+          <div class="flex min-w-0 flex-1 flex-col gap-1.5">
+            <div class="flex items-center gap-2">
+              <span class="text-[16px] font-semibold">{{ tier.name }}</span>
+              <span
+                v-if="tier.id === currentTier"
+                class="rounded-full bg-[var(--ct-bg-panel)] px-2.5 py-0.5 text-[12px] font-medium leading-4"
+              >
+                Plano atual
+              </span>
+              <span
+                v-else-if="tier.badge"
+                class="rounded-full bg-[var(--ct-accent-soft)] px-2.5 py-0.5 text-[12px] font-medium leading-4 text-[var(--ct-accent-text)]"
+              >
+                {{ tier.badge }}
+              </span>
+            </div>
+            <p
+              class="text-[14px] leading-[normal] text-[var(--ct-text-secondary)]"
+            >
+              {{ tierDescription(tier) }}
+            </p>
+          </div>
+          <div class="flex shrink-0 items-baseline gap-1 whitespace-nowrap">
+            <span class="text-[16px] font-semibold leading-6">
+              {{ price(tier.basePrice) }}
+            </span>
+            <span class="text-[14px] text-[var(--ct-text-secondary)]"
+              >/mês</span
+            >
+          </div>
+          <button
+            v-if="tier.id === currentTier"
+            type="button"
+            disabled
+            class="flex h-10 w-[220px] shrink-0 items-center justify-center rounded-[6px] bg-[var(--ct-bg-panel)] px-6 text-[14px] font-semibold opacity-40"
+          >
+            Plano atual
+          </button>
+          <button
+            v-else-if="tier.id === selectedTier"
+            type="button"
+            class="flex h-10 w-[220px] shrink-0 items-center justify-center rounded-[6px] border border-[var(--ct-border)] bg-white px-6 text-[14px] font-semibold hover:bg-[var(--ct-bg-soft)]"
+            @click="selectTier(currentTier || tier.id)"
+          >
+            Plano escolhido
+          </button>
+          <button
+            v-else
+            type="button"
+            class="flex h-10 w-[220px] shrink-0 items-center justify-center rounded-[6px] bg-[var(--ct-accent)] px-6 text-[14px] font-semibold text-white hover:bg-[var(--ct-accent-hover)] disabled:opacity-40"
+            :disabled="saving"
             @click="selectTier(tier.id)"
           >
-            <div class="flex flex-col gap-3">
-              <div class="flex items-start justify-between gap-2">
-                <div>
-                  <div class="text-base font-semibold text-[#1E1F23]">
-                    {{ tier.name }}
-                  </div>
-                  <div class="mt-0.5 text-xs text-[#5E6068]">
-                    {{ tier.subtitle }}
-                  </div>
-                </div>
-                <span
-                  v-if="tier.badge"
-                  class="shrink-0 rounded-[6px] bg-[#0088FF] px-2 py-0.5 text-[11px] font-semibold text-white"
-                >
-                  {{ tier.badge }}
-                </span>
-              </div>
-
-              <div class="flex items-baseline gap-1 border-b border-[#EDEDF0] pb-3">
-                <span class="text-2xl font-bold text-[#1E1F23]">
-                  {{ money(tier.basePrice) }}
-                </span>
-                <span class="text-xs text-[#5E6068]">/mês</span>
-              </div>
-
-              <ul class="flex flex-col gap-1.5 text-xs text-[#2A2B30]">
-                <li
-                  v-for="(feat, idx) in tier.features"
-                  :key="idx"
-                  class="flex items-start gap-1.5 leading-snug"
-                >
-                  <span class="mt-0.5 font-bold text-[#0088FF]">✓</span>
-                  <span>{{ feat }}</span>
-                </li>
-              </ul>
-            </div>
-
-            <div class="mt-4 pt-2">
-              <button
-                type="button"
-                class="w-full rounded-[8px] px-3 py-2 text-xs font-semibold transition-colors"
-                :class="
-                  selectedTier === tier.id
-                    ? 'bg-[#000000] text-white hover:bg-[#2A2B30]'
-                    : 'border border-[#DCDDE2] bg-[#F5F5F7] text-[#1E1F23] hover:bg-[#E6E7EB]'
-                "
-                @click.stop="selectTier(tier.id)"
-              >
-                {{
-                  selectedTier === tier.id
-                    ? 'Plano selecionado'
-                    : 'Selecionar ' + tier.name
-                }}
-              </button>
-            </div>
-          </div>
+            Mudar para {{ tier.name }}
+          </button>
         </div>
-
-        <!-- Comparativo completo de funcionalidades -->
-        <details
-          class="mt-1 rounded-[12px] border border-[#E6E7EB] bg-[#F5F5F7]/60 px-4 py-3"
-        >
-          <summary
-            class="cursor-pointer select-none text-sm font-semibold text-[#1E1F23] hover:text-[#0088FF]"
-          >
-            Ver tabela comparativa completa de todas as funcionalidades dos 3 planos
-          </summary>
-          <div class="mt-3 overflow-x-auto">
-            <table class="w-full border-collapse text-left text-xs">
-              <thead>
-                <tr class="border-b border-[#DCDDE2] text-[#5E6068]">
-                  <th class="py-2 pr-3 font-semibold">Funcionalidade</th>
-                  <th class="px-3 py-2 text-center font-semibold">
-                    CRM Vendas (R$ 119)
-                  </th>
-                  <th
-                    class="px-3 py-2 text-center font-semibold text-[#0088FF]"
-                  >
-                    Crédito & Cobrança (R$ 449)
-                  </th>
-                  <th class="px-3 py-2 text-center font-semibold">
-                    Enterprise (R$ 990)
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <template
-                  v-for="group in PLAN_COMPARISON_GROUPS"
-                  :key="group.category"
-                >
-                  <tr class="bg-[#EDEDF0]/70">
-                    <td
-                      colspan="4"
-                      class="px-2 py-1.5 text-[11px] font-bold uppercase tracking-wide text-[#1E1F23]"
-                    >
-                      {{ group.category }}
-                    </td>
-                  </tr>
-                  <tr
-                    v-for="row in group.rows"
-                    :key="row.label"
-                    class="border-b border-[#E6E7EB] bg-white"
-                  >
-                    <td class="py-2 pl-2 pr-3 text-[#2A2B30]">
-                      {{ row.label }}
-                    </td>
-                    <td class="px-3 py-2 text-center">
-                      <span
-                        v-if="row.vendas === true"
-                        class="font-bold text-[#1F7A3D]"
-                        >✓</span
-                      >
-                      <span
-                        v-else-if="row.vendas === false"
-                        class="text-[#8A8C94]"
-                        >—</span
-                      >
-                      <span v-else class="font-medium text-[#1E1F23]">{{
-                        row.vendas
-                      }}</span>
-                    </td>
-                    <td class="bg-[#E5F1FF]/25 px-3 py-2 text-center">
-                      <span
-                        v-if="row.credito_cobranca === true"
-                        class="font-bold text-[#0088FF]"
-                        >✓</span
-                      >
-                      <span
-                        v-else-if="row.credito_cobranca === false"
-                        class="text-[#8A8C94]"
-                        >—</span
-                      >
-                      <span v-else class="font-semibold text-[#1E1F23]">{{
-                        row.credito_cobranca
-                      }}</span>
-                    </td>
-                    <td class="px-3 py-2 text-center">
-                      <span
-                        v-if="row.enterprise === true"
-                        class="font-bold text-[#1F7A3D]"
-                        >✓</span
-                      >
-                      <span
-                        v-else-if="row.enterprise === false"
-                        class="text-[#8A8C94]"
-                        >—</span
-                      >
-                      <span v-else class="font-medium text-[#1E1F23]">{{
-                        row.enterprise
-                      }}</span>
-                    </td>
-                  </tr>
-                </template>
-              </tbody>
-            </table>
-          </div>
-        </details>
       </div>
 
-      <!-- Configuração de usuários extras e pagamento -->
-      <div class="flex flex-col gap-4 border-t border-[#E6E7EB] pt-5">
-        <div
-          v-if="selectedSpec && !selectedSpec.unlimitedUsers"
-          class="flex flex-col gap-2"
-        >
-          <div class="text-base font-semibold text-[#1E1F23]">
-            {{ __('Extra users') }} ({{
-              money(selectedSpec.extraUserPrice)
-            }}/mês cada)
+      <!-- Adicionais -->
+      <div
+        v-if="selectedSpec"
+        class="flex flex-col gap-4 rounded-[8px] border border-[#EDEDF0] bg-white p-6"
+      >
+        <div class="text-[14px] font-medium">Adicionais</div>
+        <div class="flex items-center gap-4">
+          <div
+            class="flex size-10 shrink-0 items-center justify-center rounded-[8px] bg-[var(--ct-bg-soft)] text-[#2A2B30]"
+          >
+            <UsersIcon class="ct-plan-icon size-5" />
           </div>
-          <div class="flex flex-wrap items-center gap-3">
-            <FormControl
-              v-model="quantity"
-              type="number"
-              class="w-40"
-              :min="0"
-              :max="500"
-              :disabled="saving"
-            />
-            <span class="text-sm font-medium text-[#2A2B30]">
-              {{
-                __('{0} users in total ({1} included + {2} extra), {3} per month', [
-                  selectedSpec.includedUsers + extras,
-                  selectedSpec.includedUsers,
-                  extras,
-                  money(change.monthly),
-                ])
-              }}
+          <div
+            class="flex min-w-0 flex-1 flex-col gap-1 text-[14px] leading-[normal]"
+          >
+            <span class="font-medium">{{ __('Extra users') }}</span>
+            <span class="text-[var(--ct-text-secondary)]">
+              {{ extrasDescription }}
             </span>
           </div>
+          <template v-if="!selectedSpec.unlimitedUsers">
+            <div
+              class="flex shrink-0 overflow-hidden rounded-[6px] border border-[var(--ct-border)] bg-white text-[14px]"
+            >
+              <button
+                type="button"
+                class="flex h-8 w-9 items-center justify-center bg-[var(--ct-bg-soft)] font-semibold hover:bg-[var(--ct-bg-panel)]"
+                aria-label="Remover um usuário extra"
+                :disabled="saving || extras <= 0"
+                @click="quantity = Math.max(0, extras - 1)"
+              >
+                −
+              </button>
+              <input
+                v-model.number="quantity"
+                type="number"
+                min="0"
+                max="500"
+                class="ct-stepper-value h-8 w-9 border-0 p-0 text-center text-[14px] font-medium focus:ring-0"
+                :aria-label="__('Extra users')"
+                :disabled="saving"
+              />
+              <button
+                type="button"
+                class="flex h-8 w-9 items-center justify-center bg-[var(--ct-bg-soft)] font-semibold hover:bg-[var(--ct-bg-panel)] disabled:opacity-40"
+                aria-label="Adicionar um usuário extra"
+                :disabled="saving || extras >= 500"
+                @click="quantity = Math.min(500, extras + 1)"
+              >
+                +
+              </button>
+            </div>
+            <span
+              class="shrink-0 whitespace-nowrap text-[14px] font-medium text-[var(--ct-text-secondary)]"
+            >
+              + {{ price(selectedSpec.extraUserPrice) }}/mês cada
+            </span>
+          </template>
         </div>
-        <div
-          v-else-if="selectedSpec?.unlimitedUsers"
-          class="rounded-[8px] border border-[#E6E7EB] bg-[#F5F5F7] px-3.5 py-2.5 text-sm text-[#1E1F23]"
-        >
-          Plano <strong>Enterprise</strong> selecionado:
-          <strong>usuários ilimitados</strong> e
-          <strong>100 pareceres de IA/mês</strong> por
-          <strong>{{ money(change.monthly) }}/mês</strong>.
+        <div class="flex items-start justify-between whitespace-nowrap">
+          <span class="text-[14px] font-medium">Total estimado</span>
+          <span class="text-[16px] font-semibold leading-6">
+            {{ money(change.monthly) }}/mês
+          </span>
         </div>
+      </div>
 
+      <!-- Confirmação da mudança (só quando algo mudou) -->
+      <div v-if="change.kind !== 'same'" class="flex flex-col gap-4">
         <ErrorMessage v-if="errors.quantity" :message="errors.quantity" />
 
-        <p v-if="explanation" class="text-sm text-[#5E6068]">
+        <p v-if="explanation" class="text-sm text-[var(--ct-text-secondary)]">
           {{ explanation }}
         </p>
-        <p v-if="pausedWarning" class="text-sm text-[#B42318]">
+        <p v-if="pausedWarning" class="text-sm text-[var(--ct-error)]">
           {{ pausedWarning }}
         </p>
 
@@ -500,44 +317,67 @@ import { usersStore } from '@/stores/users'
 import { formatDate } from '@/utils'
 import { formatCurrency } from '@/utils/numberFormat'
 import PlanNotice from './PlanNotice.vue'
+import HandshakeIcon from '~icons/lucide/handshake'
+import ShieldCheckIcon from '~icons/lucide/shield-check'
+import Building2Icon from '~icons/lucide/building-2'
+import UsersIcon from '~icons/lucide/users'
 import {
   PLAN_TIERS,
-  PLAN_COMPARISON_GROUPS,
   plan,
   planApi,
   loadPlan,
-  usage,
   describeChange,
   chosenExtras,
   chosenTier,
   getTierSpec,
   overLimitAfter,
-  statusBadge,
   inGrace,
   openInvoice,
   dayAfterTrial,
 } from './planApi'
-import { Badge, Button, ErrorMessage, FormControl, toast } from 'frappe-ui'
+import { Button, ErrorMessage, FormControl, toast } from 'frappe-ui'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 
 const { users } = usersStore()
 
+const TIER_ICONS = {
+  vendas: HandshakeIcon,
+  credito_cobranca: ShieldCheckIcon,
+  enterprise: Building2Icon,
+}
+
 const data = computed(() => plan.data)
-const seats = computed(() => usage(data.value))
-const barWidth = computed(() => {
-  const { used, limit } = seats.value
-  return `${limit ? Math.min(100, (used / limit) * 100) : 0}%`
-})
 
 const selectedTier = ref('credito_cobranca')
 const selectedSpec = computed(() => getTierSpec(selectedTier.value))
 
-const currentTierLabel = computed(() => {
-  if (!data.value) return ''
-  if (data.value.in_trial) return 'Teste Grátis (Crédito & Cobrança completo)'
-  const t = data.value.plan_tier
-  if (!t || t === 'free_legacy') return 'Plano Legado (Grandfathering)'
-  return getTierSpec(t)?.name || t
+// The plan the company pays for today ("Plano atual"); none during the trial.
+const currentTier = computed(() => {
+  const d = data.value
+  if (!d || d.in_trial) return null
+  if (['Active', 'Past Due'].includes(d.status)) return d.plan_tier || null
+  if (d.status === 'Awaiting Payment') {
+    return d.pending_plan_tier || d.plan_tier || null
+  }
+  return null
+})
+
+// Row text: the included-users line followed by the plan subtitle, both
+// taken as-is from PLAN_TIERS (plan wording belongs to the owner).
+function tierDescription(tier) {
+  return `${tier.features[0]}. ${tier.subtitle}.`
+}
+
+const extrasDescription = computed(() => {
+  const spec = selectedSpec.value
+  if (!spec) return ''
+  if (spec.unlimitedUsers) return `Usuários ilimitados no ${spec.name}.`
+  const others = PLAN_TIERS.filter((t) => t.id !== spec.id).map((t) =>
+    t.unlimitedUsers
+      ? `ilimitados no ${t.name}`
+      : `+ ${price(t.extraUserPrice)}/mês no ${t.name}`,
+  )
+  return `Além dos ${spec.includedUsers} inclusos no ${spec.name}. ${others.join(' · ')}.`
 })
 
 const quantity = ref(0)
@@ -678,6 +518,17 @@ async function save() {
   }
 }
 
+// Prices in the plan list read like the Figma: "R$ 119" (no cents when whole).
+function price(value) {
+  const v = value || 0
+  return formatCurrency(
+    v,
+    null,
+    data.value?.currency || 'BRL',
+    Number.isInteger(v) ? 0 : 2,
+  )
+}
+
 function money(value) {
   return formatCurrency(value || 0, null, data.value?.currency || 'BRL')
 }
@@ -688,3 +539,26 @@ function date(value) {
 
 onMounted(() => plan.loading || loadPlan())
 </script>
+
+<style scoped>
+/* Figma plan icons: Lucide at 20px with a 1.4 stroke */
+.ct-plan-icon :deep(path),
+.ct-plan-icon :deep(circle),
+.ct-plan-icon :deep(rect),
+.ct-plan-icon :deep(line) {
+  stroke-width: 1.4;
+}
+.ct-plan-icon {
+  stroke-width: 1.4;
+}
+/* Stepper value: plain number, no browser spin buttons */
+.ct-stepper-value {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+.ct-stepper-value::-webkit-inner-spin-button,
+.ct-stepper-value::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+</style>
