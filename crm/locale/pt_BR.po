@@ -14761,6 +14761,10 @@ msgstr "Lido automaticamente"
 msgid "{0} (ERP) →"
 msgstr "{0} (ERP) →"
 
+# De-para do cadastro do cedente: rótulo do campo do ERP (CRM → ERP)
+msgid "{0} (ERP) ←"
+msgstr "{0} (ERP) ←"
+
 msgid "or, if empty,"
 msgstr "ou, se vazio,"
 

@@ -38,7 +38,7 @@
 
         <!-- ERP and credentials -->
         <section class="flex flex-col gap-6">
-          <div class="flex items-start justify-between gap-4">
+          <div class="flex items-center justify-between gap-6">
             <div class="flex flex-col gap-1">
               <div class="text-lg font-semibold leading-6 text-ink-gray-9">
                 {{ __('ERP') }}
@@ -51,7 +51,7 @@
                 }}
               </span>
             </div>
-            <Switch v-model="erpEnabled" />
+            <Switch v-model="erpEnabled" size="md" />
           </div>
           <template v-if="settings.doc.erp_enabled">
             <div class="ct-field-48 grid grid-cols-2 gap-4">
@@ -116,9 +116,10 @@
             <div>
               <Button
                 variant="outline"
-                class="ct-btn-accent-text"
+                size="lg"
+                class="ct-btn-accent-text ct-erp-icon-24"
                 :label="__('Test connection')"
-                icon-left="lucide-link"
+                icon-left="lucide-link-2"
                 :loading="testing"
                 :disabled="isDirty || !settings.originalDoc?.erp_enabled"
                 @click="testConnection"
@@ -138,7 +139,7 @@
 
           <!-- Cedente registration from the credit funnel (credtech#367, PR 3) -->
           <section class="flex flex-col gap-6">
-            <div class="flex items-start justify-between gap-4">
+            <div class="flex items-center justify-between gap-6">
               <div class="flex flex-col gap-1">
                 <div class="text-lg font-semibold leading-6 text-ink-gray-9">
                   {{ __('Cedente registration (credit funnel)') }}
@@ -151,7 +152,7 @@
                   }}
                 </span>
               </div>
-              <Switch v-model="cedenteEnabled" />
+              <Switch v-model="cedenteEnabled" size="md" />
             </div>
             <template v-if="settings.doc.cedente_send_enabled">
               <div class="ct-field-48 grid grid-cols-2 gap-4">
@@ -188,7 +189,7 @@
                   :options="managerOptions"
                 />
               </div>
-              <span class="text-p-sm text-ink-gray-5">
+              <span class="text-[12px] leading-4 text-ink-gray-6">
                 {{
                   __(
                     "Manager: the card owner, when they are also a manager in the ERP; otherwise the default manager. Sector: automatic from the company's CNAE (e.g. CNAE 62 → IT services).",
@@ -220,27 +221,20 @@
                 }}
               </span>
             </div>
-            <FormControl
-              v-model="dryRun"
-              type="checkbox"
-              :label="__('Simulation mode (nothing is saved)')"
-              :description="
-                __(
-                  'On until you turn it off: each run only shows what it would create, update and close. Read the result before turning it off.',
-                )
-              "
-            />
-            <div class="ct-field-48 grid grid-cols-2 gap-4">
+            <!-- Figma "Opção": checkbox 20px, help 12/16 under the label -->
+            <div class="ct-erp-option flex flex-col gap-0.5">
               <FormControl
-                v-model="settings.doc.overdue_days"
-                type="number"
-                :label="__('Days overdue to become a card')"
+                v-model="dryRun"
+                type="checkbox"
+                :label="__('Simulation mode (nothing is saved)')"
               />
-              <FormControl
-                v-model="settings.doc.paid_lookback_days"
-                type="number"
-                :label="__('Check settlements of the last (days)')"
-              />
+              <p class="pl-[26px] text-[12px] leading-4 text-ink-gray-6">
+                {{
+                  __(
+                    'On until you turn it off: each run only shows what it would create, update and close. Read the result before turning it off.',
+                  )
+                }}
+              </p>
             </div>
             <CtAlert v-if="settings.doc.last_sync_message" type="info">
               {{ settings.doc.last_sync_message }}
@@ -259,9 +253,28 @@
                 >{{ settings.doc.last_sync_report }}</pre
               >
             </details>
-            <div>
+            <!-- Approved Figma: "Sync now" (40px) in the same row as the two
+                 fields, bottom-aligned; the fields fill the rest of the row -->
+            <div class="flex items-end gap-4">
+              <div class="ct-field-48 flex min-w-0 flex-1 gap-4">
+                <div class="min-w-0 flex-1">
+                  <FormControl
+                    v-model="settings.doc.overdue_days"
+                    type="number"
+                    :label="__('Days overdue to become a card')"
+                  />
+                </div>
+                <div class="min-w-0 flex-1">
+                  <FormControl
+                    v-model="settings.doc.paid_lookback_days"
+                    type="number"
+                    :label="__('Check settlements of the last (days)')"
+                  />
+                </div>
+              </div>
               <Button
                 variant="outline"
+                size="lg"
                 class="ct-btn-accent-text"
                 :label="__('Sync now')"
                 :loading="syncing"
@@ -296,7 +309,7 @@
               </span>
             </div>
 
-            <div class="flex flex-col gap-4">
+            <div class="flex flex-col gap-6">
               <div class="flex flex-col gap-1">
                 <div
                   class="text-[16px] font-semibold leading-6 text-ink-gray-9"
@@ -372,7 +385,7 @@
             <div
               v-for="part in importParts"
               :key="part.table"
-              class="flex flex-col gap-4"
+              class="flex flex-col gap-6"
             >
               <div class="flex flex-col gap-1">
                 <div
@@ -385,23 +398,28 @@
                 }}</span>
               </div>
               <div class="ct-field-48 grid grid-cols-2 gap-4">
-                <FormControl
-                  v-for="column in shownColumns(part)"
-                  :key="column"
-                  type="select"
-                  :label="__('{0} (ERP) →', [column])"
-                  :disabled="Boolean(part.options.fixed[column])"
-                  :options="
-                    part.options.fixed[column]
-                      ? [{ label: __('Read automatically'), value: '' }]
-                      : [
-                          { label: part.none, value: '' },
-                          ...part.options.targets,
-                        ]
-                  "
-                  :model-value="importValue(part.table, column)"
-                  @update:model-value="(v) => pickImport(part.table, column, v)"
-                />
+                <template v-for="column in shownColumns(part)" :key="column">
+                  <FormControl
+                    v-if="part.options.fixed[column]"
+                    type="text"
+                    :label="__('{0} (ERP) →', [column])"
+                    :model-value="__('Read automatically')"
+                    readonly
+                  />
+                  <FormControl
+                    v-else
+                    type="select"
+                    :label="__('{0} (ERP) →', [column])"
+                    :options="[
+                      { label: part.none, value: '' },
+                      ...part.options.targets,
+                    ]"
+                    :model-value="importValue(part.table, column)"
+                    @update:model-value="
+                      (v) => pickImport(part.table, column, v)
+                    "
+                  />
+                </template>
               </div>
               <div
                 v-if="hiddenColumnOptions(part).length > 1"
@@ -421,6 +439,7 @@
             <div>
               <Button
                 variant="outline"
+                size="lg"
                 class="ct-btn-accent-text"
                 :label="__('Restore the default mapping')"
                 :loading="resetting"
@@ -606,8 +625,9 @@ watch(() => settings.originalDoc?.erp_provider, loadMapping, {
   immediate: true,
 })
 
+// As in the Figma: "Razão social * (ERP) ←" (the arrow shows the direction, CRM → ERP)
 const fieldLabel = (field) =>
-  __(field.label) + (field.required === 'yes' ? ' *' : '')
+  __('{0} (ERP) ←', [__(field.label) + (field.required === 'yes' ? ' *' : '')])
 
 function cedenteRow(erpField) {
   return (settings.doc?.cedente_field_map || []).find(
@@ -859,7 +879,8 @@ async function syncNow() {
   syncing.value = true
   try {
     const { ok, message } = await call('cred_hub.erp.sync.sync_now')
-    ok ? toast.success(message) : toast.error(message)
+    if (ok) toast.success(message)
+    else toast.error(message)
   } catch (err) {
     toast.error(err.messages?.[0] || err.message)
   } finally {
@@ -901,3 +922,26 @@ async function doResetMapping() {
   }
 }
 </script>
+
+<style scoped>
+/* Figma "Caixa de seleção" (940:108): 20px box, 6px radius, label 14 regular */
+.ct-erp-option :deep(input[type='checkbox']) {
+  width: 20px;
+  height: 20px;
+  margin-top: 0;
+  border-radius: 6px;
+}
+.ct-erp-option :deep(label) {
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--ink-gray-9);
+}
+/* Figma "Botão" with "Ícone à esquerda": 24px icon */
+.ct-erp-icon-24 {
+  gap: 8px;
+}
+.ct-erp-icon-24 :deep([class*='lucide-']) {
+  width: 24px;
+  height: 24px;
+}
+</style>
