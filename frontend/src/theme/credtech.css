@@ -344,7 +344,6 @@
   cursor: default;
 }
 
-/* Style Guide: the trash icon is always red (Paleta/Feedback/Erro). */
 /* Figma "Andamento do card": "Ganho" is a grey outline button with green
    text and icon. */
 .ct-btn-success-text,
@@ -353,6 +352,7 @@
   color: var(--ct-success) !important;
 }
 
+/* Style Guide: the trash icon is always red (Paleta/Feedback/Erro). */
 .ct-btn-danger-icon,
 .ct-btn-danger-icon svg,
 .ct-btn-danger-icon [class*='lucide-'] {
