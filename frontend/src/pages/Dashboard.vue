@@ -14,13 +14,19 @@
           :options="options"
           class="form-control"
           :placeholder="__('Select Range')"
-          :button="{
-            label: __(preset),
-            class: 'justify-start [&>span]:mr-auto [&>svg]:text-ink-gray-5',
-            variant: 'outline',
-            iconRight: 'lucide-chevron-down',
-          }"
-        />
+        >
+          <!-- Figma "Filtro": hugs its text, black 14/500, chevron -->
+          <template #default="{ open }">
+            <button type="button" class="ct-filter">
+              <span class="truncate">{{ __(preset) }}</span>
+              <span
+                class="size-4 shrink-0"
+                :class="open ? 'lucide-chevron-up' : 'lucide-chevron-down'"
+                aria-hidden="true"
+              />
+            </button>
+          </template>
+        </Dropdown>
         <DateRangePicker
           v-else
           ref="datePickerRef"
@@ -48,7 +54,7 @@
         </DateRangePicker>
         <Link
           v-if="isAdmin() || isManager()"
-          class="form-control w-44"
+          class="form-control"
           variant="outline"
           :value="filters.user && getUser(filters.user).full_name"
           doctype="User"
@@ -60,13 +66,21 @@
           :hideMe="true"
           @change="(v) => updateFilter('user', v)"
         >
-          <template #prefix>
-            <UserAvatar
-              v-if="filters.user"
-              class="mr-2"
-              :user="filters.user"
-              size="sm"
-            />
+          <!-- Figma "Membro" filter: same "Filtro" as the period -->
+          <template #target="{ togglePopover, isOpen }">
+            <button type="button" class="ct-filter" @click="togglePopover()">
+              <UserAvatar v-if="filters.user" :user="filters.user" size="sm" />
+              <span class="truncate">
+                {{
+                  filters.user ? getUser(filters.user).full_name : __('Member')
+                }}
+              </span>
+              <span
+                class="size-4 shrink-0"
+                :class="isOpen ? 'lucide-chevron-up' : 'lucide-chevron-down'"
+                aria-hidden="true"
+              />
+            </button>
           </template>
           <template #item-prefix="{ option }">
             <UserAvatar class="mr-2" :user="option.value" size="sm" />
@@ -83,14 +97,14 @@
           v-if="!editing"
           variant="outline"
           :label="__('Refresh')"
-          :iconLeft="LucideRefreshCw"
+          iconLeft="lucide-refresh-cw"
           @click="dashboardItems.reload"
         />
         <Button
           v-if="!editing && isAdmin()"
           variant="solid"
           :label="__('Edit')"
-          :iconLeft="LucideSquarePen"
+          iconLeft="lucide-square-pen"
           @click="enableEditing"
         />
         <Button
@@ -104,7 +118,7 @@
           v-if="editing && isAdmin()"
           variant="outline"
           :label="__('Reset to Default')"
-          :iconLeft="LucideUndo2"
+          iconLeft="lucide-undo-2"
           @click="resetToDefault"
         />
         <Button
@@ -141,9 +155,6 @@
 
 <script setup lang="ts">
 import AddChartModal from '@/components/Dashboard/AddChartModal.vue'
-import LucideRefreshCw from '~icons/lucide/refresh-cw'
-import LucideUndo2 from '~icons/lucide/undo-2'
-import LucideSquarePen from '~icons/lucide/square-pen'
 import DashboardGrid from '@/components/Dashboard/DashboardGrid.vue'
 import UserAvatar from '@/components/UserAvatar.vue'
 import ViewBreadcrumbs from '@/components/ViewBreadcrumbs.vue'

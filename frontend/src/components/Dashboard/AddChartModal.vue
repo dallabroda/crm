@@ -139,7 +139,8 @@ async function getChart(type: string) {
 
       if (['axis_chart', 'donut_chart'].includes(type)) {
         width = 10
-        height = 7
+        // 8 rows of 47.2px = 378px, the chart height of the Figma "Início"
+        height = 8
       }
 
       items.value.push({
