@@ -44,9 +44,9 @@
         <CtAlert v-else-if="chat.error" type="error">{{ chat.error }}</CtAlert>
 
         <template v-if="loaded">
-          <!-- On/off and WhatsApp number -->
+          <!-- On/off, cost estimate and WhatsApp number (Figma 2493:4678) -->
           <section class="flex flex-col gap-6">
-            <div class="flex items-start justify-between gap-4">
+            <div class="flex items-center justify-between gap-6">
               <div class="flex flex-col gap-1">
                 <div class="text-lg font-semibold leading-6 text-ink-gray-9">
                   {{ __('Collection reminders') }}
@@ -65,16 +65,6 @@
                 :disabled="!chat.connected && !form.enabled"
               />
             </div>
-            <div class="ct-field-48 grid grid-cols-2 gap-4">
-              <FormControl
-                type="select"
-                :label="__('WhatsApp number')"
-                :placeholder="__('Select')"
-                :options="inboxOptions"
-                :model-value="form.inbox_id"
-                @update:model-value="pickInbox"
-              />
-            </div>
             <CtAlert type="info">
               {{
                 __(
@@ -86,30 +76,47 @@
                 )
               }}
             </CtAlert>
+            <div class="ct-field-48 w-[352px] max-w-full">
+              <FormControl
+                type="select"
+                :label="__('WhatsApp number')"
+                :placeholder="__('Select')"
+                :options="inboxOptions"
+                :model-value="form.inbox_id"
+                @update:model-value="pickInbox"
+              />
+            </div>
           </section>
 
           <SettingsDivider />
 
-          <!-- Steps -->
+          <!-- Steps: one white card per step, 12px apart -->
           <section class="flex flex-col gap-6">
-            <div class="flex items-start justify-between gap-4">
-              <div class="flex flex-col gap-1">
+            <div class="flex items-center justify-between gap-6">
+              <div class="flex max-w-[662px] flex-col gap-1">
                 <div class="text-lg font-semibold leading-6 text-ink-gray-9">
                   {{ __('Steps') }}
                 </div>
                 <span class="text-base leading-5 text-ink-gray-6">
                   {{
                     __(
-                      'Days from the due date: -2 is two days before, 0 is the due date, 5 is five days after. Each step goes once per título.',
+                      'Create as many messages as you want: each step is sent a few days before or after the due date (e.g. 5 days before, 3 days before, 2 days after). Each step goes once per título.',
                     )
                   }}
                 </span>
               </div>
+              <Button
+                variant="outline"
+                class="ct-btn-accent-text shrink-0 !h-12 !px-7 !text-[16px] !font-medium"
+                :label="__('Add more steps')"
+                :disabled="!inbox"
+                @click="addStep"
+              />
             </div>
 
             <p
               v-if="inbox && !inbox.templates.length"
-              class="text-p-sm text-ink-gray-6"
+              class="text-base leading-5 text-ink-gray-6"
             >
               {{
                 __(
@@ -117,78 +124,88 @@
                 )
               }}
             </p>
-            <p v-if="!form.steps.length" class="text-p-sm text-ink-gray-6">
+            <p
+              v-if="!form.steps.length"
+              class="text-base leading-5 text-ink-gray-6"
+            >
               {{ __('No step yet.') }}
             </p>
 
-            <div
-              v-for="(step, index) in form.steps"
-              :key="step.key"
-              class="flex flex-col gap-4"
-            >
-              <div class="ct-field-48 grid grid-cols-2 items-end gap-4">
+            <div v-if="form.steps.length" class="flex flex-col gap-3">
+              <!-- columns: Dias 120 · Quando 260 · Mensagem · Excluir; the
+                   template variables line up under them two by two -->
+              <div
+                v-for="(step, index) in form.steps"
+                :key="step.key"
+                class="ct-field-48 grid grid-cols-[120px_260px_minmax(0,1fr)_auto] items-end gap-4 rounded-[var(--ct-radius-md)] border border-[var(--ct-border)] bg-[var(--ct-bg-page)] p-4"
+              >
                 <FormControl
                   v-model="step.days"
                   type="number"
-                  :label="__('Days from the due date')"
+                  min="0"
+                  :label="__('Days')"
                 />
-                <div class="flex items-end gap-2">
-                  <FormControl
-                    class="flex-1"
-                    type="select"
-                    :label="__('Approved message template')"
-                    :placeholder="__('Select')"
-                    :options="templateOptions"
-                    :model-value="step.template"
-                    @update:model-value="(value) => pickTemplate(step, value)"
-                  />
-                  <Button
-                    variant="ghost"
-                    :aria-label="__('Remove step')"
-                    @click="form.steps.splice(index, 1)"
-                  >
-                    <LucideTrash2 class="size-4" />
-                  </Button>
-                </div>
-              </div>
-              <CtAlert v-if="duplicateDays.has(Number(step.days))" type="error">
-                {{ __('Two steps on the same day ({0}).', [step.days]) }}
-              </CtAlert>
-              <CtAlert v-if="step.template && !templateOf(step)" type="warning">
-                {{
-                  __(
-                    'The template {0} is no longer approved for this WhatsApp number. Choose another one.',
-                    [step.template.split('|')[0]],
-                  )
-                }}
-              </CtAlert>
-              <template v-if="templateOf(step)">
-                <div
-                  v-if="templateOf(step).variables.length"
-                  class="ct-field-48 grid grid-cols-2 gap-4"
+                <FormControl
+                  v-model="step.when"
+                  type="select"
+                  :label="__('When')"
+                  :options="whenOptions"
+                />
+                <FormControl
+                  type="select"
+                  :label="__('Approved message template')"
+                  :placeholder="__('Select')"
+                  :options="templateOptions"
+                  :model-value="step.template"
+                  @update:model-value="(value) => pickTemplate(step, value)"
+                />
+                <Button
+                  variant="subtle"
+                  theme="red"
+                  class="!h-12 !px-7 !text-[16px] !font-semibold !text-[color:var(--ct-danger)]"
+                  :label="__('Delete')"
+                  @click="form.steps.splice(index, 1)"
+                />
+
+                <CtAlert
+                  v-if="duplicateDays.has(signedDays(step))"
+                  type="error"
+                  class="col-span-full"
                 >
+                  {{ __('Two steps on the same day ({0}).', [stepDay(step)]) }}
+                </CtAlert>
+                <CtAlert
+                  v-if="step.template && !templateOf(step)"
+                  type="warning"
+                  class="col-span-full"
+                >
+                  {{
+                    __(
+                      'The template {0} is no longer approved for this WhatsApp number. Choose another one.',
+                      [step.template.split('|')[0]],
+                    )
+                  }}
+                </CtAlert>
+                <template v-if="templateOf(step)">
                   <FormControl
                     v-for="(variable, i) in templateOf(step).variables"
                     :key="variable"
+                    :class="
+                      i % 2 ? 'col-start-3 col-end-4' : 'col-start-1 col-end-3'
+                    "
                     type="select"
                     :label="placeholder(variable)"
                     :options="variableOptions"
                     :model-value="step.variables[i] || ''"
                     @update:model-value="(key) => (step.variables[i] = key)"
                   />
-                </div>
-                <p class="whitespace-pre-wrap text-p-xs text-ink-gray-6">
-                  {{ templateOf(step).body }}
-                </p>
-              </template>
-            </div>
-
-            <div>
-              <Button
-                :label="__('Add step')"
-                :disabled="!inbox"
-                @click="addStep"
-              />
+                  <p
+                    class="col-span-full whitespace-pre-wrap text-base text-ink-gray-6"
+                  >
+                    {{ templateOf(step).body }}
+                  </p>
+                </template>
+              </div>
             </div>
           </section>
         </template>
@@ -204,7 +221,6 @@ import SettingsDivider from '@/components/Settings/SettingsDivider.vue'
 import CtAlert from '@/components/CtAlert.vue'
 import { chat, loadChat } from '@/components/Settings/LeadSyncing/welcomeApi'
 import { getRequest } from '@/components/Settings/LeadSyncing/metaLeadsApi'
-import LucideTrash2 from '~icons/lucide/trash-2'
 import { Badge, Button, FormControl, Switch, call, toast } from 'frappe-ui'
 import { computed, onMounted, reactive, ref } from 'vue'
 
@@ -245,6 +261,29 @@ const variableOptions = computed(() => [
   ...variables.value.map((v) => ({ label: v.label, value: v.key })),
 ])
 
+// The backend keeps signed days (-2 = two days before the due date); the
+// screen shows them as "Dias" + "Quando" (Figma 2493:4678). 0 is the due date.
+const whenOptions = computed(() => [
+  { label: __('before the due date'), value: 'before' },
+  { label: __('after the due date'), value: 'after' },
+])
+
+function signedDays(step) {
+  let days = Math.abs(Number(step.days) || 0)
+  return step.when === 'before' ? -days : days
+}
+
+function splitDays(days) {
+  days = Number(days) || 0
+  return { days: Math.abs(days), when: days < 0 ? 'before' : 'after' }
+}
+
+// "5 antes do vencimento", for the repeated-day error
+function stepDay(step) {
+  let when = whenOptions.value.find((o) => o.value === step.when)
+  return `${Math.abs(Number(step.days) || 0)} ${when?.label || ''}`.trim()
+}
+
 function templateOf(step) {
   return inbox.value?.templates.find(
     (t) => `${t.name}|${t.language}` === step.template,
@@ -255,7 +294,7 @@ const duplicateDays = computed(() => {
   let seen = new Set()
   let repeated = new Set()
   form.steps.forEach((step) => {
-    let days = Number(step.days)
+    let days = signedDays(step)
     ;(seen.has(days) ? repeated : seen).add(days)
   })
   return repeated
@@ -284,7 +323,7 @@ function payload() {
       let [name, language] = step.template ? step.template.split('|') : ['', '']
       let template = templateOf(step)
       return {
-        days: Number(step.days) || 0,
+        days: signedDays(step),
         template_name: name || null,
         template_language: language || null,
         variables: template
@@ -323,7 +362,7 @@ function addStep() {
   let last = form.steps[form.steps.length - 1]
   form.steps.push({
     key: nextKey++,
-    days: last ? Number(last.days) + 5 : 1,
+    ...splitDays(last ? signedDays(last) + 5 : 1),
     template: '',
     variables: [],
   })
@@ -334,7 +373,7 @@ function fill(data) {
   form.inbox_id = data.inbox_id ? String(data.inbox_id) : ''
   form.steps = (data.steps || []).map((step) => ({
     key: nextKey++,
-    days: step.days,
+    ...splitDays(step.days),
     template: step.template_name
       ? `${step.template_name}|${step.template_language || ''}`
       : '',
@@ -376,3 +415,16 @@ async function save() {
 
 onMounted(load)
 </script>
+
+<style scoped>
+/* Figma "Campo" Seleção: white with the #dcdde2 border, like the text fields
+   (fieldOutline.css covers input/select/textarea; frappe-ui's select is a button) */
+.ct-field-48 :deep(button[data-slot='trigger']) {
+  background-color: var(--ct-bg-page);
+  border-color: var(--ct-border);
+}
+.ct-field-48 :deep(button[data-slot='trigger'][data-state='open']),
+.ct-field-48 :deep(button[data-slot='trigger']:focus-visible) {
+  border-color: var(--ct-border-strong);
+}
+</style>
