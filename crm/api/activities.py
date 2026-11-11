@@ -677,6 +677,8 @@ def get_linked_tasks(name: str):
 			"status",
 			"modified",
 			"creation",
+			"reference_doctype",
+			"reference_docname",
 		],
 	)
 	return tasks or []

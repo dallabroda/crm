@@ -17,7 +17,26 @@
         {{ title }}
       </h1>
     </template>
-    <template v-if="!errorTitle" #right-header>
+    <!-- Figma "Card · Análise de crédito" (2164:12977): on the credit tab the
+         bar keeps only "Gerar parecer de IA" (blue) and the owner -->
+    <template v-if="!errorTitle && isCreditTab" #right-header>
+      <Button
+        variant="solid"
+        iconLeft="lucide-sparkles"
+        :label="__('Gerar parecer de IA')"
+        :tooltip="creditOpinionTooltip"
+        :loading="Boolean(creditDossieRef?.requestingOpinion)"
+        :disabled="!creditDossieRef?.opinionConfigured"
+        @click="creditDossieRef?.askOpinionOnly()"
+      />
+      <AssignTo
+        v-model="assignees.data"
+        doctype="CRM Deal"
+        :docname="dealId"
+        :allowedUsers="assignableUsers"
+      />
+    </template>
+    <template v-else-if="!errorTitle" #right-header>
       <Dropdown v-if="doc && document.statuses" :options="statuses" align="end">
         <template #default="{ open }">
           <!-- Figma "Card · Atividades": the stage is a "Filtro" (no colour dot) -->
@@ -116,6 +135,7 @@
         />
         <OrganizationCreditDossie
           v-else-if="activeTab === 'credit'"
+          ref="creditDossieRef"
           :organization-id="doc.organization"
           :deal-id="dealId"
         />
@@ -208,9 +228,11 @@
           </Tooltip>
           <div class="flex gap-2">
             <Button
-              v-if="callEnabled"
+              v-if="callEnabled || hasPhoneToCall"
               variant="outline"
-              :tooltip="__('Make a Call')"
+              :tooltip="
+                callEnabled ? __('Make a Call') : __('Ligar (Telefone)')
+              "
               :icon="PhoneIcon"
               @click="triggerCall"
             />
@@ -393,10 +415,32 @@
                       </div>
                       <div
                         v-if="contact.mobile_no"
-                        class="flex items-center gap-3 p-1 py-1.5 text-ink-gray-8"
+                        class="flex items-center justify-between gap-2 p-1 py-1.5 text-ink-gray-8"
                       >
-                        <PhoneIcon class="h-4 w-4" />
-                        {{ contact.mobile_no }}
+                        <div class="flex items-center gap-2 truncate">
+                          <PhoneIcon class="h-4 w-4 shrink-0" />
+                          <span class="truncate">{{ contact.mobile_no }}</span>
+                        </div>
+                        <div class="flex items-center gap-1 shrink-0">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            :tooltip="
+                              callEnabled
+                                ? __('Make a Call')
+                                : __('Ligar (Telefone)')
+                            "
+                            :icon="PhoneIcon"
+                            @click.stop="callNumber(contact.mobile_no)"
+                          />
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            :tooltip="__('Send WhatsApp')"
+                            :icon="WhatsAppIcon"
+                            @click.stop="openWhatsAppFor(contact)"
+                          />
+                        </div>
                       </div>
                       <div
                         v-if="!contact.email && !contact.mobile_no"
@@ -1030,8 +1074,7 @@ const tabs = computed(() => {
       value: 'credit',
       label: __('Análise de crédito'),
       iconLeft: MoneyIcon,
-      condition: () =>
-        isCreditFunnel.value && Boolean(doc.value?.organization),
+      condition: () => isCreditFunnel.value && Boolean(doc.value?.organization),
     },
     {
       name: 'WhatsApp',
@@ -1052,6 +1095,18 @@ const tabs = computed(() => {
 })
 
 const { activeTab, changeTabTo } = useActiveTabManager(tabs, 'lastDealTab')
+
+// "Análise de crédito" tab: its top bar drives the AI opinion of the dossier
+const creditDossieRef = ref(null)
+const isCreditTab = computed(() => activeTab.value === 'credit')
+const creditOpinionTooltip = computed(() => {
+  const dossie = creditDossieRef.value
+  if (dossie && !dossie.opinionConfigured)
+    return __(
+      'A IA de parecer de crédito ainda não está configurada neste ambiente.',
+    )
+  return dossie?.opinionUsage || ''
+})
 
 watch(
   tabs,
@@ -1187,21 +1242,42 @@ const dealContacts = createResource({
 
 if (!dealContacts.data) dealContacts.fetch()
 
+const primaryPhone = computed(() => {
+  let primary = dealContacts.data?.find((c) => c.is_primary)
+  return (
+    primary?.mobile_no ||
+    dealContacts.data?.find((c) => c.mobile_no)?.mobile_no ||
+    doc.value?.mobile_no ||
+    null
+  )
+})
+
+const hasPhoneToCall = computed(() => Boolean(primaryPhone.value))
+
 function triggerCall() {
-  let primaryContact = dealContacts.data?.find((c) => c.is_primary)
-  if (!primaryContact) {
-    toast.error(__('No Primary Contact Set'))
-    return
-  }
-
-  let mobile_no = primaryContact.mobile_no || null
-
+  let mobile_no = primaryPhone.value
   if (!mobile_no) {
     toast.error(__('No Mobile Number Set'))
     return
   }
+  callNumber(mobile_no)
+}
 
-  makeCall(mobile_no, props.dealId)
+function callNumber(mobile_no) {
+  if (callEnabled.value) {
+    makeCall(mobile_no, props.dealId)
+  } else {
+    window.location.href = `tel:${mobile_no}`
+  }
+}
+
+function openWhatsAppFor(contact) {
+  let phone = contact?.mobile_no || contact?.phone
+  if (!phone) {
+    toast.error(__('No Mobile Number Set'))
+    return
+  }
+  whatsapp.value = { phone, name: contact.full_name || contact.name || '' }
 }
 
 // WhatsApp to the primary contact, through the company's SmartChat (credtech#211)
@@ -1236,7 +1312,9 @@ watch(
       doc.value?.status || '',
       doc.value?.organization || '',
       doc.value?.second_organization || '',
-      (dealContacts.data || []).map((c) => `${c.name}:${c.is_primary}`).join(','),
+      (dealContacts.data || [])
+        .map((c) => `${c.name}:${c.is_primary}`)
+        .join(','),
     ].join('|')
   },
   (key) => {
@@ -1416,16 +1494,14 @@ function restrictOwner(sections, allowed) {
 }
 
 const visibleSections = computed(() => {
-  let catalog = fieldSetup.value?.catalog
   let base
-  if (formSchema.value?.fields && catalog) {
-    // the funnel's fields come first, in its order; the layout keeps the rest
+  if (formSchema.value?.fields) {
+    // The funnel's fields come directly from formSchema, in its configured order;
+    // sections.data's legacy organization_section is discarded so removed fields don't leak
     let funnel = funnelSection(formSchema.value.fields, __('Card fields'))
-    let others = withoutFields(sections.data, [
-      ...catalog.filter((name) => !LOCKED_FIELDS.includes(name)),
-      // they are the organization's now: shown in its section, not as card fields
-      ...(fieldSetup.value?.moved || []),
-    ])
+    let others = (sections.data || []).filter(
+      (s) => s.name !== 'organization_section',
+    )
     base = funnel ? [funnel, ...others] : others
   } else {
     base = applyStageRules(
@@ -1433,12 +1509,10 @@ const visibleSections = computed(() => {
       stageRules.value,
       fieldSetup.value || {},
     )
+    base = mergeOrganizationSectionIntoCard(base)
   }
-  // Merge leftover card fields from the misnamed "organization_section" ("Detalhes da organização")
-  // into the main card fields section so there is no redundant "Detalhes da organização" box at the bottom
-  let merged = mergeOrganizationSectionIntoCard(base)
   return withOrganizationRegistry(
-    withOrganizationContacts(restrictOwner(merged, assignableUsers.value)),
+    withOrganizationContacts(restrictOwner(base, assignableUsers.value)),
   )
 })
 
@@ -1460,9 +1534,7 @@ function mergeOrganizationSectionIntoCard(sections) {
     let existingNames = new Set(
       (target.columns?.[0]?.fields || []).map((f) => f?.fieldname || f),
     )
-    let toAdd = extraFields.filter(
-      (f) => !existingNames.has(f?.fieldname || f),
-    )
+    let toAdd = extraFields.filter((f) => !existingNames.has(f?.fieldname || f))
     rest[targetIdx] = {
       ...target,
       columns: [

@@ -25,10 +25,12 @@
           iconLeft="lucide-plus"
           @click="emailBox.openCommentBox()"
         />
-        <MultiActionButton
-          v-else-if="title == 'Calls'"
+        <Button
+          v-else-if="title == 'Calls' && doc?.mobile_no"
           variant="solid"
-          :options="callActions"
+          :label="callEnabled ? __('Fazer Ligação (Integração)') : __('Ligar (Telefone)')"
+          :iconLeft="PhoneIcon"
+          @click="initiateCall"
         />
         <Button
           v-else-if="title == 'Tasks'"
@@ -169,14 +171,9 @@ const defaultActions = computed(() => {
     },
     {
       icon: h(PhoneIcon, { class: 'h-4 w-4' }),
-      label: __('Log a Call'),
-      onClick: () => props.modalRef.createCallLog(),
-    },
-    {
-      icon: h(PhoneIcon, { class: 'h-4 w-4' }),
-      label: __('Make a Call'),
-      onClick: () => makeCall(props.doc.mobile_no, dealName()),
-      condition: () => callEnabled.value,
+      label: callEnabled.value ? __('Fazer Ligação (Integração)') : __('Ligar (Telefone)'),
+      onClick: initiateCall,
+      condition: () => Boolean(props.doc?.mobile_no),
     },
     {
       icon: h(TaskIcon, { class: 'h-4 w-4' }),
@@ -200,23 +197,16 @@ const defaultActions = computed(() => {
   )
 })
 
-const callActions = computed(() => {
-  let actions = [
-    {
-      label: __('Log a Call'),
-      icon: 'lucide-plus',
-      onClick: () => props.modalRef.createCallLog(),
-    },
-    {
-      label: __('Make a Call'),
-      icon: h(PhoneIcon, { class: 'h-4 w-4' }),
-      onClick: () => makeCall(props.doc.mobile_no, dealName()),
-      condition: () => callEnabled.value,
-    },
-  ]
-
-  return actions.filter((action) =>
-    action.condition ? action.condition() : true,
-  )
-})
+function initiateCall() {
+  let phone = props.doc.mobile_no
+  if (!phone) {
+    toast.error(__('No Mobile Number Set'))
+    return
+  }
+  if (callEnabled.value) {
+    makeCall(phone, dealName())
+  } else {
+    window.location.href = `tel:${phone}`
+  }
+}
 </script>

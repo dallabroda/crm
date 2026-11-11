@@ -174,16 +174,43 @@ def link_to_deals(call_log, call: dict):
 	deal is the call's reference, the others are links, so the call shows once on each timeline.
 	Owner rule (credtech#47, 26/10/2026): a call never opens a deal. A number without an open deal only
 	stays in the call history, linked to its contact when there is one."""
+	contact = get_contact_by_phone_number(call["number"]) if call["number"] else {}
+	if contact.get("name"):
+		call_log.link_with_reference_doc("Contact", contact["name"])
+
 	if call["deal"] and frappe.db.exists("CRM Deal", call["deal"]):
 		deals = [call["deal"]]
 	else:
-		contact = get_contact_by_phone_number(call["number"]) if call["number"] else {}
 		deals = contact.get("deals") or []
-		if not deals:
-			if contact.get("name"):
-				call_log.link_with_reference_doc("Contact", contact["name"])
-			return
-	call_log.reference_doctype = "CRM Deal"
-	call_log.reference_docname = deals[0]
-	for deal in deals[1:]:
-		call_log.link_with_reference_doc("CRM Deal", deal)
+
+	if deals:
+		call_log.reference_doctype = "CRM Deal"
+		call_log.reference_docname = deals[0]
+		for deal in deals[1:]:
+			call_log.link_with_reference_doc("CRM Deal", deal)
+	elif contact.get("name"):
+		call_log.reference_doctype = "Contact"
+		call_log.reference_docname = contact["name"]
+
+	# Registra comentario na timeline do contato para visibilidade imediata
+	if contact.get("name"):
+		try:
+			status_pt = {
+				"Completed": "Atendida",
+				"Busy": "Ocupado",
+				"No Answer": "Não atendeu",
+				"Failed": "Falhou",
+			}.get(call.get("status"), call.get("status"))
+			dur = f"{call['duration']}s" if call.get("duration") else "0s"
+			direction = "Ligação realizada" if call.get("type") == "Outgoing" else "Ligação recebida"
+			msg = (
+				f"<b>{direction} ({call_log.medium or 'Telefonia'})</b><br>"
+				f"Número: {call.get('number') or '-'}<br>"
+				f"Situação: {status_pt} | Duração: {dur}"
+			)
+			if call.get("recording_url"):
+				msg += f"<br><a href='{call['recording_url']}' target='_blank'>Ouvir gravação</a>"
+			cdoc = frappe.get_doc("Contact", contact["name"])
+			cdoc.add_comment("Comment", msg)
+		except Exception:
+			pass

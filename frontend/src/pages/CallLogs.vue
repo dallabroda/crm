@@ -9,12 +9,6 @@
         v-if="callLogsListView?.customListActions"
         :actions="callLogsListView.customListActions"
       />
-      <Button
-        variant="solid"
-        :label="__('Create')"
-        iconLeft="lucide-plus"
-        @click="createCallLog"
-      />
     </template>
   </LayoutHeader>
   <ViewControls
@@ -56,11 +50,10 @@
     :title="__('No call logs yet')"
     :description="
       __(
-        'Calls made through the integrated telephony are logged here, along with calls you log by hand on a lead or deal.',
+        'Calls made through the integrated telephony are logged here automatically.',
       )
     "
     :filtered="!!Object.keys(callLogs.params?.filters || {}).length"
-    @create="createCallLog()"
   >
     <TelephonyOffer class="mt-4" />
   </EmptyState>

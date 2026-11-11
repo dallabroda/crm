@@ -6,14 +6,18 @@
     >
       <div class="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <div class="flex items-center gap-2">
-            <span class="text-lg-semibold text-ink-gray-9">
+          <div class="flex items-center gap-2.5">
+            <span class="text-base font-semibold text-[#1E1F23]">
               {{ __('Pasta Digital · Checklist de Documentos') }}
             </span>
-            <Badge
+            <span
               v-if="summary"
-              :theme="summary.all_required_verified ? 'green' : 'amber'"
-              variant="subtle"
+              class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border"
+              :class="
+                summary.all_required_verified
+                  ? 'bg-[#E7F6EC] text-[#1F7A3D] border-[#A6F4C5]'
+                  : 'bg-[#E5F1FF] text-[#0088FF] border-[#B2D7FF]'
+              "
             >
               {{
                 summary.all_required_verified
@@ -23,9 +27,9 @@
                       summary.required_total,
                     ])
               }}
-            </Badge>
+            </span>
           </div>
-          <p class="text-p-sm text-ink-gray-6 mt-0.5">
+          <p class="text-xs text-[#5E6068] mt-0.5">
             {{
               __(
                 'Anexe os documentos ou envie o Link Seguro (Caixa de Correio Blindada) para o cliente/contador anexar direto na pasta.',
@@ -34,7 +38,7 @@
           </p>
         </div>
         <div v-if="summary" class="text-right">
-          <span class="text-p-sm font-medium text-ink-gray-8">
+          <span class="text-xs font-semibold text-[#1E1F23]">
             {{
               __('{0} de {1} documentos conferidos ({2}%)', [
                 summary.verified_count,
@@ -124,8 +128,10 @@
               📲 {{ __('Cobrar via WhatsApp') }}
             </Button>
             <a
-              :href="portal.path || portal.url"
+              v-if="portalFullUrl"
+              :href="portalFullUrl"
               target="_blank"
+              rel="noopener noreferrer"
               class="inline-flex items-center px-2.5 py-1 text-xs font-medium rounded border border-outline-gray-2 bg-surface-white text-ink-gray-8 hover:bg-surface-gray-2"
             >
               {{ __('Abrir ↗') }}
@@ -143,11 +149,11 @@
       </div>
 
       <!-- Checklist items -->
-      <div v-if="checklist.length" class="divide-y divide-outline-gray-1">
+      <div v-if="checklist.length" class="space-y-2.5 pt-1">
         <div
           v-for="item in checklist"
           :key="item.key"
-          class="py-3 first:pt-1 last:pb-1 space-y-2"
+          class="p-3.5 rounded-lg border border-[#E6E7EB] bg-white hover:border-[#DCDDE2] transition-colors space-y-2"
         >
           <div class="flex flex-wrap items-start justify-between gap-3">
             <div class="flex items-start gap-3 min-w-0 flex-1">
@@ -157,8 +163,8 @@
                 class="mt-0.5 size-5 rounded border flex items-center justify-center shrink-0 transition-colors"
                 :class="
                   item.status === 'verified'
-                    ? 'bg-surface-green-3 border-surface-green-3 text-white'
-                    : 'border-outline-gray-3 bg-surface-white hover:border-ink-gray-6'
+                    ? 'bg-[#1F7A3D] border-[#1F7A3D] text-white'
+                    : 'border-[#DCDDE2] bg-white hover:border-[#5E6068]'
                 "
                 :title="
                   item.status === 'verified'
@@ -176,75 +182,71 @@
               <div class="min-w-0 flex-1">
                 <div class="flex flex-wrap items-center gap-2">
                   <span
-                    class="text-base font-medium"
+                    class="text-sm font-semibold"
                     :class="
                       item.status === 'verified'
-                        ? 'text-ink-gray-9'
-                        : 'text-ink-gray-8'
+                        ? 'text-[#1E1F23]'
+                        : 'text-[#2A2B30]'
                     "
                   >
                     {{ item.label }}
                   </span>
-                  <Badge theme="gray" variant="subtle" size="sm">
+                  <span
+                    class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-[#F5F5F7] text-[#5E6068] border border-[#E6E7EB]"
+                  >
                     {{ item.category }}
-                  </Badge>
+                  </span>
                   <span
                     v-if="item.required"
-                    class="text-xs font-medium text-ink-red-3"
+                    class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-[#FEF3F2] text-[#B42318] border border-[#FECDCA]"
                   >
                     {{ __('Obrigatório') }}
                   </span>
-                  <Badge
+                  <span
                     v-if="item.is_expired"
-                    theme="red"
-                    variant="solid"
-                    size="sm"
+                    class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-[#FEF3F2] text-[#B42318] border border-[#FECDCA]"
                   >
                     ⏰ {{ __('Vencido ({0})', [item.valid_until]) }}
-                  </Badge>
-                  <Badge
+                  </span>
+                  <span
                     v-else-if="item.expiring_soon"
-                    theme="amber"
-                    variant="subtle"
-                    size="sm"
+                    class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-[#FFF4D6] text-[#8A5A00] border border-[#FEEA9F]"
                   >
                     ⏰ {{ __('Vence em {0}', [item.valid_until]) }}
-                  </Badge>
-                  <Badge
+                  </span>
+                  <span
                     v-else-if="item.valid_until"
-                    theme="gray"
-                    variant="subtle"
-                    size="sm"
+                    class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-[#F5F5F7] text-[#5E6068] border border-[#E6E7EB]"
                   >
                     📅 {{ __('Validade: {0}', [item.valid_until]) }}
-                  </Badge>
+                  </span>
                 </div>
 
                 <!-- File link, Expiration Input & Smart Extraction -->
-                <div class="flex flex-wrap items-center gap-3 mt-1 text-p-sm">
+                <div class="flex flex-wrap items-center gap-3 mt-1.5 text-xs">
                   <a
                     v-if="item.file_url"
                     :href="item.file_url"
                     target="_blank"
-                    class="text-ink-blue-3 underline font-medium truncate max-w-xs"
+                    class="text-[#0088FF] hover:underline font-medium truncate max-w-xs inline-flex items-center gap-1"
                   >
                     📎 {{ item.file_name || __('Ver documento anexado') }}
                   </a>
-                  <span v-else class="text-ink-gray-5">
+                  <span v-else class="text-[#8A8C94]">
                     {{ __('Nenhum arquivo anexado') }}
                   </span>
-                  <span v-if="item.updated_on" class="text-xs text-ink-gray-5">
+                  <span v-if="item.updated_on" class="text-xs text-[#8A8C94]">
                     · {{ item.updated_on }}
                   </span>
                   <label
-                    class="inline-flex items-center gap-1.5 text-xs text-ink-gray-6"
+                    class="inline-flex items-center gap-1.5 text-xs text-[#5E6068] ml-auto"
                     :title="__('Data de vencimento do documento (se aplicável)')"
                   >
-                    <span>{{ __('Vencimento (se aplicável):') }}</span>
+                    <span>{{ __('Vencimento:') }}</span>
                     <input
                       type="date"
                       :value="item.valid_until || ''"
-                      class="rounded border border-outline-gray-2 bg-surface-white px-1.5 py-0.5 text-xs text-ink-gray-8"
+                      class="rounded border border-[#DCDDE2] bg-[#F5F5F7] px-1.5 py-0.5 text-xs text-[#1E1F23] focus:bg-white focus:border-[#0088FF]"
                       @change="onValidUntilChange(item, $event.target.value)"
                     />
                   </label>
@@ -253,14 +255,14 @@
                 <!-- Extracted Smart Data Pill -->
                 <div
                   v-if="item.extracted_data && item.extracted_data.summary_text"
-                  class="mt-1.5 text-xs text-ink-blue-4 bg-surface-blue-1 border border-outline-blue-1 px-2.5 py-1.5 rounded flex items-center justify-between gap-2"
+                  class="mt-1.5 text-xs text-[#0088FF] bg-[#E5F1FF] border border-[#B2D7FF] px-2.5 py-1.5 rounded flex items-center justify-between gap-2"
                 >
                   <span>✨ {{ item.extracted_data.summary_text }}</span>
                 </div>
 
                 <div
                   v-if="item.notes && editingNoteKey !== item.key"
-                  class="mt-1 text-p-sm text-ink-gray-6 bg-surface-gray-1 px-2.5 py-1 rounded"
+                  class="mt-1 text-xs text-[#5E6068] bg-[#F5F5F7] px-2.5 py-1 rounded border border-[#E6E7EB]"
                 >
                   💬 {{ item.notes }}
                 </div>
@@ -269,9 +271,18 @@
 
             <!-- Status & Actions -->
             <div class="flex flex-wrap items-center gap-2 shrink-0">
-              <Badge :theme="statusTheme(item.status)" variant="subtle">
+              <span
+                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border"
+                :class="
+                  item.status === 'verified'
+                    ? 'bg-[#E7F6EC] text-[#1F7A3D] border-[#A6F4C5] font-semibold'
+                    : item.status === 'rejected'
+                      ? 'bg-[#FEF3F2] text-[#B42318] border-[#FECDCA] font-semibold'
+                      : 'bg-[#F5F5F7] text-[#5E6068] border-[#E6E7EB]'
+                "
+              >
                 {{ statusLabel(item.status) }}
-              </Badge>
+              </span>
 
               <FileUploader
                 :doctype="targetDoctype"
@@ -305,6 +316,7 @@
               <Button
                 v-if="item.status !== 'verified'"
                 variant="subtle"
+                theme="green"
                 size="sm"
                 :loading="savingKey === item.key"
                 @click="markStatus(item, 'verified')"
@@ -323,7 +335,7 @@
               <button
                 v-if="item.is_custom"
                 type="button"
-                class="text-ink-red-3 hover:text-ink-red-4 text-xs font-bold px-1"
+                class="text-[#B42318] hover:text-[#912018] text-xs font-bold px-1"
                 :title="__('Remover documento específico')"
                 @click="removeCustomItem(item.key)"
               >

@@ -15,7 +15,7 @@ from frappe.model.document import Document
 from crm.integrations.voip.api4com import API_URL, GATEWAY
 
 WEBHOOK_PATH = "/api/method/crm.integrations.voip.webhook.api4com"
-WEBHOOK_VERSION = "v1.4"
+WEBHOOK_VERSION = "v1.8"
 
 
 class CRMAPI4ComSettings(Document):
@@ -77,35 +77,70 @@ def webhook_url(settings):
 
 
 def register_webhook(settings):
-	"""PATCH /integrations at API4Com (https://developers.api4com.com/integration-own-webphone.html).
-	Not yet run against the real API: needs the test account of credtech#100."""
+	"""PATCH /integrations at API4Com (https://developers.api4com.com/integration-own-webphone.html)."""
+	url = webhook_url(settings)
+	if not url:
+		return
+	token = settings.get_password("api_token")
+	if not token:
+		return
+
 	try:
 		response = requests.patch(
 			f"{API_URL}/integrations",
 			json={
 				"gateway": GATEWAY,
 				"webhook": True,
+				"webhookConstraint": {
+					"metadata": {
+						"gateway": GATEWAY,
+					}
+				},
 				"metadata": {
-					"webhookUrl": webhook_url(settings),
+					"webhookUrl": url,
 					"webhookVersion": WEBHOOK_VERSION,
-					"webhookTypes": ["channel-hangup"],
+					"webhookTypes": ["channel-answer", "channel-hangup"],
 				},
 			},
 			# API4Com takes the raw token, without "Bearer"
-			headers={"Authorization": settings.get_password("api_token")},
+			headers={"Authorization": token},
 			timeout=20,
 		)
-	except requests.RequestException:
-		frappe.log_error(title="API4Com: webhook registration failed")
-		frappe.throw(_("Could not reach API4Com. Please try again in a few minutes."))
+	except requests.RequestException as e:
+		frappe.log_error(title="API4Com: webhook registration failed", message=str(e))
+		frappe.msgprint(
+			_("Não foi possível conectar à API4Com para registrar o webhook automático. Verifique a conexão."),
+			alert=True,
+		)
+		return
+
 	if response.status_code in (401, 403):
-		frappe.throw(_("API4Com refused the token. Check that it was copied whole and has not expired."))
+		frappe.throw(_("API4Com recusou o token. Verifique se o token foi copiado integralmente e não expirou."))
+
 	if response.status_code >= 400:
+		err_msg = ""
+		try:
+			err_data = response.json()
+			err_msg = (
+				err_data.get("error", {}).get("message")
+				or err_data.get("message")
+				or response.text[:300]
+			)
+		except Exception:
+			err_msg = response.text[:300]
+
 		frappe.log_error(
 			title="API4Com: webhook registration refused",
-			message=f"HTTP {response.status_code}: {response.text[:500]}",
+			message=f"HTTP {response.status_code}: {err_msg}",
 		)
-		frappe.throw(_("API4Com refused the webhook registration (HTTP {0}).").format(response.status_code))
+		# Não bloqueia o salvamento das credenciais para que a discagem (click-to-call) funcione
+		frappe.msgprint(
+			_(
+				"Aviso API4Com ao registrar webhook (HTTP {0}): {1}. O webhook pode ser configurado manualmente no painel da API4Com."
+			).format(response.status_code, err_msg),
+			indicator="orange",
+			alert=True,
+		)
 
 
 @frappe.whitelist()

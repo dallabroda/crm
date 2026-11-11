@@ -49,6 +49,28 @@
             @change="(f, v) => (organization.doc[f] = v)"
           />
         </div>
+
+        <!-- Feedback de busca na Receita Federal (CNPJ) -->
+        <div
+          v-if="enrichingCnpj || cnpjPreview"
+          class="mt-4 p-3 rounded-lg border text-xs flex items-center gap-2.5 transition-colors"
+          :class="enrichingCnpj ? 'bg-[#F5F5F7] border-[#E6E7EB] text-[#5E6068]' : 'bg-[#E7F6EC]/60 border-[#A6F4C5] text-[#1F7A3D]'"
+        >
+          <span
+            v-if="enrichingCnpj"
+            class="inline-block size-3.5 animate-spin rounded-full border-2 border-solid border-[#0088FF] border-r-transparent"
+          />
+          <span v-else class="text-sm font-bold">✓</span>
+          <div class="flex flex-col">
+            <span class="font-medium text-[#1E1F23]">
+              {{ enrichingCnpj ? __('Buscando dados na Receita Federal...') : __('Empresa localizada na Receita Federal') }}
+            </span>
+            <span v-if="cnpjPreview" class="text-p-xs text-[#5E6068]">
+              {{ cnpjPreview.legal_name }} · {{ cnpjPreview.city }}/{{ cnpjPreview.state }}
+            </span>
+          </div>
+        </div>
+
         <ErrorMessage v-if="error" class="mt-8" :message="__(error)" />
       </div>
       <div class="px-4 pt-4 pb-7 sm:px-6">
@@ -56,8 +78,8 @@
           <Button
             class="w-full"
             variant="solid"
-            :label="__('Create')"
-            :loading="loading"
+            :label="enrichingCnpj ? __('Aguardando Receita...') : __('Create')"
+            :loading="loading || enrichingCnpj"
             @click="createOrganization"
           />
         </div>
@@ -78,7 +100,7 @@ import { useDocument } from '@/data/document'
 import { useDoctypeModal } from '@/composables/doctypeModal'
 import { useTelemetry } from '@framework/ui/telemetry'
 import { Dialog, call, createResource } from 'frappe-ui'
-import { computed, ref, nextTick, onMounted } from 'vue'
+import { computed, ref, watch, nextTick, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 
 const props = defineProps({
@@ -98,8 +120,46 @@ const show = defineModel({ type: Boolean })
 const loading = ref(false)
 const error = ref(null)
 
+const enrichingCnpj = ref(false)
+const cnpjPreview = ref(null)
+
 const { document: organization, triggerOnBeforeCreate } =
   useDocument('CRM Organization')
+
+let cnpjDebounceTimer = null
+watch(
+  () => organization.doc?.cnpj,
+  (newCnpj) => {
+    if (cnpjDebounceTimer) clearTimeout(cnpjDebounceTimer)
+    cnpjPreview.value = null
+    const digits = (newCnpj || '').replace(/\D/g, '')
+    if (digits.length === 14) {
+      cnpjDebounceTimer = setTimeout(async () => {
+        enrichingCnpj.value = true
+        try {
+          const res = await call('cred_hub.cnpj.enrich.fetch_cnpj_preview', {
+            cnpj: digits,
+          })
+          if (res && res.success && res.legal_name) {
+            cnpjPreview.value = res
+            // Autopreencher razão social no nome da organização
+            if (
+              !organization.doc.organization_name ||
+              organization.doc.organization_name.trim() === '' ||
+              organization.doc.organization_name === digits
+            ) {
+              organization.doc.organization_name = res.legal_name
+            }
+          }
+        } catch (e) {
+          // falha silenciosa de preview
+        } finally {
+          enrichingCnpj.value = false
+        }
+      }, 400)
+    }
+  },
+)
 
 // Required fields of the company's form that the quick entry layout does not
 // have (dynamic forms, credtech#181); the server asks for them too

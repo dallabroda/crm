@@ -1,4 +1,4 @@
-import { Dialog, ErrorMessage } from 'frappe-ui'
+import { Dialog, ErrorMessage, Button } from 'frappe-ui'
 import { spriteIcon } from '@/utils/spriteIcon'
 import { reactive, ref } from 'vue'
 
@@ -14,11 +14,10 @@ export let Dialogs = {
     return dialogs.value.map((dialog) => (
       <Dialog
         title={dialog.title}
-        size={dialog.size}
+        size={dialog.size || 'xl'}
         icon={dialog.icon}
         theme={dialog.theme}
         position={dialog.position}
-        actions={dialog.actions}
         open={dialog.show}
         onUpdate:open={(val) => (dialog.show = val)}
       >
@@ -31,6 +30,27 @@ export let Dialogs = {
               dialog.html && <div v-html={dialog.html} />,
               <ErrorMessage class="mt-2" message={dialog.error} />,
             ]
+          },
+          actions: () => {
+            if (!dialog.actions?.length) return null
+            return (
+              <div class="flex flex-wrap items-center justify-end gap-2 w-full pt-3">
+                {dialog.actions.map((action) => (
+                  <Button
+                    label={action.label}
+                    variant={action.variant || 'subtle'}
+                    theme={action.theme}
+                    loading={action.loading}
+                    disabled={action.disabled}
+                    onClick={() =>
+                      action.onClick?.({
+                        close: () => (dialog.show = false),
+                      })
+                    }
+                  />
+                ))}
+              </div>
+            )
           },
         }}
       </Dialog>
