@@ -1,4 +1,47 @@
 import frappeUIPreset, { content as frappeUIContent } from 'frappe-ui/tailwind'
+import fs from 'node:fs'
+import { createRequire } from 'node:module'
+import path from 'node:path'
+import plugin from 'tailwindcss/plugin'
+
+// Figma icons are 16px with a 1.4px stroke. frappe-ui bakes Lucide's mask
+// icons (`lucide-*` classes) at stroke-width 1.5 on a 24px grid, which is
+// 1px at 16px. Registering the pack again at 2.1 (= 1.4px at 16px) makes
+// these classes come later in the CSS and win. Same CSS as frappe-ui's
+// iconPackPlugin (not exported by the package), only the stroke differs.
+const lucideIconsDir = path.join(
+  path.dirname(
+    createRequire(import.meta.url).resolve('lucide-static/package.json'),
+  ),
+  'icons',
+)
+const lucideStrokeFigma = plugin(({ matchComponents }) => {
+  const values = {}
+  for (const file of fs.readdirSync(lucideIconsDir)) {
+    if (file.endsWith('.svg')) values[file.slice(0, -4)] = file.slice(0, -4)
+  }
+  matchComponents(
+    {
+      lucide: (name) => {
+        const file = path.join(lucideIconsDir, `${name}.svg`)
+        if (!fs.existsSync(file)) return {}
+        const svg = fs
+          .readFileSync(file, 'utf8')
+          .replace(/stroke-width="[^"]+"/g, 'stroke-width="2.1"')
+          .replace(/\s+/g, ' ')
+          .trim()
+        const uri = `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`
+        return {
+          '&:where(:not(svg))': {
+            '-webkit-mask-image': `url("${uri}")`,
+            'mask-image': `url("${uri}")`,
+          },
+        }
+      },
+    },
+    { values, type: 'any' },
+  )
+})
 
 export default {
   presets: [frappeUIPreset],
@@ -41,5 +84,5 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [lucideStrokeFigma],
 }

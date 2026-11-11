@@ -261,6 +261,15 @@
   color: var(--ct-text-accent) !important;
 }
 
+/* Figma "Botão de ícone" (959:135): 32x32. frappe-ui only treats a button as
+   icon-only when the icon is a Lucide one; buttons with another icon (e.g.
+   the collapsed "Primeiros passos" button) would get the 16px label sides
+   and squeeze the icon. */
+button.h-8[aria-label]:has(> span.truncate > svg:only-child) {
+  width: 2rem;
+  padding-inline: 0;
+}
+
 /* Figma "Filtro" (1165:20747): list filter / view switch in the top bars.
    White, grey border, 14 Medium black text and a 16px chevron, 32px high. */
 .ct-filter {
@@ -342,6 +351,13 @@
 .ct-page-nav:disabled {
   opacity: 0.5;
   cursor: default;
+}
+
+/* Figma icons are 16px with a 1.4px stroke. frappe-ui draws Lucide SVG icons
+   at stroke-width 1.5 on a 24px grid (1px at 16px); 2.1 gives the Figma 1.4px.
+   The mask icons (`lucide-*` classes) get the same in tailwind.config.js. */
+svg[stroke-width='1.5'] {
+  stroke-width: 2.1;
 }
 
 /* Figma "Andamento do card": "Ganho" is a grey outline button with green

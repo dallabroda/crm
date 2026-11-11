@@ -118,7 +118,7 @@
         </div>
         <div
           v-else-if="getRow(itemName, titleField).label"
-          class="truncate text-base"
+          class="truncate text-base leading-5"
         >
           {{ getRow(itemName, titleField).label }}
         </div>
@@ -185,13 +185,13 @@
             size="xs"
           />
         </div>
-        <!-- Figma "Card de Kanban": the card value stands out (16 Medium) -->
+        <!-- Figma "Card de Kanban": the card value stands out (16/24 Medium) -->
         <div
           v-else
           class="truncate"
           :class="
             MONEY_FIELDS.includes(fieldName)
-              ? 'text-lg font-medium text-ink-gray-9'
+              ? 'text-lg leading-6 font-medium text-ink-gray-9'
               : 'text-base'
           "
         >
