@@ -14822,3 +14822,15 @@ msgstr "Promessa de pagamento para {0} · {1}"
 
 msgid "Payment of {0} · balance after {1}"
 msgstr "Pagamento de {0} · saldo depois {1}"
+
+msgid "Imports"
+msgstr "Importações"
+
+msgid "Insert New Records"
+msgstr "Inserir novos registros"
+
+msgid "Update Existing Records"
+msgstr "Atualizar registros existentes"
+
+msgid "Success"
+msgstr "Sucesso"

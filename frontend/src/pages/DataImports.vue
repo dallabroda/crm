@@ -1,7 +1,8 @@
 <template>
   <LayoutHeader>
     <template #left-header>
-      <ViewBreadcrumbs routeName="Data Imports" />
+      <!-- Figma "Importação de dados · Lista" (815:2) -->
+      <ViewBreadcrumbs routeName="Data Imports" title="Data Import" />
     </template>
     <template #right-header>
       <ViewSwitcher v-model="viewControls" />

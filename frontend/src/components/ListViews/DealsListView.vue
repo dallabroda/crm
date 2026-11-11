@@ -51,9 +51,10 @@
             v-if="column.key === '_assign'"
             class="flex items-center truncate"
           >
+            <!-- Figma "Vendas · Lista" (790:2): 24px avatar, then the name -->
             <MultipleAvatar
               :avatars="item"
-              size="sm"
+              size="md"
               :label-class="isVisited ? 'text-ink-gray-6' : 'text-ink-gray-9'"
               @click="
                 (event) =>
@@ -67,9 +68,12 @@
               "
             />
           </div>
-          <div v-else-if="column.key === 'status'">
-            <IndicatorIcon :class="item.color" />
-          </div>
+          <!-- Figma "Vendas · Lista" (790:2): 8px stage dot, 8px before the name -->
+          <span
+            v-else-if="column.key === 'status'"
+            class="block size-2 shrink-0 rounded-full bg-current"
+            :class="item.color"
+          />
           <div v-else-if="column.key === 'organization'">
             <Avatar
               v-if="item.label"
@@ -230,7 +234,6 @@
 import UserAvatar from '@/components/UserAvatar.vue'
 import HeartIcon from '@/components/Icons/HeartIcon.vue'
 import MultipleAvatar from '@/components/MultipleAvatar.vue'
-import IndicatorIcon from '@/components/Icons/IndicatorIcon.vue'
 import PhoneIcon from '@/components/Icons/PhoneIcon.vue'
 import RatingInput from '@/components/Controls/RatingInput.vue'
 import ListBulkActions from '@/components/ListBulkActions.vue'

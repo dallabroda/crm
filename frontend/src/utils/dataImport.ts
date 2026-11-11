@@ -60,6 +60,11 @@ export function getDataImportRow(row: string, dataImport: DataImportRow) {
       name: dataImport.reference_doctype,
     }
   }
+  if (row === 'import_type') {
+    // "Inserir novos registros" (Figma "Importação de dados · Lista" 815:2)
+    const importType = (dataImport.import_type as string) || ''
+    return { label: __(importType), name: importType }
+  }
   if (row === 'import_file') {
     // shows the short file name but filters on the stored path; a Google
     // Sheet has no file, so clicking it clears the file filter instead

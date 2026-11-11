@@ -1,7 +1,8 @@
 <template>
+  <!-- Figma "Cobrança · Lista" (794:2): gray (subtle) button next to "Criar" -->
   <Button
     v-if="context?.enabled"
-    variant="outline"
+    variant="subtle"
     iconLeft="lucide-upload"
     :label="__('Import titles')"
     @click="open"
