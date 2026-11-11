@@ -114,19 +114,19 @@ export const patches = {
             md: 'h-8 w-8 rounded-4',
             lg: 'h-10 w-10 rounded-5',`,
       `xs: 'h-6 w-6 rounded-[var(--ct-radius-sm)]',
-            sm: 'h-7 w-7 rounded-[var(--ct-radius-sm)]',
+            sm: 'h-8 w-8 rounded-[var(--ct-radius-sm)]',
             md: 'h-8 w-8 rounded-[var(--ct-radius-sm)]',
             lg: 'h-10 w-10 rounded-[var(--ct-radius-sm)]',`,
     ],
-    // Heights stay 24/28/32/40 so no screen reflows; padding and type follow
-    // Figma (32 → 16px, 40 → 24px, 14px label).
+    // The Style Guide's smallest button is 32px with 16px sides, so the
+    // default size (sm) is 32 too; 40 → 24px sides; 14px label.
     [
       `xs: 'h-6 text-xs px-1.5 rounded-3',
             sm: 'h-7 text-base px-2 rounded-4',
             md: 'h-8 text-base-medium px-2.5 rounded-4',
             lg: 'h-10 text-lg-medium px-3 rounded-5',`,
       `xs: 'h-6 text-xs px-2 rounded-[var(--ct-radius-sm)]',
-            sm: 'h-7 text-base px-2.5 rounded-[var(--ct-radius-sm)]',
+            sm: 'h-8 text-base px-4 rounded-[var(--ct-radius-sm)]',
             md: 'h-8 text-base px-4 rounded-[var(--ct-radius-sm)]',
             lg: 'h-10 text-base px-6 rounded-[var(--ct-radius-sm)]',`,
     ],

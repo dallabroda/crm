@@ -6,7 +6,7 @@
       item-key="column"
       :disabled="options.fixedColumns"
       :delay="isTouchScreenDevice() ? 200 : 0"
-      class="flex gap-4 px-3 py-4 sm:px-6"
+      class="flex gap-4 px-3 pb-4 sm:px-6"
       @end="updateColumn"
     >
       <template #item="{ element: column }">

@@ -261,6 +261,15 @@
   color: var(--ct-text-accent) !important;
 }
 
+/* Figma "Botão de ícone" (959:135): 32x32. frappe-ui only treats a button as
+   icon-only when the icon is a Lucide one; buttons with another icon (e.g.
+   the collapsed "Primeiros passos" button) would get the 16px label sides
+   and squeeze the icon. */
+button.h-8[aria-label]:has(> span.truncate > svg:only-child) {
+  width: 2rem;
+  padding-inline: 0;
+}
+
 /* Figma "Filtro" (1165:20747): list filter / view switch in the top bars.
    White, grey border, 14 Medium black text and a 16px chevron, 32px high. */
 .ct-filter {

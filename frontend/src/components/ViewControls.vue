@@ -155,13 +155,13 @@
        outline actions on the right, 24px sides. -->
   <div v-else class="flex items-center justify-between gap-2 px-6 py-4">
     <FadedScrollableDiv
-      class="flex flex-1 items-center overflow-x-auto -ml-1 h-9"
+      class="flex flex-1 items-center overflow-x-auto -ml-1 h-8"
       orientation="horizontal"
     >
       <div
         v-for="filter in quickFilterList"
         :key="filter.fieldname"
-        class="m-1 shrink-0"
+        class="mx-1 shrink-0"
       >
         <QuickFilterField
           :filter="filter"

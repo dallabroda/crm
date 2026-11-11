@@ -13,7 +13,7 @@
     @update:selections="(selections) => emit('selectionsChanged', selections)"
   >
     <ListHeader
-      class="!rounded-[var(--ct-radius-md)] mx-3 sm:mx-6"
+      class="h-[34px] !rounded-[var(--ct-radius-md)] mx-3 sm:mx-6"
       @columnWidthUpdated="emit('columnWidthUpdated')"
     >
       <ListHeaderItem
