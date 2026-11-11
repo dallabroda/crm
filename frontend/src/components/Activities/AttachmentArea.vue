@@ -1,88 +1,58 @@
 <template>
-  <div v-if="attachments.length">
-    <div v-for="(attachment, i) in attachments" :key="attachment.name">
+  <!-- Figma "Card · Anexos" (2533:43700): one bordered list (8px radius);
+       each row has a 36px grey file icon, the name (14 Medium), size · who
+       sent it · when (12), and ghost download / delete buttons -->
+  <div
+    v-if="attachments.length"
+    class="overflow-hidden rounded-[var(--ct-radius-md)] border border-[var(--ct-border)] bg-surface-base"
+  >
+    <div
+      v-for="attachment in attachments"
+      :key="attachment.name"
+      class="activity flex cursor-pointer items-center gap-3 border-b border-[var(--ct-border)] py-3 pl-4 pr-3 last:border-b-0 hover:bg-[var(--ct-bg-soft)]"
+      @click="openFile(attachment)"
+    >
       <div
-        class="activity flex justify-between gap-2 hover:bg-surface-sidebar rounded-4 text-base p-2.5 cursor-pointer"
-        @click="openFile(attachment)"
+        class="grid size-9 shrink-0 place-items-center rounded-[var(--ct-radius-sm)] bg-[var(--ct-bg-soft)] text-ink-gray-9"
       >
-        <div class="flex gap-2 truncate">
-          <div
-            class="size-11 bg-surface-base rounded-4 overflow-hidden flex-shrink-0 flex justify-center items-center"
-            :class="{ border: !isImage(attachment.file_type) }"
-          >
-            <img
-              v-if="isImage(attachment.file_type)"
-              class="size-full object-cover"
-              :src="attachment.file_url"
-              :alt="attachment.file_name"
-            />
-            <component
-              :is="fileIcon(attachment.file_type)"
-              v-else
-              class="size-4 text-ink-gray-7"
-            />
-          </div>
-          <div class="flex flex-col justify-center gap-1 truncate">
-            <div class="text-base text-ink-gray-8 truncate">
-              {{ attachment.file_name }}
-            </div>
-            <div class="mb-1 text-sm text-ink-gray-5">
-              {{ convertSize(attachment.file_size) }}
-            </div>
-          </div>
+        <span
+          :class="fileIcon(attachment.file_type)"
+          class="size-[18px]"
+          aria-hidden="true"
+        />
+      </div>
+      <div class="flex min-w-0 flex-1 flex-col gap-0.5">
+        <div
+          class="truncate text-base font-medium leading-[17px] text-ink-gray-9"
+        >
+          {{ attachment.file_name }}
         </div>
-        <div class="flex flex-col items-end gap-2 flex-shrink-0">
-          <TimelineTimestamp :date="attachment.creation" />
-          <div class="flex gap-1">
-            <Button
-              :tooltip="
-                attachment.is_private ? __('Make Public') : __('Make Private')
-              "
-              class="!size-5"
-              @click.stop="
-                togglePrivate(attachment.name, attachment.is_private)
-              "
-            >
-              <template #icon>
-                <span
-                  :class="
-                    attachment.is_private ? 'lucide-lock' : 'lucide-unlock'
-                  "
-                  class="size-3 text-ink-gray-7"
-                  aria-hidden="true"
-                />
-              </template>
-            </Button>
-            <Button
-              :tooltip="__('Delete Attachment')"
-              class="!size-5"
-              @click.stop="() => deleteAttachment(attachment.name)"
-            >
-              <template #icon>
-                <span
-                  class="lucide-trash-2 size-3 text-ink-gray-7"
-                  aria-hidden="true"
-                />
-              </template>
-            </Button>
-          </div>
+        <div class="truncate text-xs leading-[15px] text-ink-gray-6">
+          {{ attachmentMeta(attachment) }}
         </div>
       </div>
-      <div
-        v-if="i < attachments.length - 1"
-        class="mx-2 h-px border-t border-outline-elevation-2"
+      <Button
+        :tooltip="__('Download')"
+        variant="ghost"
+        icon="lucide-download"
+        @click.stop="downloadFile(attachment)"
+      />
+      <Button
+        :tooltip="__('Delete Attachment')"
+        variant="ghost"
+        icon="lucide-trash-2"
+        class="ct-btn-danger-icon"
+        @click.stop="() => deleteAttachment(attachment.name)"
       />
     </div>
   </div>
 </template>
 <script setup>
-import FileAudioIcon from '@/components/Icons/FileAudioIcon.vue'
-import FileTextIcon from '@/components/Icons/FileTextIcon.vue'
-import FileVideoIcon from '@/components/Icons/FileVideoIcon.vue'
 import { globalStore } from '@/stores/global'
-import { call } from 'frappe-ui'
-import TimelineTimestamp from '@/components/Activities/TimelineTimestamp.vue'
-import { convertSize, isImage } from '@/utils'
+import { usersStore } from '@/stores/users'
+import { Button, call } from 'frappe-ui'
+import { isImage, timeAgo } from '@/utils'
+import { userLocale } from '@/utils/locale'
 
 defineProps({
   attachments: { type: Array, default: () => [] },
@@ -91,38 +61,45 @@ defineProps({
 const emit = defineEmits(['reload'])
 
 const { $dialog } = globalStore()
+const { getUser } = usersStore()
+
+// "245 KB · Enviado por Rafael Lima · 7 horas atrás"
+function attachmentMeta(attachment) {
+  let parts = [fileSize(attachment.file_size)]
+  if (attachment.owner) {
+    let name = getUser(attachment.owner)?.full_name || attachment.owner
+    parts.push(__('Enviado por {0}', [name]))
+  }
+  if (attachment.creation) parts.push(timeAgo(attachment.creation))
+  return parts.filter(Boolean).join(' · ')
+}
+
+// "245 KB", "1,2 MB": whole kilobytes, one decimal from megabytes up, in the
+// user's language
+function fileSize(bytes) {
+  if (!bytes && bytes !== 0) return ''
+  let units = ['B', 'KB', 'MB', 'GB']
+  let i = 0
+  let size = Number(bytes)
+  while (size >= 1024 && i < units.length - 1) {
+    size /= 1024
+    i++
+  }
+  let number = new Intl.NumberFormat(userLocale(), {
+    maximumFractionDigits: i >= 2 ? 1 : 0,
+  }).format(size)
+  return `${number} ${units[i]}`
+}
+
+function downloadFile(attachment) {
+  let link = document.createElement('a')
+  link.href = attachment.file_url
+  link.download = attachment.file_name || ''
+  link.click()
+}
 
 function openFile(attachment) {
   window.open(attachment.file_url, '_blank')
-}
-
-function togglePrivate(fileName, isPrivate) {
-  let changeTo = isPrivate ? __('public') : __('private')
-  let title = __('Make attachment {0}', [changeTo])
-  let message = __('Are you sure you want to make this attachment {0}?', [
-    changeTo,
-  ])
-  $dialog({
-    title,
-    message,
-    actions: [
-      {
-        label: __('Make {0}', [changeTo]),
-        variant: 'solid',
-        onClick: async ({ close }) => {
-          await call('frappe.client.set_value', {
-            doctype: 'File',
-            name: fileName,
-            fieldname: {
-              is_private: !isPrivate,
-            },
-          })
-          emit('reload')
-          close()
-        },
-      },
-    ],
-  })
 }
 
 function deleteAttachment(fileName) {
@@ -148,14 +125,11 @@ function deleteAttachment(fileName) {
 }
 
 function fileIcon(type) {
-  if (!type) return FileTextIcon
+  if (isImage(type)) return 'lucide-image'
   let audioExtentions = ['wav', 'mp3', 'ogg', 'flac', 'aac']
   let videoExtentions = ['mp4', 'avi', 'mkv', 'flv', 'mov']
-  if (audioExtentions.includes(type.toLowerCase())) {
-    return FileAudioIcon
-  } else if (videoExtentions.includes(type.toLowerCase())) {
-    return FileVideoIcon
-  }
-  return FileTextIcon
+  if (audioExtentions.includes(type?.toLowerCase())) return 'lucide-file-audio'
+  if (videoExtentions.includes(type?.toLowerCase())) return 'lucide-file-video'
+  return 'lucide-file-text'
 }
 </script>

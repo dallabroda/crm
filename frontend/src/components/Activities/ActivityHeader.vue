@@ -1,10 +1,11 @@
 <template>
   <div
     v-if="title !== 'Data'"
-    class="mx-3 my-3 flex flex-col gap-2.5 sm:mx-6 sm:mb-4 sm:mt-5"
+    class="mx-3 my-3 flex flex-col gap-2.5 sm:mx-6 sm:mb-4 sm:mt-6"
   >
     <div class="flex items-center justify-between text-lg-medium">
-      <!-- Figma "Card · Atividade": section title 18 Semi Bold, blue "Novo" -->
+      <!-- Figma "Card · Atividade": section title 18 Semi Bold, blue "Novo ˅"
+           (no plus icon on the activity tab) -->
       <div
         class="flex h-8 items-center text-[18px] font-semibold leading-6 text-ink-gray-9"
       >
@@ -42,8 +43,8 @@
         <Button
           v-else-if="title == 'Attachments'"
           variant="solid"
-          :label="__('Upload Attachment')"
-          iconLeft="lucide-plus"
+          :label="__('Enviar anexo')"
+          iconLeft="lucide-upload"
           @click="showFilesUploader = true"
         />
         <div v-else-if="title == 'WhatsApp'" class="flex gap-2 shrink-0">
@@ -77,7 +78,7 @@
           </template>
         </Dropdown>
         <Dropdown
-          v-if="!['Quotations', 'WhatsApp'].includes(title)"
+          v-if="!['Quotations', 'WhatsApp', 'Attachments'].includes(title)"
           :options="defaultActions"
           @click.stop
         >
@@ -86,7 +87,7 @@
               :variant="title === 'Activity' ? 'solid' : 'outline'"
               class="flex items-center gap-1"
               :label="__('New')"
-              iconLeft="lucide-plus"
+              :iconLeft="title === 'Activity' ? undefined : 'lucide-plus'"
               :iconRight="open ? 'lucide-chevron-up' : 'lucide-chevron-down'"
             />
           </template>

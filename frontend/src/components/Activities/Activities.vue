@@ -25,7 +25,8 @@
         activities?.length ||
         (whatsappMessages.data?.length && title == 'WhatsApp')
       "
-      class="activities"
+      class="activities [&_.text-base]:leading-5"
+      :class="{ 'pt-[25px]': title === 'Activity' }"
     >
       <div v-if="title == 'WhatsApp' && whatsappMessages.data?.length">
         <WhatsAppArea
@@ -124,7 +125,8 @@
           "
         >
           <!-- Figma "Card · Atividade": the activity list has no icon rail
-               (kept on the e-mails list) -->
+               (kept on the e-mails list); 25px above the first entry and
+               20px lines (set on the list above) -->
           <div
             v-if="title === 'Emails'"
             class="z-0 relative flex justify-center before:absolute before:left-[50%] before:-z-[1] before:top-0 before:border-l before:border-outline-elevation-2"
@@ -471,6 +473,7 @@
       v-model:reload="reload_email"
       :doctype="doctype"
       @scroll="scroll"
+      @whatsapp="changeTabTo('whatsapp')"
     />
     <WhatsAppBox
       v-if="title == 'WhatsApp'"
@@ -617,6 +620,12 @@ const title = computed(() => {
 })
 
 const changeTabTo = (tabName) => {
+  // a page tab of its own (e.g. the card's "Anexos") wins over the filter of
+  // the same name inside the activity tab
+  if (props.tabs?.some((tab) => tab.value === tabName)) {
+    activeTab.value = tabName
+    return
+  }
   const subMap = {
     emails: 'Emails',
     comments: 'Comments',
