@@ -1,44 +1,40 @@
 <template>
-  <div class="flex flex-col gap-3" data-testid="form-preview">
+  <!-- Figma "Campos" of "Prévia do formulário" (2324:15315): rows 8px apart,
+       a 192px label (14 Regular, red *, 12px lock), a 48px gray box with the
+       type in 16 gray and the "Varia por etapa" pills in a 112px column -->
+  <div class="flex flex-col gap-2" data-testid="form-preview">
     <div
       v-for="field in shown"
       :key="field.fieldname"
-      class="flex items-center gap-3"
+      class="flex items-center gap-4"
       :data-field="field.fieldname"
     >
       <div
-        class="flex w-48 shrink-0 items-center gap-1 text-base text-ink-gray-7"
+        class="flex w-48 shrink-0 items-center gap-1 text-[14px] leading-5 text-[var(--ct-text-primary)]"
       >
         <span class="truncate">{{ __(field.label) }}</span>
-        <span v-if="field.required === 1" class="text-ink-red-4">*</span>
+        <span v-if="field.required === 1" class="text-[var(--ct-error)]">
+          *
+        </span>
         <Tooltip v-if="field.locked" :text="__('Always shown')">
-          <span class="lucide-lock size-3 shrink-0 text-ink-gray-5" />
+          <span class="lucide-lock size-3 shrink-0 text-ink-gray-9" />
         </Tooltip>
       </div>
       <div
-        class="flex h-7 min-w-0 flex-1 items-center rounded border border-outline-gray-2 bg-surface-gray-1 px-2 text-sm text-ink-gray-4"
+        class="flex h-12 min-w-0 flex-1 items-center rounded-[6px] border border-[var(--ct-border)] bg-[var(--ct-bg-soft)] px-3.5 text-[16px] leading-6 text-[var(--ct-text-tertiary)]"
       >
         <span class="truncate">{{ fieldTypeLabel(field) }}</span>
       </div>
-      <div class="flex w-40 shrink-0 flex-wrap gap-1">
-        <Badge
-          v-if="field.is_created"
-          :label="__('Created')"
-          variant="subtle"
-          theme="gray"
-        />
-        <Badge
-          v-if="varies(field)"
-          :label="__('Varies by stage')"
-          variant="subtle"
-          theme="orange"
-        />
-        <Badge
-          v-if="field.read_only_rule === 1"
-          :label="__('Read only')"
-          variant="subtle"
-          theme="gray"
-        />
+      <div class="flex w-28 shrink-0 flex-wrap gap-1">
+        <span v-if="field.is_created" class="ct-pill">
+          {{ __('Created') }}
+        </span>
+        <span v-if="varies(field)" class="ct-pill">
+          {{ __('Varies by stage') }}
+        </span>
+        <span v-if="field.read_only_rule === 1" class="ct-pill">
+          {{ __('Read only') }}
+        </span>
       </div>
     </div>
     <p v-if="hidden" class="text-p-sm text-ink-gray-5">
@@ -57,7 +53,8 @@
 
 <script setup>
 import { fieldTypeLabel } from '../Fields/fieldTypes'
-import { Badge, Tooltip } from 'frappe-ui'
+import '../settingsTable.css'
+import { Tooltip } from 'frappe-ui'
 import { computed } from 'vue'
 
 const props = defineProps({

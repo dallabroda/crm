@@ -1,8 +1,11 @@
 <template>
   <SettingsLayoutBase
-    :title="__('SLA Policies')"
+    :title="__('Automation')"
     :description="__('Manage your service level agreement policies.')"
   >
+    <template #header-top>
+      <AutomationTabs current="sla-policies" />
+    </template>
     <template #header-actions>
       <Button
         :label="__('New policy')"
@@ -59,90 +62,93 @@
           :action-label="__('New policy')"
           @action="createNewSlaPolicy"
         />
-        <div v-else class="-ml-2">
-          <div
-            class="grid grid-cols-6 items-center gap-3 text-sm text-ink-gray-5 ml-2"
-          >
-            <div class="col-span-5">
-              {{ __('Policy Name') }}
-            </div>
-            <div class="col-span-1">{{ __('Enabled') }}</div>
+        <!-- Figma "Configurações · Automação · Prazos (SLA)" (2335:10382) -->
+        <div v-else class="ct-table">
+          <div class="ct-table-head" :style="columns">
+            <div>{{ __('Name') }}</div>
+            <div>{{ __('Applies to') }}</div>
+            <div>{{ __('First response') }}</div>
+            <div>{{ __('Resolution') }}</div>
+            <div>{{ __('Active', null, 'automation') }}</div>
           </div>
-          <hr class="mt-2 mx-2 border-outline-gray-2" />
           <div
-            v-for="(sla, index) in slaPolicyListResource.data"
+            v-for="sla in slaPolicyListResource.data"
             :key="sla.name"
+            class="ct-table-row cursor-pointer hover:bg-[var(--ct-bg-soft)]"
+            :style="columns"
+            @click="updateStep('view', sla, true)"
           >
-            <div
-              class="grid grid-cols-6 items-center gap-4 cursor-pointer hover:bg-surface-sidebar rounded-4"
-            >
-              <div
-                class="w-full pl-2 col-span-5 flex items-center h-14 gap-2"
-                @click="updateStep('view', sla, true)"
-              >
-                <div class="text-base-medium text-ink-gray-7 truncate">
-                  {{ sla.name }}
-                </div>
-                <Badge v-if="sla.default" color="gray" size="sm">{{
-                  __('Default')
-                }}</Badge>
-              </div>
-              <div class="flex justify-between items-center w-full pr-2">
-                <div>
-                  <Switch
-                    size="sm"
-                    :modelValue="sla.enabled"
-                    @update:modelValue="onToggle(sla)"
-                  />
-                </div>
-                <div>
-                  <Dropdown
-                    align="end"
-                    :options="dropdownOptions(sla)"
-                    @update:open="
-                      (open) => open && (isConfirmingDelete = false)
-                    "
-                  >
-                    <Button icon="lucide-more-horizontal" variant="ghost" />
-                  </Dropdown>
-                </div>
-              </div>
+            <div class="flex items-center gap-2">
+              <span class="ct-table-name">{{ sla.name }}</span>
+              <span v-if="sla.default" class="ct-pill ct-pill-dot">
+                {{ __('Default') }}
+              </span>
             </div>
-            <hr
-              v-if="index !== slaPolicyListResource.list.data.length - 1"
-              class="mx-2 border-outline-gray-2"
-            />
-            <Dialog
-              v-model:open="duplicateDialog.show"
-              :title="__('Duplicate SLA Policy')"
-            >
-              <template #default>
-                <div class="flex flex-col gap-4">
-                  <FormControl
-                    v-model="duplicateDialog.name"
-                    :label="__('New SLA Policy Name')"
-                    type="text"
-                    maxlength="100"
-                  />
-                </div>
-              </template>
-              <template #actions>
-                <div class="flex gap-2 justify-end">
-                  <Button
-                    variant="subtle"
-                    :label="__('Close')"
-                    @click="duplicateDialog.show = false"
-                  />
-                  <Button
-                    variant="solid"
-                    :label="__('Duplicate')"
-                    @click="() => duplicate(sla)"
-                  />
-                </div>
-              </template>
-            </Dialog>
+            <div class="truncate">
+              {{
+                hasCondition(sla)
+                  ? __('Cards with a condition')
+                  : __('All cards')
+              }}
+            </div>
+            <div>
+              {{ formatDuration(defaultPriority(sla)?.first_response_time) }}
+            </div>
+            <div>
+              {{ formatDuration(defaultPriority(sla)?.resolution_time) }}
+            </div>
+            <div class="flex items-center justify-between gap-2" @click.stop>
+              <Switch
+                size="md"
+                :modelValue="sla.enabled"
+                @update:modelValue="onToggle(sla)"
+              />
+              <Dropdown
+                align="end"
+                :options="dropdownOptions(sla)"
+                @update:open="(open) => open && (isConfirmingDelete = false)"
+              >
+                <Button
+                  icon="lucide-more-horizontal"
+                  variant="ghost"
+                  size="sm"
+                  class="ct-row-menu -my-1.5"
+                  :aria-label="__('Options')"
+                />
+              </Dropdown>
+            </div>
           </div>
         </div>
+        <!-- one dialog for the list (it was repeated in every row) -->
+        <Dialog
+          v-model:open="duplicateDialog.show"
+          :title="__('Duplicate SLA Policy')"
+        >
+          <template #default>
+            <div class="flex flex-col gap-4">
+              <FormControl
+                v-model="duplicateDialog.name"
+                :label="__('New SLA Policy Name')"
+                type="text"
+                maxlength="100"
+              />
+            </div>
+          </template>
+          <template #actions>
+            <div class="flex gap-2 justify-end">
+              <Button
+                variant="subtle"
+                :label="__('Close')"
+                @click="duplicateDialog.show = false"
+              />
+              <Button
+                variant="solid"
+                :label="__('Duplicate')"
+                @click="() => duplicate(duplicateDialog.sla)"
+              />
+            </div>
+          </template>
+        </Dialog>
       </div>
     </template>
   </SettingsLayoutBase>
@@ -152,8 +158,9 @@
 import LucideShieldCheck from '~icons/lucide/shield-check'
 import SettingsEmptyState from '@/components/Settings/SettingsEmptyState.vue'
 import SettingsLayoutBase from '@/components/Layouts/SettingsLayoutBase.vue'
+import AutomationTabs from '@/components/Settings/AutomationTabs.vue'
+import '@/components/Settings/settingsTable.css'
 import {
-  Badge,
   Button,
   createResource,
   Dialog,
@@ -165,11 +172,66 @@ import {
 } from 'frappe-ui'
 import { ConfirmDelete } from '@/utils'
 import { resetSlaData } from './utils'
-import { inject, ref, watch } from 'vue'
+import { computed, inject, ref, watch } from 'vue'
 
 const slaPolicyListResource = inject('slaPolicyListResource')
 const updateStep = inject('updateStep')
 const slaSearchQuery = inject('slaSearchQuery')
+
+// Figma column widths at 1440px (Nome 224, Vale para 345, 1ª resposta 152,
+// Resolução 152, Ativa 109), kept in proportion on other widths
+const columns = {
+  gridTemplateColumns:
+    'minmax(0,224fr) minmax(0,345fr) minmax(0,152fr) minmax(0,152fr) minmax(0,109fr)',
+}
+
+// "1ª resposta" and "Resolução" of each policy: those of its default priority
+const priorities = createResource({
+  url: 'frappe.client.get_list',
+  params: {
+    doctype: 'CRM Service Level Priority',
+    parent: 'CRM Service Level Agreement',
+    fields: [
+      'parent',
+      'default_priority',
+      'first_response_time',
+      'resolution_time',
+    ],
+    limit_page_length: 0,
+  },
+  cache: ['SLAPolicyPriorities'],
+  auto: true,
+})
+const prioritiesBySla = computed(() => {
+  let map = {}
+  for (let row of priorities.data || []) {
+    if (!map[row.parent] || row.default_priority) map[row.parent] = row
+  }
+  return map
+})
+function hasCondition(sla) {
+  let json = sla.condition_json
+  return Boolean(sla.condition || (json && json !== '[]'))
+}
+function defaultPriority(sla) {
+  return prioritiesBySla.value[sla.name]
+}
+watch(
+  () => slaPolicyListResource.data,
+  () => priorities.reload(),
+)
+
+// seconds (Duration) → "30 minutos", "2 horas", "1 dia"
+function formatDuration(seconds) {
+  if (!seconds) return '—'
+  let [value, one, many] =
+    seconds % 86400 === 0
+      ? [seconds / 86400, '1 day', '{0} days']
+      : seconds % 3600 === 0
+        ? [seconds / 3600, '1 hour', '{0} hours']
+        : [Math.round(seconds / 60), '1 minute', '{0} minutes']
+  return value === 1 ? __(one) : __(many, [value])
+}
 
 function createNewSlaPolicy() {
   resetSlaData()
@@ -190,6 +252,7 @@ const dropdownOptions = (sla) => [
       duplicateDialog.value = {
         show: true,
         name: sla.name + ' (Copy)',
+        sla,
       }
     },
     icon: 'lucide-copy',
