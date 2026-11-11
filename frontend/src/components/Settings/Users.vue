@@ -1,6 +1,9 @@
 <template>
+  <!-- Figma "Configurações · Equipe · Pessoas" (2323:15708): "Equipe" with
+       the Pessoas / Hierarquia tabs -->
   <div class="flex h-full flex-col gap-6 text-ink-gray-8">
-    <SettingsPageHeader :title="__('Users')">
+    <SettingsTeamTabs active="Users" />
+    <SettingsPageHeader :title="__('Team')">
       <template #description>
         {{
           __(
@@ -30,11 +33,14 @@
     </div>
 
     <!-- Empty State -->
-    <EmptyState
+    <!-- Figma "Configurações · Equipe · Pessoas · vazia" (2345:25880) -->
+    <SettingsEmptyState
       v-if="!users.loading && users.data?.crmUsers?.length == 1"
-      name="Users"
-      :description="__('Add one to get started.')"
-      icon="user"
+      :icon="LucideUser"
+      :title="__('No users yet')"
+      :description="__('Invite people from your team to work in the CRM.')"
+      :action-label="__('Invite User')"
+      @action="activeSettingsPage = 'Invite User'"
     />
 
     <!-- Users List -->
@@ -163,8 +169,10 @@
 
 <script setup>
 import SettingsPageHeader from '@/components/Settings/SettingsPageHeader.vue'
+import SettingsTeamTabs from '@/components/Settings/SettingsTeamTabs.vue'
 import AvailabilityDot from '@/components/AvailabilityDot.vue'
-import EmptyState from '@/components/ListViews/EmptyState.vue'
+import SettingsEmptyState from '@/components/Settings/SettingsEmptyState.vue'
+import LucideUser from '~icons/lucide/user'
 import { activeSettingsPage } from '@/composables/settings'
 import { usersStore } from '@/stores/users'
 import {

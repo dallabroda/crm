@@ -37,6 +37,8 @@
       <!-- logo -->
       <div class="flex flex-col justify-between gap-4">
         <div class="flex items-center flex-1 gap-6">
+          <!-- Figma "Configurações · Empresa" (2323:14221): the logo fills
+               the 80px box (2px inset), the favicon is a 48px circle -->
           <div
             class="flex items-center justify-center rounded-lg border border-outline-gray-2 size-20"
           >
@@ -44,15 +46,15 @@
               v-if="settings.doc?.brand_logo"
               :src="settings.doc?.brand_logo"
               alt="Logo"
-              class="size-8 rounded-4"
+              class="size-[76px] rounded-[7px] object-cover"
             />
             <ImageIcon v-else class="size-5 text-ink-gray-4" />
           </div>
           <div class="flex flex-1 flex-col gap-1">
-            <span class="text-base font-medium text-ink-gray-9">{{
+            <span class="text-base font-medium leading-5 text-ink-gray-9">{{
               __('Brand Logo')
             }}</span>
-            <span class="text-p-base text-ink-gray-6">
+            <span class="text-base leading-5 text-ink-gray-6">
               {{
                 __(
                   'Appears in the left sidebar. Recommended size is 32x32 px in PNG or SVG',
@@ -81,15 +83,15 @@
               v-if="settings.doc?.favicon"
               :src="settings.doc?.favicon"
               alt="Favicon"
-              class="size-8 rounded-4"
+              class="size-12 rounded-full object-cover"
             />
             <ImageIcon v-else class="size-5 text-ink-gray-4" />
           </div>
           <div class="flex flex-1 flex-col gap-1">
-            <span class="text-base font-medium text-ink-gray-9">{{
+            <span class="text-base font-medium leading-5 text-ink-gray-9">{{
               __('Favicon')
             }}</span>
-            <span class="text-p-base text-ink-gray-6">
+            <span class="text-base leading-5 text-ink-gray-6">
               {{
                 __(
                   'Appears next to the title in your browser tab. Recommended size is 32x32 px in PNG or ICO',

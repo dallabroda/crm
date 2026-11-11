@@ -19,11 +19,25 @@
           theme="amber"
         />
       </template>
+      <template v-if="description" #description>
+        {{ description }}
+      </template>
       <template #actions>
+        <!-- Figma "Configurações · WhatsApp" (2324:27125): the on/off check
+             sits in the top bar, 24px before "Atualizar", which is off while
+             nothing changed -->
+        <Checkbox
+          v-if="headerCheckField && data.doc"
+          v-model="data.doc[headerCheck]"
+          size="md"
+          class="mr-4"
+          :label="__(headerCheckField.label)"
+        />
         <Button
           :loading="data.save.loading"
           :label="__('Update')"
           variant="solid"
+          :disabled="Boolean(headerCheckField) && !data.isDirty"
           @click="data.save.submit()"
         />
       </template>
@@ -50,6 +64,7 @@ import {
   createResource,
   LoadingIndicator,
   Badge,
+  Checkbox,
   toast,
   ErrorMessage,
 } from 'frappe-ui'
@@ -61,6 +76,9 @@ const props = defineProps({
   title: { type: String, default: '' },
   successMessage: { type: String, default: 'Updated successfully' },
   back: { type: Function, default: null },
+  description: { type: String, default: '' },
+  // a Check field shown in the top bar instead of the form (e.g. 'enabled')
+  headerCheck: { type: String, default: '' },
 })
 
 const fields = createResource({
@@ -88,10 +106,17 @@ const data = createDocumentResource({
   },
 })
 
+const headerCheckField = computed(() =>
+  props.headerCheck
+    ? fields.data?.find((f) => f.fieldname === props.headerCheck)
+    : null,
+)
+
 const tabs = computed(() => {
   if (!fields.data) return []
   let _tabs = []
-  let fieldsData = fields.data
+  let fieldsData = fields.data.filter((f) => f !== headerCheckField.value)
+  if (!fieldsData.length) return []
 
   if (fieldsData[0].type != 'Tab Break') {
     let _sections = []

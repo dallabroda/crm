@@ -14822,3 +14822,69 @@ msgstr "Promessa de pagamento para {0} · {1}"
 
 msgid "Payment of {0} · balance after {1}"
 msgstr "Pagamento de {0} · saldo depois {1}"
+
+msgid "Team"
+msgstr "Equipe"
+
+msgid "People"
+msgstr "Pessoas"
+
+msgid "Hierarchy"
+msgstr "Hierarquia"
+
+msgid "Change manager"
+msgstr "Trocar chefe"
+
+msgid "sees the cards of 1 person"
+msgstr "vê os cards de 1 pessoa"
+
+msgid "sees the cards of {0} people"
+msgstr "vê os cards de {0} pessoas"
+
+msgid "Sales hierarchy on · each person sees their own cards and those of the people below them"
+msgstr "Hierarquia de vendas ativada · cada pessoa vê os próprios cards e os de quem está abaixo dela"
+
+msgid "Connect HubTech to the WhatsApp Business API (Meta) to send and receive messages in the cards."
+msgstr "Conecte o HubTech à API do WhatsApp Business (Meta) para enviar e receber mensagens nos cards."
+
+msgid "Token"
+msgstr "Token de acesso"
+
+msgid "Version"
+msgstr "Versão"
+
+msgid "Phone ID"
+msgstr "ID do número de telefone"
+
+msgid "Business ID"
+msgstr "ID da conta comercial"
+
+msgid "App ID"
+msgstr "ID do app"
+
+msgid "API documentation"
+msgstr "Documentação da API"
+
+msgid "Open playground"
+msgstr "Abrir playground"
+
+msgid "Created on"
+msgstr "Criada em"
+
+msgid "Last used"
+msgstr "Último uso"
+
+msgid "never"
+msgstr "nunca"
+
+msgid "No users yet"
+msgstr "Nenhum usuário ainda"
+
+msgid "Invite people from your team to work in the CRM."
+msgstr "Convide pessoas da equipe para trabalhar no CRM."
+
+msgid "User with email {0} already exists"
+msgstr "Já existe um usuário com o e-mail {0}"
+
+msgid "User with email {0} already invited"
+msgstr "O e-mail {0} já foi convidado"

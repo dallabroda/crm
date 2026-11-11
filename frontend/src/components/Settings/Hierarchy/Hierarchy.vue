@@ -1,6 +1,9 @@
 <template>
-  <div class="flex h-full flex-col gap-4 text-ink-gray-8">
-    <SettingsPageHeader :title="__('Sales Hierarchy')">
+  <!-- Figma "Configurações · Equipe · Hierarquia" (2335:9297): "Equipe" with
+       the Pessoas / Hierarquia tabs; on/off is the switch of the grey bar -->
+  <div class="flex h-full flex-col gap-6 text-ink-gray-8">
+    <SettingsTeamTabs active="Sales Hierarchy" />
+    <SettingsPageHeader :title="__('Team')">
       <template #description>
         {{
           __(
@@ -10,11 +13,6 @@
       </template>
       <template #actions>
         <template v-if="hierarchyEnabled && canEdit">
-          <Button
-            :label="__('Disable')"
-            :loading="fcrmSettings.setValue.loading"
-            @click="toggleEnable(true)"
-          />
           <Button
             :label="__('Add User')"
             icon-left="lucide-plus"
@@ -50,10 +48,29 @@
       </SettingsEmptyState>
     </div>
 
-    <div v-else class="flex-1 min-h-0 flex flex-col">
-      <div class="flex items-center gap-2 pt-0.5 pb-4">
+    <div v-else class="flex-1 min-h-0 flex flex-col gap-6">
+      <!-- Figma "Ativada": grey bar with the switch that turns it off -->
+      <div
+        class="flex items-center gap-3 rounded-lg bg-[var(--ct-bg-soft)] px-4 py-3"
+      >
+        <span
+          class="min-w-0 flex-1 text-[14px] leading-5 text-[color:var(--ct-text-primary)]"
+        >
+          {{
+            __(
+              'Sales hierarchy on · each person sees their own cards and those of the people below them',
+            )
+          }}
+        </span>
+        <Switch
+          :model-value="true"
+          size="md"
+          :disabled="!canEdit || fcrmSettings.setValue.loading"
+          @update:model-value="toggleEnable(true)"
+        />
+      </div>
+      <div v-if="enrichedNodes.length > 10" class="flex items-center gap-2">
         <TextInput
-          v-if="enrichedNodes.length"
           v-model="search"
           :placeholder="__('Search users')"
           :debounce="200"
@@ -67,7 +84,7 @@
           </template>
         </TextInput>
       </div>
-      <div class="flex-1 min-h-0 overflow-y-auto">
+      <div class="min-h-0 overflow-y-auto">
         <div
           v-if="nodes.loading"
           class="flex items-center justify-center py-12"
@@ -89,31 +106,41 @@
           "
           icon="users"
         />
-        <HierarchyTree
-          v-for="root in visibleRoots"
-          :key="root.name"
-          :node="root"
-          node-key="name"
-          :options="treeOptions"
+        <div
+          v-else
+          class="overflow-hidden rounded-lg border border-[var(--ct-border)]"
         >
-          <template #node="{ node, hasChildren, isCollapsed, toggleCollapsed }">
-            <HierarchyRow
-              :node="node"
-              :has-children="hasChildren"
-              :is-collapsed="isCollapsed"
-              :is-last="node.name === lastNodeName"
-              :row-class="rowClasses(node)"
-              :handlers="dragHandlers"
-              :get-candidates="getCandidates"
-              :candidates-loading="candidatesLoading"
-              :can-edit="canEdit"
-              @toggle="toggleCollapsed"
-              @bulk-add="({ parent, userIds }) => bulkAdd(parent, userIds)"
-              @remove="(n) => openRemoveDialog(n)"
-              @move-to-root="(n) => reparent(n.name, null)"
-            />
-          </template>
-        </HierarchyTree>
+          <HierarchyTree
+            v-for="root in visibleRoots"
+            :key="root.name"
+            :node="root"
+            node-key="name"
+            :options="treeOptions"
+          >
+            <template
+              #node="{ node, hasChildren, isCollapsed, toggleCollapsed }"
+            >
+              <HierarchyRow
+                :node="node"
+                :has-children="hasChildren"
+                :is-collapsed="isCollapsed"
+                :is-last="node.name === lastNodeName"
+                :row-class="rowClasses(node)"
+                :handlers="dragHandlers"
+                :get-candidates="getCandidates"
+                :candidates-loading="candidatesLoading"
+                :can-edit="canEdit"
+                :depth="depthOf(node)"
+                :reach="reachOf(node)"
+                :manager-options="managerOptions(node)"
+                @toggle="toggleCollapsed"
+                @bulk-add="({ parent, userIds }) => bulkAdd(parent, userIds)"
+                @remove="(n) => openRemoveDialog(n)"
+                @move-to-root="(n) => reparent(n.name, null)"
+              />
+            </template>
+          </HierarchyTree>
+        </div>
       </div>
     </div>
 
@@ -225,6 +252,7 @@
 import LucideNetwork from '~icons/lucide/network'
 import SettingsEmptyState from '@/components/Settings/SettingsEmptyState.vue'
 import SettingsPageHeader from '@/components/Settings/SettingsPageHeader.vue'
+import SettingsTeamTabs from '@/components/Settings/SettingsTeamTabs.vue'
 import EmptyState from '@/components/ListViews/EmptyState.vue'
 import HierarchyRow from './HierarchyRow.vue'
 import HierarchyTree from './HierarchyTree.vue'
@@ -237,6 +265,7 @@ import {
   Button,
   Dialog,
   LoadingIndicator,
+  Switch,
   TextInput,
   call,
   createDocumentResource,
@@ -325,9 +354,10 @@ const showAddDialog = ref(false)
 const dialogSelected = ref([])
 const saving = ref(false)
 
+// rows indent themselves (HierarchyRow `depth`), so the tree adds none
 const treeOptions = {
   rowHeight: '32px',
-  indentWidth: '28px',
+  indentWidth: '0px',
   defaultCollapsed: false,
 }
 
@@ -404,6 +434,57 @@ function getLastNode(list) {
 }
 
 const lastNodeName = computed(() => getLastNode(visibleRoots.value)?.name)
+
+const nodesByName = computed(
+  () => new Map(enrichedNodes.value.map((n) => [n.name, n])),
+)
+
+function depthOf(node) {
+  let depth = 0
+  let parent = nodesByName.value.get(node.reports_to)
+  while (parent && depth < 50) {
+    depth++
+    parent = nodesByName.value.get(parent.reports_to)
+  }
+  return depth
+}
+
+// people below this one, at any level
+function reachOf(node) {
+  return enrichedNodes.value.filter((n) => {
+    let parent = nodesByName.value.get(n.reports_to)
+    for (let i = 0; parent && i < 50; i++) {
+      if (parent.name === node.name) return true
+      parent = nodesByName.value.get(parent.reports_to)
+    }
+    return false
+  }).length
+}
+
+// "Trocar chefe": anyone of the same or a higher role, not below this person
+function managerOptions(node) {
+  return enrichedNodes.value
+    .filter(
+      (n) =>
+        n.name !== node.name &&
+        n.name !== node.reports_to &&
+        node.role_rank >= n.role_rank &&
+        !isBelow(n, node),
+    )
+    .map((n) => ({
+      label: n.full_name,
+      onClick: () => reparent(node.name, n.name),
+    }))
+}
+
+function isBelow(candidate, node) {
+  let parent = nodesByName.value.get(candidate.reports_to)
+  for (let i = 0; parent && i < 50; i++) {
+    if (parent.name === node.name) return true
+    parent = nodesByName.value.get(parent.reports_to)
+  }
+  return false
+}
 
 const placedUserIds = computed(
   () => new Set(enrichedNodes.value.map((n) => n.user)),

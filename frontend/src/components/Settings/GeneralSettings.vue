@@ -1,4 +1,6 @@
 <template>
+  <!-- Figma "Configurações · Empresa" (2323:14221), first block: rows with
+       the 36x20 "Interruptor" and "Filtro" selects -->
   <div class="flex h-full flex-col gap-6 text-ink-gray-8">
     <SettingsPageHeader :title="__('General Settings')">
       <template #description>
@@ -20,7 +22,7 @@
         </template>
         <Switch
           v-model="settings.doc.update_timestamp_on_new_communication"
-          size="sm"
+          size="md"
           @click.stop="toggle('update_timestamp_on_new_communication')"
         />
       </SettingsRow>
@@ -38,7 +40,7 @@
         </template>
         <Switch
           v-model="settings.doc.auto_mark_replied_on_response"
-          size="sm"
+          size="md"
           @click.stop="toggle('auto_mark_replied_on_response')"
         />
       </SettingsRow>
@@ -56,7 +58,7 @@
         </template>
         <Switch
           v-model="settings.doc.auto_reopen_on_new_communication"
-          size="sm"
+          size="md"
           @click.stop="toggle('auto_reopen_on_new_communication')"
         />
       </SettingsRow>
@@ -72,11 +74,8 @@
             )
           }}
         </template>
-        <FormControl
+        <SettingsSelect
           v-model="settings.doc.crm_timeline_timestamp_format"
-          type="select"
-          variant="outline"
-          class="w-40"
           :options="timestampFormatOptions"
           :placeholder="__('Relative')"
           @update:modelValue="save()"
@@ -94,11 +93,8 @@
             )
           }}
         </template>
-        <FormControl
+        <SettingsSelect
           v-model="settings.doc.crm_timeline_sort_order"
-          type="select"
-          variant="outline"
-          class="w-40"
           :options="sortOrderOptions"
           :placeholder="__('Oldest First')"
           @update:modelValue="save()"
@@ -112,8 +108,9 @@
 import SettingsRow from '@/components/Settings/SettingsRow.vue'
 import SettingsDivider from '@/components/Settings/SettingsDivider.vue'
 import SettingsPageHeader from '@/components/Settings/SettingsPageHeader.vue'
+import SettingsSelect from '@/components/Settings/SettingsSelect.vue'
 import { getSettings } from '@/stores/settings'
-import { FormControl, Switch, toast } from 'frappe-ui'
+import { Switch, toast } from 'frappe-ui'
 
 const { _settings: settings } = getSettings()
 
