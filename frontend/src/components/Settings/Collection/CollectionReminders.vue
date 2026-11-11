@@ -59,7 +59,11 @@
                   }}
                 </span>
               </div>
-              <Switch v-model="form.enabled" :disabled="!chat.connected" />
+              <!-- never stuck ON: a disconnected SmartChat must not keep the reminders on -->
+              <Switch
+                v-model="form.enabled"
+                :disabled="!chat.connected && !form.enabled"
+              />
             </div>
             <div class="ct-field-48 grid grid-cols-2 gap-4">
               <FormControl
@@ -74,8 +78,11 @@
             <CtAlert type="info">
               {{
                 __(
-                  'Meta charges each template sent. With these steps, about {0} messages in the next {1} days.',
-                  [saved.estimate ?? 0, saved.estimate_days ?? 30],
+                  'Meta charges each template sent. With the saved steps, about {0} messages in the next {1} days.',
+                  [
+                    (saved.estimate ?? 0).toLocaleString('pt-BR'),
+                    saved.estimate_days ?? 30,
+                  ],
                 )
               }}
             </CtAlert>
@@ -98,13 +105,6 @@
                   }}
                 </span>
               </div>
-              <Button
-                :label="__('Add step')"
-                :disabled="!inbox"
-                @click="addStep"
-              >
-                <template #prefix><LucidePlus class="size-4" /></template>
-              </Button>
             </div>
 
             <p
@@ -124,54 +124,71 @@
             <div
               v-for="(step, index) in form.steps"
               :key="step.key"
-              class="flex flex-col gap-4 rounded-[var(--ct-radius-md)] border border-outline-gray-2 p-4"
+              class="flex flex-col gap-4"
             >
-              <div
-                class="ct-field-48 grid grid-cols-[10rem_1fr_auto] items-end gap-4"
-              >
+              <div class="ct-field-48 grid grid-cols-2 items-end gap-4">
                 <FormControl
                   v-model="step.days"
                   type="number"
                   :label="__('Days from the due date')"
                 />
-                <FormControl
-                  type="select"
-                  :label="__('Message (approved template)')"
-                  :placeholder="__('Select')"
-                  :options="templateOptions"
-                  :model-value="step.template"
-                  @update:model-value="(value) => pickTemplate(step, value)"
-                />
-                <Button
-                  variant="ghost"
-                  :aria-label="__('Remove step')"
-                  @click="form.steps.splice(index, 1)"
-                >
-                  <LucideTrash2 class="size-4" />
-                </Button>
+                <div class="flex items-end gap-2">
+                  <FormControl
+                    class="flex-1"
+                    type="select"
+                    :label="__('Approved message template')"
+                    :placeholder="__('Select')"
+                    :options="templateOptions"
+                    :model-value="step.template"
+                    @update:model-value="(value) => pickTemplate(step, value)"
+                  />
+                  <Button
+                    variant="ghost"
+                    :aria-label="__('Remove step')"
+                    @click="form.steps.splice(index, 1)"
+                  >
+                    <LucideTrash2 class="size-4" />
+                  </Button>
+                </div>
               </div>
+              <CtAlert v-if="duplicateDays.has(Number(step.days))" type="error">
+                {{ __('Two steps on the same day ({0}).', [step.days]) }}
+              </CtAlert>
+              <CtAlert v-if="step.template && !templateOf(step)" type="warning">
+                {{
+                  __(
+                    'The template {0} is no longer approved for this WhatsApp number. Choose another one.',
+                    [step.template.split('|')[0]],
+                  )
+                }}
+              </CtAlert>
               <template v-if="templateOf(step)">
                 <div
-                  class="whitespace-pre-wrap rounded bg-surface-gray-2 px-3 py-2 text-p-sm text-ink-gray-8"
+                  v-if="templateOf(step).variables.length"
+                  class="ct-field-48 grid grid-cols-2 gap-4"
                 >
-                  {{ templateOf(step).body }}
-                </div>
-                <div
-                  v-for="(variable, i) in templateOf(step).variables"
-                  :key="variable"
-                  class="grid grid-cols-[8rem_1fr] items-center gap-3"
-                >
-                  <code class="text-sm text-ink-gray-7">{{
-                    placeholder(variable)
-                  }}</code>
                   <FormControl
+                    v-for="(variable, i) in templateOf(step).variables"
+                    :key="variable"
                     type="select"
+                    :label="placeholder(variable)"
                     :options="variableOptions"
                     :model-value="step.variables[i] || ''"
                     @update:model-value="(key) => (step.variables[i] = key)"
                   />
                 </div>
+                <p class="whitespace-pre-wrap text-p-xs text-ink-gray-6">
+                  {{ templateOf(step).body }}
+                </p>
               </template>
+            </div>
+
+            <div>
+              <Button
+                :label="__('Add step')"
+                :disabled="!inbox"
+                @click="addStep"
+              />
             </div>
           </section>
         </template>
@@ -187,7 +204,6 @@ import SettingsDivider from '@/components/Settings/SettingsDivider.vue'
 import CtAlert from '@/components/CtAlert.vue'
 import { chat, loadChat } from '@/components/Settings/LeadSyncing/welcomeApi'
 import { getRequest } from '@/components/Settings/LeadSyncing/metaLeadsApi'
-import LucidePlus from '~icons/lucide/plus'
 import LucideTrash2 from '~icons/lucide/trash-2'
 import { Badge, Button, FormControl, Switch, call, toast } from 'frappe-ui'
 import { computed, onMounted, reactive, ref } from 'vue'
@@ -206,9 +222,15 @@ let nextKey = 0
 const inbox = computed(() =>
   chat.inboxes.find((i) => String(i.id) === String(form.inbox_id)),
 )
+// +5511999990000 -> +55 11 99999-0000
+function formatPhone(phone) {
+  let m = /^\+55(\d{2})(\d{4,5})(\d{4})$/.exec(phone || '')
+  return m ? `+55 ${m[1]} ${m[2]}-${m[3]}` : phone
+}
+
 const inboxOptions = computed(() =>
   chat.inboxes.map((i) => ({
-    label: i.phone ? `${i.name} (${i.phone})` : i.name,
+    label: i.phone ? `${i.name} (${formatPhone(i.phone)})` : i.name,
     value: String(i.id),
   })),
 )
@@ -229,10 +251,21 @@ function templateOf(step) {
   )
 }
 
+const duplicateDays = computed(() => {
+  let seen = new Set()
+  let repeated = new Set()
+  form.steps.forEach((step) => {
+    let days = Number(step.days)
+    ;(seen.has(days) ? repeated : seen).add(days)
+  })
+  return repeated
+})
+
 const complete = computed(
   () =>
     Boolean(inbox.value) &&
     form.steps.length > 0 &&
+    duplicateDays.value.size === 0 &&
     form.steps.every((step) => {
       let template = templateOf(step)
       return (

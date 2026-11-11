@@ -14460,8 +14460,6 @@ msgstr "Conecte o seu SmartChat em Configurações › Origens (quadro SmartChat
 msgid "Every day at 9h. Never sent to a título that is protested, paid or closed, or has a payment promise or an agreement."
 msgstr "Todo dia às 9h. Nunca vai para título protestado, quitado ou fechado, com promessa de pagamento ou com acordo."
 
-msgid "Meta charges each template sent. With these steps, about {0} messages in the next {1} days."
-msgstr "A Meta cobra cada modelo enviado. Com estas etapas, cerca de {0} mensagens nos próximos {1} dias."
 
 msgid "Steps"
 msgstr "Etapas"
@@ -14495,3 +14493,15 @@ msgstr "Régua de cobrança salva"
 
 msgid "Could not save the collection reminders"
 msgstr "Não foi possível salvar a régua de cobrança"
+
+msgid "Meta charges each template sent. With the saved steps, about {0} messages in the next {1} days."
+msgstr "A Meta cobra cada modelo enviado. Com as etapas salvas, cerca de {0} mensagens nos próximos {1} dias."
+
+msgid "Approved message template"
+msgstr "Mensagem (modelo aprovado)"
+
+msgid "Two steps on the same day ({0})."
+msgstr "Duas etapas no mesmo dia ({0})."
+
+msgid "The template {0} is no longer approved for this WhatsApp number. Choose another one."
+msgstr "O modelo {0} não está mais aprovado para este número de WhatsApp. Escolha outro."
