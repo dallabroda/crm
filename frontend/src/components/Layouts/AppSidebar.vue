@@ -479,9 +479,10 @@ const allViews = computed(() => {
     {
       name: 'General',
       opened: true,
+      // Início (the dashboard) first, Notificações below it, as in the Figma
       views: [
-        { label: 'Notifications', key: 'Notifications' },
         ...top.map(navLink),
+        { label: 'Notifications', key: 'Notifications' },
       ],
     },
     {

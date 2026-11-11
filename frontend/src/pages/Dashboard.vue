@@ -2,7 +2,7 @@
   <div class="ct-dashboard flex flex-col h-full overflow-hidden">
     <LayoutHeader>
       <template #left-header>
-        <ViewBreadcrumbs routeName="Dashboard" />
+        <ViewBreadcrumbs routeName="Dashboard" title="Home" />
       </template>
       <!-- Figma "Painel · Visão geral" (819:2): period and sales user
            filters live in the top bar, before Atualizar (outline) and

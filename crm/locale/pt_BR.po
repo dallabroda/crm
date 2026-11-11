@@ -14729,3 +14729,7 @@ msgstr "Lido uma vez, quando a sincronização cria o sacado: as colunas que voc
 
 msgid "Read once, when the sync creates the cedente: the columns you choose fill its company and its contact. A cedente that already exists is not read again; the CNPJ data comes from the automatic enrichment."
 msgstr "Lido uma vez, quando a sincronização cria o cedente: as colunas que você escolher preenchem a empresa e o contato dele. Cedente que já existe não é lido de novo; os dados do CNPJ vêm do enriquecimento automático."
+
+#: frontend/src/utils/navigation.js:12 frontend/src/pages/Dashboard.vue:5
+msgid "Home"
+msgstr "Início"
