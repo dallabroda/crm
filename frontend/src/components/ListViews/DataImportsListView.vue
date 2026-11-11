@@ -15,7 +15,7 @@
     "
   >
     <ListHeader
-      class="!rounded-[var(--ct-radius-md)] sm:mx-6 mx-3"
+      class="h-[34px] !rounded-[var(--ct-radius-md)] sm:mx-6 mx-3"
       @columnWidthUpdated="emit('columnWidthUpdated')"
     >
       <ListHeaderItem
