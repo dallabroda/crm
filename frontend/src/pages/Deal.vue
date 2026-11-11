@@ -17,7 +17,26 @@
         {{ title }}
       </h1>
     </template>
-    <template v-if="!errorTitle" #right-header>
+    <!-- Figma "Card · Análise de crédito" (2164:12977): on the credit tab the
+         bar keeps only "Gerar parecer de IA" (blue) and the owner -->
+    <template v-if="!errorTitle && isCreditTab" #right-header>
+      <Button
+        variant="solid"
+        iconLeft="lucide-sparkles"
+        :label="__('Gerar parecer de IA')"
+        :tooltip="creditOpinionTooltip"
+        :loading="Boolean(creditDossieRef?.requestingOpinion)"
+        :disabled="!creditDossieRef?.opinionConfigured"
+        @click="creditDossieRef?.askOpinionOnly()"
+      />
+      <AssignTo
+        v-model="assignees.data"
+        doctype="CRM Deal"
+        :docname="dealId"
+        :allowedUsers="assignableUsers"
+      />
+    </template>
+    <template v-else-if="!errorTitle" #right-header>
       <Dropdown v-if="doc && document.statuses" :options="statuses" align="end">
         <template #default="{ open }">
           <Button
@@ -117,6 +136,7 @@
         />
         <OrganizationCreditDossie
           v-else-if="activeTab === 'credit'"
+          ref="creditDossieRef"
           :organization-id="doc.organization"
           :deal-id="dealId"
         />
@@ -168,7 +188,9 @@
             <Button
               v-if="callEnabled || hasPhoneToCall"
               variant="outline"
-              :tooltip="callEnabled ? __('Make a Call') : __('Ligar (Telefone)')"
+              :tooltip="
+                callEnabled ? __('Make a Call') : __('Ligar (Telefone)')
+              "
               :icon="PhoneIcon"
               @click="triggerCall"
             />
@@ -360,7 +382,11 @@
                           <Button
                             variant="ghost"
                             size="sm"
-                            :tooltip="callEnabled ? __('Make a Call') : __('Ligar (Telefone)')"
+                            :tooltip="
+                              callEnabled
+                                ? __('Make a Call')
+                                : __('Ligar (Telefone)')
+                            "
                             :icon="PhoneIcon"
                             @click.stop="callNumber(contact.mobile_no)"
                           />
@@ -1005,8 +1031,7 @@ const tabs = computed(() => {
       value: 'credit',
       label: __('Análise de crédito'),
       iconLeft: MoneyIcon,
-      condition: () =>
-        isCreditFunnel.value && Boolean(doc.value?.organization),
+      condition: () => isCreditFunnel.value && Boolean(doc.value?.organization),
     },
     {
       name: 'WhatsApp',
@@ -1027,6 +1052,18 @@ const tabs = computed(() => {
 })
 
 const { activeTab, changeTabTo } = useActiveTabManager(tabs, 'lastDealTab')
+
+// "Análise de crédito" tab: its top bar drives the AI opinion of the dossier
+const creditDossieRef = ref(null)
+const isCreditTab = computed(() => activeTab.value === 'credit')
+const creditOpinionTooltip = computed(() => {
+  const dossie = creditDossieRef.value
+  if (dossie && !dossie.opinionConfigured)
+    return __(
+      'A IA de parecer de crédito ainda não está configurada neste ambiente.',
+    )
+  return dossie?.opinionUsage || ''
+})
 
 watch(
   tabs,
@@ -1232,7 +1269,9 @@ watch(
       doc.value?.status || '',
       doc.value?.organization || '',
       doc.value?.second_organization || '',
-      (dealContacts.data || []).map((c) => `${c.name}:${c.is_primary}`).join(','),
+      (dealContacts.data || [])
+        .map((c) => `${c.name}:${c.is_primary}`)
+        .join(','),
     ].join('|')
   },
   (key) => {
@@ -1452,9 +1491,7 @@ function mergeOrganizationSectionIntoCard(sections) {
     let existingNames = new Set(
       (target.columns?.[0]?.fields || []).map((f) => f?.fieldname || f),
     )
-    let toAdd = extraFields.filter(
-      (f) => !existingNames.has(f?.fieldname || f),
-    )
+    let toAdd = extraFields.filter((f) => !existingNames.has(f?.fieldname || f))
     rest[targetIdx] = {
       ...target,
       columns: [
