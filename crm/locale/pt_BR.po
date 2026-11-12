@@ -11775,7 +11775,7 @@ msgid "Your company can have up to {0} active keys. Revoke one to create another
 msgstr "Sua empresa pode ter até {0} chaves ativas. Revogue uma para criar outra."
 
 msgid "No API keys yet."
-msgstr "Nenhuma chave da API ainda."
+msgstr "Nenhuma chave da API ainda"
 
 msgid "Revoked"
 msgstr "Revogada"

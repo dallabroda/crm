@@ -1,10 +1,15 @@
 <template>
-  <!-- Figma "Estado vazio": icon, title, help and the main action -->
+  <!-- Figma "Estado vazio": icon (30px, 2px line), title, help (384px
+       wide at most) and the main action -->
   <div class="flex w-full justify-center px-6 py-4">
     <div
-      class="flex max-w-md flex-col items-center gap-3 px-6 py-8 text-center"
+      class="flex max-w-[432px] flex-col items-center gap-3 px-6 py-8 text-center"
     >
-      <Icon v-if="icon" :icon="icon" class="size-7.5 text-ink-gray-9" />
+      <Icon
+        v-if="icon"
+        :icon="icon"
+        class="size-7.5 text-ink-gray-9 [&_*]:[stroke-width:1.6]"
+      />
       <div class="flex flex-col items-center gap-1">
         <span class="text-lg font-medium leading-6 text-ink-gray-9">
           {{ title }}
