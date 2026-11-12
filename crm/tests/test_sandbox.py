@@ -363,3 +363,78 @@ class TestSandboxGuards(FrappeTestCase):
 			):
 				tasks.auto_enrich_on_create(card)
 			self.assertEqual(enqueue.called, enriched)
+
+	# ---------- Reports and dashboards (credtech#389, decision 1-A) ----------
+
+	def test_reports_and_dashboards_leave_sandbox_data_out(self):
+		from crm.api import dashboard
+		from crm.api.doc import get_data
+
+		owner = f"sbx389-{frappe.generate_hash(length=6)}@example.com"  # only this test's rows, whatever the site has
+		for name in (self.sandbox_card, self.real_card):
+			frappe.db.set_value("CRM Deal", name, {"deal_owner": owner, "source": None, "deal_value": 100})
+		leads = {}
+		for kind in ("real", "stamped", "in_sandbox"):
+			leads[kind] = (
+				frappe.get_doc({"doctype": "CRM Lead", "first_name": kind})
+				.insert(ignore_permissions=True)
+				.name
+			)
+			frappe.db.set_value("CRM Lead", leads[kind], "lead_owner", owner)
+		frappe.db.set_value("CRM Lead", leads["stamped"], sandbox.FLAG, 1)
+		frappe.db.set_value("CRM Lead", leads["in_sandbox"], "pipeline", self.sandbox_pipeline["name"])
+		today = frappe.utils.nowdate()
+
+		def chart(name):
+			return getattr(dashboard, f"get_{name}")(today, today, owner)
+
+		self.assertEqual(chart("total_leads")["value"], 1)
+		self.assertEqual(chart("ongoing_deals")["value"], 1)
+		self.assertEqual(chart("average_deal_value")["value"], 100)
+		self.assertEqual(chart("funnel_conversion")["data"][0], {"stage": "Leads", "count": 1})
+		self.assertEqual(
+			[(r["leads"], r["deals"]) for r in chart("sales_trend")["data"] if r["date"] == today], [(1, 1)]
+		)
+		for name, key in (
+			("deals_by_stage_donut", "count"),
+			("deals_by_stage_axis", "count"),
+			("deals_by_source", "count"),
+		):
+			self.assertEqual(sum(row[key] for row in chart(name)["data"]), 1, name)
+		for name in ("deals_by_territory", "deals_by_salesperson"):
+			self.assertEqual(sum(row["deals"] for row in chart(name)["data"]), 1, name)
+		self.assertEqual(sum(row["count"] for row in chart("leads_by_source")["data"]), 1)
+		# without the flag (crm without cred_hub, or a pipeline that is not Sandbox) everything counts as before
+		with (
+			patch.object(sandbox, "sandbox_pipelines", return_value=[]),
+			patch.object(sandbox, "has_flag", return_value=False),
+		):
+			self.assertEqual(chart("total_leads")["value"], 3)
+			self.assertEqual(chart("ongoing_deals")["value"], 2)
+		# every widget of the dashboard still runs
+		for widget in dashboard.get_dashboard(today, today, owner):
+			self.assertIsNotNone(widget.get("data"), widget.get("name"))
+		# lists and kanban are untouched: the admin opening the Sandbox pipeline sees its cards
+		listed = get_data(
+			"CRM Deal",
+			{"pipeline": self.sandbox_pipeline["name"]},
+			"modified desc",
+			view={"view_type": "list"},
+		)
+		self.assertIn(self.sandbox_card, [row["name"] for row in listed["data"]])
+		self.assertEqual(listed["total_count"], 1)
+
+	def test_report_criterion_is_empty_without_cred_hub(self):
+		from pypika.terms import EmptyCriterion
+
+		with (
+			patch.object(sandbox, "sandbox_pipelines", return_value=[]),
+			patch.object(sandbox, "has_flag", return_value=False),
+		):
+			self.assertIsInstance(sandbox.real_rows("CRM Deal"), EmptyCriterion)
+			self.assertIsInstance(sandbox.real_rows("CRM Lead"), EmptyCriterion)
+		self.assertIn(self.sandbox_pipeline["name"], sandbox.sandbox_pipelines())
+		self.assertNotIn(self.real_pipeline["name"], sandbox.sandbox_pipelines())
+		self.assertIn(
+			"NOT IN", str(frappe.qb.from_("CRM Deal").select("name").where(sandbox.real_rows("CRM Deal")))
+		)

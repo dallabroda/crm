@@ -9,12 +9,17 @@ File). The client decides what costs money or reaches people, so nothing automat
 - Notification and Webhook documents of Frappe do not fire for sandbox records;
 - assignment rules and the pipeline distribution do not hand sandbox records to salespeople, and the CRM does not
   notify anyone about them;
-- the ERPNext customer sync and the website enrichment do not run for them.
+- the ERPNext customer sync and the website enrichment do not run for them;
+- reports and dashboards (crm.api.dashboard) leave them out (credtech#389, owner decision 1-A). Lists and kanban are
+  untouched: the Sandbox pipeline still shows its cards when an admin opens or filters it.
 
 The crm only reads the flags, and only where the column exists: without cred_hub nothing is ever sandbox.
 """
 
 import frappe
+from frappe.query_builder import DocType
+from frappe.query_builder.functions import IfNull
+from pypika.terms import EmptyCriterion
 
 FLAG = "credhub_sandbox"
 STAMPED = ("Contact", "CRM Organization", "CRM Lead", "FCRM Note", "CRM Task", "File")
@@ -96,6 +101,30 @@ def is_sandbox_record(doctype: str | None, name: str | None) -> bool:
 			return False
 		memo[key] = is_sandbox(frappe._dict(values, doctype=doctype))
 	return memo[key]
+
+
+def sandbox_pipelines() -> list[str]:
+	"""Names of the flagged Sandbox pipelines (one per company in practice)."""
+	if not has_flag("CRM Pipeline"):
+		return []
+	return frappe.get_all("CRM Pipeline", {FLAG: 1}, pluck="name", order_by="name asc")
+
+
+def real_rows(doctype: str, table=None):
+	"""Query builder criterion that leaves sandbox cards (CRM Deal) or leads (CRM Lead) out of a report.
+
+	`table` is the table of the query (`DocType(doctype)` or an alias of it). A card or lead is sandbox when its
+	pipeline is flagged; a lead also when a test key stamped it. Without cred_hub nothing is sandbox and the
+	criterion is empty (pypika's `where` ignores it).
+	"""
+	table = table if table is not None else DocType(doctype)
+	criterion = EmptyCriterion()
+	pipelines = sandbox_pipelines() if doctype in PIPELINE_DOCTYPES else []
+	if pipelines:
+		criterion = table.pipeline.isnull() | table.pipeline.notin(pipelines)
+	if doctype in STAMPED and has_flag(doctype):
+		criterion = criterion & (IfNull(table[FLAG], 0) == 0)
+	return criterion
 
 
 # ---------- Entry points ----------
