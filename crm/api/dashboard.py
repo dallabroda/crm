@@ -8,6 +8,7 @@ from pypika.functions import Function
 
 from crm.fcrm.doctype.crm_dashboard.crm_dashboard import create_default_manager_dashboard
 from crm.permissions.pipeline import is_admin
+from crm.sandbox import real_rows, sandbox_pipelines
 from crm.utils import sales_user_only
 
 
@@ -109,9 +110,13 @@ def get_total_leads(from_date: str | None = None, to_date: str | None = None, us
 		prev_cond = prev_cond & (Lead.lead_owner == user)
 
 	# Build query with CASE expressions
-	query = frappe.qb.from_(Lead).select(
-		Count(Case().when(current_cond, Lead.name).else_(None)).as_("current_month_leads"),
-		Count(Case().when(prev_cond, Lead.name).else_(None)).as_("prev_month_leads"),
+	query = (
+		frappe.qb.from_(Lead)
+		.select(
+			Count(Case().when(current_cond, Lead.name).else_(None)).as_("current_month_leads"),
+			Count(Case().when(prev_cond, Lead.name).else_(None)).as_("prev_month_leads"),
+		)
+		.where(real_rows("CRM Lead", Lead))
 	)
 
 	result = query.run(as_dict=True)
@@ -171,6 +176,7 @@ def get_ongoing_deals(from_date: str | None = None, to_date: str | None = None, 
 			Count(Case().when(current_cond, Deal.name).else_(None)).as_("current_month_deals"),
 			Count(Case().when(prev_cond, Deal.name).else_(None)).as_("prev_month_deals"),
 		)
+		.where(real_rows("CRM Deal", Deal))
 	)
 
 	result = query.run(as_dict=True)
@@ -235,6 +241,7 @@ def get_average_ongoing_deal_value(
 			Avg(Case().when(current_cond, deal_value_expr).else_(None)).as_("current_month_avg_value"),
 			Avg(Case().when(prev_cond, deal_value_expr).else_(None)).as_("prev_month_avg_value"),
 		)
+		.where(real_rows("CRM Deal", Deal))
 	)
 
 	result = query.run(as_dict=True)
@@ -288,6 +295,7 @@ def get_won_deals(from_date: str | None = None, to_date: str | None = None, user
 			Count(Case().when(current_cond, Deal.name).else_(None)).as_("current_month_deals"),
 			Count(Case().when(prev_cond, Deal.name).else_(None)).as_("prev_month_deals"),
 		)
+		.where(real_rows("CRM Deal", Deal))
 	)
 
 	result = query.run(as_dict=True)
@@ -348,6 +356,7 @@ def get_average_won_deal_value(
 			Avg(Case().when(current_cond, deal_value_expr).else_(None)).as_("current_month_avg_value"),
 			Avg(Case().when(prev_cond, deal_value_expr).else_(None)).as_("prev_month_avg_value"),
 		)
+		.where(real_rows("CRM Deal", Deal))
 	)
 
 	result = query.run(as_dict=True)
@@ -402,6 +411,7 @@ def get_average_deal_value(from_date: str | None = None, to_date: str | None = N
 			Avg(Case().when(current_cond, deal_value_expr).else_(None)).as_("current_month_avg"),
 			Avg(Case().when(prev_cond, deal_value_expr).else_(None)).as_("prev_month_avg"),
 		)
+		.where(real_rows("CRM Deal", Deal))
 	)
 
 	result = query.run(as_dict=True)
@@ -467,6 +477,7 @@ def get_average_time_to_close_a_lead(
 			Avg(Case().when(current_cond, time_diff).else_(None)).as_("current_avg_lead"),
 			Avg(Case().when(prev_cond, time_diff).else_(None)).as_("prev_avg_lead"),
 		)
+		.where(real_rows("CRM Deal", Deal))
 	)
 
 	result = query.run(as_dict=True)
@@ -530,6 +541,7 @@ def get_average_time_to_close_a_deal(
 			Avg(Case().when(current_cond, time_diff).else_(None)).as_("current_avg_deal"),
 			Avg(Case().when(prev_cond, time_diff).else_(None)).as_("prev_avg_deal"),
 		)
+		.where(real_rows("CRM Deal", Deal))
 	)
 
 	result = query.run(as_dict=True)
@@ -576,6 +588,7 @@ def get_sales_trend(from_date: str | None = None, to_date: str | None = None, us
 			frappe.qb.terms.ValueWrapper(0).as_("won_deals"),
 		)
 		.where(Date(Lead.creation).between(from_date, to_date))
+		.where(real_rows("CRM Lead", Lead))
 	)
 
 	if user:
@@ -595,6 +608,7 @@ def get_sales_trend(from_date: str | None = None, to_date: str | None = None, us
 			Sum(Case().when(Status.type == "Won", 1).else_(0)).as_("won_deals"),
 		)
 		.where(Date(Deal.creation).between(from_date, to_date))
+		.where(real_rows("CRM Deal", Deal))
 	)
 
 	if user:
@@ -691,6 +705,7 @@ def get_forecasted_revenue(from_date: str | None = None, to_date: str | None = N
 			Sum(actual_value).as_("actual"),
 		)
 		.where(CRMDeal.expected_closure_date >= twelve_months_ago)
+		.where(real_rows("CRM Deal", CRMDeal))
 		.groupby(DateFormat(CRMDeal.expected_closure_date, "%Y-%m"))
 		.orderby(DateFormat(CRMDeal.expected_closure_date, "%Y-%m"))
 	)
@@ -762,6 +777,7 @@ def get_funnel_conversion(from_date: str | None = None, to_date: str | None = No
 		frappe.qb.from_(CRMLead)
 		.select(Count("*").as_("count"))
 		.where(Date(CRMLead.creation).between(from_date, to_date))
+		.where(real_rows("CRM Lead", CRMLead))
 	)
 
 	if user:
@@ -824,6 +840,7 @@ def get_deals_by_stage_axis(
 		.on(CRMDeal.status == CRMDealStatus.name)
 		.select(CRMDeal.status.as_("stage"), Count("*").as_("count"), CRMDealStatus.type.as_("status_type"))
 		.where((Date(CRMDeal.creation).between(from_date, to_date)) & (CRMDealStatus.type.notin(["Lost"])))
+		.where(real_rows("CRM Deal", CRMDeal))
 		.groupby(CRMDeal.status)
 		.orderby(Count("*"), order=frappe.qb.desc)
 	)
@@ -873,6 +890,7 @@ def get_deals_by_stage_donut(
 		.on(CRMDeal.status == CRMDealStatus.name)
 		.select(CRMDeal.status.as_("stage"), Count("*").as_("count"), CRMDealStatus.type.as_("status_type"))
 		.where(Date(CRMDeal.creation).between(from_date, to_date))
+		.where(real_rows("CRM Deal", CRMDeal))
 		.groupby(CRMDeal.status)
 		.orderby(Count("*"), order=frappe.qb.desc)
 	)
@@ -914,6 +932,7 @@ def get_lost_deal_reasons(from_date: str | None = None, to_date: str | None = No
 		.on(CRMDeal.status == CRMDealStatus.name)
 		.select(CRMDeal.lost_reason.as_("reason"), Count("*").as_("count"))
 		.where((Date(CRMDeal.creation).between(from_date, to_date)) & (CRMDealStatus.type == "Lost"))
+		.where(real_rows("CRM Deal", CRMDeal))
 		.groupby(CRMDeal.lost_reason)
 		.having((CRMDeal.lost_reason.isnotnull()) & (CRMDeal.lost_reason != ""))
 		.orderby(Count("*"), order=frappe.qb.desc)
@@ -962,6 +981,7 @@ def get_leads_by_source(from_date: str | None = None, to_date: str | None = None
 		frappe.qb.from_(CRMLead)
 		.select(IfNull(CRMLead.source, "Empty").as_("source"), Count("*").as_("count"))
 		.where(Date(CRMLead.creation).between(from_date, to_date))
+		.where(real_rows("CRM Lead", CRMLead))
 		.groupby(CRMLead.source)
 		.orderby(Count("*"), order=frappe.qb.desc)
 	)
@@ -1000,6 +1020,7 @@ def get_deals_by_source(from_date: str | None = None, to_date: str | None = None
 		frappe.qb.from_(CRMDeal)
 		.select(IfNull(CRMDeal.source, "Empty").as_("source"), Count("*").as_("count"))
 		.where(Date(CRMDeal.creation).between(from_date, to_date))
+		.where(real_rows("CRM Deal", CRMDeal))
 		.groupby(CRMDeal.source)
 		.orderby(Count("*"), order=frappe.qb.desc)
 	)
@@ -1042,6 +1063,7 @@ def get_deals_by_territory(from_date: str | None = None, to_date: str | None = N
 			Sum(Coalesce(CRMDeal.deal_value, 0) * IfNull(CRMDeal.exchange_rate, 1)).as_("value"),
 		)
 		.where(Date(CRMDeal.creation).between(from_date, to_date))
+		.where(real_rows("CRM Deal", CRMDeal))
 		.groupby(CRMDeal.territory)
 		.orderby(Count("*"), order=frappe.qb.desc)
 		.orderby(
@@ -1105,6 +1127,7 @@ def get_deals_by_salesperson(
 			Sum(Coalesce(CRMDeal.deal_value, 0) * IfNull(CRMDeal.exchange_rate, 1)).as_("value"),
 		)
 		.where(Date(CRMDeal.creation).between(from_date, to_date))
+		.where(real_rows("CRM Deal", CRMDeal))
 		.groupby(CRMDeal.deal_owner)
 		.orderby(Count("*"), order=frappe.qb.desc)
 		.orderby(
@@ -1184,6 +1207,7 @@ def get_deal_status_change_counts(
 			& (CurrentStatus.type != "Lost")
 			& (Date(CRMDeal.creation).between(from_date, to_date))
 		)
+		.where(real_rows("CRM Deal", CRMDeal))
 		.groupby(CRMStatusChangeLog.to, TargetStatus.position)
 		.orderby(TargetStatus.position)
 	)
@@ -1206,7 +1230,8 @@ def label_stages(rows: list[dict], key: str = "stage") -> list[dict]:
 		"CRM Deal Status", {"name": ("in", list(keys))}, ["name", "deal_status", "pipeline"]
 	)
 	pipeline_names = dict(frappe.get_all("CRM Pipeline", ["name", "pipeline_name"], as_list=True))
-	prefix = len(pipeline_names) > 1
+	# the Sandbox pipeline of the API test keys is never in a report (credtech#389), so it does not count here
+	prefix = len(set(pipeline_names) - set(sandbox_pipelines())) > 1
 	labels = {
 		stage.name: f"{_(pipeline_names.get(stage.pipeline, ''))} · {_(stage.deal_status)}"
 		if prefix
