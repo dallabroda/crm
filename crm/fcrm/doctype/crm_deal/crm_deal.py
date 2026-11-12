@@ -426,26 +426,28 @@ class CRMDeal(Document):
 
 	@staticmethod
 	def default_list_data():
+		# Figma "Vendas · Lista · Origem dos leads" (1750:23623): column widths at
+		# 1440px (the list grid sizes to its content); the lead source with its
+		# logo and how long ago the card was created, right after the name
 		columns = [
 			{
 				"label": "Card Name",
 				"type": "Data",
 				"key": "deal_name",
-				"width": "14rem",
+				"width": "18.125rem",
 			},
 			{
-				"label": "Organization",
+				"label": "Source",
 				"type": "Link",
-				"key": "organization",
-				"options": "CRM Organization",
-				"width": "11rem",
+				"key": "source",
+				"options": "CRM Lead Source",
+				"width": "14.75rem",
 			},
 			{
-				"label": "Annual Revenue",
-				"type": "Currency",
-				"key": "annual_revenue",
-				"align": "right",
-				"width": "9rem",
+				"label": "Created",
+				"type": "Datetime",
+				"key": "creation",
+				"width": "6rem",
 			},
 			{
 				"label": "Status",
@@ -458,25 +460,13 @@ class CRMDeal(Document):
 				"label": "Email",
 				"type": "Data",
 				"key": "email",
-				"width": "12rem",
-			},
-			{
-				"label": "Mobile No.",
-				"type": "Data",
-				"key": "mobile_no",
-				"width": "11rem",
+				"width": "15rem",
 			},
 			{
 				"label": "Assigned To",
 				"type": "Text",
 				"key": "_assign",
-				"width": "10rem",
-			},
-			{
-				"label": "Last Modified",
-				"type": "Datetime",
-				"key": "modified",
-				"width": "8rem",
+				"width": "10.625rem",
 			},
 		]
 		rows = [
@@ -495,6 +485,8 @@ class CRMDeal(Document):
 			"first_responded_on",
 			"modified",
 			"_assign",
+			"source",
+			"creation",
 		]
 		return {"columns": columns, "rows": rows}
 

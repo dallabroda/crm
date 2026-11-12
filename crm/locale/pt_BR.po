@@ -46,11 +46,11 @@ msgstr "01/04/2024 23:30"
 
 #: frontend/src/utils/index.js:206
 msgid "1 hour ago"
-msgstr "há 1 hora"
+msgstr "há 1 h"
 
 #: frontend/src/utils/index.js:202
 msgid "1 minute ago"
-msgstr "há 1 minuto"
+msgstr "há 1 min"
 
 #: frontend/src/utils/index.js:221
 msgid "1 month ago"
@@ -10551,7 +10551,7 @@ msgstr "{0} não tem o campo {1}"
 #: frontend/src/utils/index.js:208
 #, python-brace-format
 msgid "{0} hours ago"
-msgstr "{0} horas atrás"
+msgstr "há {0} h"
 
 #: crm/fcrm/doctype/crm_pipeline/fields.py:231
 #, python-brace-format
@@ -10646,12 +10646,12 @@ msgstr "{0} mi"
 #: frontend/src/utils/index.js:204
 #, python-brace-format
 msgid "{0} minutes ago"
-msgstr "{0} minutos atrás"
+msgstr "há {0} min"
 
 #: frontend/src/utils/index.js:223
 #, python-brace-format
 msgid "{0} months ago"
-msgstr "{0} meses atrás"
+msgstr "há {0} meses"
 
 #: crm/automation/actions.py:31
 #, python-brace-format
@@ -10701,7 +10701,7 @@ msgstr "{0} sem."
 #: frontend/src/utils/index.js:219
 #, python-brace-format
 msgid "{0} weeks ago"
-msgstr "{0} semanas atrás"
+msgstr "há {0} semanas"
 
 #: frontend/src/utils/index.js:165
 #, python-brace-format
@@ -10711,7 +10711,7 @@ msgstr "{0} a"
 #: frontend/src/utils/index.js:227
 #, python-brace-format
 msgid "{0} years ago"
-msgstr "{0} anos atrás"
+msgstr "há {0} anos"
 
 #: frontend/src/utils/scriptHelpers.js:45
 msgid "⚠️ Avoid using \"trigger\" as a field name — it conflicts with the built-in trigger() method."
@@ -13339,7 +13339,7 @@ msgid "Won and Lost close the card; the stage stays where it was (standard CRM).
 msgstr "Ganho e Perdido fecham o card; a etapa fica onde estava (padrão de CRM)."
 
 msgid "Credit & Compliance"
-msgstr "Crédito e Compliance"
+msgstr "Crédito e cobrança"
 
 msgid "Credit analysis rules, fraud prevention and legal queries."
 msgstr "Regras de análise de crédito, prevenção a fraudes e consultas jurídicas."
@@ -15159,3 +15159,66 @@ msgstr "Criar endereço"
 #: frontend/src/utils/createLabels.js
 msgid "New record"
 msgstr "Novo registro"
+
+msgid "New distribution rule"
+msgstr "Nova regra de distribuição"
+
+msgid "E.g. Website leads"
+msgstr "Ex.: Leads do site"
+
+msgid "Choose the people"
+msgstr "Escolha as pessoas"
+
+msgid "Create rule"
+msgstr "Criar regra"
+
+msgid "Round robin among the people"
+msgstr "Rodízio entre as pessoas"
+
+msgid "By workload"
+msgstr "Pela carga de trabalho"
+
+msgid "Could not create"
+msgstr "Não foi possível criar"
+
+msgid "E.g. Task when reaching Proposal"
+msgstr "Ex.: Tarefa ao chegar em Proposta"
+
+msgid "The card changes stage"
+msgstr "O card muda de etapa"
+
+msgid "A card is created"
+msgstr "Um card é criado"
+
+msgid "A card is updated"
+msgstr "Um card é alterado"
+
+msgid "Someone starts it from the card"
+msgstr "Alguém inicia pelo card"
+
+msgid "Any stage"
+msgstr "Qualquer etapa"
+
+#, python-brace-format
+msgid "Stage = {0}"
+msgstr "Etapa = {0}"
+
+#, python-brace-format
+msgid "Stage = {0} ({1})"
+msgstr "Etapa = {0} ({1})"
+
+msgid "Then"
+msgstr "Então"
+
+msgid "Create a task for the owner"
+msgstr "Criar tarefa para o responsável"
+
+msgid "Choose the steps in the editor"
+msgstr "Escolher os passos no editor"
+
+msgid "Create automation"
+msgstr "Criar automação"
+
+#, python-brace-format
+msgid "Follow up on {0}"
+msgstr "Acompanhar {0}"

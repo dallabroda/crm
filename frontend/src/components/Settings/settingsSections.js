@@ -25,7 +25,6 @@ import LucideMegaphone from '~icons/lucide/megaphone'
 import LucidePhone from '~icons/lucide/phone'
 import LucideKeyRound from '~icons/lucide/key-round'
 import LucideSearchCheck from '~icons/lucide/search-check'
-import LucideCalendarClock from '~icons/lucide/calendar-clock'
 import LucideArrowLeftRight from '~icons/lucide/arrow-left-right'
 import LucideUsers from '~icons/lucide/users'
 import LucideMessageCircle from '~icons/lucide/message-circle'
@@ -52,7 +51,6 @@ import TelephonyPage from '@/components/Settings/Telephony/TelephonyPage.vue'
 import WhatsAppSettings from '@/components/Settings/WhatsAppSettings.vue'
 import ApiKeysPage from '@/components/Settings/ApiKeys/ApiKeysPage.vue'
 import BureausSettings from '@/components/Settings/Bureaus/BureausSettings.vue'
-import CollectionReminders from '@/components/Settings/Collection/CollectionReminders.vue'
 import ErpSettings from '@/components/Settings/Erp/ErpSettings.vue'
 import CreditBureausSettings from '@/components/Settings/CreditBureaus/CreditBureausSettings.vue'
 
@@ -173,22 +171,22 @@ function allSections() {
           condition: () => isAdmin() && apiKeys.enabled,
         }),
         // Assertiva Localize and CENPROT (credtech#290): admins only, with the cred_hub app
+        // with the Régua de cobrança (credtech#367) below: tab "Cartório e
+        // cobrança"; /settings/collection-reminders lands there
         item('Cartório & Localização', LucideSearchCheck, BureausSettings, {
-          condition: () => isAdmin() && apiKeys.enabled,
-        }),
-        // Régua de cobrança (credtech#367): admins only, with the cred_hub app
-        item('Collection reminders', LucideCalendarClock, CollectionReminders, {
+          title: 'Crédito e cobrança',
           condition: () => isAdmin() && apiKeys.enabled,
         }),
         // WBA / Smart Securities (credtech#367): admins only, with the cred_hub app
         item('ERP integration', LucideArrowLeftRight, ErpSettings, {
+          title: 'Crédito e cobrança',
           condition: () => isAdmin() && apiKeys.enabled,
         }),
         item(
           'Políticas de Crédito & Compliance',
           LucideShieldCheck,
           CreditBureausSettings,
-          { condition: () => isManager() },
+          { title: 'Crédito e cobrança', condition: () => isManager() },
         ),
       ],
     },
@@ -250,7 +248,7 @@ const NAV = [
       { key: 'Automação', icon: LucideWorkflow,
         slugs: ['workflow-automations', 'assignment-rules', 'sla-policies'] },
       { key: 'Crédito e cobrança', icon: LucideShieldCheck,
-        slugs: ['credit-compliance', 'bureaus', 'collection-reminders', 'erp-integration'] },
+        slugs: ['credit-compliance', 'bureaus', 'erp-integration'] },
     ],
   },
   {

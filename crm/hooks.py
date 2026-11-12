@@ -357,6 +357,12 @@ doc_events = {
 	},
 	# Sandbox records of the HubTech API never run automation flows (crm.sandbox)
 	"Automation Trigger Queue": {"before_insert": ["crm.sandbox.skip_sandbox_trigger"]},
+	# Sandbox pipelines are memoized per request (crm.sandbox.sandbox_pipelines)
+	"CRM Pipeline": {
+		"on_update": ["crm.sandbox.clear_memo"],
+		"on_trash": ["crm.sandbox.clear_memo"],
+		"after_rename": ["crm.sandbox.clear_memo"],
+	},
 	"Item": {
 		"after_insert": ["crm.integrations.erpnext.item.after_insert"],
 		"on_update": ["crm.integrations.erpnext.item.on_update"],

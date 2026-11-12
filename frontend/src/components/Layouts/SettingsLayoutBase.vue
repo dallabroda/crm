@@ -1,5 +1,13 @@
 <template>
-  <div class="flex h-full w-full flex-col gap-6 text-ink-gray-8">
+  <!-- a page shown as a section of another one (Régua de cobrança inside
+       Cartório e cobrança): no title or top bar actions, no own scroll -->
+  <div v-if="embedded" class="flex flex-col gap-6 text-ink-gray-8">
+    <p v-if="description" class="text-base leading-5 text-ink-gray-6">
+      {{ description }}
+    </p>
+    <slot name="content" />
+  </div>
+  <div v-else class="flex h-full w-full flex-col gap-6 text-ink-gray-8">
     <!-- above the description, e.g. the Automação tabs -->
     <slot name="header-top" />
     <!-- Title and actions go to the top bar; the description stays here -->
@@ -27,5 +35,6 @@ import SettingsPageHeader from '@/components/Settings/SettingsPageHeader.vue'
 defineProps({
   title: { type: String, default: '' },
   description: { type: String, default: '' },
+  embedded: { type: Boolean, default: false },
 })
 </script>

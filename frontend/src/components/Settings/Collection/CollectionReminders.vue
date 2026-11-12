@@ -1,5 +1,6 @@
 <template>
   <SettingsLayoutBase
+    :embedded="embedded"
     :title="__('Crédito e cobrança')"
     :description="
       __(
@@ -8,8 +9,8 @@
     "
   >
     <!-- the tabs of "Crédito e cobrança" (no sub-items in the menu) -->
-    <template #header-top>
-      <CreditTabs active="page:collection-reminders" />
+    <template v-if="!embedded" #header-top>
+      <CreditTabs active="page:bureaus" />
     </template>
     <template #header-actions>
       <div v-if="loaded" class="flex gap-2">
@@ -234,6 +235,10 @@ import { computed, onMounted, reactive, ref } from 'vue'
 // Régua de cobrança (credtech#367), served by cred_hub.collection.reminders
 const API = 'cred_hub.collection.reminders.'
 
+// embedded: a section of Cartório e cobrança (BureausSettings), whose top bar
+// saves both pages through what is exposed below
+defineProps({ embedded: { type: Boolean, default: false } })
+
 const loaded = ref(false)
 const saving = ref(false)
 const saved = ref({})
@@ -421,6 +426,16 @@ async function save() {
 }
 
 onMounted(load)
+
+defineExpose({
+  loaded,
+  changed,
+  saving,
+  // same rule as the Update button of the page
+  canSave: computed(() => changed.value && !(form.enabled && !complete.value)),
+  save,
+  discard: () => fill(saved.value),
+})
 </script>
 
 <style scoped>

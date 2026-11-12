@@ -24,6 +24,8 @@
     <div class="flex h-full overflow-y-auto">
       <AssignmentRulesList />
     </div>
+    <!-- "Nova regra" asks the essentials, then opens the full editor -->
+    <NewAssignmentRuleModal v-model="showNewRule" @created="openCreated" />
   </div>
 </template>
 
@@ -31,8 +33,9 @@
 import SettingsPageHeader from '@/components/Settings/SettingsPageHeader.vue'
 import AssignmentRulesList from './AssignmentRulesList.vue'
 import AutomationTabs from '@/components/Settings/AutomationTabs.vue'
+import NewAssignmentRuleModal from './NewAssignmentRuleModal.vue'
 import { createResource } from 'frappe-ui'
-import { inject, provide } from 'vue'
+import { inject, provide, ref } from 'vue'
 
 const updateStep = inject('updateStep')
 
@@ -44,7 +47,15 @@ const assignmentRulesListData = createResource({
 
 provide('assignmentRulesList', assignmentRulesListData)
 
+const showNewRule = ref(false)
+
 const goToNew = () => {
-  updateStep('view', null)
+  showNewRule.value = true
+}
+provide('openNewRule', goToNew)
+
+function openCreated(rule) {
+  assignmentRulesListData.reload()
+  updateStep('view', rule)
 }
 </script>
