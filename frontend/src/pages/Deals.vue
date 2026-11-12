@@ -484,7 +484,14 @@ const columns = computed(() => {
 
   if (_columns.length) {
     _columns = _columns.map((col, index) => {
-      if (index === _columns.length - 1) {
+      // a last date or amount sits on the right edge; names and owners stay
+      // left (Figma "Vendas · Lista · Origem dos leads", 1750:23623)
+      if (
+        index === _columns.length - 1 &&
+        ['Date', 'Datetime', 'Currency', 'Float', 'Int', 'Percent'].includes(
+          col.type,
+        )
+      ) {
         return { ...col, align: 'right' }
       }
       return col

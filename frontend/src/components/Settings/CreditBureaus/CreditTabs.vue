@@ -1,10 +1,12 @@
 <template>
-  <!-- Figma "Aba" (Crédito e cobrança): 14 Medium, 4px/10px padding, 2px
-       blue line on the active tab. One row for the whole "Crédito e
-       cobrança" entry of the menu: the five tabs of the credit page and the
-       Cartório, Régua and ERP pages, so the menu has no sub-items. -->
+  <!-- Figma "Aba" (Crédito e cobrança): 14 Medium, 4px/10px padding, 24px
+       apart, 2px blue line on the active tab. One row for the whole "Crédito
+       e cobrança" entry of the menu, so the menu has no sub-items: the four
+       tabs of the credit page and the Cartório (with the Régua) and ERP
+       pages. Six tabs, so the row fits at 1440px with the settings menu
+       open (designer decision; Figma 2493:4678, 2479:30217). -->
   <div
-    class="flex shrink-0 items-start gap-4 overflow-x-auto border-b border-[var(--ct-border)] [&::-webkit-scrollbar]:h-0"
+    class="flex shrink-0 items-start gap-6 overflow-x-auto border-b border-[var(--ct-border)] [&::-webkit-scrollbar]:h-0"
     role="tablist"
   >
     <button
@@ -40,8 +42,8 @@ import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 
 const props = defineProps({
-  // a tab of the credit page (funnels, bureaus, reports, policy, prefilter)
-  // or "page:<slug>" for the other pages
+  // a tab of the credit page (funnels, bureaus, dossier, prefilter) or
+  // "page:<slug>" for the other pages
   active: { type: String, required: true },
   // on the credit page itself its tabs switch in place
   inPage: { type: Boolean, default: false },
@@ -50,9 +52,10 @@ const props = defineProps({
 const emit = defineEmits(['select'])
 const router = useRouter()
 
+// Cartório e cobrança: the Cartório & Localização page with the Régua de
+// cobrança below it (/settings/collection-reminders opens it there)
 const PAGE_TABS = [
-  { slug: 'bureaus', label: 'Cartório e localização' },
-  { slug: 'collection-reminders', label: 'Régua de cobrança' },
+  { slug: 'bureaus', label: 'Cartório e cobrança' },
   { slug: 'erp-integration', label: 'Integração com ERP' },
 ]
 
@@ -67,9 +70,9 @@ const tabs = computed(() => [
   ...(visibleSlugs.value.has('credit-compliance')
     ? [
         { key: 'funnels', label: __('Funis e documentos') },
-        { key: 'bureaus', label: __('Bureaus e credenciais') },
-        { key: 'reports', label: __('Relatórios por nível') },
-        { key: 'policy', label: __('Dossiê e parecer da IA') },
+        { key: 'bureaus', label: __('Consultas e credenciais') },
+        // the dossier and AI opinion, then the reports per level
+        { key: 'dossier', label: __('Dossiê e relatórios') },
         { key: 'prefilter', label: __('Pré-filtro e régua de corte') },
       ]
     : []),
