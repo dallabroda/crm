@@ -14,7 +14,8 @@ const props = defineProps({
   date: { type: [String, Object], default: '' },
   // Format used for the exact timestamp (falls back to the default in formatDate)
   format: { type: String, default: '' },
-  className: { type: String, default: 'text-sm text-ink-gray-5' },
+  // Figma "Card · Atividade": 14px secondary text
+  className: { type: String, default: 'text-base text-ink-gray-5' },
 })
 
 const { showExactTimestamp } = useTimelinePreferences()

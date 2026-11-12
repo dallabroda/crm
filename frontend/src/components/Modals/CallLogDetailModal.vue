@@ -300,7 +300,7 @@ const detailFields = computed(() => {
         class: 'h-3.5 w-3.5',
       }),
       name: 'type',
-      value: data.type.label + ' Call',
+      value: data.type.name + ' Call',
     },
     {
       icon: ContactsIcon,

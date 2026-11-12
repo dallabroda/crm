@@ -361,9 +361,17 @@ const outcomeLabels = {
   all: __('All cards'),
 }
 const outcomeLabel = computed(() => outcomeLabels[outcome.value])
+// Figma "Vendas · Lista · Situação do card" (1331:18799): an icon per option
+const outcomeIcons = {
+  in_progress: 'lucide-circle-dashed',
+  won: 'lucide-circle-check',
+  lost: 'lucide-circle-x',
+  all: 'lucide-list',
+}
 const outcomeOptions = computed(() =>
   Object.entries(outcomeLabels).map(([value, label]) => ({
     label,
+    icon: outcomeIcons[value],
     onClick: () =>
       router.replace({
         name: route.name,

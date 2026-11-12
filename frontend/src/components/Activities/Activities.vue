@@ -252,7 +252,7 @@
                     noteActionText[a.data.action]
                   }}</span>
                   <button
-                    class="font-medium text-ink-gray-8 hover:underline"
+                    class="text-ink-gray-9 hover:underline"
                     @click="viewNote(a.data.note)"
                   >
                     {{ a.data.title }}
@@ -328,20 +328,20 @@
                 v-else
                 class="inline-flex items-center flex-wrap gap-1 text-ink-gray-5"
               >
-                <span class="font-medium text-ink-gray-8">
+                <span class="text-ink-gray-9">
                   {{ activity.owner_name }}
                 </span>
                 <span v-if="activity.type">{{ __(activity.type) }}</span>
                 <span
                   v-if="activity.data?.field_label"
-                  class="max-w-xs truncate font-medium text-ink-gray-8"
+                  class="max-w-xs truncate text-ink-gray-9"
                 >
                   {{ __(activity.data.field_label) }}
                 </span>
                 <span v-if="activity.value">{{ __(activity.value) }}</span>
                 <span
                   v-if="activity.data?.old_value"
-                  class="max-w-xs font-medium text-ink-gray-8"
+                  class="max-w-xs text-ink-gray-9"
                 >
                   <div
                     v-if="activity.options == 'User'"
@@ -357,7 +357,7 @@
                 <span v-if="activity.to">{{ __('to') }}</span>
                 <span
                   v-if="activity.data?.value"
-                  class="max-w-xs font-medium text-ink-gray-8"
+                  class="max-w-xs text-ink-gray-9"
                 >
                   <div
                     v-if="activity.options == 'User'"
@@ -404,7 +404,7 @@
                   </span>
                   <span
                     v-if="a.data?.old_value"
-                    class="max-w-xs font-medium text-ink-gray-8"
+                    class="max-w-xs text-ink-gray-9"
                   >
                     <div
                       v-if="a.options == 'User'"
@@ -420,7 +420,7 @@
                   <span v-if="a.to">{{ __('to') }}</span>
                   <span
                     v-if="a.data?.value"
-                    class="max-w-xs font-medium text-ink-gray-8"
+                    class="max-w-xs text-ink-gray-9"
                   >
                     <div
                       v-if="a.options == 'User'"

@@ -5671,7 +5671,7 @@ msgstr "Nova mensagem"
 
 #: frontend/src/components/Activities/ActivityHeader.vue:31 frontend/src/pages/Deals.vue:571 frontend/src/pages/Leads.vue:543
 msgid "New Note"
-msgstr "Nova Anotação"
+msgstr "Nova anotação"
 
 #: frontend/src/components/Modals/OrganizationModal.vue:9
 msgid "New Organization"
@@ -5699,7 +5699,7 @@ msgstr "Nova aba"
 
 #: frontend/src/components/Activities/ActivityHeader.vue:38 frontend/src/pages/Deals.vue:576 frontend/src/pages/Leads.vue:548
 msgid "New Task"
-msgstr "Nova Tarefa"
+msgstr "Nova tarefa"
 
 #: frontend/src/components/Settings/EmailTemplate/NewEmailTemplate.vue:10
 msgid "New Template"
@@ -6158,7 +6158,7 @@ msgstr "Nada aqui por enquanto. Adicione uma anotação para registrar as coisas
 
 #: frontend/src/components/Activities/Activities.vue:864
 msgid "Nothing to do at the moment. Start organizing by adding one here."
-msgstr "Nada para fazer no momento. Comece a se organizar adicionando um aqui."
+msgstr "Nada para fazer no momento. Comece a se organizar adicionando uma aqui."
 
 #: frontend/src/components/EnrichFromWebsite.vue:403
 msgid "Nothing to undo, you've edited all enriched fields"
@@ -15063,3 +15063,15 @@ msgstr "Ativada"
 
 msgid "Status of the card"
 msgstr "Situação do card"
+
+msgid "Receiver"
+msgstr "Quem recebeu"
+
+msgid "From (number)"
+msgstr "De (número)"
+
+msgid "To (number)"
+msgstr "Para (número)"
+
+msgid "Created On"
+msgstr "Criado em"

@@ -192,12 +192,12 @@
       </template>
     </Tabs>
     <!-- Figma "Organizações · Detalhe" (807:2): side panel on the right,
-         384px, like the card page; actions as 32px outline icon buttons with
+         352px; actions as 32px outline icon buttons with
          delete last (red) -->
     <Resizer
       v-if="organization.doc"
       side="right"
-      :defaultWidth="384"
+      :defaultWidth="352"
       class="flex h-full flex-col overflow-hidden border-l border-[var(--ct-border-soft)]"
     >
       <div class="border-b border-[var(--ct-border-soft)]">

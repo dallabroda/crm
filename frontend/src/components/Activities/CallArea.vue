@@ -7,7 +7,7 @@
           :label="call._caller.label"
           size="md"
         />
-        <span class="font-medium text-ink-gray-8 ml-1">
+        <span class="ml-1 text-ink-gray-9">
           {{ call._caller.label }}
         </span>
         <span>{{
@@ -20,7 +20,8 @@
         <TimelineTimestamp :date="call.creation" />
       </div>
     </div>
-    <!-- Figma "Card · Atividade" call card: title and avatars, then the date
+    <!-- Figma "Card · Atividade" call card: title and avatars (24px, side by
+         side 4px apart), then the date
          (12px), the status badge and an outline "Ouvir ligação" button -->
     <div
       class="flex cursor-pointer flex-col gap-2.5 rounded-[var(--ct-radius-md)] border border-[var(--ct-border-soft)] bg-surface-base px-3 py-[11px] text-ink-gray-9 transition-colors hover:bg-[var(--ct-bg-soft)]"
@@ -45,7 +46,8 @@
               name: call._receiver.label,
             },
           ]"
-          size="sm"
+          size="md"
+          class="!mr-0 gap-1 [&_.user-avatar]:!mr-0"
         />
       </div>
       <div class="flex min-h-8 flex-wrap items-center gap-2">
