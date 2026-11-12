@@ -48,30 +48,18 @@
           <NoteArea v-model="all_activities" :note="note" />
         </div>
       </div>
-      <div v-else-if="title == 'Comments'" class="pb-5">
-        <div v-for="(comment, i) in activities" :key="comment.name">
-          <div
-            class="activity grid grid-cols-[30px_minmax(auto,_1fr)] gap-2 px-3 sm:gap-4 sm:px-6"
-          >
-            <div
-              class="z-0 relative flex justify-center before:absolute before:left-[50%] before:-z-[1] before:top-0 before:border-l before:border-outline-elevation-2"
-              :class="
-                i != activities.length - 1 ? 'before:h-full' : 'before:h-4'
-              "
-            >
-              <div
-                class="flex h-8 w-7 items-center justify-center bg-surface-base"
-              >
-                <CommentIcon class="text-ink-gray-8" />
-              </div>
-            </div>
-            <CommentArea
-              class="mb-4"
-              :activity="comment"
-              @reload="all_activities.reload()"
-            />
-          </div>
-        </div>
+      <!-- Figma 799:2: the comments as a grid of cards, like the notes -->
+      <div
+        v-else-if="title == 'Comments'"
+        class="grid grid-cols-1 gap-4 px-3 pb-3 sm:px-6 sm:pb-5 lg:grid-cols-2 xl:grid-cols-3"
+      >
+        <CommentArea
+          v-for="comment in activities"
+          :key="comment.name"
+          card
+          :activity="comment"
+          @reload="all_activities.reload()"
+        />
       </div>
       <div v-else-if="title == 'Tasks'" class="px-3 pb-3 sm:px-6 sm:pb-5">
         <TaskArea :modalRef="modalRef" :tasks="activities" :doctype="doctype" />
