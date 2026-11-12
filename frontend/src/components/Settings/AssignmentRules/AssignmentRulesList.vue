@@ -13,7 +13,7 @@
       __('Create rules to share the cards among the team automatically.')
     "
     :action-label="__('New rule')"
-    @action="updateStep('view', null)"
+    @action="openNewRule"
   />
   <div v-else class="ct-table w-full self-start">
     <div class="ct-table-head" :style="columns">
@@ -41,6 +41,8 @@ import '@/components/Settings/settingsTable.css'
 
 const assignmentRulesList = inject('assignmentRulesList')
 const updateStep = inject('updateStep')
+// the short "Nova regra" modal of the page, or the blank editor
+const openNewRule = inject('openNewRule', () => updateStep('view', null))
 
 // Figma column widths at 1440px (Nome 305, Funil 152, Como distribui 437,
 // Ativa 104), kept in proportion on other widths

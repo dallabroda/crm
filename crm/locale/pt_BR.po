@@ -15075,3 +15075,66 @@ msgstr "Para (número)"
 
 msgid "Created On"
 msgstr "Criado em"
+
+msgid "New distribution rule"
+msgstr "Nova regra de distribuição"
+
+msgid "E.g. Website leads"
+msgstr "Ex.: Leads do site"
+
+msgid "Choose the people"
+msgstr "Escolha as pessoas"
+
+msgid "Create rule"
+msgstr "Criar regra"
+
+msgid "Round robin among the people"
+msgstr "Rodízio entre as pessoas"
+
+msgid "By workload"
+msgstr "Pela carga de trabalho"
+
+msgid "Could not create"
+msgstr "Não foi possível criar"
+
+msgid "E.g. Task when reaching Proposal"
+msgstr "Ex.: Tarefa ao chegar em Proposta"
+
+msgid "The card changes stage"
+msgstr "O card muda de etapa"
+
+msgid "A card is created"
+msgstr "Um card é criado"
+
+msgid "A card is updated"
+msgstr "Um card é alterado"
+
+msgid "Someone starts it from the card"
+msgstr "Alguém inicia pelo card"
+
+msgid "Any stage"
+msgstr "Qualquer etapa"
+
+#, python-brace-format
+msgid "Stage = {0}"
+msgstr "Etapa = {0}"
+
+#, python-brace-format
+msgid "Stage = {0} ({1})"
+msgstr "Etapa = {0} ({1})"
+
+msgid "Then"
+msgstr "Então"
+
+msgid "Create a task for the owner"
+msgstr "Criar tarefa para o responsável"
+
+msgid "Choose the steps in the editor"
+msgstr "Escolher os passos no editor"
+
+msgid "Create automation"
+msgstr "Criar automação"
+
+#, python-brace-format
+msgid "Follow up on {0}"
+msgstr "Acompanhar {0}"

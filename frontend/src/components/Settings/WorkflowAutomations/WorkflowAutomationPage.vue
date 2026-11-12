@@ -112,6 +112,9 @@
     @back="backToList"
   />
 
+  <!-- "Nova automação" asks the essentials, then opens the builder -->
+  <NewAutomationModal v-model="showNewAutomation" @created="openCreated" />
+
   <!-- The builder overlays the settings dialog: wider, taller, and dismissable only
        through its own close button so a stray click can't drop unsaved steps. -->
   <Dialog v-model:open="showBuilder" size="6xl" bare :dismissible="false">
@@ -137,6 +140,7 @@ import AutomationTabs from '@/components/Settings/AutomationTabs.vue'
 import '@/components/Settings/settingsTable.css'
 import WorkflowAutomationBuilder from './WorkflowAutomationBuilder.vue'
 import WorkflowAutomationDetail from './WorkflowAutomationDetail.vue'
+import NewAutomationModal from './NewAutomationModal.vue'
 import { sessionStore } from '@/stores/session'
 import { ConfirmDelete } from '@/utils'
 import { createDialog } from '@/utils/dialogs'
@@ -241,9 +245,17 @@ function compareDesc(a, b) {
   return String(b || '').localeCompare(String(a || ''))
 }
 
+const showNewAutomation = ref(false)
+
 function newAutomation() {
-  selectedAutomation.value = ''
+  showNewAutomation.value = true
+}
+
+/** The draft the modal created opens in the builder for the rest. */
+function openCreated(automation) {
+  selectedAutomation.value = automation.name
   showBuilder.value = true
+  reloadList()
 }
 
 function openAutomation(automation) {
