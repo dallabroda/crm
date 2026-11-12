@@ -29,7 +29,7 @@
           :aria-label="__('Settings')"
         >
           <!-- the title stays put; only the list below scrolls -->
-          <div class="shrink-0 px-3 pb-3">
+          <div class="shrink-0 px-3 pb-3.5">
             <div
               class="pl-2.5 text-[16px] font-semibold leading-6 text-[var(--ct-text-primary)]"
             >
@@ -42,7 +42,7 @@
           >
             <template v-for="group in nav" :key="group.key">
               <div
-                class="pb-1 pl-2.5 pt-3 text-[12px] font-medium uppercase tracking-[1.2px] text-[var(--ct-text-tertiary)]"
+                class="pb-0.5 pl-2.5 pt-[11px] text-[12px] font-medium uppercase tracking-[1.2px] text-[var(--ct-text-tertiary)]"
               >
                 {{ group.label }}
               </div>
