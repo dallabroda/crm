@@ -230,6 +230,18 @@ automation_events = [
 			"subject": REFERENCE_SUBJECT,
 			"correlation_options": RECORD_CORRELATION,
 		},
+		# Emitted by crm.automation.events (lead intake and conversion); undeclared, the automation engine refused
+		# them and every lead conversion failed while automation was on
+		"crm.lead_qualified": {
+			"label": "Lead was qualified",
+			"subject": LEAD_SUBJECT,
+			"correlation_options": RECORD_CORRELATION,
+		},
+		"crm.lead_converted": {
+			"label": "Lead became a card",
+			"subject": LEAD_SUBJECT,
+			"correlation_options": RECORD_CORRELATION,
+		},
 	}
 ]
 
