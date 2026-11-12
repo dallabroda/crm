@@ -416,9 +416,9 @@
                           <Badge
                             v-if="contact.is_primary"
                             class="ml-2"
-                            variant="outline"
+                            variant="subtle"
                             :label="__('Primary')"
-                            theme="green"
+                            theme="blue"
                           />
                         </div>
                         <div class="flex items-center">
