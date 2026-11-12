@@ -225,11 +225,39 @@
               </div>
             </div>
           </div>
+          <!-- Figma 807:2: the card's actions (WhatsApp, call, e-mail,
+               website, attach, delete); each one only with a target, from
+               the organization's Receita phone / e-mail or its primary
+               contact -->
           <div class="flex gap-2">
             <Button
+              v-if="orgPhone"
               variant="outline"
-              :tooltip="__('Open Website')"
-              icon="lucide-link-2"
+              :tooltip="__('Send WhatsApp')"
+              :icon="WhatsAppIcon"
+              @click="openWhatsApp"
+            />
+            <Button
+              v-if="orgPhone"
+              variant="outline"
+              :tooltip="
+                callEnabled ? __('Make a Call') : __('Ligar (Telefone)')
+              "
+              :icon="PhoneIcon"
+              @click="triggerCall"
+            />
+            <Button
+              v-if="orgEmail"
+              variant="outline"
+              :tooltip="__('Send an Email')"
+              :icon="Email2Icon"
+              @click="sendEmail"
+            />
+            <Button
+              v-if="organization.doc.website"
+              variant="outline"
+              :tooltip="__('Go to Website')"
+              :icon="LinkIcon"
               @click="openWebsite"
             />
             <Button
@@ -286,6 +314,14 @@
     v-model="showDealModal"
     :defaults="{ organization: props.organizationId }"
   />
+  <SmartChatWhatsAppModal
+    v-if="whatsapp"
+    :open="Boolean(whatsapp)"
+    :contact="whatsapp.contact"
+    :phone="whatsapp.phone"
+    :name="whatsapp.name"
+    @update:open="(v) => !v && (whatsapp = null)"
+  />
   <FilesUploader
     v-model="showFilesUploader"
     doctype="CRM Organization"
@@ -316,6 +352,12 @@ import LayoutHeader from '@/components/LayoutHeader.vue'
 import DealsListView from '@/components/ListViews/DealsListView.vue'
 import ContactsListView from '@/components/ListViews/ContactsListView.vue'
 import WebsiteIcon from '@/components/Icons/WebsiteIcon.vue'
+import WhatsAppIcon from '@/components/Icons/WhatsAppIcon.vue'
+import PhoneIcon from '@/components/Icons/PhoneIcon.vue'
+import Email2Icon from '@/components/Icons/Email2Icon.vue'
+import LinkIcon from '@/components/Icons/LinkIcon.vue'
+import SmartChatWhatsAppModal from '@/components/Modals/SmartChatWhatsAppModal.vue'
+import { callEnabled } from '@/composables/telephony'
 import CameraIcon from '@/components/Icons/CameraIcon.vue'
 import HandshakeIcon from '~icons/lucide/handshake'
 import ContactIcon from '~icons/lucide/contact'
@@ -334,6 +376,7 @@ import { usersStore } from '@/stores/users'
 import { statusesStore } from '@/stores/statuses'
 import { getView } from '@/utils/view'
 import { globalFormSections } from '@/utils/pipelines'
+import { organizationPanelSections } from '@/utils/organizationPanel'
 import {
   validateIsImageFile,
   setupCustomizations,
@@ -361,7 +404,7 @@ const props = defineProps({
 })
 
 const { brand } = getSettings()
-const { $dialog, $socket } = globalStore()
+const { $dialog, $socket, makeCall } = globalStore()
 const { getUser } = usersStore()
 const { getDealStatus, getDealStatusLabel } = statusesStore()
 const { doctypeMeta } = getMeta('CRM Organization')
@@ -563,6 +606,48 @@ function openWebsite() {
   openExternalWebsite(organization.doc.website)
 }
 
+// Who the side panel actions reach: the organization's own Receita phone /
+// e-mail, else its primary contact (or the first one that has it)
+function contactWith(field) {
+  const list = contacts.data || []
+  const primary = list.find((c) => c.is_primary_contact)
+  return primary?.[field] ? primary : list.find((c) => c[field])
+}
+const orgPhone = computed(
+  () =>
+    organization.doc?.registry_phone ||
+    contactWith('mobile_no')?.mobile_no ||
+    null,
+)
+const orgEmail = computed(
+  () =>
+    organization.doc?.registry_email ||
+    contactWith('email_id')?.email_id ||
+    null,
+)
+
+// WhatsApp through the company's SmartChat, like on the card (credtech#211)
+const whatsapp = ref(null)
+function openWhatsApp() {
+  const contact = organization.doc?.registry_phone
+    ? null
+    : contactWith('mobile_no')
+  whatsapp.value = {
+    phone: orgPhone.value,
+    contact: contact?.name || '',
+    name: contact?.full_name || organization.doc?.organization_name || '',
+  }
+}
+
+function triggerCall() {
+  if (callEnabled.value) makeCall(orgPhone.value)
+  else window.location.href = `tel:${orgPhone.value}`
+}
+
+function sendEmail() {
+  window.location.href = `mailto:${orgEmail.value}`
+}
+
 const sections = createResource({
   url: 'crm.fcrm.doctype.crm_fields_layout.crm_fields_layout.get_sidepanel_sections',
   cache: ['sidePanelSections', 'CRM Organization'],
@@ -585,8 +670,8 @@ const panelSections = computed(() => {
     form: __('Organization fields'),
     created: __('Created fields'),
   })
-  // Unify all organization & Receita Federal fields into a single "Campos da organização" section,
-  // ensuring all standard and Receita fields are visible and dropping cnpj_checked_on ("CNPJ consultado em")
+  // All the organization's and Receita Federal fields, visible, without
+  // cnpj_checked_on ("CNPJ consultado em")
   const allFieldsMap = new Map()
   for (const sec of sections.data || []) {
     for (const col of sec.columns || []) {
@@ -608,52 +693,30 @@ const panelSections = computed(() => {
       })
     }
   }
-  const preferredOrder = [
-    'cnpj',
-    'registration_status',
-    'activity_start_date',
-    'years_in_business',
-    'main_cnae',
-    'legal_nature',
-    'company_size',
-    'is_mei',
-    'share_capital',
-    'annual_revenue',
-    'industry',
-    'no_of_employees',
-    'registry_phone',
-    'registry_email',
-    'website',
-    'linkedin',
-    'address',
-    'neighborhood',
-    'city',
-    'state',
-  ]
-  const ordered = []
-  const seen = new Set()
-  for (const name of preferredOrder) {
-    if (allFieldsMap.has(name)) {
-      ordered.push(allFieldsMap.get(name))
-      seen.add(name)
-    }
-  }
-  for (const [name, f] of allFieldsMap.entries()) {
-    if (!seen.has(name)) {
-      ordered.push(f)
-      seen.add(name)
-    }
-  }
-  if (!ordered.length) return getParsedSections(base)
-  return getParsedSections([
-    {
-      name: 'form_fields',
-      label: __('Campos da organização'),
+  // Figma 807:2: "Detalhes" and "Dados da Receita (CNPJ)" (the fields of
+  // the cred_hub Receita section) instead of one "Campos da organização"
+  const receitaSection = (sections.data || [])
+    .filter((sec) => sec.name === 'cred_hub_cnpj_section')
+    .flatMap((sec) => sec.columns || [])
+    .flatMap((col) => col.fields || [])
+    .map((f) => f?.fieldname)
+    .filter(Boolean)
+  const split = organizationPanelSections(
+    [...allFieldsMap.values()],
+    receitaSection,
+  )
+  if (!split.length) return getParsedSections(base)
+  return getParsedSections(
+    split.map((section) => ({
+      name: `organization_${section.name}`,
+      label: section.label,
       opened: true,
       notInLayout: true,
-      columns: [{ name: 'form_fields_col', fields: ordered }],
-    },
-  ])
+      columns: [
+        { name: `organization_${section.name}_col`, fields: section.fields },
+      ],
+    })),
+  )
 })
 
 // Returns new objects: panelSections runs it inside a computed, and changing
@@ -776,6 +839,7 @@ const contacts = createListResource({
     'email_id',
     'mobile_no',
     'company_name',
+    'is_primary_contact',
     'modified',
   ],
   filters: {
