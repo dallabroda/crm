@@ -43,36 +43,13 @@
           </span>
         </div>
 
-        <!-- Figma "Aba": 14 Medium, 4px/10px padding, 2px blue line on the active tab -->
-        <div
-          class="flex items-start gap-4 border-b border-[var(--ct-border)]"
-          role="tablist"
-        >
-          <button
-            v-for="tab in sectionTabs"
-            :key="tab.key"
-            type="button"
-            role="tab"
-            :aria-selected="activeSection === tab.key"
-            class="flex flex-col"
-            @click="activeSection = tab.key"
-          >
-            <span
-              class="px-1 py-2.5 text-[14px] font-medium leading-5"
-              :class="
-                activeSection === tab.key
-                  ? 'text-[var(--ct-accent)]'
-                  : 'text-[var(--ct-text-secondary)] hover:text-[var(--ct-text-primary)]'
-              "
-            >
-              {{ tab.label }}
-            </span>
-            <span
-              class="h-0.5 w-full"
-              :class="activeSection === tab.key ? 'bg-[var(--ct-accent)]' : ''"
-            />
-          </button>
-        </div>
+        <!-- the tabs of "Crédito e cobrança" (this page's and the other
+             credit pages) -->
+        <CreditTabs
+          :active="activeSection"
+          in-page
+          @select="(key) => (activeSection = key)"
+        />
 
         <!-- ===================================================================== -->
         <!-- TAB 1: FUNIS E DOCUMENTOS (Figma 1999:53539)                          -->
@@ -1248,6 +1225,8 @@
 </template>
 
 <script setup>
+import CreditTabs from '@/components/Settings/CreditBureaus/CreditTabs.vue'
+import { useRoute } from 'vue-router'
 import { ref, computed, onMounted, h } from 'vue'
 import {
   Button,
@@ -1294,14 +1273,15 @@ const ProviderTest = {
 }
 
 // Figma tabs (no "all" view): one section per tab
-const activeSection = ref('funnels')
-const sectionTabs = computed(() => [
-  { key: 'funnels', label: __('Funis e documentos') },
-  { key: 'bureaus', label: __('Bureaus e credenciais') },
-  { key: 'reports', label: __('Relatórios por nível') },
-  { key: 'policy', label: __('Dossiê e parecer da IA') },
-  { key: 'prefilter', label: __('Pré-filtro e régua de corte') },
-])
+const route = useRoute()
+// a tab opened from another credit page comes in the hash (#bureaus …)
+const activeSection = ref(
+  ['funnels', 'bureaus', 'reports', 'policy', 'prefilter'].includes(
+    route.hash?.slice(1),
+  )
+    ? route.hash.slice(1)
+    : 'funnels',
+)
 
 const loading = ref(true)
 const saving = ref(false)

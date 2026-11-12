@@ -12,6 +12,7 @@ import { showSettings, activeSettingsPage } from '@/composables/settings'
 export const SETTINGS_SLUGS = {
   Profile: 'profile',
   Preferences: 'preferences',
+  Company: 'company',
   General: 'general',
   Dashboard: 'dashboard',
   Defaults: 'defaults',
@@ -50,8 +51,22 @@ export function settingsSlug(page) {
   return key ? SETTINGS_SLUGS[key] : null
 }
 
+// Sections that now live inside another page: slug → [page, anchor]
+// (Figma "Configurações · Empresa" groups the company options on one page)
+export const SETTINGS_ALIASES = {
+  general: ['company', 'general'],
+  brand: ['company', 'brand'],
+  defaults: ['company', 'defaults'],
+  dashboard: ['company', 'dashboard'],
+  'home-actions': ['company', 'home-actions'],
+}
+
 export function settingsRoute(page) {
   const slug = settingsSlug(page)
+  const alias = SETTINGS_ALIASES[slug]
+  if (alias) {
+    return { name: 'Settings', params: { section: alias[0] }, hash: '#' + alias[1] }
+  }
   return { name: 'Settings', params: slug ? { section: slug } : {} }
 }
 

@@ -61,27 +61,6 @@
                   <Icon :icon="entry.icon" class="size-4 shrink-0" />
                   <span>{{ entry.label }}</span>
                 </router-link>
-                <!-- pages of the entry without tabs of their own (Empresa,
-                     Crédito e cobrança), listed while it is open -->
-                <template v-if="isActiveEntry(entry)">
-                  <router-link
-                    v-for="item in entry.children"
-                    :key="item.slug"
-                    :to="{ name: 'Settings', params: { section: item.slug } }"
-                    :data-page="item.slug"
-                    class="flex min-h-8 shrink-0 items-center rounded-lg py-1.5 pl-9 pr-2.5 text-[14px] leading-5 transition-colors"
-                    :class="
-                      item.slug === activeItem?.slug
-                        ? 'font-medium text-[var(--ct-text-primary)]'
-                        : 'text-[var(--ct-text-secondary)] hover:bg-[var(--ct-bg-soft)]'
-                    "
-                    :aria-current="
-                      item.slug === activeItem?.slug ? 'page' : undefined
-                    "
-                  >
-                    {{ item.label }}
-                  </router-link>
-                </template>
               </template>
             </template>
           </div>
@@ -111,6 +90,10 @@ import {
 import { plan, loadPlan } from '@/components/Settings/UsersAndPlan/planApi'
 import { apiKeys, loadApiKeys } from '@/components/Settings/ApiKeys/apiKeysApi'
 import { disableSettingModalOutsideClick } from '@/composables/settings'
+import {
+  SETTINGS_ALIASES,
+  settingsRoute,
+} from '@/composables/settingsNavigation'
 import { usersStore } from '@/stores/users'
 import { usePageMeta } from 'frappe-ui'
 import { computed, nextTick, onMounted, provide, ref, watch } from 'vue'
@@ -136,7 +119,10 @@ function isActiveEntry(entry) {
 
 const activeItem = computed(
   () =>
-    findSettingsItem(sections.value, route.params.section) ||
+    findSettingsItem(
+      sections.value,
+      SETTINGS_ALIASES[route.params.section]?.[0] || route.params.section,
+    ) ||
     // the first entry of the sidebar (Perfil moved to "Minha conta")
     findSettingsItem(sections.value, nav.value[0]?.entries[0]?.target) ||
     sections.value[0]?.items[0] ||
@@ -164,6 +150,11 @@ watch(
   ],
   ([section]) => {
     if (route.name !== 'Settings' || !activeItem.value) return
+    // an old section now inside a page (/settings/brand → Empresa #brand)
+    if (SETTINGS_ALIASES[section]) {
+      router.replace(settingsRoute(section))
+      return
+    }
     if (section === activeItem.value.slug) return
     if (waitingFor(section)) return
     router.replace({
