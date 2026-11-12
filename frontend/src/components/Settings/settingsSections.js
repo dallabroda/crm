@@ -32,6 +32,8 @@ import LucideKeyRound from '~icons/lucide/key-round'
 import LucideSearchCheck from '~icons/lucide/search-check'
 import LucideCalendarClock from '~icons/lucide/calendar-clock'
 import LucideArrowLeftRight from '~icons/lucide/arrow-left-right'
+import LucideUsers from '~icons/lucide/users'
+import LucideMessageCircle from '~icons/lucide/message-circle'
 import WhatsAppIcon from '@/components/Icons/WhatsAppIcon.vue'
 
 import ProfilePage from '@/components/Settings/Profile/ProfilePage.vue'
@@ -244,4 +246,88 @@ export function findSettingsItem(sections, page) {
     items.find((i) => i.label === page) ||
     null
   )
+}
+
+// Figma "Barra lateral secundária · Configurações" (Configurações · Empresa
+// 2323:14221): three groups and eleven entries. An entry stands for one or
+// more sections (the pages that already have tabs between them, e.g. Equipe
+// → Pessoas / Hierarquia); `children` are listed under the entry while it is
+// open, for the sections that have no tabs of their own (Empresa, Crédito).
+// Sections in no entry (Perfil, Preferências → "Minha conta") stay reachable
+// by URL.
+const NAV = [
+  {
+    key: 'Empresa',
+    entries: [
+      { key: 'Empresa', icon: LucideBuilding2, children: true,
+        slugs: ['general', 'brand', 'defaults', 'dashboard', 'home-actions'] },
+      { key: 'Equipe', icon: LucideUsers,
+        slugs: ['users', 'invite-user', 'sales-hierarchy'] },
+      { key: 'Plano e cobrança', icon: LucideCreditCard,
+        slugs: ['users-and-plan'] },
+    ],
+  },
+  {
+    key: 'Vendas e crédito',
+    entries: [
+      { key: 'Funis', icon: LucideKanban,
+        slugs: ['funnels', 'form-customization'] },
+      { key: 'Automação', icon: LucideWorkflow,
+        slugs: ['workflow-automations', 'assignment-rules', 'sla-policies'] },
+      { key: 'Crédito e cobrança', icon: LucideShieldCheck, children: true,
+        slugs: ['credit-compliance', 'bureaus', 'collection-reminders', 'erp-integration'] },
+    ],
+  },
+  {
+    key: 'Canais e integrações',
+    entries: [
+      { key: 'E-mail', icon: LucideMail,
+        slugs: ['email-accounts', 'email-templates'] },
+      { key: 'WhatsApp', icon: LucideMessageCircle, slugs: ['whatsapp'] },
+      { key: 'Telefonia', icon: LucidePhone, slugs: ['telephony'] },
+      { key: 'Entrada de leads', icon: LucideMegaphone,
+        slugs: ['lead-sources', 'lead-capture-forms'] },
+      { key: 'API', icon: LucideKeyRound, slugs: ['api'] },
+    ],
+  },
+]
+
+// Names of the Crédito e cobrança pages as the Figma tabs call them
+const CHILD_LABELS = {
+  'credit-compliance': 'Crédito e Compliance',
+  bureaus: 'Cartório e localização',
+  'collection-reminders': 'Régua de cobrança',
+  'erp-integration': 'Integração com ERP',
+}
+
+// The sidebar groups for the sections the user can see (see NAV). Each entry
+// opens its first visible section and is active on any of its sections.
+export function getSettingsNav(sections) {
+  const bySlug = new Map(
+    sections.flatMap((section) => section.items).map((i) => [i.slug, i]),
+  )
+  return NAV.map((group) => ({
+    key: group.key,
+    label: __(group.key),
+    entries: group.entries
+      .map((entry) => {
+        const items = entry.slugs.map((s) => bySlug.get(s)).filter(Boolean)
+        if (!items.length) return null
+        return {
+          key: entry.key,
+          label: __(entry.key),
+          icon: markRaw(entry.icon),
+          slugs: items.map((i) => i.slug),
+          target: items[0].slug,
+          children:
+            entry.children && items.length > 1
+              ? items.map((i) => ({
+                  ...i,
+                  label: CHILD_LABELS[i.slug] ? __(CHILD_LABELS[i.slug]) : i.label,
+                }))
+              : [],
+        }
+      })
+      .filter(Boolean),
+  })).filter((group) => group.entries.length)
 }

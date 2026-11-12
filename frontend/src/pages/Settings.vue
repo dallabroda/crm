@@ -40,30 +40,49 @@
             ref="navRef"
             class="flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto px-3 pb-5"
           >
-            <template v-for="section in sections" :key="section.key">
+            <template v-for="group in nav" :key="group.key">
               <div
                 class="pb-1 pl-2.5 pt-3 text-[12px] font-medium uppercase tracking-[1.2px] text-[var(--ct-text-tertiary)]"
               >
-                {{ section.label }}
+                {{ group.label }}
               </div>
-              <router-link
-                v-for="item in section.items"
-                :key="item.slug"
-                :to="{ name: 'Settings', params: { section: item.slug } }"
-                :data-page="item.slug"
-                class="flex min-h-9 shrink-0 items-center gap-2.5 rounded-lg px-2.5 py-2 text-[14px] leading-5 transition-colors"
-                :class="
-                  item.slug === activeItem?.slug
-                    ? 'bg-[var(--ct-bg-soft)] font-medium text-[var(--ct-text-primary)]'
-                    : 'text-[var(--ct-text-secondary)] hover:bg-[var(--ct-bg-soft)]'
-                "
-                :aria-current="
-                  item.slug === activeItem?.slug ? 'page' : undefined
-                "
-              >
-                <Icon :icon="item.icon" class="size-4 shrink-0" />
-                <span>{{ item.label }}</span>
-              </router-link>
+              <template v-for="entry in group.entries" :key="entry.key">
+                <router-link
+                  :to="{ name: 'Settings', params: { section: entry.target } }"
+                  :data-page="entry.target"
+                  class="flex min-h-9 shrink-0 items-center gap-2.5 rounded-lg px-2.5 py-2 text-[14px] leading-5 transition-colors"
+                  :class="
+                    isActiveEntry(entry)
+                      ? 'bg-[var(--ct-bg-soft)] font-medium text-[var(--ct-text-primary)]'
+                      : 'text-[var(--ct-text-secondary)] hover:bg-[var(--ct-bg-soft)]'
+                  "
+                  :aria-current="isActiveEntry(entry) ? 'page' : undefined"
+                >
+                  <Icon :icon="entry.icon" class="size-4 shrink-0" />
+                  <span>{{ entry.label }}</span>
+                </router-link>
+                <!-- pages of the entry without tabs of their own (Empresa,
+                     Crédito e cobrança), listed while it is open -->
+                <template v-if="isActiveEntry(entry)">
+                  <router-link
+                    v-for="item in entry.children"
+                    :key="item.slug"
+                    :to="{ name: 'Settings', params: { section: item.slug } }"
+                    :data-page="item.slug"
+                    class="flex min-h-8 shrink-0 items-center rounded-lg py-1.5 pl-9 pr-2.5 text-[14px] leading-5 transition-colors"
+                    :class="
+                      item.slug === activeItem?.slug
+                        ? 'font-medium text-[var(--ct-text-primary)]'
+                        : 'text-[var(--ct-text-secondary)] hover:bg-[var(--ct-bg-soft)]'
+                    "
+                    :aria-current="
+                      item.slug === activeItem?.slug ? 'page' : undefined
+                    "
+                  >
+                    {{ item.label }}
+                  </router-link>
+                </template>
+              </template>
             </template>
           </div>
         </nav>
@@ -86,6 +105,7 @@ import LayoutHeader from '@/components/LayoutHeader.vue'
 import Icon from '@/components/Icon.vue'
 import {
   getSettingsSections,
+  getSettingsNav,
   findSettingsItem,
 } from '@/components/Settings/settingsSections'
 import { plan, loadPlan } from '@/components/Settings/UsersAndPlan/planApi'
@@ -108,10 +128,17 @@ if (isAdmin()) {
 }
 
 const sections = computed(() => getSettingsSections())
+const nav = computed(() => getSettingsNav(sections.value))
+
+function isActiveEntry(entry) {
+  return entry.slugs.includes(activeItem.value?.slug)
+}
 
 const activeItem = computed(
   () =>
     findSettingsItem(sections.value, route.params.section) ||
+    // the first entry of the sidebar (Perfil moved to "Minha conta")
+    findSettingsItem(sections.value, nav.value[0]?.entries[0]?.target) ||
     sections.value[0]?.items[0] ||
     null,
 )
