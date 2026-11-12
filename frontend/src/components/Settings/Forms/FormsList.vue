@@ -1,6 +1,8 @@
 <template>
   <div class="flex h-full flex-col gap-6 text-ink-gray-8">
-    <SettingsPageHeader :title="__('Lead capture forms')">
+    <!-- Figma "Entrada de leads · Formulários de captura" (2336:10624) -->
+    <SettingsSectionTabs :tabs="leadIntakeTabs" active="lead-capture-forms" />
+    <SettingsPageHeader :title="__('Lead intake')">
       <template #description>
         {{
           __(
@@ -38,38 +40,46 @@
         :action-label="__('New form')"
         @action="openCreate"
       />
+      <!-- Figma "Tabela": 40px gray header, rows 10px/16px; "Situação" holds
+           the status pill and the "Mais ações" button at the end -->
       <div
         v-else
-        class="w-full overflow-hidden rounded-lg border border-outline-gray-1"
+        class="w-full overflow-hidden rounded-lg border border-[var(--ct-border)]"
       >
         <div
-          class="flex h-10 items-center gap-4 border-b border-outline-gray-1 bg-surface-gray-2 px-4 text-xs font-medium text-ink-gray-6"
+          class="flex h-10 items-center gap-4 border-b border-[var(--ct-border)] bg-[var(--ct-bg-soft)] px-4 text-xs font-medium text-ink-gray-6"
         >
-          <div class="w-9/12">{{ __('Form') }}</div>
-          <div class="w-3/12">{{ __('Status') }}</div>
+          <div class="min-w-0 flex-1">{{ __('Form') }}</div>
+          <div class="w-[198px] shrink-0">{{ __('Status') }}</div>
         </div>
         <template v-for="(form, i) in forms.data" :key="form.name">
           <div
-            class="flex min-h-14 w-full items-center gap-4 px-4 py-2 hover:bg-surface-gray-2"
+            class="flex w-full items-center gap-4 px-4 py-2.5 hover:bg-surface-gray-2"
           >
             <div
-              class="w-9/12 min-w-0 cursor-pointer"
+              class="flex min-w-0 flex-1 cursor-pointer flex-col gap-0.5"
               @click="$emit('open', form.name)"
             >
-              <div class="truncate text-base text-ink-gray-9">
+              <div
+                class="truncate text-[14px] font-medium leading-5 text-ink-gray-9"
+              >
                 {{ form.title }}
               </div>
-              <div class="mt-0.5 truncate text-p-base text-ink-gray-5">
+              <div class="truncate text-xs text-ink-gray-6">
                 /crm-form/{{ form.route }}
               </div>
             </div>
-            <div class="flex w-3/12 items-center justify-between">
-              <Badge
-                :theme="form.published ? 'green' : 'gray'"
-                variant="outline"
-                size="md"
-                :label="form.published ? __('Published') : __('Draft')"
-              />
+            <div class="flex w-[198px] shrink-0 items-center justify-between">
+              <span
+                class="rounded-full px-2.5 py-0.5 text-xs font-medium"
+                :class="
+                  form.published
+                    ? 'bg-[var(--ct-success-soft)] text-[var(--ct-success)]'
+                    : 'bg-[var(--ct-bg-panel)] text-ink-gray-9'
+                "
+              >
+                {{ form.published ? __('Published') : __('Draft') }}
+              </span>
               <Dropdown
                 align="end"
                 :options="rowOptions(form)"
@@ -81,7 +91,7 @@
           </div>
           <div
             v-if="forms.data.length !== i + 1"
-            class="h-px bg-outline-gray-1"
+            class="h-px bg-[var(--ct-border)]"
           />
         </template>
       </div>
@@ -133,6 +143,8 @@
 import LucideTextCursorInput from '~icons/lucide/text-cursor-input'
 import SettingsEmptyState from '@/components/Settings/SettingsEmptyState.vue'
 import SettingsPageHeader from '@/components/Settings/SettingsPageHeader.vue'
+import SettingsSectionTabs from '@/components/Settings/SettingsSectionTabs.vue'
+import { leadIntakeTabs } from '@/components/Settings/LeadSyncing/webhookSourcesApi'
 import {
   Button,
   Badge,

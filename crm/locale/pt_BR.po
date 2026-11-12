@@ -14823,6 +14823,34 @@ msgstr "Promessa de pagamento para {0} · {1}"
 msgid "Payment of {0} · balance after {1}"
 msgstr "Pagamento de {0} · saldo depois {1}"
 
+# Settings · E-mail and Entrada de leads tabs (Figma 2336:10121, 2324:20471)
+msgid "Account"
+msgstr "Conta"
+
+msgid "Provider"
+msgstr "Provedor"
+
+msgid "Usage"
+msgstr "Uso"
+
+msgid "Used in"
+msgstr "Usado em"
+
+msgid "Default for sending"
+msgstr "Padrão para enviar"
+
+msgid "Default for receiving"
+msgstr "Padrão para receber"
+
+msgid "Receives emails"
+msgstr "Recebe e-mails"
+
+msgid "Lead intake"
+msgstr "Entrada de leads"
+
+msgid "Lead sources"
+msgstr "Fontes de leads"
+
 msgid "Team"
 msgstr "Equipe"
 
@@ -14888,6 +14916,18 @@ msgstr "Já existe um usuário com o e-mail {0}"
 
 msgid "User with email {0} already invited"
 msgstr "O e-mail {0} já foi convidado"
+
+msgid "Imports"
+msgstr "Importações"
+
+msgid "Insert New Records"
+msgstr "Inserir novos registros"
+
+msgid "Update Existing Records"
+msgstr "Atualizar registros existentes"
+
+msgid "Success"
+msgstr "Sucesso"
 
 msgid "My account"
 msgstr "Minha conta"

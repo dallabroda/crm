@@ -31,16 +31,20 @@
         :class="item.card && 'cursor-pointer hover:bg-surface-gray-2'"
         @click="openCard(item)"
       >
-        <Badge
-          :label="statusLabel(item.status)"
-          :theme="statusTheme(item.status)"
-          variant="subtle"
-        />
-        <div class="flex min-w-0 flex-1 flex-col">
-          <span class="truncate font-medium text-ink-gray-9">
+        <!-- Figma "Pílula de status": Duplicar amber, Novo blue -->
+        <span
+          class="shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium"
+          :class="statusClass(item.status)"
+        >
+          {{ statusLabel(item.status) }}
+        </span>
+        <div class="flex min-w-0 flex-1 flex-col gap-1">
+          <span
+            class="truncate text-[14px] font-medium leading-5 text-ink-gray-9"
+          >
             {{ item.lead_name || __('Lead without name') }}
           </span>
-          <span class="truncate text-ink-gray-6">
+          <span class="truncate text-[14px] leading-5 text-ink-gray-6">
             <template v-if="item.status === 'Failed'">{{
               item.error
             }}</template>
@@ -92,7 +96,7 @@
           </span>
         </Tooltip>
         <Tooltip :text="formatDate(item.time)">
-          <span class="shrink-0 text-xs text-ink-gray-4">
+          <span class="shrink-0 text-xs text-[var(--ct-text-tertiary)]">
             {{ timeAgo(item.time) }}
           </span>
         </Tooltip>
@@ -104,7 +108,7 @@
 <script setup>
 import { metaLeadsApi } from './metaLeadsApi'
 import { formatDate, timeAgo } from '@/utils'
-import { Badge, Button, Tooltip, toast } from 'frappe-ui'
+import { Button, Tooltip, toast } from 'frappe-ui'
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { showSettings } from '@/composables/settings'
@@ -135,11 +139,14 @@ function statusLabel(status) {
   )
 }
 
-function statusTheme(status) {
+function statusClass(status) {
   return (
-    { Created: 'green', Duplicate: 'orange', Failed: 'red', Test: 'blue' }[
-      status
-    ] || 'gray'
+    {
+      Created: 'bg-[var(--ct-accent-soft)] text-[var(--ct-accent)]',
+      Duplicate: 'bg-[var(--ct-warning-soft)] text-[var(--ct-warning)]',
+      Failed: 'bg-[var(--ct-danger-soft)] text-[var(--ct-danger)]',
+      Test: 'bg-[var(--ct-accent-soft)] text-[var(--ct-accent)]',
+    }[status] || 'bg-[var(--ct-bg-panel)] text-ink-gray-9'
   )
 }
 

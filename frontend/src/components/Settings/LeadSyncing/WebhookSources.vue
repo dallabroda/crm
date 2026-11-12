@@ -1,5 +1,7 @@
 <template>
-  <div class="flex flex-col gap-3 rounded-lg border border-outline-gray-2 p-4">
+  <!-- Figma "Google Ads, site e outras ferramentas" (2324:20471): 16px apart,
+       one row per source under a divider -->
+  <div class="flex flex-col gap-4 rounded-lg border border-outline-gray-2 p-4">
     <div class="flex items-start justify-between gap-4">
       <div class="flex flex-col gap-1">
         <div class="text-base-semibold text-ink-gray-9">

@@ -1,16 +1,23 @@
 <template>
-  <div class="flex flex-col rounded border border-outline-gray-1">
-    <div class="flex items-center gap-3 px-3 py-2">
+  <!-- Figma "Linha de configuração" (2324:20471): "Divisor" above, then icon,
+       name, funnel and WhatsApp "Filtro"s, "Como conectar" link, switch -->
+  <div class="flex flex-col gap-4">
+    <div class="flex h-5 items-center" aria-hidden="true">
+      <div class="h-px w-full bg-[var(--ct-border)]" />
+    </div>
+    <div class="flex items-center gap-6">
       <span
-        class="size-4 shrink-0 text-ink-gray-6"
+        class="size-4 shrink-0 text-ink-gray-9"
         :class="type.icon"
         aria-hidden="true"
       />
-      <div class="flex min-w-0 flex-1 flex-col">
-        <span class="truncate text-sm text-ink-gray-8">
+      <div class="flex min-w-0 flex-1 flex-col gap-1">
+        <span
+          class="truncate text-[14px] font-medium leading-5 text-ink-gray-9"
+        >
           {{ source.label || type.label }}
         </span>
-        <span class="text-p-xs text-ink-gray-5">
+        <span class="text-[14px] leading-5 text-ink-gray-6">
           {{ type.label }} ·
           {{
             source.last_lead_at
@@ -19,28 +26,39 @@
           }}
         </span>
       </div>
-      <div class="w-56">
-        <PipelineSelect
-          :label="''"
-          :model-value="source.pipeline"
-          :disabled="saving"
-          @update:model-value="(pipeline) => save({ pipeline })"
-        />
-      </div>
-      <Button
-        :label="__('How to connect')"
-        :icon-right="open ? 'lucide-chevron-up' : 'lucide-chevron-down'"
-        variant="ghost"
+      <Dropdown :options="pipelineOptions" align="end">
+        <button type="button" class="ct-filter" :disabled="saving">
+          <span class="truncate">{{ pipelineLabel }}</span>
+          <span
+            class="lucide-chevron-down size-4 shrink-0 text-[var(--ct-text-secondary)]"
+            aria-hidden="true"
+          />
+        </button>
+      </Dropdown>
+      <button
+        type="button"
+        class="shrink-0 text-[14px] font-medium leading-5 text-[var(--ct-accent)] underline hover:text-[var(--ct-accent-hover)]"
+        :aria-expanded="open"
         @click="open = !open"
-      />
-      <Button
-        :label="__('WhatsApp')"
-        :icon-right="showWelcome ? 'lucide-chevron-up' : 'lucide-chevron-down'"
-        variant="ghost"
+      >
+        {{ __('How to connect') }}
+      </button>
+      <button
+        type="button"
+        class="ct-filter"
+        :aria-expanded="showWelcome"
         @click="showWelcome = !showWelcome"
-      />
+      >
+        {{ __('WhatsApp') }}
+        <span
+          class="size-4 shrink-0 text-[var(--ct-text-secondary)]"
+          :class="showWelcome ? 'lucide-chevron-up' : 'lucide-chevron-down'"
+          aria-hidden="true"
+        />
+      </button>
       <Tooltip :text="__('Receive leads from this source')">
         <Switch
+          size="md"
           :model-value="Boolean(source.enabled)"
           :disabled="saving || !source.pipeline"
           @update:model-value="(enabled) => save({ enabled: enabled ? 1 : 0 })"
@@ -244,12 +262,13 @@
 </template>
 
 <script setup>
-import PipelineSelect from '@/components/Pipelines/PipelineSelect.vue'
 import SiteAddresses, { validOrigins } from './SiteAddresses.vue'
 import WelcomeMessage from './WelcomeMessage.vue'
 import { sourceType, webhookSourcesApi } from './webhookSourcesApi'
 import { copyToClipboard, timeAgo } from '@/utils'
-import { Button, Switch, Tooltip, toast } from 'frappe-ui'
+import { pipelinesStore } from '@/stores/pipelines'
+import { storeToRefs } from 'pinia'
+import { Button, Dropdown, Switch, Tooltip, toast } from 'frappe-ui'
 import { computed, ref } from 'vue'
 
 const props = defineProps({
@@ -261,6 +280,22 @@ const props = defineProps({
 const emit = defineEmits(['changed'])
 
 const type = computed(() => sourceType(props.source.type))
+
+// Funnel of the source, as a "Filtro" (same choices as PipelineSelect)
+const pipelineStore = pipelinesStore()
+const { pipelines } = storeToRefs(pipelineStore)
+pipelineStore.ensureLoaded()
+const pipelineLabel = computed(() => {
+  const pipeline = pipelines.value.find((p) => p.name === props.source.pipeline)
+  return pipeline ? __(pipeline.pipeline_name) : __('Choose a funnel')
+})
+const pipelineOptions = computed(() =>
+  pipelines.value.map((p) => ({
+    label: __(p.pipeline_name),
+    onClick: () =>
+      p.name !== props.source.pipeline && save({ pipeline: p.name }),
+  })),
+)
 const open = ref(Boolean(props.initialKey))
 const showWelcome = ref(false)
 const newKey = ref(props.initialKey)

@@ -1,7 +1,7 @@
 <!-- eslint-disable vue/no-v-html -->
 <template>
   <!-- Figma "Notificações · Lista" (817:2): page title, "Marcar tudo como
-       lido" as the primary action, rows with a blue unread dot, avatar,
+       lido" as an underlined blue link, rows with a blue unread dot, avatar,
        14 Medium text and the time below. -->
   <LayoutHeader>
     <template #left-header>
@@ -10,13 +10,14 @@
       </h1>
     </template>
     <template #right-header>
-      <Button
+      <button
         v-if="notifications.data?.length"
-        variant="solid"
-        :label="__('Mark all as read')"
-        iconLeft="lucide-check-check"
+        type="button"
+        class="rounded-[var(--ct-radius-sm)] text-base font-medium text-[color:var(--ct-text-accent)] underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-outline-gray-3"
         @click="() => mark_as_read.reload()"
-      />
+      >
+        {{ __('Mark all as read') }}
+      </button>
     </template>
   </LayoutHeader>
   <div class="flex flex-1 flex-col overflow-hidden text-ink-gray-9">
@@ -39,7 +40,7 @@
           <WhatsAppIcon v-if="n.type == 'WhatsApp'" class="size-7" />
           <UserAvatar v-else :user="n.from_user.name" size="lg" />
         </div>
-        <div class="min-w-0 flex-1 pt-0.5">
+        <div class="min-w-0 flex-1">
           <div
             v-if="n.notification_text"
             class="font-medium leading-5 [&_*]:!text-ink-gray-9"

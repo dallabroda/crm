@@ -827,6 +827,19 @@ export function getGridTemplateColumnsForTable(columns) {
   return columnsWidth + ' 22px'
 }
 
+// Figma lists (Ligações 813:2, Importação de dados 815:2): columns narrower
+// than the table grow in proportion to fill it, never below their own width.
+// Only the grid gets these widths; header items keep the plain ones to resize.
+export function fillColumns(columns) {
+  return columns.map((column) => {
+    const width = column.width
+    if (typeof width !== 'string') return column
+    const px = parseFloat(width) * (width.endsWith('rem') ? 16 : 1)
+    if (!/^[\d.]+(px|rem)$/.test(width) || !px) return column
+    return { ...column, width: `minmax(${width}, ${px}fr)` }
+  })
+}
+
 export function clearCache() {
   ;[
     '_last_load',

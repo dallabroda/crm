@@ -8,15 +8,17 @@
     </SettingsPageHeader>
     <!-- email service provider selection -->
     <!-- "Provedores": one bordered tile per provider, blue when selected -->
-    <div class="grid grid-cols-[repeat(auto-fill,minmax(130px,1fr))] gap-3">
+    <div
+      class="grid grid-cols-[repeat(auto-fill,minmax(130px,1fr))] gap-3 py-px"
+    >
       <button
         v-for="s in services"
         :key="s.name"
         type="button"
-        class="flex flex-col items-center gap-2 rounded-lg border bg-surface-base px-2 py-3 hover:bg-surface-gray-1"
+        class="flex min-h-[94px] flex-col items-center gap-2 rounded-lg border bg-surface-base px-2 py-3 hover:bg-surface-gray-1"
         :class="
           selectedService?.name === s?.name
-            ? 'border-[var(--ct-accent)]'
+            ? 'border-[var(--ct-accent)] ring-1 ring-[var(--ct-accent)]'
             : 'border-[var(--ct-border)]'
         "
         @click="handleSelect(s)"
@@ -29,7 +31,9 @@
         <span class="text-base font-medium text-ink-gray-9">{{ s.name }}</span>
       </button>
     </div>
-    <div v-if="selectedService" class="flex flex-col gap-4">
+    <!-- Figma "Configurar e-mail" (2345:29055): notice, fields, options and
+         funnel 24px apart; 516px fields (the form leaves 32px at the end) -->
+    <div v-if="selectedService" class="flex flex-col gap-6">
       <!-- email service provider info -->
       <!-- Style Guide "Aviso" (960:402), with its small action button -->
       <CtAlert type="warning">
@@ -46,7 +50,7 @@
       </CtAlert>
       <!-- service provider fields -->
       <div class="flex flex-col gap-6">
-        <div class="ct-field-48 grid grid-cols-2 gap-4">
+        <div class="ct-field-48 grid grid-cols-2 gap-4 pr-8">
           <div
             v-for="field in fields"
             :key="field.name"
@@ -61,7 +65,7 @@
             />
           </div>
         </div>
-        <div class="grid grid-cols-2 gap-4">
+        <div class="ct-email-options grid grid-cols-2 gap-4 pr-8">
           <template v-for="field in switches" :key="field.name">
             <div
               v-if="field.condition ? field.condition(state) : true"
@@ -73,7 +77,7 @@
                 :name="field.name"
                 :type="field.type"
               />
-              <p class="pl-6 text-p-xs text-ink-gray-6">
+              <p class="pl-[26px] text-xs text-ink-gray-6">
                 {{ field.description }}
               </p>
             </div>
@@ -81,15 +85,18 @@
         </div>
         <div
           v-if="state.create_lead_from_incoming_email"
-          class="ct-field-48 grid grid-cols-2 gap-4"
+          class="ct-field-48 grid grid-cols-2 gap-4 pr-8"
         >
-          <PipelineSelect
-            v-model="state.crm_pipeline"
-            :description="
-              __('Cards created from emails of this account go to this funnel.')
-            "
-          />
+          <PipelineSelect v-model="state.crm_pipeline" />
         </div>
+        <p
+          v-if="state.create_lead_from_incoming_email"
+          class="text-xs text-ink-gray-6"
+        >
+          {{
+            __('Cards created from emails of this account go to this funnel.')
+          }}
+        </p>
         <ErrorMessage class="ml-1" :message="error" />
       </div>
     </div>
@@ -101,6 +108,7 @@
       <Button
         :label="__('Back')"
         variant="outline"
+        icon-left="lucide-arrow-left"
         :disabled="addEmailRes.loading"
         @click="emit('update:step', 'email-list')"
       />
@@ -211,4 +219,17 @@ function createEmailAccount() {
 }
 </script>
 
-<style scoped></style>
+<style scoped>
+/* Figma "Caixa de seleção": 20px box (6px radius), 14/20 black label 8px away */
+.ct-email-options :deep(input[type='checkbox']) {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+}
+.ct-email-options :deep(label) {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: var(--ct-text-primary);
+}
+</style>

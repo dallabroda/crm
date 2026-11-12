@@ -1,5 +1,21 @@
 import { call } from 'frappe-ui'
 import { getRequest } from './metaLeadsApi'
+import { usersStore } from '@/stores/users'
+
+// Tabs of the "Entrada de leads" page (Figma 2324:20471, 2336:10624); same
+// conditions as the sections in settingsSections.js
+export const leadIntakeTabs = [
+  {
+    slug: 'lead-sources',
+    label: 'Lead sources',
+    condition: () => usersStore().isManager(),
+  },
+  {
+    slug: 'lead-capture-forms',
+    label: 'Lead capture forms',
+    condition: () => usersStore().isManager(),
+  },
+]
 
 // Lead sources that post to Cred Hub (credtech#51): Google Ads lead forms,
 // the company's website, Typeform and any other tool (Zapier, Make...).

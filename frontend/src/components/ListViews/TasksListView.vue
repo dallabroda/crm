@@ -1,7 +1,7 @@
 <!-- eslint-disable vue/no-v-html -->
 <template>
   <ListView
-    :columns="columns"
+    :columns="fillColumns(columns)"
     :rows="rows"
     :options="{
       onRowClick: (row) => emit('showTask', row.name),
@@ -19,6 +19,7 @@
       <ListHeaderItem
         v-for="column in columns"
         :key="column.key"
+        class="!text-base"
         :item="column"
         @columnWidthUpdated="(e) => onColumnWidthUpdated(e, column)"
       >
@@ -58,24 +59,49 @@
         class="overflow-hidden"
       >
         <template #prefix>
-          <div v-if="column.key === 'status'">
-            <TaskStatusIcon :status="item" />
-          </div>
-          <div v-else-if="column.key === 'priority'">
-            <TaskPriorityIcon :priority="item" />
-          </div>
-          <div v-else-if="column.key === 'assigned_to'">
+          <!-- Figma "Tarefas · Lista" (809:2): 24px avatar -->
+          <div v-if="column.key === 'assigned_to'">
             <UserAvatar
               v-if="item.full_name"
               class="flex items-center"
               :user="item.name"
-              size="sm"
+              :label="item.label"
+              size="md"
             />
           </div>
         </template>
         <template #default="{ label }">
+          <!-- Figma "Tarefas · Lista" (809:2): status and priority as pills -->
+          <TaskStatusBadge
+            v-if="column.key === 'status'"
+            :status="item"
+            @click="
+              (event) =>
+                emit('applyFilter', {
+                  event,
+                  idx,
+                  column,
+                  item,
+                  firstColumn: columns[0],
+                })
+            "
+          />
+          <TaskPriorityBadge
+            v-else-if="column.key === 'priority'"
+            :priority="item"
+            @click="
+              (event) =>
+                emit('applyFilter', {
+                  event,
+                  idx,
+                  column,
+                  item,
+                  firstColumn: columns[0],
+                })
+            "
+          />
           <div
-            v-if="['modified', 'creation'].includes(column.key)"
+            v-else-if="['modified', 'creation'].includes(column.key)"
             class="truncate text-base"
             @click="
               (event) =>
@@ -206,8 +232,8 @@
 <script setup>
 import UserAvatar from '@/components/UserAvatar.vue'
 import HeartIcon from '@/components/Icons/HeartIcon.vue'
-import TaskStatusIcon from '@/components/Icons/TaskStatusIcon.vue'
-import TaskPriorityIcon from '@/components/Icons/TaskPriorityIcon.vue'
+import TaskStatusBadge from '@/components/TaskStatusBadge.vue'
+import TaskPriorityBadge from '@/components/TaskPriorityBadge.vue'
 import CalendarIcon from '@/components/Icons/CalendarIcon.vue'
 import RatingInput from '@/components/Controls/RatingInput.vue'
 import ListBulkActions from '@/components/ListBulkActions.vue'
@@ -217,6 +243,7 @@ import {
   isTranslatable,
   formatDuration,
   sanitizeHTML,
+  fillColumns,
 } from '@/utils'
 import { Dropdown, Tooltip } from 'frappe-ui'
 import {

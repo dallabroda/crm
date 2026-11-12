@@ -1,6 +1,6 @@
 <template>
   <ListView
-    :columns="columns"
+    :columns="fillColumns(columns)"
     :rows="rows"
     :options="{
       onRowClick: (row: { name: string }) => emit('openImport', row.name),
@@ -21,6 +21,7 @@
       <ListHeaderItem
         v-for="column in columns"
         :key="column.key"
+        class="!text-base"
         :item="column"
         @columnWidthUpdated="
           (e: ColumnWidthUpdate) => onColumnWidthUpdated(e, column)
@@ -141,7 +142,7 @@
     v-if="list?.data"
     class="border-t border-surface-gray-3 px-3 sm:px-6"
     :list="list"
-    :itemLabel="__('Data Imports').toLowerCase()"
+    :itemLabel="__('Imports').toLowerCase()"
   />
   <ListBulkActions
     ref="listBulkActionsRef"
@@ -154,6 +155,7 @@
   />
 </template>
 <script setup lang="ts">
+import { fillColumns } from '@/utils'
 import HeartIcon from '@/components/Icons/HeartIcon.vue'
 import ListBulkActions from '@/components/ListBulkActions.vue'
 import ListRows from '@/components/ListViews/ListRows.vue'

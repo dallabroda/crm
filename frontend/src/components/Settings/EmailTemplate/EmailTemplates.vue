@@ -1,6 +1,8 @@
 <template>
   <div class="flex h-full flex-col gap-6 text-ink-gray-8">
-    <SettingsPageHeader :title="__('Email Templates')">
+    <!-- Figma "E-mail · Modelos" (2336:10373): tab Modelos of the "E-mail" page -->
+    <SettingsSectionTabs :tabs="emailTabs" active="email-templates" />
+    <SettingsPageHeader :title="__('Email')">
       <template #description>
         {{
           __(
@@ -77,36 +79,46 @@
           ]"
         />
       </div>
+      <!-- Figma "Tabela": Nome, Assunto, Usado em, Ativo; 40px gray header,
+           rows 10px/16px with 16px between the cells -->
       <div
-        class="flex h-10 items-center rounded-t-lg border border-outline-gray-1 bg-surface-gray-2 px-4 text-xs font-medium text-ink-gray-6"
+        class="flex h-10 items-center gap-4 rounded-t-lg border border-[var(--ct-border)] bg-[var(--ct-bg-soft)] px-4 text-xs font-medium text-ink-gray-6"
       >
-        <div class="w-4/6">{{ __('Template Name') }}</div>
-        <div class="w-1/6">{{ __('For') }}</div>
-        <div class="w-1/6">{{ __('Enabled') }}</div>
+        <div class="w-[284px] shrink-0">{{ __('Name') }}</div>
+        <div class="min-w-0 flex-1">{{ __('Subject') }}</div>
+        <div class="w-[152px] shrink-0">{{ __('Used in') }}</div>
+        <div class="w-[135px] shrink-0">{{ __('Active') }}</div>
       </div>
       <ul
-        class="overflow-y-auto rounded-b-lg border border-t-0 border-outline-gray-1"
+        class="overflow-y-auto rounded-b-lg border border-t-0 border-[var(--ct-border)]"
       >
         <template v-for="(template, i) in templatesList" :key="template.name">
           <li
-            class="flex min-h-14 items-center justify-between px-4 py-2 cursor-pointer hover:bg-surface-gray-2"
+            class="flex cursor-pointer items-center gap-4 px-4 py-2.5 hover:bg-surface-gray-2"
             @click="() => emit('updateStep', 'edit-template', { ...template })"
           >
-            <div class="flex flex-col w-4/6 pr-5">
-              <div class="text-base text-ink-gray-9 truncate">
-                {{ template.name }}
-              </div>
-              <div class="text-p-sm text-ink-gray-5 truncate">
-                {{ template.subject }}
-              </div>
+            <div
+              class="w-[284px] shrink-0 truncate text-[14px] font-medium leading-5 text-ink-gray-9"
+            >
+              {{ template.name }}
             </div>
-            <div class="text-base text-ink-gray-6 w-1/6">
-              {{ template.reference_doctype.replace('CRM ', '') }}
+            <div
+              class="min-w-0 flex-1 truncate text-[14px] leading-5 text-ink-gray-6"
+            >
+              {{ template.subject }}
             </div>
-            <div class="flex items-center justify-between w-1/6">
+            <div
+              class="w-[152px] shrink-0 text-[14px] leading-5 text-ink-gray-6"
+            >
+              {{ usedIn(template.reference_doctype) }}
+            </div>
+            <!-- the menu (duplicate, delete) is not in the Figma: kept at the end -->
+            <div
+              class="flex h-5 w-[135px] shrink-0 items-center justify-between"
+            >
               <Switch
                 v-model="template.enabled"
-                size="sm"
+                size="md"
                 @update:model-value="
                   (val) => toggleEmailTemplate(template, val)
                 "
@@ -130,7 +142,7 @@
           </li>
           <div
             v-if="templatesList.length !== i + 1"
-            class="h-px bg-outline-gray-1"
+            class="h-px bg-[var(--ct-border)]"
           />
         </template>
         <!-- Load More Button -->
@@ -154,6 +166,8 @@
 import LucideFileText from '~icons/lucide/file-text'
 import SettingsEmptyState from '@/components/Settings/SettingsEmptyState.vue'
 import SettingsPageHeader from '@/components/Settings/SettingsPageHeader.vue'
+import SettingsSectionTabs from '@/components/Settings/SettingsSectionTabs.vue'
+import { emailTabs } from '@/components/Settings/emailConfig'
 import { useBroadcast } from '@/composables/useBroadcast'
 import { TextInput, FormControl, Switch, Dropdown, toast } from 'frappe-ui'
 import { ref, computed, inject } from 'vue'
@@ -185,6 +199,11 @@ const templatesList = computed(() => {
   }
   return list
 })
+
+// "Usado em": deal templates are used on the cards, lead ones on the contacts
+function usedIn(doctype) {
+  return doctype === 'CRM Deal' ? __('Cards') : __('Contacts')
+}
 
 function toggleEmailTemplate(template, enabledVal) {
   templates.setValue.submit(

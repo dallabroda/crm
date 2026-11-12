@@ -21,14 +21,16 @@
                 <IndicatorIcon :class="parseColor(column.column.color)" />
               </div>
               <Popover v-else bare>
+                <!-- Figma "Tarefas · Kanban" (811:2): the dot sits where the
+                     fixed columns have it; it still opens the color picker -->
                 <template #trigger>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    class="hover:!bg-surface-gray-2"
+                  <button
+                    type="button"
+                    class="flex shrink-0 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-outline-gray-3"
+                    :aria-label="__('Color')"
                   >
                     <IndicatorIcon :class="parseColor(column.column.color)" />
-                  </Button>
+                  </button>
                 </template>
                 <template #default>
                   <div
@@ -118,9 +120,16 @@
                       </div>
                     </slot>
                   </div>
+                  <!-- inlineFields: Figma "Tarefas · Kanban" (811:2) puts the
+                       priority and the time on one line -->
                   <div
                     v-if="cardFields(column).length"
-                    class="relative pointer-events-none [&_[data-slot=trigger]]:pointer-events-auto flex flex-col gap-3"
+                    class="relative pointer-events-none [&_[data-slot=trigger]]:pointer-events-auto flex"
+                    :class="
+                      options.inlineFields
+                        ? 'flex-row flex-wrap items-center gap-x-2 gap-y-3'
+                        : 'flex-col gap-3'
+                    "
                   >
                     <template v-for="value in cardFields(column)" :key="value">
                       <slot
@@ -220,6 +229,8 @@ const props = defineProps({
       fixedColumns: false,
       // card field the page shows in the card footer instead of the field list
       footerField: null,
+      // card fields side by side (wrapping) instead of one per line
+      inlineFields: false,
     }),
   },
 })
