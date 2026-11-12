@@ -169,6 +169,11 @@ def auto_enrich_on_create(doc, method=None):
 		# not assemble the full config (Rules/Mappings). The worker builds that later.
 		if not auto_enrich_enabled_for(doc.doctype):
 			return
+		from crm.sandbox import is_sandbox
+
+		if is_sandbox(doc):
+			# Sandbox of the HubTech API: test data never triggers outbound crawling
+			return
 
 		website = (doc.get("website") or "").strip()
 		if not website:

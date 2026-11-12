@@ -18,6 +18,7 @@ from crm.fcrm.doctype.crm_status_change_log.crm_status_change_log import (
 )
 from crm.fcrm.doctype.utils import add_or_remove_lost_reason_section_in_sidepanel
 from crm.permissions.pipeline import get_role_in_pipeline
+from crm.sandbox import is_sandbox
 from crm.utils.locks import acquire_record_creation_lock
 
 LEAD_DEAL_FIELD_MAP = {"lead_owner": "deal_owner"}
@@ -129,11 +130,13 @@ class CRMLead(Document):
 		if duplicate:
 			note_repeat_entry(self, duplicate)
 			return duplicate
-		owner = (
-			self.lead_owner
-			if self.lead_owner and get_role_in_pipeline(self.pipeline, self.lead_owner)
-			else pick_salesperson(self.pipeline, self.as_dict())
-		)
+		if self.lead_owner and get_role_in_pipeline(self.pipeline, self.lead_owner):
+			owner = self.lead_owner
+		elif is_sandbox(self):
+			# Sandbox of the HubTech API (crm.sandbox): test cards are not handed to salespeople
+			owner = None
+		else:
+			owner = pick_salesperson(self.pipeline, self.as_dict())
 		self.flags.ignore_permissions = True
 		# An entry from outside cannot answer the entry stage's required fields; refusing it would
 		# lose the entry, so the card is created and the fields are asked when someone works it
@@ -725,7 +728,7 @@ def note_repeat_entry(lead, card: str):
 		}
 	).insert(ignore_permissions=True)
 	owner = frappe.db.get_value("CRM Deal", card, "deal_owner")
-	if owner:
+	if owner and not is_sandbox(lead):
 		frappe.get_doc(
 			{
 				"doctype": "CRM Notification",

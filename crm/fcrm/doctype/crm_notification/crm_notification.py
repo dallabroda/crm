@@ -4,6 +4,8 @@
 import frappe
 from frappe.model.document import Document
 
+from crm.sandbox import is_sandbox_record
+
 
 class CRMNotification(Document):
 	# begin: auto-generated types
@@ -64,6 +66,11 @@ def notify_user(notification):
 	"""
 	notification = frappe._dict(notification)
 	if notification.owner == notification.assigned_to:
+		return
+	if is_sandbox_record(
+		notification.redirect_to_doctype, notification.redirect_to_docname
+	) or is_sandbox_record(notification.reference_doctype, notification.reference_docname):
+		# Sandbox of the HubTech API (crm.sandbox): nobody is notified about test data
 		return
 
 	values = frappe._dict(
