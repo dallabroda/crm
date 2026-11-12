@@ -7,7 +7,6 @@ import unicodedata
 
 import frappe
 from frappe import _
-from frappe.custom.doctype.custom_field.custom_field import create_custom_field
 
 DEAL = "CRM Deal"
 # Doctypes whose forms the company configures (dynamic forms, credtech#178): cards, contacts and companies
@@ -219,7 +218,7 @@ def create_field(label: str, fieldtype: str, options: str | None = None, doctype
 		fieldname = f"{base}_{n}"
 
 	try:
-		create_custom_field(
+		_insert_custom_field(
 			doctype,
 			{
 				"fieldname": fieldname,
@@ -228,7 +227,6 @@ def create_field(label: str, fieldtype: str, options: str | None = None, doctype
 				"options": options,
 				"insert_after": _last_fieldname(doctype),
 			},
-			ignore_validate=False,
 		)
 	except frappe.db.OperationalError as e:
 		# The estimate above can miss by a few bytes: never show the raw database error
@@ -245,6 +243,17 @@ def create_field(label: str, fieldtype: str, options: str | None = None, doctype
 		)
 	frappe.clear_cache(doctype=doctype)
 	return _catalog_item(fieldname, doctype)
+
+
+def _insert_custom_field(doctype: str, df: dict):
+	"""Frappe's create_custom_field, without its permission check on Custom Field: the callers already checked that
+	the user manages the catalog (an admin, or a field admin vouched by the crm_field_admin hook, credtech#375)."""
+	field = frappe.get_doc(
+		{"doctype": "Custom Field", "dt": doctype, "permlevel": 0, "hidden": 0, "is_system_generated": 1, **df}
+	)
+	field.flags.ignore_permissions = True
+	field.insert()
+	return field
 
 
 def update_field(
@@ -610,10 +619,12 @@ def validate_deal(doc):
 				title=_("Required fields"),
 			)
 	before = doc.get_doc_before_save()
-	if not before or before.pipeline != doc.pipeline:
+	if not before or not before.pipeline:
 		return
-	moving = before.status != doc.status
-	for fieldname, rule in get_stage_rules(doc.pipeline, before.status).items():
+	# The rules of the stage the card is leaving apply, also when the same save changes its pipeline: otherwise
+	# moving the card to another pipeline would unlock a read-only field for that save (audit M7)
+	moving = before.status != doc.status or before.pipeline != doc.pipeline
+	for fieldname, rule in get_stage_rules(before.pipeline, before.status).items():
 		df = doc.meta.get_field(fieldname)
 		if not rule["read_only"] or not df:
 			continue

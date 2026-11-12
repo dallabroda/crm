@@ -110,6 +110,25 @@ class TestPipelineFields(FrappeTestCase):
 		with self.assertRaises(frappe.PermissionError):
 			update_field(self.cpf, label="Renamed")
 
+	def test_field_admin_hook_lets_a_vouched_caller_change_the_catalog(self):
+		"""crm_field_admin (credtech#375): another app vouches for the call (cred_hub: an API key with the fields
+		admin scope). Without it the same user is refused; pipeline ownership still applies."""
+		from crm.api import forms
+
+		frappe.set_user(SALES_USER)
+		try:
+			with patch("crm.api.pipeline._field_admin_by_hook", return_value=True):
+				self.assertEqual(update_field(self.kind, label="Kind by key")["label"], "Kind by key")
+				placement = [{"pipeline": self.pipeline["name"], "stages": []}]
+				with self.assertRaises(frappe.PermissionError):
+					forms.create_field("Not my pipeline", "Data", placement=placement)
+			self.assertFalse(frappe.db.exists("Custom Field", {"dt": "CRM Deal", "fieldname": "ch_not_my_pipeline"}))
+			with self.assertRaises(frappe.PermissionError):
+				update_field(self.kind, label="Again")
+		finally:
+			frappe.set_user("Administrator")
+			update_field(self.kind, label="Kind test")
+
 	def test_deleted_field_is_dropped_from_pipelines(self):
 		gone = create_field("Gone test", "Data")["fieldname"]
 		save_pipeline({"name": self.pipeline["name"], "fields": [self.cpf, gone]})
@@ -231,6 +250,21 @@ class TestPipelineFields(FrappeTestCase):
 		card.reload()
 		card.set(self.cpf, "3")
 		card.save()  # editable again in the next stage
+
+	def test_read_only_field_stays_locked_when_the_same_save_changes_pipeline(self):
+		"""Audit M7: changing pipeline and a read-only field in one save used to skip the stage rules."""
+		self.set_rule(self.lead, self.cpf, read_only=1)
+		card = self.make_card(**{self.cpf: "1"})
+		other = save_pipeline({"pipeline_name": "Other funnel", "stages": [{"deal_status": "Start"}]})
+		card.pipeline = other["name"]
+		card.status = other["stages"][0]["name"]
+		card.set(self.cpf, "2")
+		with self.assertRaises(frappe.ValidationError):
+			card.save()
+		card.reload()
+		card.pipeline = other["name"]
+		card.status = other["stages"][0]["name"]
+		card.save()  # moving without touching the locked field is fine
 
 	def test_empty_read_only_field_can_be_filled_when_moving_on(self):
 		self.set_rule(self.lead, self.cpf, read_only=1)

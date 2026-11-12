@@ -483,8 +483,15 @@ def get_field_catalog() -> dict:
 	}
 
 
+def _field_admin_by_hook() -> bool:
+	"""Another app vouches for this request as a field admin through the `crm_field_admin` hook (dotted paths of
+	functions with no arguments returning a bool). cred_hub uses it for API keys with the fields admin scope
+	(credtech#375): their technical user is not an admin, but the key was allowed to manage fields."""
+	return any(frappe.get_attr(method)() for method in frappe.get_hooks("crm_field_admin"))
+
+
 def _assert_admin():
-	if not is_admin():
+	if not (is_admin() or _field_admin_by_hook()):
 		frappe.throw(_("Only admins can change the field catalog."), frappe.PermissionError)
 
 
