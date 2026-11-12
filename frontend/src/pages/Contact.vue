@@ -75,11 +75,11 @@
       </template>
     </Tabs>
     <!-- Figma "Contatos · Detalhe" (805:2): the side panel is on the right,
-         384px, like the card page -->
+         352px (narrower than the card page) -->
     <Resizer
       v-if="contact.doc"
       side="right"
-      :defaultWidth="384"
+      :defaultWidth="352"
       class="flex h-full flex-col overflow-hidden border-l border-[var(--ct-border-soft)]"
     >
       <div class="border-b border-[var(--ct-border-soft)]">
