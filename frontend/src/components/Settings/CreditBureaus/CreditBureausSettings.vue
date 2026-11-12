@@ -1,7 +1,8 @@
 <template>
   <!-- Figma "Configurações · Políticas de Crédito & Compliance" (1999:53488 …):
-       title "Crédito e Compliance", blue info notice, 4 underlined tabs -->
-  <SettingsLayoutBase :title="__('Crédito e Compliance')">
+       title "Crédito e cobrança" (the menu entry, 2345:26721), blue info
+       notice, underlined tabs -->
+  <SettingsLayoutBase :title="__('Crédito e cobrança')">
     <template #header-actions>
       <div v-if="settingsDoc" class="flex items-center gap-2">
         <Button
@@ -289,13 +290,21 @@
         <!-- each provider (token, test, on/off). Reports per level have their tab -->
         <!-- ===================================================================== -->
         <div v-show="activeSection === 'bureaus'" class="flex flex-col gap-6">
-          <p class="mb-0 text-[14px] leading-5 text-[var(--ct-text-secondary)]">
-            {{
-              __(
-                'Conecte suas contas nos provedores (DirectD, Serasa Experian, Escavador, Infosimples e CGU) para consultas de Dossiê e Pré-Filtro.',
-              )
-            }}
-          </p>
+          <!-- title + help like the other tabs (Figma 2345:27090) -->
+          <div class="flex flex-col gap-1">
+            <span
+              class="text-[18px] font-semibold leading-6 text-[var(--ct-text-primary)]"
+            >
+              {{ __('Bureaus de Crédito & Credenciais de API') }}
+            </span>
+            <span class="text-[14px] leading-5 text-[var(--ct-text-secondary)]">
+              {{
+                __(
+                  'Conecte suas contas nos provedores (DirectD, Serasa Experian, Escavador, Infosimples e CGU) para consultas de Dossiê e Pré-Filtro.',
+                )
+              }}
+            </span>
+          </div>
 
           <!-- DirectD -->
           <div class="ct-provider-card">
@@ -352,7 +361,7 @@
               <span :class="pillClass('warning')">{{
                 __('Contrato Próprio')
               }}</span>
-              <Switch v-model="settingsDoc.serasa_enabled" />
+              <Switch v-model="settingsDoc.serasa_enabled" size="md" />
             </div>
             <p class="ct-provider-text">
               {{
@@ -421,7 +430,7 @@
                 {{ __('Pesquisa processual unificada (Escavador)') }}
               </span>
               <span :class="pillClass('accent')">{{ __('Processos') }}</span>
-              <Switch v-model="settingsDoc.escavador_enabled" />
+              <Switch v-model="settingsDoc.escavador_enabled" size="md" />
             </div>
             <p class="ct-provider-text">
               {{
@@ -471,7 +480,7 @@
                 }}
               </span>
               <span :class="pillClass('accent')">{{ __('Fiscal') }}</span>
-              <Switch v-model="settingsDoc.infosimples_enabled" />
+              <Switch v-model="settingsDoc.infosimples_enabled" size="md" />
             </div>
             <p class="ct-provider-text">
               {{
@@ -519,7 +528,7 @@
                 {{ __('Etapa 0: sanções CEIS/CNEP (CGU)') }}
               </span>
               <span :class="pillClass('success')">{{ __('Grátis') }}</span>
-              <Switch v-model="settingsDoc.cgu_enabled" />
+              <Switch v-model="settingsDoc.cgu_enabled" size="md" />
             </div>
             <p class="ct-provider-text">
               {{
