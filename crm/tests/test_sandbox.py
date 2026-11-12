@@ -372,7 +372,9 @@ class TestSandboxGuards(FrappeTestCase):
 
 		owner = f"sbx389-{frappe.generate_hash(length=6)}@example.com"  # only this test's rows, whatever the site has
 		for name in (self.sandbox_card, self.real_card):
-			frappe.db.set_value("CRM Deal", name, {"deal_owner": owner, "source": None, "deal_value": 100})
+			frappe.db.set_value(
+				"CRM Deal", name, {"deal_owner": owner, "source": None, "deal_value": 100, "exchange_rate": 1}
+			)
 		leads = {}
 		for kind in ("real", "stamped", "in_sandbox"):
 			leads[kind] = (
