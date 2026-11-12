@@ -187,7 +187,7 @@
             <br />
             {{
               __(
-                '(prazo de {0} dias, alterável em Configurações › Políticas de Crédito & Compliance).',
+                '(prazo de {0} dias, alterável em Configurações › Crédito e cobrança).',
                 [pkg.data?.reuse_days ?? 30],
               )
             }}

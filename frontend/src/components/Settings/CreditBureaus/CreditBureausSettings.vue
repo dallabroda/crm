@@ -1,5 +1,5 @@
 <template>
-  <!-- Figma "Configurações · Políticas de Crédito & Compliance" (1999:53488 …):
+  <!-- Figma "Configurações · Crédito e cobrança" (1999:53488 …):
        title "Crédito e cobrança" (the menu entry, 2345:26721), blue info
        notice, underlined tabs -->
   <SettingsLayoutBase :title="__('Crédito e cobrança')">
@@ -346,7 +346,7 @@
             <p class="ct-provider-text">
               {{
                 __(
-                  'O mesmo token vale para a Boa Vista, o Dossiê QUOD e o SCR Bacen da aba Relatórios por nível.',
+                  'O mesmo token vale para a Boa Vista, o Dossiê QUOD e o SCR Bacen da aba Dossiê e relatórios.',
                 )
               }}
             </p>
@@ -546,14 +546,19 @@
         </div>
 
         <!-- ===================================================================== -->
-        <!-- TAB 3: RELATÓRIOS POR NÍVEL (Figma 2520:4977): DirectD reports per     -->
-        <!-- level and the Nível 1 screening, same fields as before                -->
+        <!-- TAB 3 (2/2): RELATÓRIOS POR NÍVEL (Figma 2520:4977): DirectD reports -->
+        <!-- per level and the Nível 1 screening, same fields as before; shown    -->
+        <!-- below the dossier (order-1) in the "Dossiê e relatórios" tab        -->
         <!-- ===================================================================== -->
-        <div v-show="activeSection === 'reports'" class="flex flex-col gap-6">
+        <div
+          v-show="activeSection === 'dossier'"
+          id="credit-reports"
+          class="order-1 flex flex-col gap-6 border-t border-[var(--ct-border)] pt-6"
+        >
           <p class="mb-0 text-[14px] leading-5 text-[var(--ct-text-secondary)]">
             {{
               __(
-                'Escolha quais relatórios entram em cada nível da análise. Aparece só se a integração com a DirectD estiver ligada em Bureaus e credenciais.',
+                'Escolha quais relatórios entram em cada nível da análise. Aparece só se a integração com a DirectD estiver ligada em Consultas e credenciais.',
               )
             }}
           </p>
@@ -702,7 +707,7 @@
               >
                 {{
                   __(
-                    'Informe o token da DirectD em Bureaus e credenciais e clique em Salvar para usar os relatórios marcados.',
+                    'Informe o token da DirectD em Consultas e credenciais e clique em Salvar para usar os relatórios marcados.',
                   )
                 }}
               </p>
@@ -711,10 +716,10 @@
         </div>
 
         <!-- ===================================================================== -->
-        <!-- TAB 4: DOSSIÊ E PARECER DA IA (Figma 2167:13315): sections split by    -->
-        <!-- divider lines, no card boxes                                          -->
+        <!-- TAB 3 (1/2): DOSSIÊ E PARECER DA IA (Figma 2167:13315): sections     -->
+        <!-- split by divider lines, no card boxes                                 -->
         <!-- ===================================================================== -->
-        <div v-show="activeSection === 'policy'" class="flex flex-col gap-6">
+        <div v-show="activeSection === 'dossier'" class="flex flex-col gap-6">
           <div class="flex flex-col gap-1">
             <span
               class="text-[18px] font-semibold leading-6 text-[var(--ct-text-primary)]"
@@ -1235,8 +1240,9 @@
 
 <script setup>
 import CreditTabs from '@/components/Settings/CreditBureaus/CreditTabs.vue'
+import { scrollToSettingsSection } from '@/composables/settingsNavigation'
 import { useRoute } from 'vue-router'
-import { ref, computed, onMounted, h } from 'vue'
+import { ref, computed, nextTick, onMounted, h } from 'vue'
 import {
   Button,
   FormControl,
@@ -1283,14 +1289,17 @@ const ProviderTest = {
 
 // Figma tabs (no "all" view): one section per tab
 const route = useRoute()
-// a tab opened from another credit page comes in the hash (#bureaus …)
-const activeSection = ref(
-  ['funnels', 'bureaus', 'reports', 'policy', 'prefilter'].includes(
-    route.hash?.slice(1),
-  )
-    ? route.hash.slice(1)
-    : 'funnels',
-)
+// a tab opened from another credit page comes in the hash (#bureaus …);
+// the old #reports and #policy tabs are now "Dossiê e relatórios"
+const SECTION_OF_HASH = {
+  funnels: 'funnels',
+  bureaus: 'bureaus',
+  dossier: 'dossier',
+  policy: 'dossier',
+  reports: 'dossier',
+  prefilter: 'prefilter',
+}
+const activeSection = ref(SECTION_OF_HASH[route.hash?.slice(1)] || 'funnels')
 
 const loading = ref(true)
 const saving = ref(false)
@@ -1754,9 +1763,9 @@ function packageTier(opt) {
 
 function packageOptionWarning(opt) {
   if (isOptionEnabled(opt))
-    return __('falta informar o token/credencial em Bureaus e credenciais')
+    return __('falta informar o token/credencial em Consultas e credenciais')
   return opt.bureau === 'serasa'
-    ? __('ligue a Serasa em Bureaus e credenciais')
+    ? __('ligue a Serasa em Consultas e credenciais')
     : __('ligue este relatório em Relatórios por nível')
 }
 
@@ -2043,7 +2052,12 @@ async function runTest(provider, token, cnpj) {
 }
 
 onMounted(() => {
-  loadSettings()
+  loadSettings().then(async () => {
+    // an old link to the reports tab lands on its block of the dossier tab
+    if (route.hash !== '#reports') return
+    await nextTick()
+    scrollToSettingsSection('credit-reports')
+  })
   loadPolicy()
   loadRatingPolicy()
   loadPackage()
@@ -2088,7 +2102,7 @@ onMounted(() => {
   line-height: 20px;
   color: var(--ink-gray-6);
 }
-/* Figma provider card (Bureaus e credenciais): 8px radius, 20/16 padding */
+/* Figma provider card (Consultas e credenciais): 8px radius, 20/16 padding */
 .ct-provider-card {
   display: flex;
   flex-direction: column;

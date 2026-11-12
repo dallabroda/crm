@@ -59,6 +59,9 @@ export const SETTINGS_ALIASES = {
   defaults: ['company', 'defaults'],
   dashboard: ['company', 'dashboard'],
   'home-actions': ['company', 'home-actions'],
+  // Crédito e cobrança has six tabs (designer decision): the Régua de
+  // cobrança sits below Cartório & Localização
+  'collection-reminders': ['bureaus', 'collection-reminders'],
 }
 
 export function settingsRoute(page) {
@@ -83,4 +86,17 @@ export function installSettingsNavigation(router) {
     showSettings.value = false
     activeSettingsPage.value = ''
   })
+}
+
+// Scrolls the settings content (not the whole app, whose frames hide their
+// overflow) to the section with this id: an old link to a merged tab
+export function scrollToSettingsSection(id) {
+  const el = document.getElementById(id)
+  let box = el?.parentElement
+  while (box && !/(auto|scroll)/.test(getComputedStyle(box).overflowY)) {
+    box = box.parentElement
+  }
+  if (!el || !box) return
+  box.scrollTop +=
+    el.getBoundingClientRect().top - box.getBoundingClientRect().top
 }

@@ -13339,7 +13339,7 @@ msgid "Won and Lost close the card; the stage stays where it was (standard CRM).
 msgstr "Ganho e Perdido fecham o card; a etapa fica onde estava (padrão de CRM)."
 
 msgid "Credit & Compliance"
-msgstr "Crédito e Compliance"
+msgstr "Crédito e cobrança"
 
 msgid "Credit analysis rules, fraud prevention and legal queries."
 msgstr "Regras de análise de crédito, prevenção a fraudes e consultas jurídicas."

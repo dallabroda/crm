@@ -11,32 +11,34 @@
     <template #header-top>
       <CreditTabs active="page:bureaus" />
     </template>
+    <!-- one Update for the tab: the bureaus and the Régua de cobrança below -->
     <template #header-actions>
       <div v-if="settings.doc && !settings.get.loading" class="flex gap-2">
         <Badge
-          v-if="isDirty"
+          v-if="anyDirty"
           :label="__('Not Saved')"
           variant="subtle"
           theme="amber"
         />
         <Button
-          v-if="isDirty"
+          v-if="anyDirty"
           :label="__('Discard Changes')"
           variant="subtle"
-          @click="settings.reload()"
+          @click="discardAll"
         />
         <Button
           variant="solid"
           :label="__('Update')"
-          :loading="settings.save.loading"
-          :disabled="!isDirty"
-          @click="save"
+          :loading="settings.save.loading || reminders?.saving"
+          :disabled="!canSave"
+          @click="saveAll"
         />
       </div>
     </template>
     <template #content>
       <!-- Figma "Configurações · Cartório & Localização" (1334:19485):
-           16/600 section titles, 48px fields, 24px rhythm -->
+           16/600 section titles, 48px fields, 24px rhythm. Tab "Cartório e
+           cobrança": the Régua de cobrança (Figma 2493:4678) comes below. -->
       <div v-if="settings.doc" class="ct-bureaus flex flex-col gap-6">
         <ErrorMessage :message="saveError" />
 
@@ -413,18 +415,28 @@
       >
         <LoadingIndicator class="size-6" />
       </div>
+      <section
+        v-if="showReminders"
+        id="collection-reminders"
+        class="mt-6 border-t border-[var(--ct-border)] pt-6"
+      >
+        <CollectionReminders ref="reminders" embedded />
+      </section>
     </template>
   </SettingsLayoutBase>
 </template>
 <script setup>
 import CreditTabs from '@/components/Settings/CreditBureaus/CreditTabs.vue'
+import CollectionReminders from '@/components/Settings/Collection/CollectionReminders.vue'
 import '../fieldOutline.css'
 import SettingsDivider from '@/components/Settings/SettingsDivider.vue'
 import CtAlert from '@/components/CtAlert.vue'
 import { useDocument } from '@/data/document'
 import { pipelinesStore } from '@/stores/pipelines'
 import { FormControl, Switch, TextInput, call, toast } from 'frappe-ui'
-import { computed, ref, watch } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
+import { scrollToSettingsSection } from '@/composables/settingsNavigation'
 
 // Assertiva Localize and CENPROT (credtech#290), served by the cred_hub app.
 // Admins only: the page holds the passwords of the company's contracts.
@@ -560,6 +572,36 @@ const stageFields = [
   { field: 'stage_paid', label: __('Paid at the registry stage') },
   { field: 'stage_agreement', label: __('Agreement or withdrawn stage') },
 ]
+
+// the Régua de cobrança section (credtech#367) once the bureaus are loaded;
+// /settings/collection-reminders lands here, on #collection-reminders
+const route = useRoute()
+const reminders = ref(null)
+const showReminders = computed(() => Boolean(settings.doc))
+// again once the reminders are loaded, as they make the page longer
+watch([showReminders, () => reminders.value?.loaded], async ([shown]) => {
+  if (!shown || route.hash !== '#collection-reminders') return
+  await nextTick()
+  scrollToSettingsSection('collection-reminders')
+})
+
+const anyDirty = computed(
+  () => isDirty.value || Boolean(reminders.value?.changed),
+)
+const canSave = computed(
+  () =>
+    anyDirty.value && (!reminders.value?.changed || reminders.value.canSave),
+)
+
+function discardAll() {
+  if (isDirty.value) settings.reload()
+  if (reminders.value?.changed) reminders.value.discard()
+}
+
+function saveAll() {
+  if (isDirty.value) save()
+  if (reminders.value?.changed) reminders.value.save()
+}
 
 function save() {
   saveError.value = ''
