@@ -1,6 +1,7 @@
 <template>
   <!-- Figma "Modal · Nova tarefa" (2424:26862): 520px for tasks, the shared
-       modal header / gray footer, "Cancelar" (outline) beside "Criar" -->
+       modal header / gray footer, "Cancelar" (outline) beside "Criar tarefa";
+       "Nova tarefa" / "Novo contato"... from createLabels() -->
   <Dialog
     v-model:open="show"
     :size="
@@ -22,7 +23,7 @@
                 {{
                   editMode
                     ? __('Edit {0}', [__(doctypeTitle || doctype)])
-                    : __('Create {0}', [__(doctypeTitle || doctype)])
+                    : createLabels(doctype).title
                 }}
               </h3>
             </Dialog.Title>
@@ -66,7 +67,7 @@
         <div class="flex flex-row-reverse gap-3">
           <Button
             variant="solid"
-            :label="editMode ? __('Update') : __('Create')"
+            :label="editMode ? __('Update') : createLabels(doctype).button"
             :loading="editMode ? document.save.loading : create.loading"
             @click="submit"
           />
@@ -83,6 +84,7 @@
 
 <script setup>
 import EditIcon from '@/components/Icons/EditIcon.vue'
+import { createLabels } from '@/utils/createLabels'
 import FieldLayout from '@/components/FieldLayout/FieldLayout.vue'
 import CustomActions from '@/components/CustomActions.vue'
 import { useDocument } from '@/data/document'

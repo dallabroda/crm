@@ -15076,6 +15076,90 @@ msgstr "Para (número)"
 msgid "Created On"
 msgstr "Criado em"
 
+#: frontend/src/utils/createLabels.js
+msgid "New task"
+msgstr "Nova tarefa"
+
+#: frontend/src/utils/createLabels.js
+msgid "Create task"
+msgstr "Criar tarefa"
+
+#: frontend/src/utils/createLabels.js
+msgid "New note"
+msgstr "Nova anotação"
+
+#: frontend/src/utils/createLabels.js
+msgid "Create note"
+msgstr "Criar anotação"
+
+#: frontend/src/utils/createLabels.js
+msgid "New contact"
+msgstr "Novo contato"
+
+#: frontend/src/utils/createLabels.js
+msgid "Create contact"
+msgstr "Criar contato"
+
+#: frontend/src/utils/createLabels.js
+msgid "New organization"
+msgstr "Nova organização"
+
+#: frontend/src/utils/createLabels.js
+msgid "Create organization"
+msgstr "Criar organização"
+
+#: frontend/src/utils/createLabels.js
+msgid "New call log"
+msgstr "Novo registro de ligação"
+
+#: frontend/src/utils/createLabels.js
+msgid "Create call log"
+msgstr "Criar registro de ligação"
+
+#: frontend/src/utils/createLabels.js
+msgid "New product"
+msgstr "Novo produto"
+
+#: frontend/src/utils/createLabels.js
+msgid "Create product"
+msgstr "Criar produto"
+
+#: frontend/src/utils/createLabels.js
+msgid "New industry"
+msgstr "Novo setor"
+
+#: frontend/src/utils/createLabels.js
+msgid "Create industry"
+msgstr "Criar setor"
+
+#: frontend/src/utils/createLabels.js
+msgid "New source"
+msgstr "Nova origem"
+
+#: frontend/src/utils/createLabels.js
+msgid "Create source"
+msgstr "Criar origem"
+
+#: frontend/src/utils/createLabels.js
+msgid "New territory"
+msgstr "Novo território"
+
+#: frontend/src/utils/createLabels.js
+msgid "Create territory"
+msgstr "Criar território"
+
+#: frontend/src/utils/createLabels.js
+msgid "New address"
+msgstr "Novo endereço"
+
+#: frontend/src/utils/createLabels.js
+msgid "Create address"
+msgstr "Criar endereço"
+
+#: frontend/src/utils/createLabels.js
+msgid "New record"
+msgstr "Novo registro"
+
 msgid "New distribution rule"
 msgstr "Nova regra de distribuição"
 

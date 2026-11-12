@@ -6,7 +6,7 @@
           <div>
             <Dialog.Title as-child>
               <h3 class="text-[20px] font-semibold leading-7 text-ink-gray-9">
-                {{ __('New Organization') }}
+                {{ createLabels('CRM Organization').title }}
               </h3>
             </Dialog.Title>
           </div>
@@ -78,7 +78,7 @@
           <Button
             class="w-full"
             variant="solid"
-            :label="enrichingCnpj ? __('Aguardando Receita...') : __('Create')"
+            :label="enrichingCnpj ? __('Aguardando Receita...') : createLabels('CRM Organization').button"
             :loading="loading || enrichingCnpj"
             @click="createOrganization"
           />
@@ -91,6 +91,7 @@
 <script setup>
 import FieldLayout from '@/components/FieldLayout/FieldLayout.vue'
 import EditIcon from '@/components/Icons/EditIcon.vue'
+import { createLabels } from '@/utils/createLabels'
 import StageFields from '@/components/Pipelines/StageFields.vue'
 import { emptyRequiredFields, requiredOutsideLayout } from '@/utils/pipelines'
 import { usersStore } from '@/stores/users'

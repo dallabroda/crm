@@ -9,11 +9,14 @@
       <div
         class="flex h-8 items-center text-[18px] font-semibold leading-6 text-ink-gray-9"
       >
-        {{ title === 'Activity' ? __('Atividades') : __(title) }}
+        {{ inActivityTab ? __('Atividades') : __(title) }}
       </div>
       <div class="flex items-center gap-2">
+        <!-- Figma 799:2 / 801:2 / 802:2: a filtered activity tab keeps the
+             single primary "Novo ˅"; its actions live inside that dropdown -->
+        <template v-if="inActivityTab" />
         <Button
-          v-if="title == 'Emails'"
+          v-else-if="title == 'Emails'"
           variant="solid"
           :label="__('New Email')"
           iconLeft="lucide-plus"
@@ -78,16 +81,19 @@
           </template>
         </Dropdown>
         <Dropdown
-          v-if="!['Quotations', 'WhatsApp', 'Attachments'].includes(title)"
+          v-if="
+            inActivityTab ||
+            !['Quotations', 'WhatsApp', 'Attachments'].includes(title)
+          "
           :options="defaultActions"
           @click.stop
         >
           <template #default="{ open }">
             <Button
-              :variant="title === 'Activity' ? 'solid' : 'outline'"
+              :variant="inActivityTab ? 'solid' : 'outline'"
               class="flex items-center gap-1"
               :label="__('New')"
-              :iconLeft="title === 'Activity' ? undefined : 'lucide-plus'"
+              :iconLeft="inActivityTab ? undefined : 'lucide-plus'"
               :iconRight="open ? 'lucide-chevron-up' : 'lucide-chevron-down'"
             />
           </template>
@@ -109,7 +115,7 @@ import WhatsAppIcon from '@/components/Icons/WhatsAppIcon.vue'
 import { globalStore } from '@/stores/global'
 import { whatsappEnabled } from '@/composables/whatsapp'
 import { callEnabled } from '@/composables/telephony'
-import { Dropdown } from 'frappe-ui'
+import { Dropdown, toast } from 'frappe-ui'
 import { computed, h } from 'vue'
 
 const props = defineProps({
@@ -136,6 +142,9 @@ const showWhatsappTemplates = defineModel('showWhatsappTemplates', {
 })
 const showFilesUploader = defineModel('showFilesUploader', { type: Boolean })
 const emailBox = defineModel('emailBox', { type: Object, default: () => ({}) })
+
+// the activity tab, whatever its filter (Comentários, Tarefas, Ligações...)
+const inActivityTab = computed(() => activeTab.value === 'activity')
 
 const filterPills = computed(() => [
   { value: 'Activity', label: __('Todas as atividades') },

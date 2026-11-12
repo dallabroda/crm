@@ -1131,10 +1131,22 @@ const tabs = computed(() => {
       condition: () => canViewQuotations.value,
     },
   ]
+  // Figma "Card de Cobrança" (2445:4191): on a collection card the titles
+  // come first (then the credit analysis, when there is one)
+  if (isCollectionFunnel.value) {
+    const first = ['titles', 'credit']
+    tabOptions = [
+      ...first.map((v) => tabOptions.find((tab) => tab.value === v)),
+      ...tabOptions.filter((tab) => !first.includes(tab.value)),
+    ]
+  }
   return tabOptions.filter((tab) => (tab.condition ? tab.condition() : true))
 })
 
-const { activeTab, changeTabTo } = useActiveTabManager(tabs, 'lastDealTab')
+// ...and "Títulos" is the tab a collection card opens on
+const { activeTab, changeTabTo } = useActiveTabManager(tabs, 'lastDealTab', {
+  firstTabByDefault: () => isCollectionFunnel.value,
+})
 
 // "Análise de crédito" tab: its top bar drives the AI opinion of the dossier
 const creditDossieRef = ref(null)
