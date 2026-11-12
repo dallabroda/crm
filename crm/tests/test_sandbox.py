@@ -48,6 +48,7 @@ class TestSandboxGuards(FrappeTestCase):
 			"CRM Pipeline", cls.sandbox_pipeline["name"], sandbox.FLAG, 1, update_modified=False
 		)
 		frappe.local.credhub_sandbox_pipeline = None
+		sandbox.clear_memo()
 		frappe.db.commit()  # nosemgrep: fixtures shared by the tests
 
 	@classmethod
@@ -68,11 +69,11 @@ class TestSandboxGuards(FrappeTestCase):
 
 	def setUp(self):
 		frappe.set_user("Administrator")
-		frappe.local.crm_sandbox_records = {}
+		sandbox.clear_memo()
 
 	def tearDown(self):
 		frappe.db.rollback()
-		frappe.local.crm_sandbox_records = {}
+		sandbox.clear_memo()
 
 	@staticmethod
 	def make_pipeline():
@@ -440,3 +441,18 @@ class TestSandboxGuards(FrappeTestCase):
 		self.assertIn(
 			"NOT IN", str(frappe.qb.from_("CRM Deal").select("name").where(sandbox.real_rows("CRM Deal")))
 		)
+
+	def test_sandbox_pipelines_are_read_once_per_request_and_follow_pipeline_changes(self):
+		with patch.object(frappe, "get_all", wraps=frappe.get_all) as get_all:
+			for _i in range(20):
+				sandbox.sandbox_pipelines()
+		self.assertEqual(len([c for c in get_all.call_args_list if c.args[:1] == ("CRM Pipeline",)]), 1)
+		# a pipeline created and then flagged in the same request (as cred_hub does) is seen right away
+		new = self.make_pipeline()
+		frappe.db.set_value("CRM Pipeline", new["name"], sandbox.FLAG, 1, update_modified=False)
+		self.assertIn(new["name"], sandbox.sandbox_pipelines())
+		# and any save of a pipeline refreshes it
+		frappe.db.set_value("CRM Pipeline", new["name"], sandbox.FLAG, 0, update_modified=False)
+		frappe.get_doc("CRM Pipeline", new["name"]).save(ignore_permissions=True)
+		self.assertNotIn(new["name"], sandbox.sandbox_pipelines())
+		self.assertIn(self.sandbox_pipeline["name"], sandbox.sandbox_pipelines())

@@ -104,10 +104,26 @@ def is_sandbox_record(doctype: str | None, name: str | None) -> bool:
 
 
 def sandbox_pipelines() -> list[str]:
-	"""Names of the flagged Sandbox pipelines (one per company in practice)."""
+	"""Names of the flagged Sandbox pipelines (one per company in practice). Memoized for the request (a dashboard
+	asks once per widget); any change to a CRM Pipeline clears the memo (clear_memo)."""
 	if not has_flag("CRM Pipeline"):
 		return []
-	return frappe.get_all("CRM Pipeline", {FLAG: 1}, pluck="name", order_by="name asc")
+	memo = getattr(frappe.local, "crm_sandbox_pipelines", None)
+	if memo is None:
+		memo = frappe.local.crm_sandbox_pipelines = tuple(
+			frappe.get_all("CRM Pipeline", {FLAG: 1}, pluck="name", order_by="name asc")
+		)
+	return list(memo)
+
+
+def clear_memo(doc=None, method=None):
+	"""CRM Pipeline on_update / on_trash / after_rename: forget the memoized Sandbox pipelines and records.
+
+	cred_hub flags its Sandbox pipeline with a direct db write right after creating it (save_pipeline), so the
+	insert's on_update already cleared the memo and the next read is fresh. Code that flags a pipeline by a direct
+	write after reading in the same request (tests, scripts) calls this itself."""
+	frappe.local.crm_sandbox_pipelines = None
+	frappe.local.crm_sandbox_records = {}
 
 
 def real_rows(doctype: str, table=None):
