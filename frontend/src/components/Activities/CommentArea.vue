@@ -3,11 +3,11 @@
     <div class="mb-1 flex items-center justify-stretch gap-2 py-1 text-base">
       <div class="inline-flex items-center flex-wrap gap-1 text-ink-gray-5">
         <UserAvatar class="mr-1" :user="activity.owner" size="md" />
-        <span class="font-medium text-ink-gray-8">
+        <span class="text-ink-gray-9">
           {{ activity.owner_name }}
         </span>
         <span>{{ __('added a') }}</span>
-        <span class="max-w-xs truncate font-medium text-ink-gray-8">
+        <span class="max-w-xs truncate text-ink-gray-9">
           {{ __('comment') }}
         </span>
       </div>
