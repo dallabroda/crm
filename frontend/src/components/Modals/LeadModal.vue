@@ -6,7 +6,7 @@
           <div>
             <Dialog.Title as-child>
               <h3 class="text-[20px] font-semibold leading-7 text-ink-gray-9">
-                {{ __('Create Lead') }}
+                {{ createLabels('CRM Lead').title }}
               </h3>
             </Dialog.Title>
           </div>
@@ -38,7 +38,7 @@
         <div class="flex flex-row-reverse gap-2">
           <Button
             variant="solid"
-            :label="__('Create')"
+            :label="createLabels('CRM Lead').button"
             :loading="isLeadCreating"
             @click="createNewLead"
           />
@@ -50,6 +50,7 @@
 
 <script setup>
 import EditIcon from '@/components/Icons/EditIcon.vue'
+import { createLabels } from '@/utils/createLabels'
 import FieldLayout from '@/components/FieldLayout/FieldLayout.vue'
 import { usersStore } from '@/stores/users'
 import { statusesStore } from '@/stores/statuses'

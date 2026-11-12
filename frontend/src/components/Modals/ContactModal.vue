@@ -6,7 +6,7 @@
           <div>
             <Dialog.Title as-child>
               <h3 class="text-[20px] font-semibold leading-7 text-ink-gray-9">
-                {{ __('New Contact') }}
+                {{ createLabels('Contact').title }}
               </h3>
             </Dialog.Title>
           </div>
@@ -56,7 +56,7 @@
           <Button
             class="w-full"
             variant="solid"
-            :label="__('Create')"
+            :label="createLabels('Contact').button"
             :loading="insertContact.loading"
             @click="createContact"
           />
@@ -71,6 +71,7 @@ import StageFields from '@/components/Pipelines/StageFields.vue'
 import { emptyRequiredFields, requiredOutsideLayout } from '@/utils/pipelines'
 import FieldLayout from '@/components/FieldLayout/FieldLayout.vue'
 import EditIcon from '@/components/Icons/EditIcon.vue'
+import { createLabels } from '@/utils/createLabels'
 import { usersStore } from '@/stores/users'
 import { isMobileView } from '@/composables/settings'
 import { showQuickEntryModal, quickEntryProps } from '@/composables/modals'

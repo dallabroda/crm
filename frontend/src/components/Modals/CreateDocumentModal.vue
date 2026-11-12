@@ -49,6 +49,7 @@
 <script setup>
 import FieldLayout from '@/components/FieldLayout/FieldLayout.vue'
 import EditIcon from '@/components/Icons/EditIcon.vue'
+import { createLabels } from '@/utils/createLabels'
 import { usersStore } from '@/stores/users'
 import { getMeta } from '@/stores/meta'
 import { useDocument } from '@/data/document'
@@ -75,17 +76,12 @@ const { document: _data, triggerOnBeforeCreate } = useDocument(props.doctype)
 const { doctypeMeta } = getMeta(props.doctype)
 
 const dialogOptions = computed(() => {
-  let doctype = props.doctype
-
-  if (doctype.startsWith('CRM ') || doctype.startsWith('FCRM ')) {
-    doctype = doctype.replace(/^(CRM |FCRM )/, '')
-  }
-
-  let title = __('New {0}', [doctype])
+  // "Novo contato" / "Criar contato" (Figma 2424:26862)
+  let { title, button } = createLabels(props.doctype)
   let size = 'xl'
   let actions = [
     {
-      label: __('Create'),
+      label: button,
       variant: 'solid',
       onClick: () => create(),
     },
