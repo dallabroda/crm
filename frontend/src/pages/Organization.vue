@@ -229,7 +229,7 @@
             <Button
               variant="outline"
               :tooltip="__('Open Website')"
-              icon="lucide-link"
+              icon="lucide-link-2"
               @click="openWebsite"
             />
             <Button
