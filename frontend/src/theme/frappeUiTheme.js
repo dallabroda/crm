@@ -196,6 +196,17 @@ export const patches = {
   return classes[props.theme]
 })`,
     ],
+    // initials sized like the Style Guide: 24px -> 10px, 32px -> 12px, 40px -> 14px
+    [
+      `md: 'text-base',
+    lg: 'text-base',
+    xl: 'text-lg',
+    '2xl': 'text-2xl',`,
+      `md: 'text-[10px]',
+    lg: 'text-base',
+    xl: 'text-[12px]',
+    '2xl': 'text-[14px]',`,
+    ],
   ],
 
   // Figma "Interruptor" (959:104): on = blue, off = #dcdde2.
