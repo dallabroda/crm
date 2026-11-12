@@ -46,11 +46,11 @@ msgstr "01/04/2024 23:30"
 
 #: frontend/src/utils/index.js:206
 msgid "1 hour ago"
-msgstr "há 1 hora"
+msgstr "há 1 h"
 
 #: frontend/src/utils/index.js:202
 msgid "1 minute ago"
-msgstr "há 1 minuto"
+msgstr "há 1 min"
 
 #: frontend/src/utils/index.js:221
 msgid "1 month ago"
@@ -10551,7 +10551,7 @@ msgstr "{0} não tem o campo {1}"
 #: frontend/src/utils/index.js:208
 #, python-brace-format
 msgid "{0} hours ago"
-msgstr "{0} horas atrás"
+msgstr "há {0} h"
 
 #: crm/fcrm/doctype/crm_pipeline/fields.py:231
 #, python-brace-format
@@ -10646,12 +10646,12 @@ msgstr "{0} mi"
 #: frontend/src/utils/index.js:204
 #, python-brace-format
 msgid "{0} minutes ago"
-msgstr "{0} minutos atrás"
+msgstr "há {0} min"
 
 #: frontend/src/utils/index.js:223
 #, python-brace-format
 msgid "{0} months ago"
-msgstr "{0} meses atrás"
+msgstr "há {0} meses"
 
 #: crm/automation/actions.py:31
 #, python-brace-format
@@ -10701,7 +10701,7 @@ msgstr "{0} sem."
 #: frontend/src/utils/index.js:219
 #, python-brace-format
 msgid "{0} weeks ago"
-msgstr "{0} semanas atrás"
+msgstr "há {0} semanas"
 
 #: frontend/src/utils/index.js:165
 #, python-brace-format
@@ -10711,7 +10711,7 @@ msgstr "{0} a"
 #: frontend/src/utils/index.js:227
 #, python-brace-format
 msgid "{0} years ago"
-msgstr "{0} anos atrás"
+msgstr "há {0} anos"
 
 #: frontend/src/utils/scriptHelpers.js:45
 msgid "⚠️ Avoid using \"trigger\" as a field name — it conflicts with the built-in trigger() method."

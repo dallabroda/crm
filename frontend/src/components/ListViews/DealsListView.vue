@@ -74,6 +74,27 @@
             class="block size-2 shrink-0 rounded-full bg-current"
             :class="item.color"
           />
+          <!-- Figma "Vendas · Lista · Origem dos leads" (1750:23623): 16px
+               source logo, 8px before the name -->
+          <template v-else-if="column.key === 'source' && item">
+            <span
+              v-if="leadSourceBrand(item).image"
+              class="flex size-4 shrink-0 items-center justify-center"
+            >
+              <img :src="leadSourceBrand(item).image" alt="" />
+            </span>
+            <component
+              :is="leadSourceBrand(item).component"
+              v-else-if="leadSourceBrand(item).component"
+              class="size-4 shrink-0 text-ink-gray-7"
+            />
+            <span
+              v-else
+              class="size-4 shrink-0 text-ink-gray-7"
+              :class="leadSourceBrand(item).icon"
+              aria-hidden="true"
+            />
+          </template>
           <div v-else-if="column.key === 'organization'">
             <Avatar
               v-if="item.label"
@@ -239,6 +260,7 @@ import RatingInput from '@/components/Controls/RatingInput.vue'
 import ListBulkActions from '@/components/ListBulkActions.vue'
 import ListRows from '@/components/ListViews/ListRows.vue'
 import { isTranslatable, formatDuration } from '@/utils'
+import { leadSourceBrand } from '@/utils/leadSourceBrand'
 import { Avatar, Dropdown, Tooltip } from 'frappe-ui'
 import {
   ListView,
