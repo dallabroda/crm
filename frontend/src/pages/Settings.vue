@@ -40,30 +40,28 @@
             ref="navRef"
             class="flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto px-3 pb-5"
           >
-            <template v-for="section in sections" :key="section.key">
+            <template v-for="group in nav" :key="group.key">
               <div
                 class="pb-1 pl-2.5 pt-3 text-[12px] font-medium uppercase tracking-[1.2px] text-[var(--ct-text-tertiary)]"
               >
-                {{ section.label }}
+                {{ group.label }}
               </div>
-              <router-link
-                v-for="item in section.items"
-                :key="item.slug"
-                :to="{ name: 'Settings', params: { section: item.slug } }"
-                :data-page="item.slug"
-                class="flex min-h-9 shrink-0 items-center gap-2.5 rounded-lg px-2.5 py-2 text-[14px] leading-5 transition-colors"
-                :class="
-                  item.slug === activeItem?.slug
-                    ? 'bg-[var(--ct-bg-soft)] font-medium text-[var(--ct-text-primary)]'
-                    : 'text-[var(--ct-text-secondary)] hover:bg-[var(--ct-bg-soft)]'
-                "
-                :aria-current="
-                  item.slug === activeItem?.slug ? 'page' : undefined
-                "
-              >
-                <Icon :icon="item.icon" class="size-4 shrink-0" />
-                <span>{{ item.label }}</span>
-              </router-link>
+              <template v-for="entry in group.entries" :key="entry.key">
+                <router-link
+                  :to="{ name: 'Settings', params: { section: entry.target } }"
+                  :data-page="entry.target"
+                  class="flex min-h-9 shrink-0 items-center gap-2.5 rounded-lg px-2.5 py-2 text-[14px] leading-5 transition-colors"
+                  :class="
+                    isActiveEntry(entry)
+                      ? 'bg-[var(--ct-bg-soft)] font-medium text-[var(--ct-text-primary)]'
+                      : 'text-[var(--ct-text-secondary)] hover:bg-[var(--ct-bg-soft)]'
+                  "
+                  :aria-current="isActiveEntry(entry) ? 'page' : undefined"
+                >
+                  <Icon :icon="entry.icon" class="size-4 shrink-0" />
+                  <span>{{ entry.label }}</span>
+                </router-link>
+              </template>
             </template>
           </div>
         </nav>
@@ -86,11 +84,16 @@ import LayoutHeader from '@/components/LayoutHeader.vue'
 import Icon from '@/components/Icon.vue'
 import {
   getSettingsSections,
+  getSettingsNav,
   findSettingsItem,
 } from '@/components/Settings/settingsSections'
 import { plan, loadPlan } from '@/components/Settings/UsersAndPlan/planApi'
 import { apiKeys, loadApiKeys } from '@/components/Settings/ApiKeys/apiKeysApi'
 import { disableSettingModalOutsideClick } from '@/composables/settings'
+import {
+  SETTINGS_ALIASES,
+  settingsRoute,
+} from '@/composables/settingsNavigation'
 import { usersStore } from '@/stores/users'
 import { usePageMeta } from 'frappe-ui'
 import { computed, nextTick, onMounted, provide, ref, watch } from 'vue'
@@ -108,10 +111,20 @@ if (isAdmin()) {
 }
 
 const sections = computed(() => getSettingsSections())
+const nav = computed(() => getSettingsNav(sections.value))
+
+function isActiveEntry(entry) {
+  return entry.slugs.includes(activeItem.value?.slug)
+}
 
 const activeItem = computed(
   () =>
-    findSettingsItem(sections.value, route.params.section) ||
+    findSettingsItem(
+      sections.value,
+      SETTINGS_ALIASES[route.params.section]?.[0] || route.params.section,
+    ) ||
+    // the first entry of the sidebar (Perfil moved to "Minha conta")
+    findSettingsItem(sections.value, nav.value[0]?.entries[0]?.target) ||
     sections.value[0]?.items[0] ||
     null,
 )
@@ -137,6 +150,11 @@ watch(
   ],
   ([section]) => {
     if (route.name !== 'Settings' || !activeItem.value) return
+    // an old section now inside a page (/settings/brand → Empresa #brand)
+    if (SETTINGS_ALIASES[section]) {
+      router.replace(settingsRoute(section))
+      return
+    }
     if (section === activeItem.value.slug) return
     if (waitingFor(section)) return
     router.replace({

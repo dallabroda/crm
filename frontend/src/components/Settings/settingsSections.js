@@ -9,10 +9,6 @@
 import { markRaw } from 'vue'
 import LucideUserRound from '~icons/lucide/user-round'
 import LucideSlidersVertical from '~icons/lucide/sliders-vertical'
-import LucideSettings from '~icons/lucide/settings'
-import LucideLayoutDashboard from '~icons/lucide/layout-dashboard'
-import LucideMonitorCog from '~icons/lucide/monitor-cog'
-import LucideStar from '~icons/lucide/star'
 import LucideKanban from '~icons/lucide/kanban'
 import LucideTextCursorInput from '~icons/lucide/text-cursor-input'
 import LucideUser from '~icons/lucide/user'
@@ -25,21 +21,19 @@ import LucideWorkflow from '~icons/lucide/workflow'
 import LucideGitBranch from '~icons/lucide/git-branch'
 import LucideShieldCheck from '~icons/lucide/shield-check'
 import LucideZap from '~icons/lucide/zap'
-import LucideHouse from '~icons/lucide/house'
 import LucideMegaphone from '~icons/lucide/megaphone'
 import LucidePhone from '~icons/lucide/phone'
 import LucideKeyRound from '~icons/lucide/key-round'
 import LucideSearchCheck from '~icons/lucide/search-check'
 import LucideCalendarClock from '~icons/lucide/calendar-clock'
 import LucideArrowLeftRight from '~icons/lucide/arrow-left-right'
+import LucideUsers from '~icons/lucide/users'
+import LucideMessageCircle from '~icons/lucide/message-circle'
 import WhatsAppIcon from '@/components/Icons/WhatsAppIcon.vue'
 
 import ProfilePage from '@/components/Settings/Profile/ProfilePage.vue'
 import PreferencesSettings from '@/components/Settings/PreferencesSettings.vue'
-import GeneralSettings from '@/components/Settings/GeneralSettings.vue'
-import DashboardSettings from '@/components/Settings/DashboardSettings.vue'
-import DefaultsSettings from '@/components/Settings/DefaultsSettings.vue'
-import BrandSettings from '@/components/Settings/BrandSettings.vue'
+import CompanySettings from '@/components/Settings/CompanySettings.vue'
 import PipelinesPage from '@/components/Settings/Pipelines/PipelinesPage.vue'
 import FormCustomizationPage from '@/components/Settings/FormCustomization/FormCustomizationPage.vue'
 import Users from '@/components/Settings/Users.vue'
@@ -53,7 +47,6 @@ import AssignmentRulePage from '@/components/Settings/AssignmentRules/Assignment
 import SlaConfig from '@/components/Settings/Sla/SlaConfig.vue'
 import FormsSettings from '@/components/Settings/Forms/FormsSettings.vue'
 import EnrichmentSettings from '@/components/Settings/Enrichment/EnrichmentSettings.vue'
-import HomeActions from '@/components/Settings/HomeActions.vue'
 import LeadSyncSourcePage from '@/components/Settings/LeadSyncing/LeadSyncSourcePage.vue'
 import TelephonyPage from '@/components/Settings/Telephony/TelephonyPage.vue'
 import WhatsAppSettings from '@/components/Settings/WhatsAppSettings.vue'
@@ -92,20 +85,11 @@ function allSections() {
       ],
     },
     {
-      key: 'System Configuration',
+      // Figma "Configurações · Empresa": Geral, Marca, Valores padrão, Painel
+      // and Ações da página inicial on one page (CompanySettings)
+      key: 'Empresa',
       condition: () => isManager(),
-      items: [
-        item('General', LucideSettings, GeneralSettings, {
-          title: 'General Settings',
-        }),
-        item('Dashboard', LucideLayoutDashboard, DashboardSettings),
-        item('Defaults', LucideMonitorCog, DefaultsSettings, {
-          title: 'System Defaults',
-        }),
-        item('Brand', LucideStar, BrandSettings, {
-          title: 'Brand Settings',
-        }),
-      ],
+      items: [item('Company', LucideBuilding2, CompanySettings, { title: 'Empresa' })],
     },
     {
       key: 'Funnels',
@@ -170,11 +154,6 @@ function allSections() {
           condition: () => false,
         }),
       ],
-    },
-    {
-      key: 'Customization',
-      condition: () => isManager(),
-      items: [item('Home Actions', LucideHouse, HomeActions)],
     },
     {
       key: 'Integrations',
@@ -244,4 +223,71 @@ export function findSettingsItem(sections, page) {
     items.find((i) => i.label === page) ||
     null
   )
+}
+
+// Figma "Barra lateral secundária · Configurações" (Configurações · Empresa
+// 2323:14221): three groups and eleven entries. An entry stands for one or
+// more sections that have tabs between them (Equipe → Pessoas / Hierarquia,
+// Crédito e cobrança → its tabs); no sub-items, to keep the menu short.
+// Sections in no entry (Perfil, Preferências → "Minha conta") stay reachable
+// by URL.
+const NAV = [
+  {
+    key: 'Empresa',
+    entries: [
+      { key: 'Empresa', icon: LucideBuilding2, slugs: ['company'] },
+      { key: 'Equipe', icon: LucideUsers,
+        slugs: ['users', 'invite-user', 'sales-hierarchy'] },
+      { key: 'Plano e cobrança', icon: LucideCreditCard,
+        slugs: ['users-and-plan'] },
+    ],
+  },
+  {
+    key: 'Vendas e crédito',
+    entries: [
+      { key: 'Funis', icon: LucideKanban,
+        slugs: ['funnels', 'form-customization'] },
+      { key: 'Automação', icon: LucideWorkflow,
+        slugs: ['workflow-automations', 'assignment-rules', 'sla-policies'] },
+      { key: 'Crédito e cobrança', icon: LucideShieldCheck,
+        slugs: ['credit-compliance', 'bureaus', 'collection-reminders', 'erp-integration'] },
+    ],
+  },
+  {
+    key: 'Canais e integrações',
+    entries: [
+      { key: 'E-mail', icon: LucideMail,
+        slugs: ['email-accounts', 'email-templates'] },
+      { key: 'WhatsApp', icon: LucideMessageCircle, slugs: ['whatsapp'] },
+      { key: 'Telefonia', icon: LucidePhone, slugs: ['telephony'] },
+      { key: 'Entrada de leads', icon: LucideMegaphone,
+        slugs: ['lead-sources', 'lead-capture-forms'] },
+      { key: 'API', icon: LucideKeyRound, slugs: ['api'] },
+    ],
+  },
+]
+
+// The sidebar groups for the sections the user can see (see NAV). Each entry
+// opens its first visible section and is active on any of its sections.
+export function getSettingsNav(sections) {
+  const bySlug = new Map(
+    sections.flatMap((section) => section.items).map((i) => [i.slug, i]),
+  )
+  return NAV.map((group) => ({
+    key: group.key,
+    label: __(group.key),
+    entries: group.entries
+      .map((entry) => {
+        const items = entry.slugs.map((s) => bySlug.get(s)).filter(Boolean)
+        if (!items.length) return null
+        return {
+          key: entry.key,
+          label: __(entry.key),
+          icon: markRaw(entry.icon),
+          slugs: items.map((i) => i.slug),
+          target: items[0].slug,
+        }
+      })
+      .filter(Boolean),
+  })).filter((group) => group.entries.length)
 }

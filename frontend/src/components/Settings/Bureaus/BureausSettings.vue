@@ -7,6 +7,10 @@
       )
     "
   >
+    <!-- the tabs of "Crédito e cobrança" (no sub-items in the menu) -->
+    <template #header-top>
+      <CreditTabs active="page:bureaus" />
+    </template>
     <template #header-actions>
       <div v-if="settings.doc && !settings.get.loading" class="flex gap-2">
         <Badge
@@ -413,6 +417,7 @@
   </SettingsLayoutBase>
 </template>
 <script setup>
+import CreditTabs from '@/components/Settings/CreditBureaus/CreditTabs.vue'
 import '../fieldOutline.css'
 import SettingsDivider from '@/components/Settings/SettingsDivider.vue'
 import CtAlert from '@/components/CtAlert.vue'
