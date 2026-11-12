@@ -9,10 +9,14 @@ event subscriptions and run logs.
 Correlation: a message event is emitted once per candidate key (thread first, then the
 Lead/Deal it belongs to) so both thread-level and record-level waits can match. Emitting
 more than once is safe for flows: the outbox deduplicates a pending row per document.
+
+Sandbox records of the HubTech API (crm.sandbox) emit nothing: test data never starts a flow.
 """
 
 import frappe
 from frappe.utils import add_to_date, get_datetime, now
+
+from crm.sandbox import is_sandbox, is_sandbox_record
 
 try:
 	from frappe.automation_engine import emit, is_enabled
@@ -56,7 +60,7 @@ def on_communication(doc, method=None):
 	"""Emit the prospect message event for an email against a Lead or Deal."""
 	if not _enabled() or doc.reference_doctype not in CRM_REFERENCE_DOCTYPES:
 		return
-	if doc.communication_type != "Communication":
+	if doc.communication_type != "Communication" or is_sandbox(doc):
 		return
 	event = "crm.prospect_message_sent" if doc.sent_or_received == "Sent" else "crm.prospect_message_received"
 	thread = _email_thread_key(doc)
@@ -66,7 +70,7 @@ def on_communication(doc, method=None):
 
 def on_whatsapp_message(doc, method=None):
 	"""Emit the prospect message event for a WhatsApp message against a Lead or Deal."""
-	if not _enabled() or doc.reference_doctype not in CRM_REFERENCE_DOCTYPES:
+	if not _enabled() or doc.reference_doctype not in CRM_REFERENCE_DOCTYPES or is_sandbox(doc):
 		return
 	outgoing = doc.get("type") == "Outgoing"
 	event = "crm.prospect_message_sent" if outgoing else "crm.prospect_message_received"
@@ -78,11 +82,13 @@ def on_whatsapp_message(doc, method=None):
 def on_lead_update(doc, method=None):
 	if not _enabled() or not doc.has_value_changed("status") or doc.status != QUALIFIED_STATUS:
 		return
+	if is_sandbox(doc):
+		return
 	emit("crm.lead_qualified", doc=doc, payload={"lead": doc.name, "status": doc.status})
 
 
 def on_deal_update(doc, method=None):
-	if not _enabled() or not doc.has_value_changed("status"):
+	if not _enabled() or not doc.has_value_changed("status") or is_sandbox(doc):
 		return
 	before = doc.get_doc_before_save()
 	payload = {"deal": doc.name, "status": doc.status, "previous_status": before.status if before else None}
@@ -91,7 +97,7 @@ def on_deal_update(doc, method=None):
 
 
 def emit_lead_converted(lead, deal, contact=None, organization=None):
-	if not _enabled():
+	if not _enabled() or is_sandbox(lead) or is_sandbox_record("CRM Deal", deal):
 		return
 	payload = {"lead": lead.name, "deal": deal, "contact": contact, "organization": organization}
 	emit("crm.lead_converted", doc=lead, payload=payload, correlation_key=lead.name)
@@ -129,6 +135,9 @@ def _sweep_start(until):
 
 
 def _emit_overdue_task(task):
+	doc = frappe.get_doc("CRM Task", task.name)
+	if is_sandbox(doc):
+		return
 	payload = {
 		"task": task.name,
 		"reference_doctype": task.reference_doctype,
@@ -137,7 +146,7 @@ def _emit_overdue_task(task):
 	}
 	emit(
 		"crm.task_overdue",
-		doc=frappe.get_doc("CRM Task", task.name),
+		doc=doc,
 		payload=payload,
 		correlation_key=task.name,
 	)

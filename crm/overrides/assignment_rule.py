@@ -1,6 +1,7 @@
 from frappe.automation.doctype.assignment_rule.assignment_rule import AssignmentRule
 
 from crm.api.availability import get_user_categories
+from crm.sandbox import is_sandbox
 
 CRM_DOCTYPES = ("CRM Lead", "CRM Deal")
 USER_POOL_FIELDS = {
@@ -11,7 +12,13 @@ USER_POOL_FIELDS = {
 
 
 class CRMAssignmentRule:
-	"""Assign leads and deals to Active users first, then Away, then anyone in the rule."""
+	"""Assign leads and deals to Active users first, then Away, then anyone in the rule. Sandbox records of the
+	HubTech API (crm.sandbox) are never assigned by a rule."""
+
+	def apply_assign(self, doc):
+		if is_sandbox(doc):
+			return False
+		return super().apply_assign(doc)
 
 	def get_user(self, doc):
 		fieldname = USER_POOL_FIELDS.get(self.rule)

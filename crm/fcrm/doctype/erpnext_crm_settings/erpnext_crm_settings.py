@@ -11,6 +11,8 @@ from frappe.frappeclient import FrappeClient
 from frappe.model.document import Document
 from frappe.utils import get_url_to_form, get_url_to_list
 
+from crm.sandbox import is_sandbox, is_sandbox_record
+
 
 def _is_erpnext_installed():
 	return "erpnext" in frappe.get_installed_apps()
@@ -592,6 +594,9 @@ def get_organization_address(organization: str | None = None):
 
 
 def create_customer_in_erpnext(doc, method):
+	if is_sandbox(doc):
+		# Sandbox card of the HubTech API (crm.sandbox): test data never reaches ERPNext
+		return
 	erpnext_crm_settings = frappe.get_single("ERPNext CRM Settings")
 	if (
 		not erpnext_crm_settings.enabled
@@ -618,7 +623,7 @@ def check_customer_for_deal(crm_deal: str):
 	erpnext_crm_settings = frappe.get_single("ERPNext CRM Settings")
 	if not erpnext_crm_settings.enabled or erpnext_crm_settings.is_erpnext_in_different_site:
 		return None
-	if not crm_deal or not frappe.db.exists("CRM Deal", crm_deal):
+	if not crm_deal or not frappe.db.exists("CRM Deal", crm_deal) or is_sandbox_record("CRM Deal", crm_deal):
 		return None
 
 	customer = get_local_customer(crm_deal)

@@ -246,6 +246,19 @@ override_doctype_class = {
 extend_doctype_class = {
 	"Data Import": ["crm.overrides.data_import.DataImportListView"],
 	"Assignment Rule": ["crm.overrides.assignment_rule.CRMAssignmentRule"],
+	# Sandbox records of the HubTech API: Frappe notifications and webhooks do not fire (crm.sandbox)
+	**{
+		doctype: ["crm.sandbox.SandboxDocument"]
+		for doctype in (
+			"CRM Deal",
+			"Contact",
+			"CRM Organization",
+			"CRM Lead",
+			"FCRM Note",
+			"CRM Task",
+			"File",
+		)
+	},
 }
 
 # Frappe v15 has no extend_doctype_class
@@ -330,6 +343,8 @@ doc_events = {
 			"crm.fcrm.doctype.erpnext_crm_settings.erpnext_crm_settings.notify_deal_quotation_change"
 		],
 	},
+	# Sandbox records of the HubTech API never run automation flows (crm.sandbox)
+	"Automation Trigger Queue": {"before_insert": ["crm.sandbox.skip_sandbox_trigger"]},
 	"Item": {
 		"after_insert": ["crm.integrations.erpnext.item.after_insert"],
 		"on_update": ["crm.integrations.erpnext.item.on_update"],
