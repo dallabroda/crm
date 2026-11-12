@@ -2,7 +2,9 @@ import { ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useDebounceFn, useStorage } from '@vueuse/core'
 
-export function useActiveTabManager(tabs, storageKey) {
+// options.firstTabByDefault(): open on the first tab instead of the last one
+// visited (e.g. "Títulos" on a collection card); a tab in the URL still wins
+export function useActiveTabManager(tabs, storageKey, options = {}) {
   const lastVisitedTab = useStorage(storageKey, 'activity')
   const route = useRoute()
   const router = useRouter()
@@ -44,6 +46,8 @@ export function useActiveTabManager(tabs, storageKey) {
       return firstTab()
     }
 
+    if (options.firstTabByDefault?.()) return firstTab()
+
     if (hasTab(lastVisitedTab.value)) return lastVisitedTab.value
 
     return firstTab()
@@ -69,7 +73,16 @@ export function useActiveTabManager(tabs, storageKey) {
     },
   )
 
-  watch(tabs, () => {
+  watch(tabs, (newTabs, oldTabs) => {
+    // the tabs load with the document: when the first tab changes to the
+    // default one (the card turned out to be a collection card), open it
+    if (
+      options.firstTabByDefault?.() &&
+      newTabs?.[0]?.value !== oldTabs?.[0]?.value
+    ) {
+      activeTab.value = firstTab()
+      return
+    }
     activeTab.value = getActiveTab()
   })
 
