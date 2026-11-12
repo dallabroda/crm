@@ -1,6 +1,6 @@
 <template>
   <SettingsLayoutBase
-    :title="__('Bureaus')"
+    :title="__('Crédito e cobrança')"
     :description="
       __(
         'Contracts of your company with each bureau: every query is paid by your company to the bureau, and every query is kept in the history (LGPD).',
@@ -326,7 +326,7 @@
                     __('Collection pipeline: {0}', [__(pipeline.pipeline_name)])
                   }}
                 </div>
-                <span class="text-base leading-5 text-ink-gray-6">
+                <span class="text-xs text-ink-gray-6">
                   {{
                     __(
                       'When the registry status changes, the card moves to the stage chosen below and the owner gets a notification.',
@@ -615,8 +615,9 @@ async function test(provider) {
   font-size: 12px;
   line-height: 16px;
 }
-/* the server IP is read-only: gray box, as in the Figma "IP" */
-.ct-bureaus .ct-ip :deep(input) {
+/* the server IP is read-only: gray box, as in the Figma "IP" (the class
+   sits inside TextInput, so it is matched through :deep) */
+.ct-bureaus :deep(.ct-ip input) {
   background-color: var(--ct-bg-soft);
   color: var(--ct-text-tertiary);
 }

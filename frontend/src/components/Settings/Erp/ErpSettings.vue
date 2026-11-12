@@ -1,6 +1,6 @@
 <template>
   <SettingsLayoutBase
-    :title="__('ERP integration')"
+    :title="__('Crédito e cobrança')"
     :description="
       __(
         'Direct connection with the ERP of your securitization company or factoring. The contract and the API credentials are your company\'s with the ERP; HubTech only does the technical integration.',

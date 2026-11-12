@@ -1,9 +1,10 @@
 <template>
   <!-- Figma "Configurações · Usuários e plano · preenchida" (2201:2060):
        the title lives in the top bar; the page is the plan list and the
-       "Adicionais" block, with no intro text, usage card or comparison table. -->
+       "Adicionais" block, with no intro text, usage card or comparison table.
+       The top bar says "Plano e cobrança", like the menu entry (2323:16567). -->
   <div class="flex h-full flex-col gap-6 text-[var(--ct-text-primary)]">
-    <SettingsPageHeader :title="__('Users and Plan')" />
+    <SettingsPageHeader :title="__('Plano e cobrança')" />
 
     <div v-if="!data" class="flex mt-28 justify-between w-full h-full">
       <Button
@@ -14,12 +15,10 @@
       />
     </div>
 
-    <div
-      v-else-if="data.unlimited"
-      class="rounded-[8px] bg-[var(--ct-info-soft)] px-3.5 py-2.5 text-base font-medium text-[var(--ct-info)]"
-    >
+    <!-- Figma "Plano e cobrança · vazia" (2323:16567): the Style Guide notice -->
+    <CtAlert v-else-if="data.unlimited">
       {{ __('Your company has no user limit.') }}
-    </div>
+    </CtAlert>
 
     <div v-else class="flex flex-col gap-6 overflow-y-auto pb-6">
       <!-- Alertas de pagamento (só aparecem quando há pendência) -->
@@ -313,6 +312,7 @@
 
 <script setup>
 import SettingsPageHeader from '@/components/Settings/SettingsPageHeader.vue'
+import CtAlert from '@/components/CtAlert.vue'
 import { usersStore } from '@/stores/users'
 import { formatDate } from '@/utils'
 import { formatCurrency } from '@/utils/numberFormat'

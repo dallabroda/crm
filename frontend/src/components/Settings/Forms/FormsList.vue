@@ -98,7 +98,8 @@
     </div>
   </div>
 
-  <!-- create dialog -->
+  <!-- create dialog (Figma "Modal · Novo formulário" 2424:24349): 48px
+       fields, "Cancelar" + "Criar formulário" on the right of the footer -->
   <Dialog v-model:open="showCreate" :title="__('New form')">
     <template #default>
       <div class="flex flex-col gap-4">
@@ -110,16 +111,18 @@
           @input="onTitleInput"
         />
         <div>
-          <div class="mb-1.5 text-sm text-ink-gray-5">{{ __('Route') }}</div>
+          <div class="ct-field-label mb-1.5 text-sm text-ink-gray-5">
+            {{ __('Route') }}
+          </div>
           <div
-            class="flex h-7 cursor-text items-center rounded-4 border border-transparent bg-surface-gray-2 px-2.5 text-base transition-colors hover:bg-surface-gray-3 focus-within:border-outline-gray-4 focus-within:bg-surface-base"
+            class="flex h-12 cursor-text items-center rounded-[6px] border border-[var(--ct-border)] bg-[var(--ct-bg-page)] px-3.5 text-[16px] leading-6 text-[var(--ct-text-primary)] transition-colors focus-within:border-[var(--ct-accent)]"
             @click="focusRouteEnd"
           >
-            <span class="shrink-0 text-ink-gray-4">/crm-form/</span>
+            <span class="shrink-0">/crm-form/</span>
             <input
               v-model="draft.route"
               :placeholder="__('contact-sales')"
-              class="min-w-0 flex-1 border-0 bg-transparent p-0 text-base text-ink-gray-8 placeholder:text-ink-gray-4 focus:outline-none focus:ring-0"
+              class="min-w-0 flex-1 border-0 bg-transparent p-0 text-[16px] leading-6 text-[var(--ct-text-primary)] placeholder:text-ink-gray-4 focus:outline-none focus:ring-0"
               @input="routeEdited = true"
             />
           </div>
@@ -128,13 +131,19 @@
       </div>
     </template>
     <template #actions>
-      <Button
-        class="w-full"
-        variant="solid"
-        :label="__('Create form')"
-        :loading="creating"
-        @click="createForm"
-      />
+      <div class="flex justify-end gap-2">
+        <Button
+          variant="outline"
+          :label="__('Cancel')"
+          @click="showCreate = false"
+        />
+        <Button
+          variant="solid"
+          :label="__('Create form')"
+          :loading="creating"
+          @click="createForm"
+        />
+      </div>
     </template>
   </Dialog>
 </template>

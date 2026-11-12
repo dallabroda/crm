@@ -1,14 +1,14 @@
 <template>
   <!-- Figma "Configurações · Empresa" (2323:14221): one page with the general
        options first, then "Marca" and "Valores padrão" as sections (18 Semi
-       Bold title, actions on its right); "Painel" and "Ações da página
+       Bold title, actions on its right; 44px above, no divider); "Painel" and "Ações da página
        inicial" follow the same way. The top bar keeps "Empresa". -->
   <div class="flex flex-col">
     <template v-for="(section, i) in visibleSections" :key="section.key">
       <section
         :id="section.key"
-        class="flex scroll-mt-4 flex-col gap-4"
-        :class="i > 0 ? 'mt-8 border-t border-[var(--ct-border-soft)] pt-8' : ''"
+        class="flex scroll-mt-4 flex-col gap-5"
+        :class="i > 0 ? 'mt-11' : ''"
       >
         <div
           v-if="section.title || i > 0"

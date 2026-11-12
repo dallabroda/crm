@@ -1,6 +1,6 @@
 <template>
   <SettingsLayoutBase
-    :title="__('Collection reminders')"
+    :title="__('Crédito e cobrança')"
     :description="
       __(
         'Approved WhatsApp templates sent through SmartChat to the sacado of each open título of the collection funnel, on the days you choose. The AI agent that answers and the templates are configured in SmartChat.',
@@ -36,8 +36,9 @@
     </template>
     <template #content>
       <!-- Figma "[HubTech CRM] · credtech#367 · Configurações › Régua de cobrança"
-           (review page 1979:3291): same rhythm as Integração com ERP -->
-      <div class="flex flex-col gap-6 pb-12">
+           (review page 1979:3291): same rhythm as Integração com ERP; the
+           blocks are 950px wide at most (Figma 2493:4678) -->
+      <div class="flex max-w-[950px] flex-col gap-6 pb-12">
         <CtAlert v-if="!chat.loading && !chat.connected" type="warning">
           {{
             __(
@@ -66,6 +67,7 @@
               <!-- never stuck ON: a disconnected SmartChat must not keep the reminders on -->
               <Switch
                 v-model="form.enabled"
+                size="md"
                 :disabled="!chat.connected && !form.enabled"
               />
             </div>
