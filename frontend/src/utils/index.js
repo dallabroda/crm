@@ -101,6 +101,24 @@ export function timeAgo(date) {
   return prettyDate(date)
 }
 
+// Short relative time ("há 6 min", "há 2 h", "há 3 d") for compact columns,
+// like "Criado" in Figma "Vendas · Lista · Origem dos leads" (1750:23623).
+export function shortTimeAgo(date) {
+  if (!date) return ''
+  if (typeof date == 'string') date = dayjsLocal(date)
+  const tz = getConfig('localTimezone') || getBrowserTimezone()
+  const diff = Math.max(
+    0,
+    dayjs()
+      .tz(tz || getConfig('systemTimezone'))
+      .diff(date, 'seconds'),
+  )
+  if (diff < 3600)
+    return __('{0} min ago (short)', [Math.max(1, Math.floor(diff / 60))])
+  if (diff < 86400) return __('{0} h ago (short)', [Math.floor(diff / 3600)])
+  return __('{0} d ago (short)', [Math.floor(diff / 86400)])
+}
+
 function getBrowserTimezone() {
   return Intl.DateTimeFormat().resolvedOptions().timeZone
 }
@@ -873,4 +891,17 @@ export function sanitizeHTML(html = '', options = {}) {
 export function sanitizeText(text = '') {
   if (typeof text !== 'string') return text
   return text.replace(/\p{Cf}/gu, '')
+}
+
+// Two-letter initials ("Rafael Lima" -> "RL"), used where the Figma shows them:
+// the signed-in user's avatar (32px) and the card owner in the top bar.
+export function initials(name) {
+  const words = String(name || '')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+  if (!words.length) return ''
+  const first = words[0][0] || ''
+  const last = words.length > 1 ? words[words.length - 1][0] : ''
+  return (first + last).toUpperCase()
 }

@@ -14,7 +14,10 @@
             :image="avatars[0].image"
             :label="avatars[0].label"
             :size="size"
-          />
+            ><template v-if="twoInitials" #default>{{
+              initials(avatars[0].label)
+            }}</template></Avatar
+          >
           <AvailabilityDot
             :user="avatars[0].name"
             class="absolute bottom-0 right-0 ring-2 ring-[--surface-base]"
@@ -49,6 +52,7 @@
   </div>
 </template>
 <script setup>
+import { initials } from '@/utils'
 import AvailabilityDot from '@/components/AvailabilityDot.vue'
 import { Avatar, Tooltip } from 'frappe-ui'
 import { computed } from 'vue'
@@ -57,6 +61,7 @@ const props = defineProps({
   avatars: { type: Array, default: () => [] },
   size: { type: String, default: 'md' },
   labelClass: { type: String, default: '' },
+  twoInitials: { type: Boolean, default: false },
 })
 const reverseAvatars = computed(() => [...props.avatars].reverse())
 </script>

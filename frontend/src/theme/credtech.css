@@ -582,3 +582,15 @@ input[type='radio'].ct-radio:disabled {
   button[class*='bg-[var(--ct-action-neutral)]']:hover {
   background-color: var(--ct-bg-soft);
 }
+
+/* Figma "Aba" (Style Guide; card 2533:43700): the active underline tab has a
+   2px blue line (Uso/Texto/Destaque #0088ff), not the 1px grey of frappe-ui. */
+[data-slot='tab-list'][data-variant='underline'] > [data-slot='tab-indicator'] {
+  height: 2px;
+  transform: translateX(var(--reka-tabs-indicator-position)) translateY(0);
+}
+[data-slot='tab-list'][data-variant='underline']
+  > [data-slot='tab-indicator']
+  > div {
+  background: var(--ct-accent);
+}

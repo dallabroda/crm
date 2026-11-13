@@ -1,8 +1,10 @@
 import { dayjs } from 'frappe-ui'
-import 'dayjs/esm/locale/pt-br'
+import ptBr from 'dayjs/esm/locale/pt-br'
 
-// dayjs locales bundled with the app, keyed by base language
-const DAYJS_LOCALES = { pt: 'pt-br' }
+// dayjs locales bundled with the app, keyed by base language. Passed as objects so
+// they register on frappe-ui's dayjs instance (a side-effect import registers them on
+// another copy, and dates came out in English: "13 Nov, Friday").
+const DAYJS_LOCALES = { pt: ptBr }
 
 // The signed-in user's language (boot "lang", e.g. "pt-BR"), as a tag Intl accepts
 export function userLocale() {

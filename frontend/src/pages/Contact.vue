@@ -59,7 +59,7 @@
         />
         <EmptyState
           v-if="tab.value !== 'notes' && !rows.length"
-          :icon="tab.iconLeft"
+          icon="lucide-clipboard-list"
           name="Deals"
           :title="__('No deals found')"
           :description="__('Use New Deal to create a deal for this contact.')"

@@ -75,12 +75,18 @@
     class="flex items-center justify-between gap-3 px-6 py-2 bg-[#F5F5F7] border-b border-[#E6E7EB] text-xs text-[#1E1F23]"
   >
     <div class="flex items-center gap-2.5">
-      <span class="inline-block size-3.5 animate-spin rounded-full border-2 border-solid border-[#0088FF] border-r-transparent" />
+      <span
+        class="inline-block size-3.5 animate-spin rounded-full border-2 border-solid border-[#0088FF] border-r-transparent"
+      />
       <span class="font-medium text-[#1E1F23]">
         {{ __('Consultando dados da empresa na Receita Federal...') }}
       </span>
       <span class="text-[#5E6068]">
-        {{ __('Identificando razão social, situação cadastral, CNAE, endereço e sócios.') }}
+        {{
+          __(
+            'Identificando razão social, situação cadastral, CNAE, endereço e sócios.',
+          )
+        }}
       </span>
     </div>
     <Button
@@ -128,9 +134,7 @@
           class="flex flex-col gap-6 p-5"
         >
           <!-- Pasta Digital · Checklist de Documentos & Link Seguro (LGPD) -->
-          <CreditOnboardingPanel
-            :organization-id="docName"
-          />
+          <CreditOnboardingPanel :organization-id="docName" />
 
           <!-- Outros Anexos Gerais / Avulsos -->
           <div class="mt-2 pt-5 border-t border-[#E6E7EB] flex flex-col gap-4">
@@ -140,7 +144,11 @@
                   {{ __('Outros Anexos Gerais') }}
                 </span>
                 <p class="text-xs text-ink-gray-6 mt-0.5">
-                  {{ __('Arquivos avulsos anexados diretamente ao cadastro da organização fora do checklist.') }}
+                  {{
+                    __(
+                      'Arquivos avulsos anexados diretamente ao cadastro da organização fora do checklist.',
+                    )
+                  }}
                 </p>
               </div>
               <Button
@@ -161,7 +169,9 @@
               :name="__('Anexos')"
               :title="__('Nenhum anexo avulso encontrado')"
               :description="
-                __('Use Enviar anexo avulso se precisar guardar arquivos extras que não fazem parte do checklist da pasta digital.')
+                __(
+                  'Use Enviar anexo avulso se precisar guardar arquivos extras que não fazem parte do checklist da pasta digital.',
+                )
               "
             />
           </div>
@@ -176,7 +186,7 @@
             !['notes', 'credit', 'attachments'].includes(tab.value) &&
             !rows.length
           "
-          :icon="tab.iconLeft"
+          :icon="tab.value === 'deals' ? 'lucide-clipboard-list' : tab.iconLeft"
           :name="__(tab.label)"
           :title="
             tab.value === 'deals'
@@ -438,7 +448,12 @@ watch(
         const res = await call('cred_hub.cnpj.enrich.resolve_organization', {
           org_name: props.organizationId,
         })
-        if (res && res.exists && res.name && res.name !== props.organizationId) {
+        if (
+          res &&
+          res.exists &&
+          res.name &&
+          res.name !== props.organizationId
+        ) {
           router.replace({
             name: 'Organization',
             params: { organizationId: res.name },
@@ -676,7 +691,12 @@ const panelSections = computed(() => {
   for (const sec of sections.data || []) {
     for (const col of sec.columns || []) {
       for (const f of col.fields || []) {
-        if (f && typeof f === 'object' && f.fieldname && f.fieldname !== 'cnpj_checked_on') {
+        if (
+          f &&
+          typeof f === 'object' &&
+          f.fieldname &&
+          f.fieldname !== 'cnpj_checked_on'
+        ) {
           allFieldsMap.set(f.fieldname, { ...f, visible: 1 })
         }
       }

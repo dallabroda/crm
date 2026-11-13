@@ -73,7 +73,7 @@
             { label: __('All'), value: 'All' },
             { label: __('Admin'), value: 'System Manager' },
             { label: __('Manager'), value: 'Sales Manager' },
-            { label: __('Sales User'), value: 'Sales User' },
+            { label: __('Member'), value: 'Sales User' },
           ]"
         />
       </div>
@@ -140,7 +140,9 @@
                     <span class="truncate">{{ roleMap[user.role] }}</span>
                     <span
                       class="size-4 shrink-0"
-                      :class="open ? 'lucide-chevron-up' : 'lucide-chevron-down'"
+                      :class="
+                        open ? 'lucide-chevron-up' : 'lucide-chevron-down'
+                      "
                       aria-hidden="true"
                     />
                   </button>
@@ -196,7 +198,7 @@ const currentRole = ref('All')
 const roleMap = {
   'System Manager': __('Admin'),
   'Sales Manager': __('Manager'),
-  'Sales User': __('Sales User'),
+  'Sales User': __('Member'),
 }
 
 const usersList = computed(() => {
@@ -244,7 +246,7 @@ function getDropdownOptions(user) {
       condition: () => isAdmin(),
     },
     {
-      label: __('Sales User'),
+      label: __('Member'),
       icon: 'lucide-user-check',
       selected: user.role === 'Sales User',
       onClick: () => updateRole(user, 'Sales User'),
