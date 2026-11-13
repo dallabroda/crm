@@ -204,9 +204,178 @@
                 {{ lists.error }}
               </CtAlert>
             </template>
+
+            <p
+              v-if="
+                settings.doc.cedente_send_enabled && mappingLoading && !mapping
+              "
+              class="text-base leading-5 text-ink-gray-6"
+            >
+              {{ __('Loading the field mapping…') }}
+            </p>
+
+            <!-- De-para (Ida: CRM → ERP) — collapsed by default inside Cedente registration -->
+            <div
+              v-if="
+                mapping &&
+                (settings.doc.cedente_send_enabled ||
+                  (cedenteValidationTriggered &&
+                    missingRequiredCedente.length > 0))
+              "
+              ref="cedenteAccordionEl"
+              class="rounded-[8px] border bg-[var(--ct-bg-page)]"
+              :class="
+                cedenteValidationTriggered && missingRequiredCedente.length > 0
+                  ? 'border-[var(--ct-danger)]'
+                  : 'border-[var(--ct-border)]'
+              "
+            >
+              <button
+                type="button"
+                class="flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left transition-colors hover:bg-[var(--ct-bg-soft)]"
+                :class="
+                  openSections.cedente ? 'rounded-t-[8px]' : 'rounded-[8px]'
+                "
+                :aria-expanded="openSections.cedente"
+                @click="openSections.cedente = !openSections.cedente"
+              >
+                <span class="flex min-w-0 items-center gap-2.5">
+                  <span
+                    class="size-4 shrink-0 text-[var(--ct-text-secondary)]"
+                    :class="
+                      openSections.cedente
+                        ? 'lucide-chevron-down'
+                        : 'lucide-chevron-right'
+                    "
+                    aria-hidden="true"
+                  />
+                  <span
+                    class="truncate text-[14px] font-semibold leading-5 text-[var(--ct-text-primary)]"
+                  >
+                    {{
+                      __('Field mapping · Cedente registration (CRM → ERP)')
+                    }}
+                  </span>
+                </span>
+                <span class="flex shrink-0 items-center gap-2">
+                  <span
+                    v-if="
+                      cedenteValidationTriggered &&
+                      missingRequiredCedente.length > 0
+                    "
+                    class="inline-flex items-center rounded-full bg-[var(--ct-danger-soft)] px-2.5 py-1 text-[12px] font-medium leading-4 text-[var(--ct-danger)]"
+                  >
+                    {{
+                      missingRequiredCedente.length === 1
+                        ? __('1 required pending')
+                        : __('{0} required pending', [
+                            missingRequiredCedente.length,
+                          ])
+                    }}
+                  </span>
+                  <span
+                    class="inline-flex items-center rounded-full border border-[var(--ct-border-soft)] bg-[var(--ct-bg-soft)] px-2.5 py-1 text-[12px] font-medium leading-4 text-[var(--ct-text-secondary)]"
+                  >
+                    {{ activeFieldsLabel(activeCedenteCount) }}
+                  </span>
+                </span>
+              </button>
+
+              <div
+                v-if="openSections.cedente"
+                class="flex flex-col gap-4 border-t border-[var(--ct-border-soft)] p-4"
+              >
+                <span class="text-base leading-5 text-ink-gray-6">
+                  {{
+                    __(
+                      'Each field of the cedente registration in the ERP and where it comes from in the CRM: a field, a fixed value, a name of the ERP list or do not send.',
+                    )
+                  }}
+                  {{ __('* required by the ERP.') }}
+                </span>
+                <div class="ct-field-48 grid grid-cols-2 gap-4">
+                  <div
+                    v-for="field in shownCedenteFields"
+                    :key="field.erp_field"
+                    class="flex flex-col gap-2"
+                  >
+                    <FormControl
+                      v-if="field.kind === 'auto'"
+                      type="text"
+                      :label="fieldLabel(field)"
+                      :model-value="__('Automatic (from the ERP lists)')"
+                      readonly
+                    />
+                    <FormControl
+                      v-else-if="field.kind === 'list'"
+                      type="select"
+                      :label="fieldLabel(field)"
+                      :options="listOptions(field)"
+                      :model-value="
+                        cedenteRow(field.erp_field)?.default_value || ''
+                      "
+                      @update:model-value="(v) => pickList(field, v)"
+                    />
+                    <template v-else>
+                      <FormControl
+                        type="select"
+                        :label="fieldLabel(field)"
+                        :options="sourceOptions(field)"
+                        :model-value="sourceValue(field)"
+                        @update:model-value="(v) => pickSource(field, v)"
+                      />
+                      <FormControl
+                        v-if="sourceValue(field) === FIXED"
+                        type="text"
+                        :placeholder="__('Fixed value')"
+                        :model-value="
+                          cedenteRow(field.erp_field)?.default_value || ''
+                        "
+                        @update:model-value="
+                          (v) => (cedenteRow(field.erp_field).default_value = v)
+                        "
+                      />
+                    </template>
+                  </div>
+                </div>
+                <div
+                  v-if="hiddenCedenteOptions.length > 1"
+                  class="ct-field-48 grid grid-cols-2 gap-4"
+                >
+                  <FormControl
+                    type="select"
+                    :options="hiddenCedenteOptions"
+                    model-value=""
+                    @update:model-value="
+                      (v) => v && showMore.add('cedente:' + v)
+                    "
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div
+              v-if="
+                mapping &&
+                settings.doc.cedente_send_enabled &&
+                settings.doc.erp_provider !== 'Smart Securities'
+              "
+            >
+              <Button
+                variant="outline"
+                size="lg"
+                class="ct-btn-accent-text"
+                :label="__('Restore the default mapping')"
+                :loading="resetting"
+                :disabled="isDirty || !settings.originalDoc?.erp_provider"
+                @click="resetMapping"
+              />
+            </div>
           </section>
 
-          <SettingsDivider />
+          <SettingsDivider
+            v-if="settings.doc.erp_provider === 'Smart Securities'"
+          />
 
           <!-- Overdue títulos from the ERP into the collection funnel (credtech#367, PR 4) -->
           <section
@@ -286,161 +455,120 @@
                 @click="syncNow"
               />
             </div>
-          </section>
 
-          <SettingsDivider
-            v-if="settings.doc.erp_provider === 'Smart Securities'"
-          />
+            <p
+              v-if="mappingLoading && !mapping"
+              class="text-base leading-5 text-ink-gray-6"
+            >
+              {{ __('Loading the field mapping…') }}
+            </p>
 
-          <!-- Field mapping (de-para): every field the ERP accepts or returns, the company picks the CRM side -->
-          <p
-            v-if="mappingLoading && !mapping"
-            class="text-base leading-5 text-ink-gray-6"
-          >
-            {{ __('Loading the field mapping…') }}
-          </p>
-          <section v-if="mapping" class="flex flex-col gap-6">
-            <div class="flex flex-col gap-1">
-              <div class="text-lg font-semibold leading-6 text-ink-gray-9">
-                {{ __('Field mapping') }}
-              </div>
-              <span class="text-base leading-5 text-ink-gray-6">
-                {{
-                  __(
-                    'You choose which ERP fields to use: the screen shows the required ones and the ones you added. * required by the ERP.',
-                  )
-                }}
-              </span>
-            </div>
-
-            <div class="flex flex-col gap-6">
+            <!-- De-para (Volta: ERP → CRM) — collapsed accordions inside Collection section -->
+            <div v-if="mapping" class="flex flex-col gap-3">
               <div class="flex flex-col gap-1">
                 <div
                   class="text-[16px] font-semibold leading-6 text-ink-gray-9"
                 >
-                  {{ __('Cedente registration (CRM → ERP)') }}
+                  {{ __('Field mapping (ERP → CRM)') }}
                 </div>
                 <span class="text-base leading-5 text-ink-gray-6">
                   {{
                     __(
-                      'Each field of the cedente registration in the ERP and where it comes from in the CRM: a field, a fixed value, a name of the ERP list or do not send.',
+                      'You choose which ERP columns to bring on sync. Click a group to expand and edit.',
                     )
                   }}
                 </span>
               </div>
-              <div class="ct-field-48 grid grid-cols-2 gap-4">
-                <div
-                  v-for="field in shownCedenteFields"
-                  :key="field.erp_field"
-                  class="flex flex-col gap-2"
+
+              <div
+                v-for="part in importParts"
+                :key="part.table"
+                class="rounded-[8px] border border-[var(--ct-border)] bg-[var(--ct-bg-page)]"
+              >
+                <button
+                  type="button"
+                  class="flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left transition-colors hover:bg-[var(--ct-bg-soft)]"
+                  :class="
+                    openSections[part.table] ? 'rounded-t-[8px]' : 'rounded-[8px]'
+                  "
+                  :aria-expanded="openSections[part.table]"
+                  @click="openSections[part.table] = !openSections[part.table]"
                 >
-                  <FormControl
-                    v-if="field.kind === 'auto'"
-                    type="text"
-                    :label="fieldLabel(field)"
-                    :model-value="__('Automatic (from the ERP lists)')"
-                    readonly
-                  />
-                  <FormControl
-                    v-else-if="field.kind === 'list'"
-                    type="select"
-                    :label="fieldLabel(field)"
-                    :options="listOptions(field)"
-                    :model-value="
-                      cedenteRow(field.erp_field)?.default_value || ''
-                    "
-                    @update:model-value="(v) => pickList(field, v)"
-                  />
-                  <template v-else>
+                  <span class="flex min-w-0 items-center gap-2.5">
+                    <span
+                      class="size-4 shrink-0 text-[var(--ct-text-secondary)]"
+                      :class="
+                        openSections[part.table]
+                          ? 'lucide-chevron-down'
+                          : 'lucide-chevron-right'
+                      "
+                      aria-hidden="true"
+                    />
+                    <span
+                      class="truncate text-[14px] font-semibold leading-5 text-[var(--ct-text-primary)]"
+                    >
+                      {{ part.title }}
+                    </span>
+                  </span>
+                  <span
+                    class="inline-flex shrink-0 items-center rounded-full border border-[var(--ct-border-soft)] bg-[var(--ct-bg-soft)] px-2.5 py-1 text-[12px] font-medium leading-4 text-[var(--ct-text-secondary)]"
+                  >
+                    {{ activeFieldsLabel(activeImportCount(part)) }}
+                  </span>
+                </button>
+
+                <div
+                  v-if="openSections[part.table]"
+                  class="flex flex-col gap-4 border-t border-[var(--ct-border-soft)] p-4"
+                >
+                  <span class="text-base leading-5 text-ink-gray-6">{{
+                    part.hint
+                  }}</span>
+                  <div class="ct-field-48 grid grid-cols-2 gap-4">
+                    <template
+                      v-for="column in shownColumns(part)"
+                      :key="column"
+                    >
+                      <FormControl
+                        v-if="part.options.fixed[column]"
+                        type="text"
+                        :label="__('{0} (ERP) →', [column])"
+                        :model-value="__('Read automatically')"
+                        readonly
+                      />
+                      <FormControl
+                        v-else
+                        type="select"
+                        :label="__('{0} (ERP) →', [column])"
+                        :options="[
+                          { label: part.none, value: '' },
+                          ...part.options.targets,
+                        ]"
+                        :model-value="importValue(part.table, column)"
+                        @update:model-value="
+                          (v) => pickImport(part.table, column, v)
+                        "
+                      />
+                    </template>
+                  </div>
+                  <div
+                    v-if="hiddenColumnOptions(part).length > 1"
+                    class="ct-field-48 grid grid-cols-2 gap-4"
+                  >
                     <FormControl
                       type="select"
-                      :label="fieldLabel(field)"
-                      :options="sourceOptions(field)"
-                      :model-value="sourceValue(field)"
-                      @update:model-value="(v) => pickSource(field, v)"
-                    />
-                    <FormControl
-                      v-if="sourceValue(field) === FIXED"
-                      type="text"
-                      :placeholder="__('Fixed value')"
-                      :model-value="
-                        cedenteRow(field.erp_field)?.default_value || ''
-                      "
+                      :options="hiddenColumnOptions(part)"
+                      model-value=""
                       @update:model-value="
-                        (v) => (cedenteRow(field.erp_field).default_value = v)
+                        (v) => v && showMore.add(part.table + ':' + v)
                       "
                     />
-                  </template>
+                  </div>
                 </div>
-              </div>
-              <div
-                v-if="hiddenCedenteOptions.length > 1"
-                class="ct-field-48 grid grid-cols-2 gap-4"
-              >
-                <FormControl
-                  type="select"
-                  :options="hiddenCedenteOptions"
-                  model-value=""
-                  @update:model-value="(v) => v && showMore.add('cedente:' + v)"
-                />
               </div>
             </div>
 
-            <div
-              v-for="part in importParts"
-              :key="part.table"
-              class="flex flex-col gap-6"
-            >
-              <div class="flex flex-col gap-1">
-                <div
-                  class="text-[16px] font-semibold leading-6 text-ink-gray-9"
-                >
-                  {{ part.title }}
-                </div>
-                <span class="text-base leading-5 text-ink-gray-6">{{
-                  part.hint
-                }}</span>
-              </div>
-              <div class="ct-field-48 grid grid-cols-2 gap-4">
-                <template v-for="column in shownColumns(part)" :key="column">
-                  <FormControl
-                    v-if="part.options.fixed[column]"
-                    type="text"
-                    :label="__('{0} (ERP) →', [column])"
-                    :model-value="__('Read automatically')"
-                    readonly
-                  />
-                  <FormControl
-                    v-else
-                    type="select"
-                    :label="__('{0} (ERP) →', [column])"
-                    :options="[
-                      { label: part.none, value: '' },
-                      ...part.options.targets,
-                    ]"
-                    :model-value="importValue(part.table, column)"
-                    @update:model-value="
-                      (v) => pickImport(part.table, column, v)
-                    "
-                  />
-                </template>
-              </div>
-              <div
-                v-if="hiddenColumnOptions(part).length > 1"
-                class="ct-field-48 grid grid-cols-2 gap-4"
-              >
-                <FormControl
-                  type="select"
-                  :options="hiddenColumnOptions(part)"
-                  model-value=""
-                  @update:model-value="
-                    (v) => v && showMore.add(part.table + ':' + v)
-                  "
-                />
-              </div>
-            </div>
-
-            <div>
+            <div v-if="mapping">
               <Button
                 variant="outline"
                 size="lg"
@@ -476,7 +604,7 @@ import {
   call,
   toast,
 } from 'frappe-ui'
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, nextTick, reactive, ref, watch } from 'vue'
 
 // WBA / Smart Securities integration (credtech#367), served by the cred_hub app.
 // Admins only: the page holds the passwords of the company's ERP contract.
@@ -607,6 +735,15 @@ const mappingLoading = ref(false)
 const mappingLists = ref({})
 // Fields and columns the admin added on the screen (the rest stays hidden until chosen)
 const showMore = reactive(new Set())
+// All de-para sections start collapsed by default; required-field errors open them automatically on save
+const openSections = reactive({
+  cedente: false,
+  title_field_map: false,
+  sacado_field_map: false,
+  cedente_registry_map: false,
+})
+const cedenteAccordionEl = ref(null)
+const cedenteValidationTriggered = ref(false)
 const FIXED = '__fixed'
 const LIST_SOURCE = 'erp_list'
 
@@ -830,7 +967,93 @@ const mapShape = (doc) =>
     (doc?.cedente_registry_map || []).map((r) => [r.erp_column, r.crm_field]),
   ])
 
+function isCedenteFieldActive(field) {
+  if (field.kind === 'auto') return true
+  const row = cedenteRow(field.erp_field)
+  if (!row) return false
+  if (field.kind === 'list') return Boolean(row.default_value?.trim())
+  if (row.source) return true
+  return Boolean(row.default_value?.trim())
+}
+
+const activeCedenteCount = computed(() =>
+  (mapping.value?.cedente.fields || []).filter((f) => isCedenteFieldActive(f))
+    .length,
+)
+
+const missingRequiredCedente = computed(() => {
+  if (!mapping.value?.cedente?.fields) return []
+  const mustCheck =
+    Boolean(settings.doc?.cedente_send_enabled) ||
+    Boolean((settings.doc?.cedente_field_map || []).length)
+  if (!mustCheck) return []
+  return mapping.value.cedente.fields.filter(
+    (f) => f.required === 'yes' && !isCedenteFieldActive(f),
+  )
+})
+
+function activeImportCount(part) {
+  const fixedCount = Object.keys(part.options.fixed || {}).length
+  const mappedCount = (settings.doc?.[part.table] || []).filter((r) =>
+    Boolean(r.crm_field),
+  ).length
+  return fixedCount + mappedCount
+}
+
+function activeFieldsLabel(count) {
+  return count === 1
+    ? __('1 active field')
+    : __('{0} active fields', [count])
+}
+
+function revealAccordionForError(message) {
+  const msg = String(message || '')
+  if (missingRequiredCedente.value.length > 0) {
+    cedenteValidationTriggered.value = true
+    openSections.cedente = true
+    nextTick(() =>
+      cedenteAccordionEl.value?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      }),
+    )
+    return
+  }
+  for (const part of importParts.value) {
+    const hasColumnInError = (settings.doc?.[part.table] || []).some(
+      (r) => r.erp_column && msg.includes(r.erp_column),
+    )
+    if (hasColumnInError) {
+      openSections[part.table] = true
+      return
+    }
+  }
+  if (
+    (mapping.value?.cedente.fields || []).some(
+      (f) => msg.includes(f.erp_field) || msg.includes(__(f.label)),
+    )
+  ) {
+    openSections.cedente = true
+  }
+}
+
 function save() {
+  if (missingRequiredCedente.value.length > 0) {
+    cedenteValidationTriggered.value = true
+    openSections.cedente = true
+    const firstLabel = __(missingRequiredCedente.value[0].label)
+    saveError.value = __(
+      'The ERP field {0} is required: choose where it comes from.',
+      [firstLabel],
+    )
+    nextTick(() =>
+      cedenteAccordionEl.value?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      }),
+    )
+    return
+  }
   const leavingSimulation =
     settings.originalDoc?.sync_dry_run && !settings.doc.sync_dry_run
   if (!leavingSimulation) return submit()
@@ -859,12 +1082,17 @@ function submit() {
   saveError.value = ''
   settings.save.submit(null, {
     onSuccess: () => {
+      cedenteValidationTriggered.value = false
       settings.reload()
       loadMapping()
       connection.value = null
       toast.success(__('ERP settings saved'))
     },
-    onError: (err) => (saveError.value = err.messages?.[0] || err.message),
+    onError: (err) => {
+      const msg = err.messages?.[0] || err.message
+      saveError.value = msg
+      revealAccordionForError(msg)
+    },
   })
 }
 
