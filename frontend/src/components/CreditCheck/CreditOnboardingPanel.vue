@@ -1056,69 +1056,72 @@
       :title="__('Recusar Documento · {0}', [rejectingItem?.label || ''])"
       size="lg"
     >
-      <div class="space-y-4 pt-1">
-        <p class="text-xs text-[#5E6068]">
-          {{
-            __(
-              'O documento será marcado como recusado, o motivo será registrado na timeline e exibido com destaque na Pasta Digital do cedente para substituição imediata.',
-            )
-          }}
-        </p>
+      <template #default>
+        <div class="space-y-4 pt-1">
+          <p class="text-xs text-[#5E6068]">
+            {{
+              __(
+                'O documento será marcado como recusado, o motivo será registrado na timeline e exibido com destaque na Pasta Digital do cedente para substituição imediata.',
+              )
+            }}
+          </p>
 
-        <!-- Sugestão da IA (se houver) -->
-        <div
-          v-if="rejectingItem?.extracted_data?.suggested_reason"
-          class="p-2.5 rounded-lg bg-[#FFF4D6] border border-[#FEEA9F] text-xs text-[#8A5A00] flex items-center justify-between gap-2"
-        >
-          <div class="flex items-center gap-1.5 min-w-0 flex-1">
-            <span class="font-bold shrink-0">✨ {{ __('Sugestão da IA') }}:</span>
-            <span class="truncate">{{ rejectingItem.extracted_data.suggested_reason }}</span>
-          </div>
-          <Button
-            variant="outline"
-            size="sm"
-            class="shrink-0 bg-white text-[#8A5A00] border-[#FEEA9F] hover:bg-[#FEF3D6] text-xs py-0.5 h-6"
-            @click="applyQuickReason(rejectingItem.extracted_data.suggested_reason)"
+          <!-- Sugestão da IA (se houver) -->
+          <div
+            v-if="rejectingItem?.extracted_data?.suggested_reason"
+            class="p-2.5 rounded-lg bg-[#FFF4D6] border border-[#FEEA9F] text-xs text-[#8A5A00] flex items-center justify-between gap-2"
           >
-            {{ __('Usar motivo') }}
-          </Button>
-        </div>
-
-        <!-- Chips de Motivos Rápidos -->
-        <div class="space-y-1.5">
-          <label class="text-xs font-semibold text-[#1E1F23]">
-            {{ __('Motivos rápidos (clique para preencher):') }}
-          </label>
-          <div class="flex flex-wrap gap-1.5">
-            <button
-              v-for="r in quickRejectionReasons"
-              :key="r"
-              type="button"
-              class="px-2.5 py-1 rounded-full text-xs font-medium border border-[#DCDDE2] bg-[#F5F5F7] text-[#2A2B30] hover:bg-[#E6E7EB] hover:border-[#8A8C94] transition-colors"
-              @click="applyQuickReason(r)"
+            <div class="flex items-center gap-1.5 min-w-0 flex-1">
+              <span class="font-bold shrink-0">✨ {{ __('Sugestão da IA') }}:</span>
+              <span class="truncate">{{ rejectingItem.extracted_data.suggested_reason }}</span>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              class="shrink-0 bg-white text-[#8A5A00] border-[#FEEA9F] hover:bg-[#FEF3D6] text-xs py-0.5 h-6"
+              @click="applyQuickReason(rejectingItem.extracted_data.suggested_reason)"
             >
-              + {{ r }}
-            </button>
+              {{ __('Usar motivo') }}
+            </Button>
+          </div>
+
+          <!-- Chips de Motivos Rápidos -->
+          <div class="space-y-1.5">
+            <label class="text-xs font-semibold text-[#1E1F23]">
+              {{ __('Motivos rápidos (clique para preencher):') }}
+            </label>
+            <div class="flex flex-wrap gap-1.5">
+              <button
+                v-for="r in quickRejectionReasons"
+                :key="r"
+                type="button"
+                class="px-2.5 py-1 rounded-full text-xs font-medium border border-[#DCDDE2] bg-[#F5F5F7] text-[#2A2B30] hover:bg-[#E6E7EB] hover:border-[#8A8C94] transition-colors"
+                @click="applyQuickReason(r)"
+              >
+                + {{ r }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Campo de Motivo Livre -->
+          <div>
+            <label class="block text-xs font-semibold text-[#1E1F23] mb-1">
+              {{ __('Motivo da recusa informado ao cliente:') }}
+            </label>
+            <textarea
+              v-model="rejectReasonDraft"
+              rows="3"
+              class="w-full rounded-lg border border-[#DCDDE2] bg-white p-2.5 text-xs text-[#1E1F23] focus:border-[#0088FF] focus:outline-none"
+              :placeholder="
+                __('Ex: O contrato social enviado não possui o carimbo da Junta Comercial. Favor anexar a versão autenticada.')
+              "
+            />
           </div>
         </div>
+      </template>
 
-        <!-- Campo de Motivo Livre -->
-        <div>
-          <label class="block text-xs font-semibold text-[#1E1F23] mb-1">
-            {{ __('Motivo da recusa informado ao cliente:') }}
-          </label>
-          <textarea
-            v-model="rejectReasonDraft"
-            rows="3"
-            class="w-full rounded-lg border border-[#DCDDE2] bg-white p-2.5 text-xs text-[#1E1F23] focus:border-[#0088FF] focus:outline-none"
-            :placeholder="
-              __('Ex: O contrato social enviado não possui o carimbo da Junta Comercial. Favor anexar a versão autenticada.')
-            "
-          />
-        </div>
-
-        <!-- Rodapé de Ações -->
-        <div class="flex items-center justify-end gap-2 pt-2 border-t border-[#E6E7EB]">
+      <template #actions>
+        <div class="flex items-center justify-end gap-2">
           <Button
             variant="subtle"
             size="sm"
@@ -1137,7 +1140,7 @@
             {{ __('Confirmar Recusa e Notificar') }}
           </Button>
         </div>
-      </div>
+      </template>
     </Dialog>
   </div>
 </template>
@@ -1455,7 +1458,10 @@ const quickRejectionReasons = [
 
 function openRejectModal(item, prefillReason = '') {
   rejectingItem.value = item
-  rejectReasonDraft.value = prefillReason || item.notes || ''
+  // Se o item já estava com status 'rejected', reaproveita o motivo;
+  // se estava em outro status, não puxa notas internas do analista para evitar vazamento acidental.
+  const existingRejectionReason = item.status === 'rejected' ? item.notes : ''
+  rejectReasonDraft.value = prefillReason || existingRejectionReason || ''
   showRejectModal.value = true
 }
 
@@ -1468,7 +1474,7 @@ function applyQuickReason(reason) {
 }
 
 async function confirmReject() {
-  if (!rejectingItem.value) return
+  if (!rejectingItem.value || !rejectReasonDraft.value.trim()) return
   submittingReject.value = true
   try {
     await updateItem(
