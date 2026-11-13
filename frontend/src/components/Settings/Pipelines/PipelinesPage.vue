@@ -42,7 +42,7 @@
           <div>{{ __('Funnel') }}</div>
           <div>{{ __('Stages') }}</div>
           <div>{{ __('My role') }}</div>
-          <div>{{ __('Active') }}</div>
+          <div>{{ __('Ativo') }}</div>
         </div>
         <div
           v-for="pipeline in list"
@@ -60,7 +60,9 @@
           </div>
           <div>{{ pipeline.stages.length }}</div>
           <div class="flex">
-            <span class="ct-pill">{{ roleLabel(pipeline.my_role) }}</span>
+            <span v-if="pipeline.my_role" class="ct-pill">{{
+              roleLabel(pipeline.my_role)
+            }}</span><span v-else class="text-ink-gray-5">—</span>
           </div>
           <div>{{ pipeline.is_active ? __('Yes') : __('No') }}</div>
         </div>

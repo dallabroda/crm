@@ -7,7 +7,7 @@
           v-if="assignees?.length"
           :variant="assignees?.length == 1 ? 'outline' : undefined"
         >
-          <MultipleAvatar :avatars="assignees" />
+          <MultipleAvatar :avatars="assignees" :twoInitials="twoInitials" />
         </component>
         <Button v-else variant="outline" :label="__('Assign To')" />
       </div>
@@ -32,6 +32,7 @@ import { toast, Popover } from 'frappe-ui'
 import { computed } from 'vue'
 
 const props = defineProps({
+  twoInitials: { type: Boolean, default: false },
   doctype: { type: String, default: '' },
   docname: { type: String, default: '' },
   allowedUsers: { type: Array, default: null },

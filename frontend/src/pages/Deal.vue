@@ -33,6 +33,7 @@
         doctype="CRM Deal"
         :docname="dealId"
         :allowedUsers="assignableUsers"
+        twoInitials
       />
     </template>
     <!-- Figma "Card · Atividade" (1999:53888): only the owner on the right;
@@ -79,6 +80,7 @@
         doctype="CRM Deal"
         :docname="dealId"
         :allowedUsers="assignableUsers"
+        twoInitials
       />
     </template>
   </LayoutHeader>
@@ -173,359 +175,371 @@
           {{ __(dealId) }}
         </span>
       </div>
-      <div
-        class="flex items-center justify-start gap-5 border-b border-[var(--ct-border-soft)] p-5"
-      >
-        <Tooltip :text="__('Organization Logo')">
-          <div class="group relative size-10">
-            <Avatar
-              size="2xl"
-              class="size-10"
-              :label="title"
-              :image="doc.organization_logo || organization?.organization_logo"
-            />
-          </div>
-        </Tooltip>
-        <div class="flex min-w-0 flex-col gap-2.5 text-ink-gray-9">
-          <Tooltip :text="organization?.name || __('Set an Organization')">
-            <div class="line-clamp-2 break-words text-lg font-medium leading-6">
-              {{ title }}
+      <!-- everything under the card id scrolls as one, so the fields at the end
+           of the panel (contacts, card fields) can always be reached -->
+      <div class="flex min-h-0 flex-1 flex-col overflow-y-auto">
+        <div
+          class="flex items-center justify-start gap-5 border-b border-[var(--ct-border-soft)] p-5"
+        >
+          <Tooltip :text="__('Organization Logo')">
+            <div class="group relative size-10">
+              <Avatar
+                size="2xl"
+                class="size-10"
+                :label="title"
+                :image="
+                  doc.organization_logo || organization?.organization_logo
+                "
+              />
             </div>
           </Tooltip>
-          <!-- Figma order: WhatsApp, call, e-mail, website, attach, delete -->
-          <div class="flex gap-2">
-            <Button
-              variant="outline"
-              :tooltip="__('Send WhatsApp')"
-              :icon="WhatsAppIcon"
-              @click="openWhatsApp"
-            />
-            <Button
-              v-if="callEnabled || hasPhoneToCall"
-              variant="outline"
-              :tooltip="
-                callEnabled ? __('Make a Call') : __('Ligar (Telefone)')
-              "
-              :icon="PhoneIcon"
-              @click="triggerCall"
-            />
-
-            <Button
-              variant="outline"
-              :tooltip="__('Send an Email')"
-              :icon="Email2Icon"
-              @click="
-                doc.email
-                  ? openEmailBox()
-                  : toast.error(
-                      __('Please set an email address to send emails'),
-                    )
-              "
-            />
-
-            <Button
-              variant="outline"
-              :tooltip="__('Go to Website')"
-              :icon="LinkIcon"
-              @click="
-                doc.website
-                  ? openWebsite(doc.website)
-                  : toast.error(__('Please set a website to visit'))
-              "
-            />
-
-            <Button
-              variant="outline"
-              :tooltip="__('Attach a File')"
-              :icon="AttachmentIcon"
-              @click="showFilesUploader = true"
-            />
-
-            <Button
-              v-if="canDelete"
-              :tooltip="__('Delete')"
-              variant="outline"
-              icon="lucide-trash-2"
-              class="ct-btn-danger-icon"
-              @click="deleteDeal"
-            />
-          </div>
-        </div>
-      </div>
-      <!-- Figma "Andamento do card": stage selector and Ganho/Perdido, 128px
-           labels, 16px padding -->
-      <div
-        v-if="doc.name"
-        class="flex flex-col gap-1.5 border-b border-[var(--ct-border-soft)] p-4"
-        data-testid="card-progress"
-      >
-        <div class="text-base-medium leading-5 text-ink-gray-9">
-          {{ __('Andamento do card') }}
-        </div>
-        <div class="flex flex-col gap-1.5 pt-2">
-          <div class="flex items-start gap-2">
-            <div class="w-32 shrink-0 text-base leading-5 text-ink-gray-5">
-              {{ __('Etapa') }}
-            </div>
-            <div v-if="doc.status" class="min-w-0 flex-1">
-              <Dropdown :options="statuses" align="end" class="w-full">
-                <template #default="{ open }">
-                  <button
-                    type="button"
-                    class="ct-filter !max-w-none w-full !gap-2"
-                  >
-                    <IndicatorIcon
-                      :class="
-                        pipelineStore.getStage(doc.status, doc.pipeline)
-                          ?.colorClass
-                      "
-                    />
-                    <span class="flex-1 truncate text-left">
-                      {{ statusLabel(doc.status) }}
-                    </span>
-                    <span
-                      class="size-4 shrink-0"
-                      :class="
-                        open ? 'lucide-chevron-up' : 'lucide-chevron-down'
-                      "
-                      aria-hidden="true"
-                    />
-                  </button>
-                </template>
-              </Dropdown>
-            </div>
-          </div>
-          <div v-if="doc.outcome" class="flex items-start gap-2">
-            <div class="w-32 shrink-0 text-base leading-5 text-ink-gray-5">
-              Status
-            </div>
-            <div
-              v-if="doc.outcome === 'In progress'"
-              class="flex flex-wrap gap-2"
-            >
-              <Button
-                :label="__('Won')"
-                variant="outline"
-                iconLeft="lucide-circle-check"
-                class="ct-btn-success-text"
-                @click="setOutcome('Won')"
-              />
-              <Button
-                :label="__('Lost')"
-                theme="red"
-                variant="subtle"
-                iconLeft="lucide-circle-x"
-                @click="setOutcome('Lost')"
-              />
-            </div>
-            <Badge
-              v-else
-              :label="doc.outcome === 'Won' ? __('Won') : __('Lost')"
-              :theme="doc.outcome === 'Won' ? 'green' : 'red'"
-              variant="subtle"
-              size="lg"
-            />
-          </div>
-        </div>
-      </div>
-      <!-- Figma "Dados da Receita (CNPJ)": the organization's registry data,
-           read-only, right below the card's progress -->
-      <OrganizationRegistry :organization="organization" />
-      <SLASection
-        v-if="doc.sla_status"
-        v-model="doc"
-        @updateField="updateField"
-      />
-      <ProbableCompany :deal="doc" @changed="onProbableCompany" />
-      <div
-        v-if="sections.data"
-        class="flex flex-1 flex-col justify-between overflow-hidden"
-      >
-        <SidePanelLayout
-          :sections="visibleSections"
-          :addContact="addContact"
-          doctype="CRM Deal"
-          :docname="dealId"
-          @reload="sections.reload"
-          @beforeFieldChange="beforeStatusChange"
-          @afterFieldChange="reloadResources"
-        >
-          <template #actions="{ section }">
-            <div v-if="section.name == 'contacts_section'" class="pr-2">
-              <Link
-                value=""
-                doctype="Contact"
-                :onCreate="
-                  (value, close) => {
-                    _contact = {
-                      first_name: value,
-                      company_name: doc.organization,
-                    }
-                    showContactModal = true
-                    close()
-                  }
-                "
-                @change="(e) => addContact(e)"
-              >
-                <template #target="{ togglePopover }">
-                  <Button
-                    class="h-7 px-3"
-                    variant="ghost"
-                    icon="lucide-plus"
-                    @click="togglePopover()"
-                  />
-                </template>
-              </Link>
-            </div>
-          </template>
-          <template #default="{ section }">
-            <div
-              v-if="section.name == 'contacts_section'"
-              class="contacts-area"
-            >
+          <div class="flex min-w-0 flex-col gap-2.5 text-ink-gray-9">
+            <Tooltip :text="organization?.name || __('Set an Organization')">
               <div
-                v-if="dealContacts?.loading && dealContacts?.data?.length == 0"
-                class="flex min-h-20 flex-1 items-center justify-center gap-3 text-base text-ink-gray-4"
+                class="line-clamp-2 break-words text-lg font-medium leading-6"
               >
-                <LoadingIndicator class="h-4 w-4" />
-                <span>{{ __('Loading...') }}</span>
+                {{ title }}
+              </div>
+            </Tooltip>
+            <!-- Figma order: WhatsApp, call, e-mail, website, attach, delete -->
+            <div class="flex gap-2">
+              <Button
+                variant="outline"
+                :tooltip="__('Send WhatsApp')"
+                :icon="WhatsAppIcon"
+                @click="openWhatsApp"
+              />
+              <Button
+                v-if="callEnabled || hasPhoneToCall"
+                variant="outline"
+                :tooltip="
+                  callEnabled ? __('Make a Call') : __('Ligar (Telefone)')
+                "
+                :icon="PhoneIcon"
+                @click="triggerCall"
+              />
+
+              <Button
+                variant="outline"
+                :tooltip="__('Send an Email')"
+                :icon="Email2Icon"
+                @click="
+                  doc.email
+                    ? openEmailBox()
+                    : toast.error(
+                        __('Please set an email address to send emails'),
+                      )
+                "
+              />
+
+              <Button
+                variant="outline"
+                :tooltip="__('Go to Website')"
+                :icon="LinkIcon"
+                @click="
+                  doc.website
+                    ? openWebsite(doc.website)
+                    : toast.error(__('Please set a website to visit'))
+                "
+              />
+
+              <Button
+                variant="outline"
+                :tooltip="__('Attach a File')"
+                :icon="AttachmentIcon"
+                @click="showFilesUploader = true"
+              />
+
+              <Button
+                v-if="canDelete"
+                :tooltip="__('Delete')"
+                variant="outline"
+                icon="lucide-trash-2"
+                class="ct-btn-danger-icon"
+                @click="deleteDeal"
+              />
+            </div>
+          </div>
+        </div>
+        <!-- Figma "Andamento do card": stage selector and Ganho/Perdido, 128px
+           labels, 16px padding -->
+        <div
+          v-if="doc.name"
+          class="flex flex-col gap-1.5 border-b border-[var(--ct-border-soft)] p-4"
+          data-testid="card-progress"
+        >
+          <div class="text-base-medium leading-5 text-ink-gray-9">
+            {{ __('Andamento do card') }}
+          </div>
+          <div class="flex flex-col gap-1.5 pt-2">
+            <div class="flex items-start gap-2">
+              <div class="w-32 shrink-0 text-base leading-5 text-ink-gray-5">
+                {{ __('Etapa') }}
+              </div>
+              <div v-if="doc.status" class="min-w-0 flex-1">
+                <Dropdown :options="statuses" align="end" class="w-full">
+                  <template #default="{ open }">
+                    <button
+                      type="button"
+                      class="ct-filter !max-w-none w-full !gap-2"
+                    >
+                      <IndicatorIcon
+                        :class="
+                          pipelineStore.getStage(doc.status, doc.pipeline)
+                            ?.colorClass
+                        "
+                      />
+                      <span class="flex-1 truncate text-left">
+                        {{ statusLabel(doc.status) }}
+                      </span>
+                      <span
+                        class="size-4 shrink-0"
+                        :class="
+                          open ? 'lucide-chevron-up' : 'lucide-chevron-down'
+                        "
+                        aria-hidden="true"
+                      />
+                    </button>
+                  </template>
+                </Dropdown>
+              </div>
+            </div>
+            <div v-if="doc.outcome" class="flex items-start gap-2">
+              <div class="w-32 shrink-0 text-base leading-5 text-ink-gray-5">
+                Status
               </div>
               <div
-                v-for="(contact, i) in dealContacts.data"
-                v-else-if="dealContacts?.data?.length"
-                :key="contact.name"
+                v-if="doc.outcome === 'In progress'"
+                class="flex flex-wrap gap-2"
               >
-                <div class="px-2 pb-2.5" :class="[i == 0 ? 'pt-5' : 'pt-2.5']">
-                  <Section :opened="contact.opened">
-                    <template #header="{ opened, toggle }">
-                      <div
-                        class="flex cursor-pointer items-center justify-between gap-2 pr-1 text-base leading-5 text-ink-gray-7"
-                      >
-                        <div
-                          class="flex h-7 items-center gap-2 truncate"
-                          @click="toggle()"
-                        >
-                          <Avatar
-                            :label="contact.full_name"
-                            :image="contact.image"
-                            size="md"
-                          />
-                          <div class="truncate">
-                            {{ contact.full_name }}
-                          </div>
-                          <Badge
-                            v-if="contact.is_primary"
-                            class="ml-2"
-                            variant="subtle"
-                            :label="__('Primary')"
-                            theme="blue"
-                          />
-                        </div>
-                        <div class="flex items-center">
-                          <Dropdown :options="contactOptions(contact)">
-                            <Button
-                              icon="lucide-more-horizontal"
-                              class="text-ink-gray-5"
-                              variant="ghost"
-                            />
-                          </Dropdown>
-                          <Button
-                            variant="ghost"
-                            :tooltip="__('View Contact')"
-                            :icon="ArrowUpRightIcon"
-                            @click="
-                              router.push({
-                                name: 'Contact',
-                                params: { contactId: contact.name },
-                              })
-                            "
-                          />
-                          <Button
-                            variant="ghost"
-                            class="transition-all duration-300 ease-in-out"
-                            :class="{ 'rotate-90': opened }"
-                            icon="lucide-chevron-right"
-                            @click="toggle()"
-                          />
-                        </div>
-                      </div>
-                    </template>
-                    <div class="flex flex-col gap-1.5 text-base">
-                      <div
-                        v-if="contact.email"
-                        class="flex items-center gap-3 pb-1.5 pl-1 pt-4 text-ink-gray-8"
-                      >
-                        <Email2Icon class="h-4 w-4" />
-                        {{ contact.email }}
-                      </div>
-                      <div
-                        v-if="contact.mobile_no"
-                        class="flex items-center justify-between gap-2 p-1 py-1.5 text-ink-gray-8"
-                      >
-                        <div class="flex items-center gap-2 truncate">
-                          <PhoneIcon class="h-4 w-4 shrink-0" />
-                          <span class="truncate">{{ contact.mobile_no }}</span>
-                        </div>
-                        <div class="flex items-center gap-1 shrink-0">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            :tooltip="
-                              callEnabled
-                                ? __('Make a Call')
-                                : __('Ligar (Telefone)')
-                            "
-                            :icon="PhoneIcon"
-                            @click.stop="callNumber(contact.mobile_no)"
-                          />
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            :tooltip="__('Send WhatsApp')"
-                            :icon="WhatsAppIcon"
-                            @click.stop="openWhatsAppFor(contact)"
-                          />
-                        </div>
-                      </div>
-                      <div
-                        v-if="!contact.email && !contact.mobile_no"
-                        class="flex items-center justify-center py-4 text-sm text-ink-gray-4"
-                      >
-                        {{ __('No Details Added') }}
-                      </div>
-                    </div>
-                  </Section>
-                </div>
-                <div
-                  v-if="i != dealContacts.data.length - 1"
-                  class="mx-2 h-px border-t border-outline-elevation-2"
+                <Button
+                  :label="__('Won')"
+                  variant="outline"
+                  iconLeft="lucide-circle-check"
+                  class="ct-btn-success-text"
+                  @click="setOutcome('Won')"
+                />
+                <Button
+                  :label="__('Lost')"
+                  theme="red"
+                  variant="subtle"
+                  iconLeft="lucide-circle-x"
+                  @click="setOutcome('Lost')"
                 />
               </div>
-              <div
+              <Badge
                 v-else
-                class="flex h-20 items-center justify-center text-base text-ink-gray-5"
-              >
-                {{ __('No Contacts Added') }}
-              </div>
+                :label="doc.outcome === 'Won' ? __('Won') : __('Lost')"
+                :theme="doc.outcome === 'Won' ? 'green' : 'red'"
+                variant="subtle"
+                size="lg"
+              />
             </div>
-            <OrganizationContacts
-              v-else-if="section.name == 'organization_contacts'"
-              :deal="dealId"
-              :version="`${doc.organization}|${doc.second_organization}|${doc.contacts_from}`"
-              @sent="reloadActivities"
-            />
-          </template>
-        </SidePanelLayout>
-        <!-- fields of the organization, second organization and contact that
-             the stage shows, saved on those records (credtech#196) -->
-        <SidePanelLayout
-          v-for="b in cardBlocks.data || []"
-          :key="`${b.block}:${b.docname}`"
-          :sections="blockSections(b)"
-          :doctype="b.doctype"
-          :docname="b.docname"
-          @afterFieldChange="cardBlocks.reload()"
+          </div>
+        </div>
+        <!-- Figma "Dados da Receita (CNPJ)": the organization's registry data,
+           read-only, right below the card's progress -->
+        <OrganizationRegistry :organization="organization" />
+        <SLASection
+          v-if="doc.sla_status"
+          v-model="doc"
+          @updateField="updateField"
         />
+        <ProbableCompany :deal="doc" @changed="onProbableCompany" />
+        <div v-if="sections.data" class="flex flex-col">
+          <SidePanelLayout
+            :sections="visibleSections"
+            :addContact="addContact"
+            doctype="CRM Deal"
+            :docname="dealId"
+            @reload="sections.reload"
+            @beforeFieldChange="beforeStatusChange"
+            @afterFieldChange="reloadResources"
+          >
+            <template #actions="{ section }">
+              <div v-if="section.name == 'contacts_section'" class="pr-2">
+                <Link
+                  value=""
+                  doctype="Contact"
+                  :onCreate="
+                    (value, close) => {
+                      _contact = {
+                        first_name: value,
+                        company_name: doc.organization,
+                      }
+                      showContactModal = true
+                      close()
+                    }
+                  "
+                  @change="(e) => addContact(e)"
+                >
+                  <template #target="{ togglePopover }">
+                    <Button
+                      class="h-7 px-3"
+                      variant="ghost"
+                      icon="lucide-plus"
+                      @click="togglePopover()"
+                    />
+                  </template>
+                </Link>
+              </div>
+            </template>
+            <template #default="{ section }">
+              <div
+                v-if="section.name == 'contacts_section'"
+                class="contacts-area"
+              >
+                <div
+                  v-if="
+                    dealContacts?.loading && dealContacts?.data?.length == 0
+                  "
+                  class="flex min-h-20 flex-1 items-center justify-center gap-3 text-base text-ink-gray-4"
+                >
+                  <LoadingIndicator class="h-4 w-4" />
+                  <span>{{ __('Loading...') }}</span>
+                </div>
+                <div
+                  v-for="(contact, i) in dealContacts.data"
+                  v-else-if="dealContacts?.data?.length"
+                  :key="contact.name"
+                >
+                  <div
+                    class="px-2 pb-2.5"
+                    :class="[i == 0 ? 'pt-5' : 'pt-2.5']"
+                  >
+                    <Section :opened="contact.opened">
+                      <template #header="{ opened, toggle }">
+                        <div
+                          class="flex cursor-pointer items-center justify-between gap-2 pr-1 text-base leading-5 text-ink-gray-7"
+                        >
+                          <div
+                            class="flex h-7 items-center gap-2 truncate"
+                            @click="toggle()"
+                          >
+                            <Avatar
+                              :label="contact.full_name"
+                              :image="contact.image"
+                              size="md"
+                            />
+                            <div class="truncate">
+                              {{ contact.full_name }}
+                            </div>
+                            <Badge
+                              v-if="contact.is_primary"
+                              class="ml-2"
+                              variant="subtle"
+                              :label="__('Primary')"
+                              theme="blue"
+                            />
+                          </div>
+                          <div class="flex items-center">
+                            <Dropdown :options="contactOptions(contact)">
+                              <Button
+                                icon="lucide-more-horizontal"
+                                class="text-ink-gray-5"
+                                variant="ghost"
+                              />
+                            </Dropdown>
+                            <Button
+                              variant="ghost"
+                              :tooltip="__('View Contact')"
+                              :icon="ArrowUpRightIcon"
+                              @click="
+                                router.push({
+                                  name: 'Contact',
+                                  params: { contactId: contact.name },
+                                })
+                              "
+                            />
+                            <Button
+                              variant="ghost"
+                              class="transition-all duration-300 ease-in-out"
+                              :class="{ 'rotate-90': opened }"
+                              icon="lucide-chevron-right"
+                              @click="toggle()"
+                            />
+                          </div>
+                        </div>
+                      </template>
+                      <div class="flex flex-col gap-1.5 text-base">
+                        <div
+                          v-if="contact.email"
+                          class="flex items-center gap-3 pb-1.5 pl-1 pt-4 text-ink-gray-8"
+                        >
+                          <Email2Icon class="h-4 w-4" />
+                          {{ contact.email }}
+                        </div>
+                        <div
+                          v-if="contact.mobile_no"
+                          class="flex items-center justify-between gap-2 p-1 py-1.5 text-ink-gray-8"
+                        >
+                          <div class="flex items-center gap-2 truncate">
+                            <PhoneIcon class="h-4 w-4 shrink-0" />
+                            <span class="truncate">{{
+                              contact.mobile_no
+                            }}</span>
+                          </div>
+                          <div class="flex items-center gap-1 shrink-0">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              :tooltip="
+                                callEnabled
+                                  ? __('Make a Call')
+                                  : __('Ligar (Telefone)')
+                              "
+                              :icon="PhoneIcon"
+                              @click.stop="callNumber(contact.mobile_no)"
+                            />
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              :tooltip="__('Send WhatsApp')"
+                              :icon="WhatsAppIcon"
+                              @click.stop="openWhatsAppFor(contact)"
+                            />
+                          </div>
+                        </div>
+                        <div
+                          v-if="!contact.email && !contact.mobile_no"
+                          class="flex items-center justify-center py-4 text-sm text-ink-gray-4"
+                        >
+                          {{ __('No Details Added') }}
+                        </div>
+                      </div>
+                    </Section>
+                  </div>
+                  <div
+                    v-if="i != dealContacts.data.length - 1"
+                    class="mx-2 h-px border-t border-outline-elevation-2"
+                  />
+                </div>
+                <div
+                  v-else
+                  class="flex h-20 items-center justify-center text-base text-ink-gray-5"
+                >
+                  {{ __('No Contacts Added') }}
+                </div>
+              </div>
+              <OrganizationContacts
+                v-else-if="section.name == 'organization_contacts'"
+                :deal="dealId"
+                :version="`${doc.organization}|${doc.second_organization}|${doc.contacts_from}`"
+                @sent="reloadActivities"
+              />
+            </template>
+          </SidePanelLayout>
+          <!-- fields of the organization, second organization and contact that
+             the stage shows, saved on those records (credtech#196) -->
+          <SidePanelLayout
+            v-for="b in cardBlocks.data || []"
+            :key="`${b.block}:${b.docname}`"
+            :sections="blockSections(b)"
+            :doctype="b.doctype"
+            :docname="b.docname"
+            @afterFieldChange="cardBlocks.reload()"
+          />
+        </div>
       </div>
     </Resizer>
   </div>
@@ -1765,7 +1779,11 @@ function reloadResources(data) {
 // Figma "Card · Atividades": tab labels without icons (the icons stay in
 // `tabs` for the activity empty states)
 const tabLabels = computed(() =>
-  (tabs.value || tabs).map((tab) => ({ ...tab, iconLeft: undefined, icon: undefined })),
+  (tabs.value || tabs).map((tab) => ({
+    ...tab,
+    iconLeft: undefined,
+    icon: undefined,
+  })),
 )
 
 // Figma "Botão recolher painel": each person's choice is kept in the browser

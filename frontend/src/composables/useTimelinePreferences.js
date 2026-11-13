@@ -1,6 +1,6 @@
 import { computed } from 'vue'
 import { getSettings } from '@/stores/settings'
-import { formatDate, timeAgo } from '@/utils'
+import { formatDate, timeAgo, shortTimeAgo } from '@/utils'
 
 export function useTimelinePreferences() {
   const { _settings } = getSettings()
@@ -29,10 +29,10 @@ export function useTimelinePreferences() {
 // is the tooltip; when "Exact" is set the two are swapped so the date shows.
 // Kept here (not in utils/index.js) so the settings store is not pulled into
 // the eager import graph and fetched before frappe-ui is configured.
-export function timestampCell(date) {
+export function timestampCell(date, short = false) {
   if (!date) return { label: '', timeAgo: '' }
   const exact = formatDate(date)
-  const relative = __(timeAgo(date))
+  const relative = short ? shortTimeAgo(date) : __(timeAgo(date))
   const showExact =
     getSettings()._settings.doc?.crm_timeline_timestamp_format === 'Exact'
   return {

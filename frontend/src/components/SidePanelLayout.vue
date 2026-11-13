@@ -53,8 +53,16 @@
                         class="w-32 shrink-0 flex items-center gap-0.5"
                         :class="{ 'pt-[9px]': isTextareaField(field) }"
                       >
+                        <!-- card fields wrap to two lines (Figma 1999:53888);
+                             contact and organization labels stay on one line
+                             and end in "..." (Figma 805:2 / 807:2) -->
                         <div
-                          class="line-clamp-2 break-words py-1.5 text-base leading-[17px] text-ink-gray-6"
+                          class="py-1.5 text-base leading-[17px] text-ink-gray-6"
+                          :class="
+                            doctype === 'CRM Deal'
+                              ? 'line-clamp-2 break-words'
+                              : 'truncate'
+                          "
                         >
                           {{ __(field.label) }}
                         </div>
@@ -386,7 +394,7 @@
                             (field.fieldtype === 'Link' ||
                               field.canLink?.(doc[field.fieldname]))
                           "
-                          class="relative -left-[13px] h-4 w-4 shrink-0 cursor-pointer text-ink-gray-5 hover:text-ink-gray-8"
+                          class="ct-field-link relative -left-[13px] h-4 w-4 shrink-0 cursor-pointer text-ink-gray-5 hover:text-ink-gray-8"
                           @click.stop="field.link(doc[field.fieldname])"
                         />
                         <ArrowUpRightIcon
@@ -733,6 +741,14 @@ function checkChange(value, df) {
   border-color: transparent;
 }
 
+/* Figma "Descrição da empresa" (807:2): long text reads like the other values,
+   same size, no resize handle */
+:deep(textarea.form-control) {
+  resize: none;
+  font-size: 14px;
+  line-height: 20px;
+}
+
 :deep(.form-control button) {
   gap: 0;
 }
@@ -775,5 +791,29 @@ function checkChange(value, df) {
 /* Link chevrons line up with the Select chevrons. */
 :deep(.form-control .lucide-chevron-down.absolute) {
   right: 3px;
+}
+
+/* the "open" arrow of linked fields shows on hover, like the chevrons below */
+.ct-field-link {
+  opacity: 0;
+  transition: opacity 0.12s;
+}
+*:hover > .ml-1 > .ct-field-link,
+.ct-field-link:focus-visible {
+  opacity: 1;
+}
+
+/* Figma "Campos do card" (1999:53888): fields show only their value; the
+   chevron of link, date and select fields appears on hover or focus. */
+:deep(.form-control .lucide-chevron-down),
+:deep(.form-control svg.feather-chevron-down) {
+  opacity: 0;
+  transition: opacity 0.12s;
+}
+:deep(.form-control:hover .lucide-chevron-down),
+:deep(.form-control:focus-within .lucide-chevron-down),
+:deep(.form-control:hover svg.feather-chevron-down),
+:deep(.form-control:focus-within svg.feather-chevron-down) {
+  opacity: 1;
 }
 </style>

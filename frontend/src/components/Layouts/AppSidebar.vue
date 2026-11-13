@@ -359,7 +359,9 @@ const { capture } = useTelemetry()
 const { clearDemoData, isDemoDataCreated } = useDemoData()
 const { send } = useBroadcast()
 
-const storedCollapsed = useStorage('isSidebarCollapsed', false)
+// Figma: every HubTech screen opens with the icon rail (collapsed sidebar);
+// a new key so the old stored "expanded" default does not override it.
+const storedCollapsed = useStorage('ct-sidebar-collapsed', true)
 
 // Figma "Configurações": the settings pages open with the icon rail (their own
 // "Barra lateral secundária" sits beside it). Expanding it there lasts until
@@ -410,7 +412,11 @@ const ROUTE_ICONS = {
 const isFCSite = ref(window.is_fc_site)
 const isDemoSite = ref(window.is_demo_site)
 
-const links = getNavigationItems({ mobile: props.mobile })
+// Figma sidebar (2326:41374): Registros = Contatos, Organizações, Tarefas,
+// Ligações. Notes stays reachable from the card and the command palette.
+const links = getNavigationItems({ mobile: props.mobile }).filter(
+  (link) => link.route !== 'Notes',
+)
 
 const pipelineStore = pipelinesStore()
 const { pipelines, canCreate: canCreatePipeline } = storeToRefs(pipelineStore)

@@ -24,7 +24,8 @@
           :image="user.user_image"
           size="xl"
           class="shrink-0"
-        />
+          >{{ initials(user.full_name) }}</Avatar
+        >
         <div v-if="!isCollapsed" class="flex min-w-0 flex-1 flex-col">
           <span
             class="truncate text-[14px] font-medium leading-5 tracking-normal text-ink-gray-9"
@@ -52,6 +53,7 @@ import { showSettings, isMobileView } from '@/composables/settings'
 import { showAboutModal } from '@/composables/modals'
 import { confirmLoginToFrappeCloud } from '@/composables/frappecloud'
 import { spriteIcon } from '@/utils/spriteIcon'
+import { initials } from '@/utils'
 import { Avatar, createResource, Dropdown } from 'frappe-ui'
 import { computed, h, markRaw } from 'vue'
 import { useRouter } from 'vue-router'
@@ -74,43 +76,26 @@ const apps = createResource({
   transform: (data) => [deskApp(), ...crmSiblingApps(data)],
 })
 
-const dropdownItems = computed(() => {
-  if (!settings.value?.dropdown_items) return []
-
-  let items = settings.value.dropdown_items
-
-  // Figma "Menu da conta": "Minha conta" opens the account page
-  let _dropdownItems = [
-    {
-      group: 'Dropdown Items',
-      hideLabel: true,
-      options: [
-        {
-          icon: 'lucide-user-round ct-account-menu-icon',
-          label: __('My account'),
-          onClick: () => router.push({ name: 'My Account' }),
-        },
-      ],
-    },
-  ]
-
-  items.forEach((item) => {
-    if (item.hidden) return
-    if (item.type !== 'Separator') {
-      _dropdownItems[_dropdownItems.length - 1].options.push(
-        dropdownItemObj(item),
-      )
-    } else {
-      _dropdownItems.push({
-        group: '',
-        hideLabel: true,
-        options: [],
-      })
-    }
-  })
-
-  return _dropdownItems
-})
+const dropdownItems = computed(() => [
+  // Figma "Menu da conta" (2326:41374): "Minha conta", a divider and "Sair".
+  // Apps, Settings (it has its own sidebar entry), About and Frappe Cloud stay out.
+  {
+    group: 'Account',
+    hideLabel: true,
+    options: [
+      {
+        icon: 'lucide-user-round ct-account-menu-icon',
+        label: __('My account'),
+        onClick: () => router.push({ name: 'My Account' }),
+      },
+    ],
+  },
+  {
+    group: 'Logout',
+    hideLabel: true,
+    options: [getStandardItem({ name1: 'logout', label: 'Log out' })],
+  },
+])
 
 function dropdownItemObj(item) {
   let _item = JSON.parse(JSON.stringify(item))

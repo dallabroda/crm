@@ -11,6 +11,7 @@
       cy="8"
       r="6.5"
       stroke="currentColor"
+      stroke-width="1.4"
       stroke-linecap="round"
       stroke-dasharray="1.9 1.9"
     />
@@ -23,6 +24,7 @@
     <path
       d="M6.55133 5.06237L10.9174 8.09973L6.54669 10.7899L6.55133 5.06237Z"
       stroke="currentColor"
+      stroke-width="1.4"
     />
   </svg>
 </template>
