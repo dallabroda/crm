@@ -260,6 +260,44 @@
                   <span>✨ {{ item.extracted_data.summary_text }}</span>
                 </div>
 
+                <!-- Callout de Alerta da IA (Risco de Rejeição Sugerido) -->
+                <div
+                  v-if="item.extracted_data && item.extracted_data.rejection_risk && item.status !== 'rejected'"
+                  class="mt-1.5 text-xs bg-[#FFF4D6] text-[#8A5A00] border border-[#FEEA9F] px-2.5 py-1.5 rounded flex flex-wrap items-center justify-between gap-2"
+                >
+                  <span class="font-medium min-w-0 flex-1">
+                    ⚠️ <strong>{{ __('IA') }}:</strong> {{ item.extracted_data.suggested_reason || item.extracted_data.summary_text }}
+                  </span>
+                  <Button
+                    variant="outline"
+                    theme="red"
+                    size="sm"
+                    class="shrink-0 text-xs py-0.5 h-6 bg-white hover:bg-[#FEF3F2]"
+                    @click="openRejectModal(item, item.extracted_data.suggested_reason)"
+                  >
+                    {{ __('Recusar com motivo da IA') }}
+                  </Button>
+                </div>
+
+                <!-- Callout de Documento Recusado -->
+                <div
+                  v-if="item.status === 'rejected'"
+                  class="mt-1.5 text-xs bg-[#FEF3F2] text-[#B42318] border border-[#FECDCA] px-3 py-2 rounded flex items-start justify-between gap-2"
+                >
+                  <div class="space-y-0.5 min-w-0 flex-1">
+                    <span class="font-semibold">{{ __('Documento Recusado') }}:</span>
+                    <span class="ml-1">{{ item.notes || __('Aguardando reenvio pelo cliente.') }}</span>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    class="text-[#B42318] hover:bg-[#FEE4E2] shrink-0 text-xs h-6 px-2"
+                    @click="openRejectModal(item)"
+                  >
+                    {{ __('Alterar motivo') }}
+                  </Button>
+                </div>
+
                 <div
                   v-if="item.notes && editingNoteKey !== item.key"
                   class="mt-1 text-xs text-[#5E6068] bg-[#F5F5F7] px-2.5 py-1 rounded border border-[#E6E7EB]"
@@ -325,11 +363,22 @@
               </Button>
 
               <Button
+                v-if="item.file_url && item.status !== 'rejected'"
+                variant="subtle"
+                theme="red"
+                size="sm"
+                :loading="savingKey === item.key"
+                @click="openRejectModal(item)"
+              >
+                {{ __('Recusar ✕') }}
+              </Button>
+
+              <Button
                 variant="ghost"
                 size="sm"
                 @click="openNoteEditor(item)"
               >
-                {{ item.notes ? __('Editar nota') : __('Obs / Rejeitar') }}
+                {{ item.notes ? __('Editar nota') : __('Nota interna') }}
               </Button>
 
               <button
@@ -1000,6 +1049,96 @@
         </div>
       </div>
     </div>
+
+    <!-- Modal de Recusa de Documento com Motivo e Chips Rápidos -->
+    <Dialog
+      v-model:open="showRejectModal"
+      :title="__('Recusar Documento · {0}', [rejectingItem?.label || ''])"
+      size="lg"
+    >
+      <div class="space-y-4 pt-1">
+        <p class="text-xs text-[#5E6068]">
+          {{
+            __(
+              'O documento será marcado como recusado, o motivo será registrado na timeline e exibido com destaque na Pasta Digital do cedente para substituição imediata.',
+            )
+          }}
+        </p>
+
+        <!-- Sugestão da IA (se houver) -->
+        <div
+          v-if="rejectingItem?.extracted_data?.suggested_reason"
+          class="p-2.5 rounded-lg bg-[#FFF4D6] border border-[#FEEA9F] text-xs text-[#8A5A00] flex items-center justify-between gap-2"
+        >
+          <div class="flex items-center gap-1.5 min-w-0 flex-1">
+            <span class="font-bold shrink-0">✨ {{ __('Sugestão da IA') }}:</span>
+            <span class="truncate">{{ rejectingItem.extracted_data.suggested_reason }}</span>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            class="shrink-0 bg-white text-[#8A5A00] border-[#FEEA9F] hover:bg-[#FEF3D6] text-xs py-0.5 h-6"
+            @click="applyQuickReason(rejectingItem.extracted_data.suggested_reason)"
+          >
+            {{ __('Usar motivo') }}
+          </Button>
+        </div>
+
+        <!-- Chips de Motivos Rápidos -->
+        <div class="space-y-1.5">
+          <label class="text-xs font-semibold text-[#1E1F23]">
+            {{ __('Motivos rápidos (clique para preencher):') }}
+          </label>
+          <div class="flex flex-wrap gap-1.5">
+            <button
+              v-for="r in quickRejectionReasons"
+              :key="r"
+              type="button"
+              class="px-2.5 py-1 rounded-full text-xs font-medium border border-[#DCDDE2] bg-[#F5F5F7] text-[#2A2B30] hover:bg-[#E6E7EB] hover:border-[#8A8C94] transition-colors"
+              @click="applyQuickReason(r)"
+            >
+              + {{ r }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Campo de Motivo Livre -->
+        <div>
+          <label class="block text-xs font-semibold text-[#1E1F23] mb-1">
+            {{ __('Motivo da recusa informado ao cliente:') }}
+          </label>
+          <textarea
+            v-model="rejectReasonDraft"
+            rows="3"
+            class="w-full rounded-lg border border-[#DCDDE2] bg-white p-2.5 text-xs text-[#1E1F23] focus:border-[#0088FF] focus:outline-none"
+            :placeholder="
+              __('Ex: O contrato social enviado não possui o carimbo da Junta Comercial. Favor anexar a versão autenticada.')
+            "
+          />
+        </div>
+
+        <!-- Rodapé de Ações -->
+        <div class="flex items-center justify-end gap-2 pt-2 border-t border-[#E6E7EB]">
+          <Button
+            variant="subtle"
+            size="sm"
+            @click="showRejectModal = false"
+          >
+            {{ __('Cancelar') }}
+          </Button>
+          <Button
+            variant="solid"
+            theme="red"
+            size="sm"
+            :loading="submittingReject"
+            :disabled="!rejectReasonDraft.trim()"
+            @click="confirmReject"
+          >
+            {{ __('Confirmar Recusa e Notificar') }}
+          </Button>
+        </div>
+      </div>
+    </Dialog>
   </div>
 </template>
 
@@ -1007,6 +1146,7 @@
 import {
   Badge,
   Button,
+  Dialog,
   FileUploader,
   FormControl,
   call,
@@ -1298,6 +1438,53 @@ function onFileUploaded(item, file) {
     },
     __('Documento anexado na pasta de crédito.'),
   )
+}
+
+const showRejectModal = ref(false)
+const rejectingItem = ref(null)
+const rejectReasonDraft = ref('')
+const submittingReject = ref(false)
+
+const quickRejectionReasons = [
+  __('Documento ilegível ou cortado'),
+  __('Falta assinatura (Junta Comercial / Sócio / Contador)'),
+  __('CNPJ ou Razão Social divergente do cadastro'),
+  __('Documento incorreto (tipo diferente do solicitado)'),
+  __('Documento vencido ou fora do período exigido'),
+]
+
+function openRejectModal(item, prefillReason = '') {
+  rejectingItem.value = item
+  rejectReasonDraft.value = prefillReason || item.notes || ''
+  showRejectModal.value = true
+}
+
+function applyQuickReason(reason) {
+  if (rejectReasonDraft.value && !rejectReasonDraft.value.includes(reason)) {
+    rejectReasonDraft.value = `${rejectReasonDraft.value} · ${reason}`
+  } else {
+    rejectReasonDraft.value = reason
+  }
+}
+
+async function confirmReject() {
+  if (!rejectingItem.value) return
+  submittingReject.value = true
+  try {
+    await updateItem(
+      rejectingItem.value.key,
+      {
+        status: 'rejected',
+        notes: rejectReasonDraft.value.trim(),
+      },
+      __('Documento recusado. O cedente foi notificado e pode reenviar pelo link.'),
+    )
+    showRejectModal.value = false
+    rejectingItem.value = null
+    rejectReasonDraft.value = ''
+  } finally {
+    submittingReject.value = false
+  }
 }
 
 function openNoteEditor(item) {
