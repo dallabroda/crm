@@ -389,7 +389,7 @@
               <span class="text-base leading-5 text-ink-gray-6">
                 {{
                   __(
-                    'Every day at 7:30 the overdue títulos of the ERP become cards in the collection funnel; settlements and repurchases close the títulos. The balance of ERP títulos is read-only on the card.',
+                    'Every day at 8:45 the overdue títulos of the ERP become cards in the collection funnel; settlements and repurchases close the títulos. The balance of ERP títulos is read-only on the card.',
                   )
                 }}
               </span>
@@ -540,10 +540,7 @@
                         v-else
                         type="select"
                         :label="__('{0} (ERP) →', [column])"
-                        :options="[
-                          { label: part.none, value: '' },
-                          ...part.options.targets,
-                        ]"
+                        :options="importOptions(part)"
                         :model-value="importValue(part.table, column)"
                         @update:model-value="
                           (v) => pickImport(part.table, column, v)
@@ -568,7 +565,7 @@
               </div>
             </div>
 
-            <div v-if="mapping">
+            <div>
               <Button
                 variant="outline"
                 size="lg"
@@ -584,6 +581,63 @@
       </div>
     </template>
   </SettingsLayoutBase>
+
+  <Dialog
+    v-model:open="newFieldModal.show"
+    :size="'md'"
+    :title="__('Criar novo campo no CRM')"
+  >
+    <template #default>
+      <div class="flex flex-col gap-4 py-2">
+        <p class="text-base text-ink-gray-6">
+          {{
+            __(
+              'Crie um campo no CRM para receber os dados da coluna {0} do ERP.',
+              [newFieldModal.column],
+            )
+          }}
+        </p>
+        <FormControl
+          v-model="newFieldModal.label"
+          type="text"
+          :label="__('Nome do campo no CRM *')"
+          :placeholder="__('Ex.: Situação ERP')"
+          required
+        />
+        <FormControl
+          v-model="newFieldModal.fieldtype"
+          type="select"
+          :label="__('Tipo de dado *')"
+          :options="fieldTypeOptions"
+        />
+        <FormControl
+          v-if="newFieldModal.table !== 'title_field_map'"
+          v-model="newFieldModal.entity"
+          type="select"
+          :label="__('Vincular a *')"
+          :options="[
+            { label: __('Empresa (Organização)'), value: 'organization' },
+            { label: __('Contato (Pessoa física / sócio)'), value: 'contact' },
+          ]"
+        />
+        <div class="mt-2 flex justify-end gap-2">
+          <Button
+            :label="__('Cancelar')"
+            variant="subtle"
+            @click="newFieldModal.show = false"
+          />
+          <Button
+            :label="__('Criar e Mapear')"
+            variant="solid"
+            class="ct-btn-primary"
+            :loading="newFieldModal.loading"
+            :disabled="!newFieldModal.label?.trim()"
+            @click="submitCreateCustomField"
+          />
+        </div>
+      </div>
+    </template>
+  </Dialog>
 </template>
 
 <script setup>
@@ -598,6 +652,7 @@ import { pipelinesStore } from '@/stores/pipelines'
 import {
   Badge,
   Button,
+  Dialog,
   ErrorMessage,
   FormControl,
   Switch,
@@ -946,7 +1001,90 @@ function importValue(table, column) {
   )
   return row?.crm_field || ''
 }
+
+const newFieldModal = reactive({
+  show: false,
+  table: '',
+  column: '',
+  label: '',
+  fieldtype: 'Data',
+  entity: 'organization',
+  loading: false,
+})
+
+const fieldTypeOptions = [
+  { label: __('Texto curto (Data)'), value: 'Data' },
+  { label: __('Texto longo (Text)'), value: 'Small Text' },
+  { label: __('Valor monetário (Currency)'), value: 'Currency' },
+  { label: __('Número inteiro (Int)'), value: 'Int' },
+  { label: __('Número decimal (Float)'), value: 'Float' },
+  { label: __('Data (Date)'), value: 'Date' },
+  { label: __('Data e hora (Datetime)'), value: 'Datetime' },
+  { label: __('Sim / Não (Check)'), value: 'Check' },
+]
+
+function importOptions(part) {
+  return [
+    { label: part.none, value: '' },
+    ...part.options.targets,
+    { label: __('+ Criar novo campo no CRM…'), value: '__create_new__' },
+  ]
+}
+
+function openCreateFieldModal(table, column) {
+  const cleanName = String(column || '')
+    .replace(/[_-]+/g, ' ')
+    .toLowerCase()
+    .replace(/(^\w|\s\w)/g, (m) => m.toUpperCase())
+
+  newFieldModal.table = table
+  newFieldModal.column = column
+  newFieldModal.label = cleanName + ' ERP'
+  newFieldModal.fieldtype = 'Data'
+  newFieldModal.entity = 'organization'
+  newFieldModal.loading = false
+  newFieldModal.show = true
+}
+
+async function submitCreateCustomField() {
+  if (!newFieldModal.label?.trim()) return
+  newFieldModal.loading = true
+  try {
+    let targetDoctype = 'CRM Deal Title'
+    let prefix = ''
+    if (newFieldModal.table !== 'title_field_map') {
+      if (newFieldModal.entity === 'contact') {
+        targetDoctype = 'Contact'
+        prefix = 'contact.'
+      } else {
+        targetDoctype = 'CRM Organization'
+        prefix = 'organization.'
+      }
+    }
+    const res = await call('cred_hub.erp.settings.create_custom_crm_field', {
+      target_doctype: targetDoctype,
+      label: newFieldModal.label.trim(),
+      fieldtype: newFieldModal.fieldtype || 'Data',
+    })
+    if (res?.ok) {
+      toast.success(__('Campo criado com sucesso no CRM!'))
+      newFieldModal.show = false
+      await loadMapping()
+      const targetValue = prefix + res.fieldname
+      pickImport(newFieldModal.table, newFieldModal.column, targetValue)
+    }
+  } catch (err) {
+    toast.error(err.messages?.[0] || err.message)
+  } finally {
+    newFieldModal.loading = false
+  }
+}
+
 function pickImport(table, column, value) {
+  if (value === '__create_new__') {
+    openCreateFieldModal(table, column)
+    return
+  }
   const rows = (settings.doc[table] || []).filter(
     (r) => columnKey(r.erp_column) !== columnKey(column),
   )

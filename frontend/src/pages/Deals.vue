@@ -23,7 +23,11 @@
         </template>
       </Dropdown>
       <!-- Só no funil de Cobrança (credtech#315): importar títulos vencidos por planilha -->
-      <CollectionImport v-if="pipelineName" :key="pipelineName" :pipeline="pipelineName" />
+      <CollectionImport
+        v-if="pipelineName"
+        :key="pipelineName"
+        :pipeline="pipelineName"
+      />
       <Button
         variant="solid"
         :label="__('Create')"
@@ -376,7 +380,10 @@ const outcomeOptions = computed(() =>
       router.replace({
         name: route.name,
         params: route.params,
-        query: { ...route.query, outcome: value === 'in_progress' ? undefined : value },
+        query: {
+          ...route.query,
+          outcome: value === 'in_progress' ? undefined : value,
+        },
         hash: route.hash,
       }),
   })),
@@ -626,7 +633,7 @@ function parseRows(rows, columns = []) {
           label: userLabel(user),
         }))
       } else if (['modified', 'creation'].includes(row)) {
-        _rows[row] = timestampCell(deal[row])
+        _rows[row] = timestampCell(deal[row], row === 'creation')
       } else if (
         ['first_response_time', 'first_responded_on', 'response_by'].includes(
           row,

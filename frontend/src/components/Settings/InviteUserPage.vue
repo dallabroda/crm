@@ -228,14 +228,14 @@ const description = computed(() => {
 
 const roleOptions = computed(() => {
   return [
-    { value: 'Sales User', label: __('Sales User') },
+    { value: 'Sales User', label: __('Member') },
     ...(isAdmin() ? [{ value: 'Sales Manager', label: __('Manager') }] : []),
     ...(isAdmin() ? [{ value: 'System Manager', label: __('Admin') }] : []),
   ]
 })
 
 const roleMap = {
-  'Sales User': __('Sales User'),
+  'Sales User': __('Member'),
   'Sales Manager': __('Manager'),
   'System Manager': __('Admin'),
 }

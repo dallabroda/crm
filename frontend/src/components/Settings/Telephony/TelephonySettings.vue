@@ -30,31 +30,37 @@
     </SettingsPageHeader>
 
     <div v-if="telephonyAgent.doc" class="flex-1 flex flex-col overflow-y-auto">
-      <SettingsRow class="py-3">
-        <template #label>{{ __('Default Medium') }}</template>
-        <template #description>
-          {{ __('Default calling medium for logged-in user') }}
-        </template>
-        <SettingsSelect
-          v-model="telephonyAgent.doc.default_medium"
-          :options="[
-            { label: __('Twilio'), value: 'Twilio' },
-            { label: __('Exotel'), value: 'Exotel' },
-            ...Object.values(voipOperators).map((medium) => ({
-              label: medium,
-              value: medium,
-            })),
-          ]"
-          :placeholder="__('Select Medium')"
-        />
-        <Button
-          v-if="telephonyAgent.doc.default_medium"
-          icon="lucide-x"
-          variant="ghost"
-          :tooltip="__('Clear')"
-          @click="telephonyAgent.doc.default_medium = ''"
-        />
-      </SettingsRow>
+      <!-- Figma "Configurações · Telefonia" (2336:10865): "Meio padrão" label
+           (14 Medium) over a full-width 48px field, 6px apart -->
+      <div class="flex flex-col gap-1.5">
+        <span class="text-base font-medium leading-5 text-ink-gray-9">
+          {{ __('Default Medium') }}
+        </span>
+        <div class="flex items-center gap-2">
+          <div class="min-w-0 flex-1">
+            <SettingsSelect
+              block
+              v-model="telephonyAgent.doc.default_medium"
+              :options="[
+                { label: __('Twilio'), value: 'Twilio' },
+                { label: __('Exotel'), value: 'Exotel' },
+                ...Object.values(voipOperators).map((medium) => ({
+                  label: medium,
+                  value: medium,
+                })),
+              ]"
+              :placeholder="__('Select Medium')"
+            />
+          </div>
+          <Button
+            v-if="telephonyAgent.doc.default_medium"
+            icon="lucide-x"
+            variant="ghost"
+            :tooltip="__('Clear')"
+            @click="telephonyAgent.doc.default_medium = ''"
+          />
+        </div>
+      </div>
       <div
         v-if="isEnabled('twilio') || isEnabled('exotel')"
         class="ct-field-48 flex flex-col gap-6 pb-3 pt-6"
@@ -108,7 +114,7 @@
 
       <div
         v-if="isManager()"
-        class="mt-4 flex items-center justify-between py-3 text-lg font-semibold leading-6 text-ink-gray-9"
+        class="mb-3 mt-6 flex items-center justify-between text-lg font-semibold leading-6 text-ink-gray-9"
       >
         {{ __('Integrations') }}
       </div>
@@ -136,7 +142,10 @@
         />
       </div>
 
-      <div v-if="isManager()" class="h-px border-t border-outline-gray-2" />
+      <div
+        v-if="isManager()"
+        class="my-2.5 h-px border-t border-[var(--ct-border-soft)]"
+      />
 
       <div
         v-if="isManager()"
@@ -161,7 +170,10 @@
         />
       </div>
 
-      <div v-if="isManager()" class="h-px border-t border-outline-gray-2" />
+      <div
+        v-if="isManager()"
+        class="my-2.5 h-px border-t border-[var(--ct-border-soft)]"
+      />
 
       <!-- Call logging only: calls made at API4Com land on the deal timeline (credtech#98) -->
       <div
@@ -187,7 +199,10 @@
         />
       </div>
 
-      <div v-if="isManager()" class="h-px border-t border-outline-gray-2" />
+      <div
+        v-if="isManager()"
+        class="my-2.5 h-px border-t border-[var(--ct-border-soft)]"
+      />
 
       <!-- No webhook: calls are read every few minutes (credtech#269) -->
       <div
@@ -213,7 +228,10 @@
         />
       </div>
 
-      <div v-if="isManager()" class="h-px border-t border-outline-gray-2" />
+      <div
+        v-if="isManager()"
+        class="my-2.5 h-px border-t border-[var(--ct-border-soft)]"
+      />
 
       <!-- Call logging only, same as API4Com; no click-to-call yet (credtech#271) -->
       <div
@@ -239,7 +257,10 @@
         />
       </div>
 
-      <div v-if="isManager()" class="h-px border-t border-outline-gray-2" />
+      <div
+        v-if="isManager()"
+        class="my-2.5 h-px border-t border-[var(--ct-border-soft)]"
+      />
 
       <!-- Click-to-call through a Call Control Application (credtech#270) -->
       <div
@@ -265,7 +286,10 @@
         />
       </div>
 
-      <div v-if="isManager()" class="h-px border-t border-outline-gray-2" />
+      <div
+        v-if="isManager()"
+        class="my-2.5 h-px border-t border-[var(--ct-border-soft)]"
+      />
 
       <!-- Zenvia Voz, former TotalVoice (credtech#272) -->
       <div

@@ -2,7 +2,7 @@
   <svg
     viewBox="0 0 64 64"
     xmlns="http://www.w3.org/2000/svg"
-    stroke-width="3"
+    stroke-width="5.6"
     stroke="currentColor"
     fill="none"
   >
