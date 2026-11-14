@@ -14795,6 +14795,33 @@ msgstr "+ Adicionar coluna do ERP"
 msgid "Cedentes (ERP → CRM)"
 msgstr "Cedentes (ERP → CRM)"
 
+msgid "Field mapping · Cedente registration (CRM → ERP)"
+msgstr "De-para · Cadastro do cedente (CRM → ERP)"
+
+msgid "Field mapping (ERP → CRM)"
+msgstr "De-para de campos (ERP → CRM)"
+
+msgid "You choose which ERP columns to bring on sync. Click a group to expand and edit."
+msgstr "Você escolhe quais colunas do ERP trazer na sincronização. Clique em um grupo para expandir e editar."
+
+msgid "* required by the ERP."
+msgstr "* obrigatório no ERP."
+
+msgid "1 active field"
+msgstr "1 campo ativo"
+
+msgid "{0} active fields"
+msgstr "{0} campos ativos"
+
+msgid "1 required pending"
+msgstr "1 obrigatório pendente"
+
+msgid "{0} required pending"
+msgstr "{0} obrigatórios pendentes"
+
+msgid "The ERP field {0} is required: choose where it comes from."
+msgstr "O campo {0} é obrigatório no ERP: escolha de onde ele vem."
+
 msgid "Read once, when the sync creates the sacado: the columns you choose fill its company or person and its contact. A sacado that already exists is not read again; the CNPJ data comes from the automatic enrichment."
 msgstr "Lido uma vez, quando a sincronização cria o sacado: as colunas que você escolher preenchem a empresa ou pessoa e o contato dele. Sacado que já existe não é lido de novo; os dados do CNPJ vêm do enriquecimento automático."
 
